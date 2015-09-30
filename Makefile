@@ -17,11 +17,12 @@ endif
 
 LIB_DIR ?= lib
 OBJ_DIR ?= obj
-INC_DIR ?= .
+SRC_DIR ?= src
+INC_DIR ?= $(SRC_DIR)
 
-PAHO_C_LIB ?= /home/fmp/static/opensrc/mqtt/paho/org.eclipse.paho.mqtt.c
+PAHO_C_HEADERS ?= /usr/local/include
 
-INC_DIRS += $(INC_DIR) $(PAHO_C_LIB)/src
+INC_DIRS += $(INC_DIR) $(PAHO_C_HEADERS)
 
 _MK_OBJ_DIR := $(shell mkdir -p $(OBJ_DIR))
 _MK_LIB_DIR := $(shell mkdir -p $(LIB_DIR))
@@ -41,13 +42,13 @@ TGT = $(LIB_DIR)/$(LIB)
 
 # ----- Sources -----
 
-SRCS += $(wildcard *.cpp)
+SRCS += $(wildcard $(SRC_DIR)/*.cpp)
 
 ifdef SRC_IGNORE
   SRCS := $(filter-out $(SRC_IGNORE),$(SRCS))
 endif
 
-OBJS := $(addprefix $(OBJ_DIR)/,$(SRCS:.cpp=.o))
+OBJS := $(subst $(SRC_DIR),$(OBJ_DIR),$(SRCS:.cpp=.o))
 DEPS := $(OBJS:.o=.dep)
 
 # ----- Compiler flags, etc -----
@@ -73,7 +74,7 @@ LDFLAGS := -g -shared -Wl,-soname,$(LIB_MAJOR_LINK) -L$(LIB_DIR)
 
 # ----- Compiler directives -----
 
-$(OBJ_DIR)/%.o: %.cpp
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@echo $(CXX) $<
 	$(QUIET) $(COMPILE.cpp) $(OUTPUT_OPTION) $<
 
