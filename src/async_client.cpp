@@ -65,14 +65,14 @@ async_client::async_client(const std::string& serverURI, const std::string& clie
 	else {
 		persist_ = new MQTTClient_persistence {
 			persistence,
-			&iclient_persistence::persistence_open,
-			&iclient_persistence::persistence_close,
-			&iclient_persistence::persistence_put,
-			&iclient_persistence::persistence_get,
-			&iclient_persistence::persistence_remove,
-			&iclient_persistence::persistence_keys,
-			&iclient_persistence::persistence_clear,
-			&iclient_persistence::persistence_containskey
+			(Persistence_open) &iclient_persistence::persistence_open,
+			(Persistence_close) &iclient_persistence::persistence_close,
+			(Persistence_put) &iclient_persistence::persistence_put,
+			(Persistence_get) &iclient_persistence::persistence_get,
+			(Persistence_remove) &iclient_persistence::persistence_remove,
+			(Persistence_keys) &iclient_persistence::persistence_keys,
+			(Persistence_clear) &iclient_persistence::persistence_clear,
+			(Persistence_containskey) &iclient_persistence::persistence_containskey
 		};
 
 		MQTTAsync_create(&cli_, const_cast<char*>(serverURI.c_str()),
