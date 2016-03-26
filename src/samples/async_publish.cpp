@@ -22,8 +22,9 @@
 #include <cstring>
 #include "mqtt/async_client.h"
 
-const std::string ADDRESS("tcp://localhost:1883");
-const std::string CLIENTID("AsyncPublisher");
+const std::string DFLT_ADDRESS("tcp://localhost:1883");
+const std::string DFLT_CLIENTID("AsyncPublisher");
+
 const std::string TOPIC("hello");
 
 const char* PAYLOAD1 = "Hello World!";
@@ -108,7 +109,10 @@ public:
 
 int main(int argc, char* argv[])
 {
-	mqtt::async_client client(ADDRESS, CLIENTID);
+	std::string address  = (argc > 1) ? std::string(argv[1]) : DFLT_ADDRESS,
+				clientID = (argc > 1) ? std::string(argv[2]) : DFLT_CLIENTID;
+
+	mqtt::async_client client(address, clientID);
 	
 	callback cb;
 	client.set_callback(cb);
@@ -122,7 +126,7 @@ int main(int argc, char* argv[])
 		// First use a message pointer.
 
 		std::cout << "Sending message..." << std::flush;
-		mqtt::message_ptr pubmsg = std::make_shared<mqtt::message>(PAYLOAD1);
+		mqtt::message_ptr pubmsg = mqtt::make_message(PAYLOAD1);
 		pubmsg->set_qos(QOS);
 		client.publish(TOPIC, pubmsg)->wait_for_completion(TIMEOUT);
 		std::cout << "OK" << std::endl;
@@ -139,7 +143,7 @@ int main(int argc, char* argv[])
 
 		std::cout << "Sending next message..." << std::flush;
 		action_listener listener;
-		pubmsg = std::make_shared<mqtt::message>(PAYLOAD3);
+		pubmsg = mqtt::make_message(PAYLOAD3);
 		pubtok = client.publish(TOPIC, pubmsg, nullptr, listener);
 		pubtok->wait_for_completion();
 		std::cout << "OK" << std::endl;
@@ -148,7 +152,7 @@ int main(int argc, char* argv[])
 
 		std::cout << "Sending final message..." << std::flush;
 		delivery_action_listener deliveryListener;
-		pubmsg = std::make_shared<mqtt::message>(PAYLOAD4);
+		pubmsg = mqtt::make_message(PAYLOAD4);
 		client.publish(TOPIC, pubmsg, nullptr, deliveryListener);
 
 		while (!deliveryListener.is_done()) {

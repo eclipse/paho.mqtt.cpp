@@ -80,69 +80,87 @@ public:
 	virtual ~iasync_client() {}
 	/**
 	 * Connects to an MQTT server using the default options.
-	 * @return bool 
-	 * @throw exception 
-	 * @throw security_exception
+	 * @return token used to track and wait for the connect to complete. The 
+	 *  	   token will be passed to any callback that has been set.
+	 * @throw exception for non security related problems
+	 * @throw security_exception for security related problems
 	 */
 	virtual itoken_ptr connect() throw(exception, security_exception) =0;
 	/**
 	 * Connects to an MQTT server using the provided connect options. 
-	 * @param options 
-	 * @return bool 
-	 * @throw exception 
-	 * @throw security_exception
+	 * @param options a set of connection parameters that override the 
+	 *  			  defaults.
+	 * @return token used to track and wait for the connect to complete. The 
+	 *  	   token will be passed to any callback that has been set.
+	 * @throw exception for non security related problems
+	 * @throw security_exception for security related problems
 	 */
 	virtual itoken_ptr connect(connect_options options) 
 							throw(exception, security_exception) =0;
 	/**
 	 * Connects to an MQTT server using the specified options.
 	 * 
-	 * @param options 
+	 * @param options a set of connection parameters that override the 
+	 *  			  defaults.
+	 * @param userContext optional object used to pass context to the 
+	 *  				  callback. Use @em nullptr if not required.
 	 * 
-	 * @return bool 
-	 * @throw exception 
-	 * @throw security_exception
+	 * @return token used to track and wait for the connect to complete. The 
+	 *  	   token will be passed to any callback that has been set.
+	 * @throw exception for non security related problems
+	 * @throw security_exception for security related problems
 	 */
 	virtual itoken_ptr connect(connect_options options, void* userContext, 
 							   iaction_listener& cb) throw(exception, security_exception) =0;
 	/**
 	 *  
-	 * @param userContext 
-	 * @param callback 
-	 * 
-	 * @return bool 
-	 * @throw exception 
-	 * @throw security_exception
+	 * @param userContext optional object used to pass context to the 
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param cb listener that will be notified when the connect completes. 
+	 * @return token used to track and wait for the connect to complete. The
+	 *  	   token will be passed to any callback that has been set.
+	 * @throw exception for non security related problems
+	 * @throw security_exception for security related problems
 	 */
 	virtual itoken_ptr connect(void* userContext, iaction_listener& cb)
 							throw(exception, security_exception) =0;
 	/**
 	 * Disconnects from the server. 
-	 * @return itoken_ptr
+	 * @return token used to track and wait for the disconnect to complete. 
+	 *  	   The token will be passed to any callback that has been set.
+	 * @throw exception for problems encountered while disconnecting 
 	 */
 	virtual itoken_ptr disconnect() throw(exception) =0;
 	/**
 	 * Disconnects from the server.
-	 * 
 	 * @param quiesceTimeout 
-	 * @return itoken_ptr
+	 * @return token used to track and wait for the disconnect to complete. 
+	 *  	   The token will be passed to any callback that has been set.
+	 * @throw exception for problems encountered while disconnecting 
 	 */
 	virtual itoken_ptr disconnect(long quiesceTimeout) throw(exception) =0;
 	/**
 	 * Disconnects from the server.
-	 * 
 	 * @param quiesceTimeout 
-	 * @param userContext 
-	 * @param callback 
-	 * @return itoken_ptr
+	 * @param userContext optional object used to pass context to the 
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param cb listener that will be notified when the disconnect 
+	 *  		 completes.
+	 * @return token used to track and wait for the disconnect to complete. 
+	 *  	   The token will be passed to any callback that has been set.
+	 * @throw exception for problems encountered while disconnecting 
 	 */
 	virtual itoken_ptr disconnect(long quiesceTimeout, void* userContext, iaction_listener& cb)
 						throw(exception) =0;
 	/**
 	 * Disconnects from the server.
-	 * @param userContext 
-	 * @param callback 
-	 * @return itoken_ptr
+	 * @param userContext optional object used to pass context to the 
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param cb listener that will be notified when the disconnect 
+	 *  		 completes.
+	 * @return token used to track and wait for the disconnect to complete. 
+	 *  	   The token will be passed to any callback that has been set.
+	 * @throw exception for problems encountered while disconnecting 
 	 */
 	virtual itoken_ptr disconnect(void* userContext, iaction_listener& cb) 
 						throw(exception) =0;
@@ -171,26 +189,31 @@ public:
 	virtual bool is_connected() const =0;
 	/**
 	 * Publishes a message to a topic on the server
-	 * @param topic 
-	 * @param payload 
-	 * @param qos 
+	 * @param topic The topic to deliver the message to
+	 * @param payload the bytes to use as the message payload 
+	 * @param n the number of bytes in the payload
+	 * @param qos the Quality of Service to deliver the message at. Valid 
+	 *  		  values are 0, 1 or 2.
 	 * @param retained 
-	 * 
-	 * @return idelivery_token 
+	 * @return token used to track and wait for the publish to complete. The 
+	 *  	   token will be passed to callback methods if set.
 	 */
 	virtual idelivery_token_ptr publish(const std::string& topic, const void* payload, 
 										size_t n, int qos, bool retained) 
 									throw(exception) =0;
 	/**
 	 * Publishes a message to a topic on the server 
-	 * @param topic 
-	 * @param payload 
-	 * @param qos 
+	 * @param topic The topic to deliver the message to
+	 * @param payload the bytes to use as the message payload 
+	 * @param n the number of bytes in the payload
+	 * @param qos the Quality of Service to deliver the message at. Valid 
+	 *  		  values are 0, 1 or 2.
 	 * @param retained 
-	 * @param userContext 
+	 * @param userContext optional object used to pass context to the 
+	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb 
-	 * 
-	 * @return idelivery_token 
+	 * @return token used to track and wait for the publish to complete. The 
+	 *  	   token will be passed to callback methods if set.
 	 */
 	virtual idelivery_token_ptr publish(const std::string& topic, 
 										const void* payload, size_t n,
@@ -200,22 +223,23 @@ public:
 	 * Publishes a message to a topic on the server Takes an Message 
 	 * message and delivers it to the server at the requested quality of 
 	 * service. 
-	 * 
-	 * @param topic 
-	 * @param message 
-	 * 
-	 * @return idelivery_token 
+	 * @param topic the topic to deliver the message to
+	 * @param msg the message to deliver to the server
+	 * @return token used to track and wait for the publish to complete. The 
+	 *  	   token will be passed to callback methods if set.
 	 */
 	virtual idelivery_token_ptr publish(const std::string& topic, message_ptr msg)
 					throw(exception) =0;
 	/**
 	 * Publishes a message to a topic on the server. 
-	 * @param topic 
-	 * @param message 
-	 * @param userContext 
-	 * @param callback 
-	 * 
-	 * @return idelivery_token 
+	 * @param topic the topic to deliver the message to
+	 * @param msg the message to deliver to the server
+	 * @param userContext optional object used to pass context to the 
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param cb optional listener that will be notified when message 
+	 *  		 delivery has completed to the requested quality of service
+	 * @return token used to track and wait for the publish to complete. The
+	 *  	   token will be passed to callback methods if set.
 	 */
 	virtual idelivery_token_ptr publish(const std::string& topic, message_ptr msg, 
 										void* userContext, iaction_listener& cb)
@@ -223,27 +247,42 @@ public:
 	/**
 	 * Sets a callback listener to use for events that happen 
 	 * asynchronously. 
-	 * @param callback 
+	 * @param cb callback which will be invoked for certain asynchronous 
+	 *  		 events
 	 */
 	virtual void set_callback(callback& cb) throw(exception) =0;
 	/**
 	 * Subscribe to multiple topics, each of which may include wildcards. 
-	 * @param topicFilters 
-	 * @param qos 
-	 * 
-	 * @return bool 
+	 * Provides an optimized way to subscribe to multiple topics compared to 
+	 * subscribing to each one individually.
+	 * @param topicFilters one or more topics to subscribe to, which can 
+	 *  				   include wildcards
+	 * @param qos the maximum quality of service at which to subscribe. 
+	 *  		  Messages published at a lower quality of service will be
+	 *  		  received at the published QoS. Messages published at a
+	 *  		  higher quality of service will be received using the QoS
+	 *  		  specified on the subscribe.
+	 * @return token used to track and wait for the subscribe to complete. 
+	 *  	   The token will be passed to callback methods if set.
 	 */
 	virtual itoken_ptr subscribe(const topic_filter_collection& topicFilters, 
 								 const qos_collection& qos) 
 					throw(std::invalid_argument,exception) =0;
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards. 
-	 * @param topicFilters 
-	 * @param qos 
-	 * @param userContext 
-	 * @param callback 
-	 * 
-	 * @return bool 
+	 * @param topicFilters one or more topics to subscribe to, which can 
+	 *  				   include wildcards
+	 * @param qos  the maximum quality of service at which to subscribe. 
+	 *  		   Messages published at a lower quality of service will be
+	 *  		   received at the published QoS. Messages published at a
+	 *  		   higher quality of service will be received using the QoS
+	 *  		   specified on the subscribe.
+	 * @param userContext optional object used to pass context to the 
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param callback listener that will be notified when subscribe has 
+	 *  			   completed
+	 * @return token used to track and wait for the subscribe to complete. 
+	 *  	   The token will be passed to callback methods if set.
 	 */
 	virtual itoken_ptr subscribe(const topic_filter_collection& topicFilters, 
 								 const qos_collection& qos,
@@ -251,60 +290,83 @@ public:
 					throw(std::invalid_argument,exception) =0;
 	/**
 	 * Subscribe to a topic, which may include wildcards. 
-	 * @param topicFilter 
-	 * @param qos 
-	 * 
-	 * @return bool 
+	 * @param topicFilter the topic to subscribe to, which can include 
+	 *  				  wildcards.
+	 * @param qos the maximum quality of service at which to subscribe. 
+	 *  		  Messages published at a lower quality of service will be
+	 *  		  received at the published QoS. Messages published at a
+	 *  		  higher quality of service will be received using the QoS
+	 *  		  specified on the subscribe.
+	 * @return token used to track and wait for the subscribe to complete. 
+	 *  	   The token will be passed to callback methods if set.
 	 */
 	virtual itoken_ptr subscribe(const std::string& topicFilter, int qos) 
 					throw(exception) =0;
 	/**
 	 * Subscribe to a topic, which may include wildcards. 
-	 * @param topicFilter 
-	 * @param qos 
-	 * @param userContext 
-	 * @param callback 
-	 * 
-	 * @return bool 
+	 * @param topicFilter the topic to subscribe to, which can include 
+	 *  				  wildcards.
+	 * @param qos the maximum quality of service at which to subscribe. 
+	 *  		  Messages published at a lower quality of service will be
+	 *  		  received at the published QoS. Messages published at a
+	 *  		  higher quality of service will be received using the QoS
+	 *  		  specified on the subscribe.
+	 * @param userContext optional object used to pass context to the 
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param callback listener that will be notified when subscribe has 
+	 *  			   completed
+	 * @return token used to track and wait for the subscribe to complete. 
+	 *  	   The token will be passed to callback methods if set.
 	 */
 	virtual itoken_ptr subscribe(const std::string& topicFilter, int qos, 
 								 void* userContext, iaction_listener& callback)
 					throw(exception) =0;
 	/**
 	 * Requests the server unsubscribe the client from a topic. 
-	 * @param topicFilter 
-	 * 
-	 * @return bool 
+	 * @param topicFilter the topic to unsubscribe from. It must match a 
+	 *  				  topicFilter specified on an earlier subscribe.
+	 * @return token used to track and wait for the unsubscribe to complete.
+	 *  	   The token will be passed to callback methods if set.
 	 */
 	virtual itoken_ptr unsubscribe(const std::string& topicFilter) throw(exception) =0;
 	/**
 	 * Requests the server unsubscribe the client from one or more topics. 
-	 * @param string 
-	 * @return bool 
+	 * @param topicFilters one or more topics to unsubscribe from. Each 
+	 *  				   topicFilter must match one specified on an
+	 *  				   earlier subscribe.
+	 * @return token used to track and wait for the unsubscribe to complete.
+	 *  	   The token will be passed to callback methods if set.
 	 */
 	virtual itoken_ptr unsubscribe(const topic_filter_collection& topicFilters) 
 					throw(exception) =0;
 	/**
 	 * Requests the server unsubscribe the client from one or more topics. 
-	 * @param string 
-	 * @param userContext 
-	 * @param callback 
-	 * 
-	 * @return bool 
+	 * @param topicFilters one or more topics to unsubscribe from. Each 
+	 *  				   topicFilter must match one specified on an
+	 *  				   earlier subscribe.
+	 * @param userContext optional object used to pass context to the 
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param cb listener that will be notified when unsubscribe has 
+	 *  		 completed
+	 * @return token used to track and wait for the unsubscribe to complete.
+	 *  	   The token will be passed to callback methods if set.
 	 */
 	virtual itoken_ptr unsubscribe(const topic_filter_collection& topicFilters, 
-								   void* userContext, iaction_listener& callback)
+								   void* userContext, iaction_listener& cb)
 					throw(exception) =0;
 	/**
 	 * Requests the server unsubscribe the client from a topics. 
-	 * @param topicFilter 
-	 * @param userContext 
-	 * @param callback 
-	 * 
-	 * @return bool 
+	 * @param topicFilter the topic to unsubscribe from. It must match a 
+	 *  				  topicFilter specified on an earlier subscribe.
+	 * @param userContext optional object used to pass context to the 
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param cb listener that will be notified when unsubscribe has 
+	 *  		 completed
+	 * @return token used to track and wait for the unsubscribe to complete.
+	 *  	   The token will be passed to callback methods if set.
 	 */
 	virtual itoken_ptr unsubscribe(const std::string& topicFilter, 
-								   void* userContext, iaction_listener& callback)
+								   void* userContext, iaction_listener& cb)
 					throw(exception) =0;
 };
 
@@ -317,7 +379,7 @@ public:
 class async_client : public virtual iasync_client
 {
 public:
-	/** Pointer type for this object */
+	/** Smart pointer type for this object */
 	typedef std::shared_ptr<async_client> ptr_t;
 
 private:
@@ -378,16 +440,20 @@ public:
 	 * Create an async_client that can be used to communicate with an MQTT
 	 * server. 
 	 * This uses file-based persistence in the current working directory.
-	 * @param serverURI 
-	 * @param clientId 
+	 * @param serverURI the address of the server to connect to, specified 
+	 *  				as a URI.
+	 * @param clientId a client identifier that is unique on the server 
+	 *  			   being connected to.
 	 */
 	async_client(const std::string& serverURI, const std::string& clientId);
 	/**
 	 * Create an async_client that can be used to communicate with an MQTT
 	 * server. 
-	 * This uses file-based persistence in the specified directory. 
-	 * @param serverURI 
-	 * @param clientId 
+	 * This uses file-based persistence in the specified directory.
+	 * @param serverURI the address of the server to connect to, specified 
+	 *  				as a URI.
+	 * @param clientId a client identifier that is unique on the server 
+	 *  			   being connected to
 	 * @param persistDir 
 	 */
 	async_client(const std::string& serverURI, const std::string& clientId,
@@ -397,8 +463,10 @@ public:
 	 * server. 
 	 * This allows the caller to specify a user-defined persistance object, 
 	 * or use no persistence. 
-	 * @param serverURI 
-	 * @param clientId 
+	 * @param serverURI the address of the server to connect to, specified 
+	 *  				as a URI.
+	 * @param clientId a client identifier that is unique on the server 
+	 *  			   being connected to
 	 * @param persistence The user persistence structure. If this is null, 
 	 *  				  then no persistence is used.
 	 */
@@ -410,68 +478,96 @@ public:
 	~async_client();
 	/**
 	 * Connects to an MQTT server using the default options.
-	 * @return bool 
-	 * @throw exception 
-	 * @throw security_exception
+	 * @return token used to track and wait for the connect to complete. The 
+	 *  	   token will be passed to any callback that has been set.
+	 * @throw exception for non security related problems
+	 * @throw security_exception for security related problems
 	 */
 	virtual itoken_ptr connect() throw(exception, security_exception);
 	/**
 	 * Connects to an MQTT server using the provided connect options. 
-	 * @param options 
-	 * @return bool 
-	 * @throw exception 
-	 * @throw security_exception
+	 * @param options a set of connection parameters that override the 
+	 *  			  defaults.
+	 * @return token used to track and wait for the connect to complete. The 
+	 *  	   token will be passed to any callback that has been set.
+	 * @throw exception for non security related problems
+	 * @throw security_exception for security related problems
 	 */
 	virtual itoken_ptr connect(connect_options options) throw(exception, security_exception);
 	/**
-	 * Connects to an MQTT server using the specified options.
-	 * 
-	 * @param options 
-	 * 
-	 * @return bool 
-	 * @throw exception 
-	 * @throw security_exception
+	 * Connects to an MQTT server using the specified options. 
+	 * @param options a set of connection parameters that override the 
+	 *  			  defaults.
+	 * @param userContext optional object used to pass context to the 
+	 *  				  callback. Use @em nullptr if not required.
+	 * @return token used to track and wait for the connect to complete. The 
+	 *  	   token will be passed to any callback that has been set.
+	 * @throw exception for non security related problems
+	 * @throw security_exception for security related problems
 	 */
 	virtual itoken_ptr connect(connect_options options, void* userContext, 
 							   iaction_listener& cb) throw(exception, security_exception);
 	/**
 	 *  
-	 * @param userContext 
-	 * @param callback 
-	 * 
-	 * @return bool 
-	 * @throw exception 
-	 * @throw security_exception
+	 * @param userContext optional object used to pass context to the 
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param callback listener that will be notified when the connect 
+	 *  			   completes.
+	 * @return token used to track and wait for the connect to complete. The 
+	 *  	   token will be passed to any callback that has been set.
+	 * @throw exception for non security related problems
+	 * @throw security_exception for security related problems
 	 */
 	virtual itoken_ptr connect(void* userContext, iaction_listener& cb)
 							throw(exception, security_exception);
 	/**
 	 * Disconnects from the server. 
-	 * @return itoken_ptr
+	 * @return token used to track and wait for the disconnect to complete. 
+	 *  	   The token will be passed to any callback that has been set.
+	 * @throw exception for problems encountered while disconnecting 
 	 */
 	virtual itoken_ptr disconnect() throw(exception) { return disconnect(0L); }
 	/**
 	 * Disconnects from the server.
 	 * 
-	 * @param quiesceTimeout 
-	 * @return itoken_ptr
+	 * @param quiesceTimeout the amount of time in milliseconds to allow for 
+	 *  					 existing work to finish before disconnecting. A
+	 *  					 value of zero or less means the client will not
+	 *  					 quiesce.
+	 * @return Token used to track and wait for disconnect to complete. The 
+	 *  	   token will be passed to the callback methods if a callback is
+	 *  	   set.
+	 * @throw exception for problems encountered while disconnecting 
 	 */
 	virtual itoken_ptr disconnect(long quiesceTimeout) throw(exception);
 	/**
 	 * Disconnects from the server.
 	 * 
-	 * @param quiesceTimeout 
-	 * @param userContext 
-	 * @param callback 
-	 * @return itoken_ptr
+	 * @param quiesceTimeout the amount of time in milliseconds to allow for 
+	 *  					 existing work to finish before disconnecting. A
+	 *  					 value of zero or less means the client will not
+	 *  					 quiesce.
+	 * @param userContext optional object used to pass context to the 
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param callback listener that will be notified when the disconnect 
+	 *  			   completes.
+	 * @return itoken_ptr Token used to track and wait for disconnect to 
+	 *  	   complete. The token will be passed to the callback methods if
+	 *  	   a callback is set.
+	 * @throw exception for problems encountered while disconnecting 
 	 */
 	virtual itoken_ptr disconnect(long quiesceTimeout, void* userContext, iaction_listener& cb)
 						throw(exception);
 	/**
 	 * Disconnects from the server.
-	 * @param userContext 
-	 * @param callback 
-	 * @return itoken_ptr
+	 * @param userContext optional object used to pass context to the 
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param callback listener that will be notified when the disconnect 
+	 *  			   completes.
+	 * @return itoken_ptr Token used to track and wait for disconnect to 
+	 *  	   complete. The token will be passed to the callback methods if
+	 *  	   a callback is set.
+	 * @throw exception for problems encountered while disconnecting 
 	 */
 	virtual itoken_ptr disconnect(void* userContext, iaction_listener& cb) throw(exception) {
 		return disconnect(0L, userContext, cb);
@@ -488,38 +584,47 @@ public:
 	virtual std::vector<idelivery_token_ptr> get_pending_delivery_tokens() const;
 	/**
 	 * Returns the client ID used by this client.
-	 * @return std::string 
+	 * @return The client ID used by this client.
 	 */
 	virtual std::string get_client_id() const { return clientId_; }
 	/**
-	 * Returns the address of the server used by this client.
+	 * Returns the address of the server used by this client. 
+	 * @return The server's address, as a URI String. 
 	 */
 	virtual std::string get_server_uri() const { return serverURI_; }
 	/**
-	 * Determines if this client is currently connected to the server.
+	 * Determines if this client is currently connected to the server. 
+	 * @return true if connected, false otherwise. 
 	 */
 	virtual bool is_connected() const { return MQTTAsync_isConnected(cli_) != 0; }
 	/**
 	 * Publishes a message to a topic on the server
-	 * @param topic 
-	 * @param payload 
-	 * @param qos 
-	 * @param retained 
-	 * 
-	 * @return idelivery_token 
+	 * @param topic The topic to deliver the message to
+	 * @param payload the bytes to use as the message payload 
+	 * @param n the number of bytes in the payload
+	 * @param qos the Quality of Service to deliver the message at. Valid 
+	 *  		  values are 0, 1 or 2.
+	 * @param retained whether or not this message should be retained by the 
+	 *  			   server.
+	 * @return token used to track and wait for the publish to complete. The 
+	 *  	   token will be passed to callback methods if set.
 	 */
 	virtual idelivery_token_ptr publish(const std::string& topic, const void* payload, 
 										size_t n, int qos, bool retained) throw(exception);
 	/**
 	 * Publishes a message to a topic on the server 
-	 * @param topic 
-	 * @param payload 
-	 * @param qos 
-	 * @param retained 
-	 * @param userContext 
+	 * @param topic The topic to deliver the message to
+	 * @param payload the bytes to use as the message payload
+	 * @param n the number of bytes in the payload
+	 * @param qos the Quality of Service to deliver the message at. Valid 
+	 *  		  values are 0, 1 or 2.
+	 * @param retained whether or not this message should be retained by the 
+	 *  			   server.
+	 * @param userContext optional object used to pass context to the 
+	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb 
-	 * 
-	 * @return idelivery_token 
+	 * @return token used to track and wait for the publish to complete. The 
+	 *  	   token will be passed to callback methods if set.
 	 */
 	virtual idelivery_token_ptr publish(const std::string& topic, 
 										const void* payload, size_t n,
@@ -529,22 +634,24 @@ public:
 	 * Publishes a message to a topic on the server Takes an Message 
 	 * message and delivers it to the server at the requested quality of 
 	 * service. 
-	 * 
-	 * @param topic 
-	 * @param message 
-	 * 
-	 * @return idelivery_token 
+	 * @param topic the topic to deliver the message to
+	 * @param msg the message to deliver to the server
+	 * @return token used to track and wait for the publish to complete. The 
+	 *  	   token will be passed to callback methods if set.
 	 */
 	virtual idelivery_token_ptr publish(const std::string& topic, message_ptr msg)
 					throw(exception);
 	/**
 	 * Publishes a message to a topic on the server. 
-	 * @param topic 
-	 * @param message 
-	 * @param userContext 
-	 * @param callback 
-	 * 
-	 * @return idelivery_token 
+	 * @param topic the topic to deliver the message to
+	 * @param msg the message to deliver to the server
+	 * @param userContext optional object used to pass context to the 
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param callback optional listener that will be notified when message 
+	 *  			   delivery has completed to the requested quality of
+	 *  			   service
+	 * @return token used to track and wait for the publish to complete. The 
+	 *  	   token will be passed to callback methods if set.
 	 */
 	virtual idelivery_token_ptr publish(const std::string& topic, message_ptr msg, 
 										void* userContext, iaction_listener& cb)
@@ -552,15 +659,19 @@ public:
 	/**
 	 * Sets a callback listener to use for events that happen 
 	 * asynchronously. 
-	 * @param callback 
+	 * @param callback which will be invoked for certain asynchronous events 
 	 */
 	virtual void set_callback(callback& cb) throw(exception);
 	/**
 	 * Subscribe to multiple topics, each of which may include wildcards. 
 	 * @param topicFilters 
-	 * @param qos 
-	 * 
-	 * @return bool 
+	 * @param qos the maximum quality of service at which to subscribe. 
+	 *  		  Messages published at a lower quality of service will be
+	 *  		  received at the published QoS. Messages published at a
+	 *  		  higher quality of service will be received using the QoS
+	 *  		  specified on the subscribe.
+	 * @return token used to track and wait for the subscribe to complete. 
+	 *  	   The token will be passed to callback methods if set.
 	 */
 	virtual itoken_ptr subscribe(const topic_filter_collection& topicFilters, 
 								 const qos_collection& qos) 
@@ -568,72 +679,94 @@ public:
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards. 
 	 * @param topicFilters 
-	 * @param qos 
-	 * @param userContext 
-	 * @param callback 
-	 * 
-	 * @return bool 
+	 * @param qos the maximum quality of service at which to subscribe. 
+	 *  		  Messages published at a lower quality of service will be
+	 *  		  received at the published QoS. Messages published at a
+	 *  		  higher quality of service will be received using the QoS
+	 *  		  specified on the subscribe.
+	 * @param userContext optional object used to pass context to the 
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param cb listener that will be notified when subscribe has completed 
+	 * @return token used to track and wait for the subscribe to complete. 
+	 *  	   The token will be passed to callback methods if set.
 	 */
 	virtual itoken_ptr subscribe(const topic_filter_collection& topicFilters, 
-								 const qos_collection& qos,
-								 void* userContext, iaction_listener& callback)
+								 const qos_collection& qos, 
+								 void* userContext, iaction_listener& cb)
 					throw(std::invalid_argument,exception);
 	/**
 	 * Subscribe to a topic, which may include wildcards. 
-	 * @param topicFilter 
+	 * @param topicFilter the topic to subscribe to, which can include 
+	 *  				  wildcards.
 	 * @param qos 
 	 * 
-	 * @return bool 
+	 * @return token used to track and wait for the subscribe to complete. 
+	 *  	   The token will be passed to callback methods if set.
 	 */
 	virtual itoken_ptr subscribe(const std::string& topicFilter, int qos) 
 					throw(exception);
 	/**
 	 * Subscribe to a topic, which may include wildcards. 
-	 * @param topicFilter 
-	 * @param qos 
-	 * @param userContext 
-	 * @param callback 
-	 * 
-	 * @return bool 
+	 * @param topicFilter the topic to subscribe to, which can include 
+	 *  				  wildcards.
+	 * @param qos the maximum quality of service at which to subscribe. 
+	 *  		  Messages published at a lower quality of service will be
+	 *  		  received at the published QoS. Messages published at a
+	 *  		  higher quality of service will be received using the QoS
+	 *  		  specified on the subscribe.
+	 * @param userContext optional object used to pass context to the 
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param cb listener that will be notified when subscribe has completed 
+	 * @return token used to track and wait for the subscribe to complete. 
+	 *  	   The token will be passed to callback methods if set.
 	 */
-	virtual itoken_ptr subscribe(const std::string& topicFilter, int qos, 
-								 void* userContext, iaction_listener& callback)
+	virtual itoken_ptr subscribe(const std::string& topicFilter, int qos,
+								 void* userContext, iaction_listener& cb)
 					throw(exception);
 	/**
 	 * Requests the server unsubscribe the client from a topic. 
-	 * @param topicFilter 
-	 * 
-	 * @return bool 
+	 * @param topicFilter the topic to unsubscribe from. It must match a 
+	 *  				  topicFilter specified on an earlier subscribe.
+	 * @return token used to track and wait for the unsubscribe to complete.
+	 *  	   The token will be passed to callback methods if set.
 	 */
 	virtual itoken_ptr unsubscribe(const std::string& topicFilter) throw(exception);
 	/**
 	 * Requests the server unsubscribe the client from one or more topics. 
-	 * @param string 
-	 * @return bool 
+	 * @param topicFilters one or more topics to unsubscribe from. Each 
+	 *  				   topicFilter must match one specified on an
+	 *  				   earlier subscribe.
+	 * @return token used to track and wait for the unsubscribe to complete.
+	 *  	   The token will be passed to callback methods if set.
 	 */
 	virtual itoken_ptr unsubscribe(const topic_filter_collection& topicFilters) 
 					throw(exception);
 	/**
 	 * Requests the server unsubscribe the client from one or more topics. 
-	 * @param string 
-	 * @param userContext 
-	 * @param callback 
-	 * 
-	 * @return bool 
+	 * @param topicFilters 
+	 * @param userContext optional object used to pass context to the 
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param cb listener that will be notified when unsubscribe has 
+	 *  		 completed
+	 * @return token used to track and wait for the unsubscribe to complete.
+	 *  	   The token will be passed to callback methods if set.
 	 */
 	virtual itoken_ptr unsubscribe(const topic_filter_collection& topicFilters, 
-								   void* userContext, iaction_listener& callback)
+								   void* userContext, iaction_listener& cb)
 					throw(exception);
 	/**
 	 * Requests the server unsubscribe the client from a topics. 
-	 * @param topicFilter 
-	 * @param userContext 
-	 * @param callback 
-	 * 
-	 * @return bool 
+	 * @param topicFilter the topic to unsubscribe from. It must match a 
+	 *  				  topicFilter specified on an earlier subscribe.
+	 * @param userContext optional object used to pass context to the 
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param cb listener that will be notified when unsubscribe has 
+	 *  		 completed
+	 * @return token used to track and wait for the unsubscribe to complete.
+	 *  	   The token will be passed to callback methods if set.
 	 */
 	virtual itoken_ptr unsubscribe(const std::string& topicFilter, 
-								   void* userContext, iaction_listener& callback)
+								   void* userContext, iaction_listener& cb)
 					throw(exception);
 };
 

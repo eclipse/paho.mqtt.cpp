@@ -70,8 +70,8 @@ public:
 // C++ persistence object, which is reassigned to the 'handle'. Subsequent
 // calls have the object address as the handle.
 
-int iclient_persistence::persistence_open(void** handle, char* clientID, 
-										  char* serverURI, void* context)
+int iclient_persistence::persistence_open(void** handle, const char* clientID, 
+										  const char* serverURI, void* context)
 {
 	try {
 		if (context) {

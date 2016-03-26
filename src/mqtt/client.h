@@ -24,11 +24,6 @@
 #ifndef __mqtt_client_h
 #define __mqtt_client_h
 
-//extern "C" {
-//	#include "MQTTClient.h"
-//	#include "MQTTClientPersistence.h"
-//}
-
 #include "async_client.h"
 
 #include <string>
@@ -44,15 +39,11 @@ namespace mqtt {
  */
 class client
 {
+	/** The default quality of service */
 	static const int DFLT_QOS;
-
-	//MQTTClient cli_;
-
-	/**
-	 * The actual client
-	 */
+	/** The actual client */
 	async_client cli_;
-	/**
+	/** 
 	 * The longest amount of time to wait for an operation (in milliseconds)
 	 */
 	int timeout_;
@@ -123,16 +114,12 @@ public:
 	 * Returns a randomly generated client identifier based on the current 
 	 * user's login name and the system time. 
 	 */
-	//static std::string generateClientId();
+	//static std::string generate_client_id();
 	/**
 	 * Returns the client ID used by this client.
 	 * @return std::string 
 	 */
 	virtual std::string get_client_id() const;
-
-	//Debug 	getDebug()
-	//Return a debug object that can be used to help solve problems.
-
 	/**
 	 * Returns the delivery tokens for any outstanding publish operations.
 	 */

@@ -42,6 +42,7 @@ namespace mqtt {
 class idelivery_token : public virtual itoken
 {
 public:
+	/** Smart pointer type for this object */
 	typedef std::shared_ptr<idelivery_token> ptr_t;
 	/**
 	 * Returns the message associated with this token. 
@@ -69,15 +70,13 @@ class delivery_token : public virtual idelivery_token,
 	friend class async_client;
 
 	/**
-	 * Sets the message that this token correspn
+	 * Sets the message to which this token corresponds.
 	 * @param msg 
 	 */
 	void set_message(message_ptr msg) { msg_ = msg; }
 
 public:
-	/**
-	 * Smart/shared pointer to this class.
-	 */
+	/** Smart pointer type for this object */
 	typedef std::shared_ptr<delivery_token> ptr_t;
 
 	delivery_token(iasync_client& cli) : token(cli) {}
@@ -86,12 +85,9 @@ public:
 
 	delivery_token(iasync_client& cli, const std::vector<std::string>& topics) 
 					: token(cli, topics) {}
-
-	//delivery_token(const std::string& logContext);
-
 	/**
 	 * Returns the message associated with this token.
-	 * @return message 
+	 * @return The message associated with this token.
 	 */
 	virtual message_ptr get_message() const { return msg_; }
 };

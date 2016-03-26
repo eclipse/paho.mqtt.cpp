@@ -1,6 +1,6 @@
-# Makefile for the mqttpp sample applications
+# Makefile for the paho-mqttpp (C++) sample applications
 
-PAHO_C_LIB ?= /home/fmp/static/opensrc/mqtt/paho/org.eclipse.paho.mqtt.c
+PAHO_C_LIB ?= $(abspath ../../../org.eclipse.paho.mqtt.c)
 
 all: async_publish async_subscribe sync_publish
 
@@ -15,7 +15,7 @@ else
   CXXFLAGS += -O2
 endif
 
-LDLIBS += -L../lib -L$(PAHO_C_LIB)/src/linux_ia64 -lmqttpp -lmqttv3a
+LDLIBS += -L../../lib -L$(PAHO_C_LIB)/build/output -lpaho-mqttpp3 -lpaho-mqtt3a
 
 async_publish: async_publish.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS)
@@ -26,11 +26,11 @@ async_subscribe: async_subscribe.cpp
 sync_publish: sync_publish.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS)
 
-.PHONY: clean
+.PHONY: clean distclean
+
 clean:
 	rm -f async_publish async_subscribe sync_publish
 
-.PHONY: distclean
 distclean: clean
 
 

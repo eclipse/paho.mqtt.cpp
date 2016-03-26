@@ -23,10 +23,11 @@
 
 namespace mqtt {
 
-/////////////////////////////////////////////////////////////////////////////
-
-// Failure callback from the C library.
+// --------------------------------------------------------------------------
+// Class static callbacks.
+// These are the callbacks directly from the C library.
 // The 'context' is a raw pointer to the token object.
+
 void token::on_failure(void* context, MQTTAsync_failureData* rsp) 
 {
 	if (context) {
@@ -36,8 +37,6 @@ void token::on_failure(void* context, MQTTAsync_failureData* rsp)
 	}
 }
 
-// Success callback from the C library.
-// The 'context' is a raw pointer to the token object.
 void token::on_success(void* context, MQTTAsync_successData* rsp) 
 {
 	if (context) {
@@ -46,6 +45,8 @@ void token::on_success(void* context, MQTTAsync_successData* rsp)
 		tok->get_client()->remove_token(tok);
 	}
 }
+
+// --------------------------------------------------------------------------
 
 void token::on_success(MQTTAsync_successData* rsp) 
 {
@@ -56,7 +57,7 @@ void token::on_success(MQTTAsync_successData* rsp)
 	complete_ = true;
 	g.unlock();
 
-	// Note: callback always completes before the obect is signalled.
+	// Note: callback always completes before the object is signaled.
 	if (listener)
 		listener->on_success(*this);
 	cond_.notify_all();
@@ -77,7 +78,7 @@ void token::on_failure(MQTTAsync_failureData* rsp)
 	complete_ = true;
 	g.unlock();
 
-	// Note: callback always completes before the obect is signalled.
+	// Note: callback always completes before the obect is signaled.
 	if (listener)
 		listener->on_failure(*this);
 	cond_.notify_all();
