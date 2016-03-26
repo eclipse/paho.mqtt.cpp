@@ -24,7 +24,7 @@ Then clone the C++ library and build:
 ```
 $ git clone https://git.eclipse.org/r/paho/org.eclipse.paho.mqtt.cpp
 $ cd paho.mqtt.cpp
-$ make DEVELOP=1
+$ make
 ```
 
 To build against the latest C development branch, fFirst, clone the C library repository, checkout the *develop* branch and build in-place (you don't need to install).
