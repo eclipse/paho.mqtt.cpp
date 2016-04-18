@@ -150,6 +150,10 @@ clean:
 distclean: clean
 	$(QUIET) rm -rf $(OBJ_DIR) $(LIB_DIR)
 
+.PHONY: samples
+samples: $(SRC_DIR)/samples
+	$(MAKE) -C $<
+
 # ----- Installation targets -----
 
 strip_options:
