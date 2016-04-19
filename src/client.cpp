@@ -43,6 +43,10 @@ client::client(const std::string& serverURI, const std::string& clientId,
 {
 }
 
+client::~client()
+{
+}
+
 void client::close()
 {
 	// TODO: What?
