@@ -26,33 +26,33 @@ DOXYFILE_ENCODING      = UTF-8
 # identify the project. Note that if you do not use Doxywizard you need
 # to put quotes around the project name if it contains spaces.
 
-PROJECT_NAME           = "mqttpp"
+PROJECT_NAME           = @PROJECT_NAME@
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number.
 # This could be handy for archiving the generated documentation or
 # if some version control system is used.
 
-PROJECT_NUMBER         = "0.1"
+PROJECT_NUMBER         = @CLIENT_VERSION@
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer
 # a quick idea about the purpose of the project. Keep the description short.
 
-PROJECT_BRIEF          = "C++ wrapper library for the Paho MQTT C library"
+PROJECT_BRIEF          = "MQTT C++ Client for POSIX and Windows"
 
 # With the PROJECT_LOGO tag one can specify an logo or icon that is
 # included in the documentation. The maximum height of the logo should not
 # exceed 55 pixels and the maximum width should not exceed 200 pixels.
 # Doxygen will copy the logo to the output directory.
 
-PROJECT_LOGO           =
+PROJECT_LOGO           = "@PROJECT_SOURCE_DIR@/doc/pahologo.png"
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute)
 # base path where the generated documentation will be put.
 # If a relative path is entered, it will be relative to the location
 # where doxygen was started. If left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = doc
+OUTPUT_DIRECTORY       = "@CMAKE_CURRENT_BINARY_DIR@/doc"
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create
 # 4096 sub-directories (in 2 levels) under the output directory of each output
@@ -119,7 +119,7 @@ INLINE_INHERITED_MEMB  = NO
 # path before files name in the file list and in the header files. If set
 # to NO the shortest path that makes the file name unique will be used.
 
-FULL_PATH_NAMES        = YES
+FULL_PATH_NAMES        = NO
 
 # If the FULL_PATH_NAMES tag is set to YES then the STRIP_FROM_PATH tag
 # can be used to strip a user-defined part of the path. Stripping is
@@ -151,7 +151,7 @@ SHORT_NAMES            = NO
 # comments will behave just like regular Qt-style comments
 # (thus requiring an explicit @brief command for a brief description.)
 
-JAVADOC_AUTOBRIEF      = YES
+JAVADOC_AUTOBRIEF      = NO
 
 # If the QT_AUTOBRIEF tag is set to YES then Doxygen will
 # interpret the first line (until the first dot) of a Qt-style
@@ -207,7 +207,7 @@ TCL_SUBST              =
 # For instance, some of the names that are used will be different. The list
 # of all members will be omitted, etc.
 
-OPTIMIZE_OUTPUT_FOR_C  = NO
+OPTIMIZE_OUTPUT_FOR_C  = YES
 
 # Set the OPTIMIZE_OUTPUT_JAVA tag to YES if your project consists of Java
 # sources only. Doxygen will then generate output that is more tailored for
@@ -346,7 +346,7 @@ LOOKUP_CACHE_SIZE      = 0
 # Private class members and static file members will be hidden unless
 # the EXTRACT_PRIVATE and EXTRACT_STATIC tags are set to YES
 
-EXTRACT_ALL            = NO
+EXTRACT_ALL            = YES
 
 # If the EXTRACT_PRIVATE tag is set to YES all private members of a class
 # will be included in the documentation.
@@ -451,7 +451,7 @@ INLINE_INFO            = YES
 # alphabetically by member name. If set to NO the members will appear in
 # declaration order.
 
-SORT_MEMBER_DOCS       = YES
+SORT_MEMBER_DOCS       = NO
 
 # If the SORT_BRIEF_DOCS tag is set to YES then doxygen will sort the
 # brief documentation of file, namespace and class members alphabetically
@@ -648,7 +648,21 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT                  = ../src/mqtt
+STRIP_FROM_PATH        = @PROJECT_SOURCE_DIR@/src/mqtt
+INPUT                  = @PROJECT_SOURCE_DIR@/src/mqtt/async_client.h
+                         @PROJECT_SOURCE_DIR@/src/mqtt/callback.h
+                         @PROJECT_SOURCE_DIR@/src/mqtt/client.h
+                         @PROJECT_SOURCE_DIR@/src/mqtt/connect_options.h
+                         @PROJECT_SOURCE_DIR@/src/mqtt/delivery_token.h
+                         @PROJECT_SOURCE_DIR@/src/mqtt/exception.h
+                         @PROJECT_SOURCE_DIR@/src/mqtt/iaction_listener.h
+                         @PROJECT_SOURCE_DIR@/src/mqtt/iclient_persistence.h
+                         @PROJECT_SOURCE_DIR@/src/mqtt/ipersistable.h
+                         @PROJECT_SOURCE_DIR@/src/mqtt/message.h
+                         @PROJECT_SOURCE_DIR@/src/mqtt/token.h
+                         @PROJECT_SOURCE_DIR@/src/mqtt/topic.h
+                         @PROJECT_SOURCE_DIR@/src/mqtt/will_options.h
+                         @PROJECT_SOURCE_DIR@/src/mqtt/ssl_options.h
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is
@@ -672,7 +686,7 @@ FILE_PATTERNS          = *.h
 # should be searched for input files as well. Possible values are YES and NO.
 # If left blank NO is used.
 
-RECURSIVE              = YES
+RECURSIVE              = NO
 
 # The EXCLUDE tag can be used to specify files and/or directories that should be
 # excluded from the INPUT source files. This way you can easily exclude a
@@ -715,7 +729,7 @@ EXAMPLE_PATH           =
 # and *.h) to filter out the source-files in the directories. If left
 # blank all files are included.
 
-EXAMPLE_PATTERNS       =
+EXAMPLE_PATTERNS       = *
 
 # If the EXAMPLE_RECURSIVE tag is set to YES then subdirectories will be
 # searched for input files to be used with the \include or \dontinclude
@@ -1117,7 +1131,7 @@ DISABLE_INDEX          = NO
 # Since the tree basically has the same information as the tab index you
 # could consider to set DISABLE_INDEX to NO when enabling this option.
 
-GENERATE_TREEVIEW      = YES
+GENERATE_TREEVIEW      = NONE
 
 # The ENUM_VALUES_PER_LINE tag can be used to set the number of enum values
 # (range [0,1..20]) that doxygen will group on one line in the generated HTML
@@ -1677,7 +1691,7 @@ INCLUDED_BY_GRAPH      = YES
 # the time of a run. So in most cases it will be better to enable call graphs
 # for selected functions only using the \callgraph command.
 
-CALL_GRAPH             = NO
+CALL_GRAPH             = YES
 
 # If the CALLER_GRAPH and HAVE_DOT tags are set to YES then
 # doxygen will generate a caller dependency graph for every global function
