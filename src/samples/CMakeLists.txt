@@ -42,6 +42,8 @@ add_executable(async_publish async_publish.cpp)
 add_executable(async_subscribe async_subscribe.cpp)
 add_executable(sync_publish sync_publish.cpp)
 
+set(PAHO_MQTT_C paho-mqtt3a)
+
 ## link binaries
 target_link_libraries(async_publish
     ${PAHO_MQTT_C}
