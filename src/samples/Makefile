@@ -3,7 +3,7 @@
 # Check if paho mqtt C libs are installed into the system, and use them.
 ifneq (,$(wildcard /usr/local/lib/libpaho-mqtt*))
 PAHO_C_LIB = /usr/local/lib
-LDLIBS += -L../../lib -L$(PAHO_C_LIB) -lpaho-mqttpp3 -lpaho-mqtt3a
+LDLIBS += -L$(PAHO_C_LIB) -lpaho-mqttpp3 -lpaho-mqtt3a
 else
 PAHO_C_LIB ?= $(abspath ../../../paho.mqtt.c)
 LDLIBS += -L../../lib -L$(PAHO_C_LIB)/build/output -lpaho-mqttpp3 -lpaho-mqtt3a

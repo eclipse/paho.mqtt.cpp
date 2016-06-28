@@ -16,6 +16,13 @@ ifndef VERBOSE
   QUIET := @
 endif
 
+ifndef INSTALL
+  INSTALL = install
+endif
+
+INSTALL_PROGRAM = $(INSTALL)
+INSTALL_DATA =  $(INSTALL) -m 644
+
 # ----- Directories -----
 
 SRC_DIR ?= src
@@ -63,9 +70,9 @@ DEPS := $(OBJS:.o=.dep)
 
 # ----- Compiler flags, etc -----
 
-CC  = $(CROSS_COMPILE)gcc
-CXX = $(CROSS_COMPILE)g++
-AR  = $(CROSS_COMPILE)ar
+CC	= $(CROSS_COMPILE)gcc
+CXX	= $(CROSS_COMPILE)g++
+AR	= $(CROSS_COMPILE)ar
 LD  = $(CROSS_COMPILE)ld
 
 CPPFLAGS += -Wall -fPIC
@@ -81,7 +88,7 @@ endif
 
 CPPFLAGS += $(addprefix -D,$(DEFS)) $(addprefix -I,$(INC_DIRS))
 
-LIB_DEPS += c stdc++ pthread 
+LIB_DEPS += c stdc++ pthread
 
 LIB_DEP_FLAGS += $(addprefix -l,$(LIB_DEPS))
 
@@ -123,6 +130,20 @@ dump:
 	@echo OBJS=$(OBJS)
 	@echo DEPS:$(DEPS)
 	@echo LIB_DEPS=$(LIB_DEPS)
+
+strip_options:
+	$(eval INSTALL_OPTS := -s)
+
+.PHONY: install
+install:
+	$(INSTALL_DATA) ${INSTALL_OPTS} $(TGT) /usr/local/lib
+	ln -s $(LIB) /usr/local/lib/$(LIB_MAJOR_LINK)
+	ln -s $(LIB_MAJOR_LINK) /usr/local/lib/$(LIB_LINK)
+
+.PHONY: uninstall
+uninstall:
+	$(RM) /usr/local/lib/$(LIB) /usr/local/lib/$(LIB_MAJOR_LINK) \
+		/usr/local/lib/$(LIB_LINK)
 
 .PHONY: clean
 clean:
