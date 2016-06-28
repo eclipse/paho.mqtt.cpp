@@ -1,3 +1,4 @@
+*.swp
 lib/
 obj/
 \.hg/
