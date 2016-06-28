@@ -1,6 +1,13 @@
 # Makefile for the paho-mqttpp (C++) sample applications
 
-PAHO_C_LIB ?= $(abspath ../../../org.eclipse.paho.mqtt.c)
+# Check if paho mqtt C libs are installed into the system, and use them.
+ifneq (,$(wildcard /usr/local/lib/libpaho-mqtt*))
+PAHO_C_LIB = /usr/local/lib
+LDLIBS += -L../../lib -L$(PAHO_C_LIB) -lpaho-mqttpp3 -lpaho-mqtt3a
+else
+PAHO_C_LIB ?= $(abspath ../../../paho.mqtt.c)
+LDLIBS += -L../../lib -L$(PAHO_C_LIB)/build/output -lpaho-mqttpp3 -lpaho-mqtt3a
+endif
 
 all: async_publish async_subscribe sync_publish
 
@@ -15,7 +22,6 @@ else
   CXXFLAGS += -O2
 endif
 
-LDLIBS += -L../../lib -L$(PAHO_C_LIB)/build/output -lpaho-mqttpp3 -lpaho-mqtt3a
 
 async_publish: async_publish.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS)
@@ -32,5 +38,4 @@ clean:
 	rm -f async_publish async_subscribe sync_publish
 
 distclean: clean
-
 
