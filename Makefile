@@ -103,6 +103,7 @@ $(OBJ_DIR)/%.o: %.cpp
 # ----- Build targets -----
 
 .PHONY: all
+
 all: $(TGT) $(LIB_DIR)/$(LIB_LINK) $(LIB_DIR)/$(LIB_MAJOR_LINK)
 
 $(TGT): $(OBJS)
@@ -116,6 +117,7 @@ $(LIB_DIR)/$(LIB_MAJOR_LINK): $(TGT)
 	$(QUIET) cd $(LIB_DIR) ; $(RM) $(LIB_MAJOR_LINK) ; ln -s $(LIB) $(LIB_MAJOR_LINK)
 
 .PHONY: dump
+
 dump:
 	@echo LIB=$(LIB)
 	@echo TGT=$(TGT)
@@ -135,28 +137,33 @@ strip_options:
 	$(eval INSTALL_OPTS := -s)
 
 .PHONY: install
+
 install:
 	$(INSTALL_DATA) ${INSTALL_OPTS} $(TGT) /usr/local/lib
 	ln -s $(LIB) /usr/local/lib/$(LIB_MAJOR_LINK)
 	ln -s $(LIB_MAJOR_LINK) /usr/local/lib/$(LIB_LINK)
 
 .PHONY: uninstall
+
 uninstall:
 	$(RM) /usr/local/lib/$(LIB) /usr/local/lib/$(LIB_MAJOR_LINK) \
 		/usr/local/lib/$(LIB_LINK)
 
 .PHONY: clean
+
 clean:
 	$(QUIET) $(RM) $(TGT) $(LIB_DIR)/$(LIB_LINK) $(LIB_DIR)/$(LIB_MAJOR_LINK) \
 	    $(OBJS)
 
 .PHONY: distclean
+
 distclean: clean
 	$(QUIET) rm -rf $(OBJ_DIR) $(LIB_DIR)
 
 # ----- Header dependencies -----
 
 MKG := $(findstring $(MAKECMDGOALS),"clean distclean dump")
+
 ifeq "$(MKG)" ""
   -include $(DEPS)
 endif
