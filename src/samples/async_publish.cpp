@@ -31,6 +31,7 @@ const char* PAYLOAD1 = "Hello World!";
 const char* PAYLOAD2 = "Hi there!";
 const char* PAYLOAD3 = "Is anyone listening?";
 const char* PAYLOAD4 = "Someone is always listening.";
+const char* PAYLOAD5 = "Last will and testament.";
 
 const int  QOS = 1;
 const long TIMEOUT = 10000L;
@@ -118,7 +119,11 @@ int main(int argc, char* argv[])
 	client.set_callback(cb);
 
 	try {
-		mqtt::itoken_ptr conntok = client.connect();
+		mqtt::connect_options conopts;
+		mqtt::message_ptr willmsg = mqtt::make_message(PAYLOAD5);
+		mqtt::will_options will(TOPIC, willmsg, 1, true);
+		conopts.set_will(will);
+		mqtt::itoken_ptr conntok = client.connect(conopts);
 		std::cout << "Waiting for the connection..." << std::flush;
 		conntok->wait_for_completion();
 		std::cout << "OK" << std::endl;

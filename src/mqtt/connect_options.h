@@ -30,6 +30,7 @@ extern "C" {
 
 #include "mqtt/message.h"
 #include "mqtt/topic.h"
+#include "mqtt/will_options.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -48,6 +49,9 @@ class connect_options
 {
 	/** The underlying C connection options */
 	MQTTAsync_connectOptions opts_;
+
+	/** The Will Options **/
+	will_options will_;
 
 	/** The client has special access */
 	friend class async_client;
@@ -136,12 +140,9 @@ public:
 	void set_user_name(const std::string& userName);
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
-	 * @param top 
-	 * @param msg 
-	 * @param qos 
-	 * @param retained 
+	 * @param will The LWT options.
 	 */
-	void set_will(const std::string& top, const std::string& msg, int qos, bool retained);
+	void set_will(const will_options& will);
 
 	std::string to_str() const;
 };
