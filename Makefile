@@ -44,6 +44,17 @@ INC_DIRS += $(INC_DIR) $(PAHO_C_INC_DIR)
 _MK_OBJ_DIR := $(shell mkdir -p $(OBJ_DIR))
 _MK_LIB_DIR := $(shell mkdir -p $(LIB_DIR))
 
+ifndef prefix
+  prefix = /usr/local
+endif
+
+ifndef exec_prefix
+  exec_prefix = ${prefix}
+endif
+
+includedir = $(prefix)/include
+libdir = $(exec_prefix)/lib
+
 # ----- Definitions for the shared library -----
 
 LIB_BASE  ?= $(MODULE)
@@ -133,21 +144,26 @@ dump:
 	@echo DEPS:$(DEPS)
 	@echo LIB_DEPS=$(LIB_DEPS)
 
+# ----- Installation targets -----
+
 strip_options:
 	$(eval INSTALL_OPTS := -s)
+
+install-strip:
+	$(TGT) strip_options install
 
 .PHONY: install
 
 install:
-	$(INSTALL_DATA) ${INSTALL_OPTS} $(TGT) /usr/local/lib
-	ln -s $(LIB) /usr/local/lib/$(LIB_MAJOR_LINK)
-	ln -s $(LIB_MAJOR_LINK) /usr/local/lib/$(LIB_LINK)
+	$(INSTALL_DATA) ${INSTALL_OPTS} $(TGT) $(libdir)
+	ln -s $(LIB) $(libdir)/$(LIB_MAJOR_LINK)
+	ln -s $(LIB_MAJOR_LINK) $(libdir)/$(LIB_LINK)
 
 .PHONY: uninstall
 
 uninstall:
-	$(RM) /usr/local/lib/$(LIB) /usr/local/lib/$(LIB_MAJOR_LINK) \
-		/usr/local/lib/$(LIB_LINK)
+	$(RM) $(libdir)/$(LIB) $(libdir)/$(LIB_MAJOR_LINK) \
+		$(libdir)/$(LIB_LINK)
 
 .PHONY: clean
 
@@ -159,6 +175,14 @@ clean:
 
 distclean: clean
 	$(QUIET) rm -rf $(OBJ_DIR) $(LIB_DIR)
+
+.PHONY: samples
+
+samples: $(SRC_DIR)/samples
+	$(MAKE) -C $<
+
+# ----- Installation targets -----
+
 
 # ----- Header dependencies -----
 
@@ -172,5 +196,7 @@ $(OBJ_DIR)/%.dep: %.cpp
 	@echo DEP $<
 	$(QUIET) $(CXX) -M $(CPPFLAGS) $(CXXFLAGS) $< > $@.$$$$; \
 	sed 's,\($*\)\.o[ :]*,$$(OBJ_DIR)/\1.o $@ : ,g' < $@.$$$$ > $@; \
+.PHONY: clean
+
 	$(RM) $@.$$$$
 
