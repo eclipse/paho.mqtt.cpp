@@ -58,7 +58,7 @@ public:
 	 */
 	typedef std::shared_ptr<connect_options> ptr_t;
 	/**
-	 * Constructs a new MqttConnectOptions object using the default values.
+	 * Constructs a new object using the default values.
 	 */
 	connect_options() : opts_( MQTTAsync_connectOptions_initializer ) {}
 	/**
@@ -66,9 +66,6 @@ public:
 	 * @return int 
 	 */
 	int get_connection_timeout() const;
-
-	//java.util.Properties getDebug()
-           
 	/**
 	 * Returns the "keep alive" interval.
 	 * @return int 
@@ -83,15 +80,6 @@ public:
 	std::string get_password() const {
 		return std::string(opts_.password);
 	}
-	/**
-	 * Returns the socket factory that will be used when connecting, or null 
-	 * if one has not been set.
-	 */
-	//javax.net.SocketFactory get_socket_factory();
-	/**
-	 * Returns the SSL properties for the connection.
-	 */
-	//java.util.Properties get_ssl_properties();
 	/**
 	 * Returns the user name to use for the connection.
 	 * @return std::string 
@@ -142,14 +130,6 @@ public:
 	 */
 	void set_password(const std::string& password);
 	/**
-	 * Sets the SocketFactory to use.
-	 */
-	//void set_socket_factory(javax.net.SocketFactory socketFactory)
-	/**
-	 * Sets the SSL properties for the connection.
-	 */
-	//void set_ssl_properties(java.util.Properties props);
-	/**
 	 * Sets the user name to use for the connection.
 	 * @param userName 
 	 */
@@ -181,7 +161,7 @@ public:
 	 * @param qos 
 	 * @param retained 
 	 */
-	/*protected*/ void set_will(const std::string& top, message msg, int qos, bool retained);
+	void set_will(const std::string& top, message msg, int qos, bool retained);
 
 	std::string to_str() const;
 };
