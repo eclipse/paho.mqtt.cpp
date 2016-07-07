@@ -1,11 +1,18 @@
 # Makefile for the paho-mqttpp (C++) sample applications
 
-PAHO_C_LIB ?= $(abspath ../../../org.eclipse.paho.mqtt.c)
+ifdef DEVELOP
+  PAHO_C_LIB_DIR ?= $(abspath ../../../paho.mqtt.c)/build/output
+  PAHO_C_INC_DIR ?= $(abspath ../../../paho.mqtt.c)/src
+else
+  PAHO_C_LIB_DIR ?= /usr/local/lib
+  PAHO_C_INC_DIR ?= /usr/local/include
+endif
+
 
 all: async_publish async_subscribe sync_publish
 
 CXXFLAGS += -Wall -std=c++0x
-CPPFLAGS += -I.. -I$(PAHO_C_LIB)/src
+CPPFLAGS += -I.. -I$(PAHO_C_INC_DIR)
 
 ifdef DEBUG
   CPPFLAGS += -DDEBUG
@@ -15,7 +22,7 @@ else
   CXXFLAGS += -O2
 endif
 
-LDLIBS += -L../../lib -L$(PAHO_C_LIB)/build/output -lpaho-mqttpp3 -lpaho-mqtt3a
+LDLIBS += -L../../lib -L$(PAHO_C_LIB_DIR) -lpaho-mqttpp3 -lpaho-mqtt3a
 
 async_publish: async_publish.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS)
