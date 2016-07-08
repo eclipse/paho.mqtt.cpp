@@ -28,6 +28,7 @@
 
 #include "mqtt/iasync_client.h"
 #include "mqtt/async_client.h"
+#include "mqtt/qos.h"
 
 #include "dummy_client_persistence.h"
 #include "dummy_action_listener.h"
@@ -98,10 +99,10 @@ class async_client_test : public CppUnit::TestFixture
 	const std::string CLIENT_ID { "async_client_test" };
 	const std::string PERSISTENCE_DIR { "/tmp" };
 	const std::string TOPIC { "TOPIC" };
-	const int GOOD_QOS { 0 };
-	const int BAD_QOS  { 3 };
+	const mqtt::QoS GOOD_QOS { mqtt::QoS::QOS0 };
+	const mqtt::QoS BAD_QOS  { static_cast<mqtt::QoS>(3) };
 	mqtt::iasync_client::topic_filter_collection TOPIC_COLL { "TOPIC0", "TOPIC1", "TOPIC2" };
-	mqtt::iasync_client::qos_collection GOOD_QOS_COLL { 0, 1, 2 };
+	mqtt::iasync_client::qos_collection GOOD_QOS_COLL { mqtt::QoS::QOS0, mqtt::QoS::QOS1, mqtt::QoS::QOS2 };
 	mqtt::iasync_client::qos_collection BAD_QOS_COLL  { BAD_QOS };
 	const std::string PAYLOAD { "PAYLOAD" };
 	const int TIMEOUT { 1000 };
@@ -176,9 +177,15 @@ public:
 		mqtt::itoken_ptr token_conn { nullptr };
 		mqtt::connect_options co;
 		mqtt::will_options wo;
-		wo.set_qos(BAD_QOS); // Invalid QoS causes connection failure
-		co.set_will(wo);
 		int reason_code = MQTTASYNC_SUCCESS;
+		try {
+			wo.set_qos(BAD_QOS); // Invalid QoS causes connection failure
+		} catch (mqtt::exception& ex) {
+			reason_code = ex.get_reason_code();
+		}
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_BAD_QOS, reason_code);
+		co.set_will(wo);
+		reason_code = MQTTASYNC_SUCCESS;
 		try {
 			token_conn = cli.connect(co);
 			CPPUNIT_ASSERT(nullptr != token_conn);
@@ -187,7 +194,7 @@ public:
 		}
 		CPPUNIT_ASSERT(nullptr == token_conn);
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
-		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_BAD_QOS, reason_code);
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, reason_code);
 	}
 
 	void test_connect_2_args() {
@@ -224,10 +231,16 @@ public:
 		mqtt::itoken_ptr token_conn { nullptr };
 		mqtt::connect_options co;
 		mqtt::will_options wo;
-		wo.set_qos(BAD_QOS); // Invalid QoS causes connection failure
+		int reason_code = MQTTASYNC_SUCCESS;
+		try {
+			wo.set_qos(BAD_QOS); // Invalid QoS causes connection failure
+		} catch (mqtt::exception& ex) {
+			reason_code = ex.get_reason_code();
+		}
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_BAD_QOS, reason_code);
 		co.set_will(wo);
 		mqtt::test::dummy_action_listener listener;
-		int reason_code = MQTTASYNC_SUCCESS;
+		reason_code = MQTTASYNC_SUCCESS;
 		try {
 			token_conn = cli.connect(co, &CONTEXT, listener);
 			CPPUNIT_ASSERT(nullptr != token_conn);
@@ -237,7 +250,7 @@ public:
 		}
 		CPPUNIT_ASSERT(nullptr == token_conn);
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
-		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_BAD_QOS, reason_code);
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, reason_code);
 		// TODO Why listener.on_failure() is not called?
 		//CPPUNIT_ASSERT(listener.on_failure_called);
 	}
@@ -351,9 +364,9 @@ public:
 		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
-		CPPUNIT_ASSERT_EQUAL(0, GOOD_QOS_COLL[0]);
-		CPPUNIT_ASSERT_EQUAL(1, GOOD_QOS_COLL[1]);
-		CPPUNIT_ASSERT_EQUAL(2, GOOD_QOS_COLL[2]);
+		CPPUNIT_ASSERT_EQUAL(mqtt::QoS::QOS0, GOOD_QOS_COLL[0]);
+		CPPUNIT_ASSERT_EQUAL(mqtt::QoS::QOS1, GOOD_QOS_COLL[1]);
+		CPPUNIT_ASSERT_EQUAL(mqtt::QoS::QOS2, GOOD_QOS_COLL[2]);
 
 		mqtt::itoken_ptr token_conn { cli.connect() };
 		CPPUNIT_ASSERT(nullptr != token_conn);
@@ -416,9 +429,9 @@ public:
 		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
-		CPPUNIT_ASSERT_EQUAL(0, GOOD_QOS_COLL[0]);
-		CPPUNIT_ASSERT_EQUAL(1, GOOD_QOS_COLL[1]);
-		CPPUNIT_ASSERT_EQUAL(2, GOOD_QOS_COLL[2]);
+		CPPUNIT_ASSERT_EQUAL(mqtt::QoS::QOS0, GOOD_QOS_COLL[0]);
+		CPPUNIT_ASSERT_EQUAL(mqtt::QoS::QOS1, GOOD_QOS_COLL[1]);
+		CPPUNIT_ASSERT_EQUAL(mqtt::QoS::QOS2, GOOD_QOS_COLL[2]);
 
 		mqtt::itoken_ptr token_conn { cli.connect() };
 		CPPUNIT_ASSERT(nullptr != token_conn);

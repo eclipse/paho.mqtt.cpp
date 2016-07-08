@@ -24,7 +24,7 @@
 
 namespace mqtt {
 
-const int client::DFLT_QOS = 1;
+const QoS client::DFLT_QOS = QoS::QOS1;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -70,10 +70,6 @@ void client::disconnect(long timeout)
 	cli_.disconnect(timeout)->wait_for_completion(timeout_);
 }
 
-//std::string client::generate_client_id()
-//{
-//}
-
 std::string client::get_client_id() const
 {
 	return cli_.get_client_id();
@@ -108,7 +104,7 @@ bool client::is_connected() const
 }
 
 void client::publish(const std::string& top, const void* payload, size_t n,
-					 int qos, bool retained)
+					 QoS qos, bool retained)
 {
 	cli_.publish(top, payload, n, qos, retained)->wait_for_completion(timeout_);
 }
@@ -156,7 +152,7 @@ void client::subscribe(const topic_filter_collection& topicFilters,
 	cli_.subscribe(topicFilters, qos)->wait_for_completion(timeout_);
 }
 
-void client::subscribe(const std::string& topicFilter, int qos)
+void client::subscribe(const std::string& topicFilter, QoS qos)
 {
 	cli_.subscribe(topicFilter, qos)->wait_for_completion(timeout_);
 }

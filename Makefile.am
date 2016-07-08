@@ -32,6 +32,7 @@ libpaho_mqttpp3_la_SOURCES += src/client.cpp
 libpaho_mqttpp3_la_SOURCES += src/disconnect_options.cpp
 libpaho_mqttpp3_la_SOURCES += src/iclient_persistence.cpp
 libpaho_mqttpp3_la_SOURCES += src/message.cpp
+libpaho_mqttpp3_la_SOURCES += src/qos.cpp
 libpaho_mqttpp3_la_SOURCES += src/response_options.cpp
 libpaho_mqttpp3_la_SOURCES += src/token.cpp
 libpaho_mqttpp3_la_SOURCES += src/topic.cpp

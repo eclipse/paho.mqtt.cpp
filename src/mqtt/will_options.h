@@ -82,7 +82,7 @@ public:
 		const std::string& top,
 		const void *payload,
 		size_t payload_len,
-		int qos,
+		QoS qos,
 		bool retained
 	);
 	/**
@@ -97,7 +97,7 @@ public:
 		const topic& top,
 		const void *payload,
 		size_t payload_len,
-		int qos,
+		QoS qos,
 		bool retained
 	);
 	/**
@@ -111,7 +111,7 @@ public:
 	will_options(
 		const std::string& top,
 		const std::string& payload,
-		int qos,
+		QoS qos,
 		bool retained
 	);
 	/**
@@ -157,7 +157,9 @@ public:
 	 * Gets the QoS value for the LWT message.
 	 * @return The QoS value for the LWT message.
 	 */
-	int get_qos() const { return opts_.qos; }
+	QoS get_qos() const {
+		return static_cast<QoS>(opts_.qos);
+	}
 	/**
 	 * Gets the 'retained' flag for the LWT message.
 	 * @return The 'retained' flag for the LWT message.
@@ -170,7 +172,7 @@ public:
 	 * @return A copy of the LWT message.
 	 */
 	const_message_ptr get_message() const {
-		return make_message(payload_, opts_.qos, opts_.retained);
+		return make_message(payload_, static_cast<QoS>(opts_.qos), opts_.retained);
 	}
 	/**
 	 * Sets the LWT message topic name.
@@ -186,7 +188,7 @@ public:
 	 * Sets the QoS value.
 	 * @param qos The LWT message QoS
 	 */
-	void set_qos(const int qos) { opts_.qos = qos; }
+	void set_qos(const QoS qos);
 	/**
 	 * Sets the retained flag.
 	 * @param retained Tell the broker to keep the LWT message after send to

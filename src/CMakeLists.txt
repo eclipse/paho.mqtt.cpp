@@ -41,6 +41,7 @@ set(COMMON_SRC
     disconnect_options.cpp
     iclient_persistence.cpp
     message.cpp
+    qos.cpp
     response_options.cpp
     token.cpp
     topic.cpp

@@ -81,7 +81,7 @@ public:
 
 		CPPUNIT_ASSERT_EQUAL(msg_in->get_payload(), msg_out->get_payload());
 		CPPUNIT_ASSERT_EQUAL(msg_in->get_qos(), msg_out->get_qos());
-		CPPUNIT_ASSERT_EQUAL(0, msg_out->get_qos());
+		CPPUNIT_ASSERT_EQUAL(mqtt::QoS::QOS0, msg_out->get_qos());
 	}
 
 // ----------------------------------------------------------------------
@@ -92,7 +92,7 @@ public:
 		mqtt::topic topic{ TOPIC_NAME, cli };
 
 		std::string payload { "message" };
-		int qos { 1 };
+		mqtt::QoS qos { mqtt::QoS::QOS1 };
 
 		mqtt::idelivery_token_ptr token { topic.publish(payload, qos, false) };
 		CPPUNIT_ASSERT(token);
@@ -113,7 +113,7 @@ public:
 
 		std::string payload { "message" };
 		std::size_t payload_size { payload.size() };
-		int qos { 2 };
+		mqtt::QoS qos { mqtt::QoS::QOS2 };
 
 		mqtt::idelivery_token_ptr token = topic.publish(payload.c_str(), payload_size, qos, false);
 		CPPUNIT_ASSERT(token);

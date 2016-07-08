@@ -35,7 +35,7 @@ message::message(const void* payload, size_t len)
 	set_payload(payload, len);
 }
 
-message::message(const void* payload, size_t len, int qos, bool retained)
+message::message(const void* payload, size_t len, QoS qos, bool retained)
 						: msg_(MQTTAsync_message_initializer)
 {
 	set_payload(payload, len);
@@ -49,7 +49,7 @@ message::message(const std::string& payload)
 	set_payload(payload);
 }
 
-message::message(const std::string& payload, int qos, bool retained)
+message::message(const std::string& payload, QoS qos, bool retained)
 						: msg_(MQTTAsync_message_initializer)
 {
 	set_payload(payload);
@@ -123,6 +123,12 @@ void message::set_payload(const std::string& payload)
 	payload_ = payload;
 	msg_.payload = const_cast<char*>(payload_.data());
 	msg_.payloadlen = payload_.length();
+}
+
+void message::set_qos(QoS qos)
+{
+	validate_qos(qos);
+	msg_.qos = static_cast<int>(qos);
 }
 
 /////////////////////////////////////////////////////////////////////////////
