@@ -60,7 +60,7 @@ public:
 	/**
 	 * Constructs a new object using the default values.
 	 */
-	connect_options() : opts_( MQTTAsync_connectOptions_initializer ) {}
+	connect_options();
 	/**
 	 * Returns the connection timeout value. 
 	 * @return int 
