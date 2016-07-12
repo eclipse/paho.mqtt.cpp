@@ -91,7 +91,7 @@ public:
 	 * Returns the topic to be used for last will and testament (LWT).
 	 * @return std::string 
 	 */
-	std::string get_will_destination() const;
+	std::string get_will_topic() const;
 	/**
 	 * Returns the message to be sent as last will and testament (LWT).
 	 * @return MqttMessage 
