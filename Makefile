@@ -44,6 +44,10 @@ INC_DIRS += $(INC_DIR) $(PAHO_C_INC_DIR)
 _MK_OBJ_DIR := $(shell mkdir -p $(OBJ_DIR))
 _MK_LIB_DIR := $(shell mkdir -p $(LIB_DIR))
 
+ifndef srcdir
+  srcdir = src
+endif
+
 ifndef prefix
   prefix = /usr/local
 endif
@@ -155,15 +159,36 @@ install-strip:
 .PHONY: install
 
 install:
+	mkdir -p ${includedir}
 	$(INSTALL_DATA) ${INSTALL_OPTS} $(TGT) $(libdir)
 	ln -s $(LIB) $(libdir)/$(LIB_MAJOR_LINK)
 	ln -s $(LIB_MAJOR_LINK) $(libdir)/$(LIB_LINK)
+
+	$(INSTALL_DATA) ${srcdir}/mqtt/async_client.h ${includedir}
+	$(INSTALL_DATA) ${srcdir}/mqtt/callback.h ${includedir}
+	$(INSTALL_DATA) ${srcdir}/mqtt/client.h ${includedir}
+	$(INSTALL_DATA) ${srcdir}/mqtt/connect_options.h ${includedir}
+	$(INSTALL_DATA) ${srcdir}/mqtt/delivery_token.h ${includedir}
+	$(INSTALL_DATA) ${srcdir}/mqtt/exception.h ${includedir}
+	$(INSTALL_DATA) ${srcdir}/mqtt/iaction_listener.h ${includedir}
+	$(INSTALL_DATA) ${srcdir}/mqtt/iclient_persistence.h ${includedir}
+	$(INSTALL_DATA) ${srcdir}/mqtt/ipersistable.h ${includedir}
+	$(INSTALL_DATA) ${srcdir}/mqtt/message.h ${includedir}
+	$(INSTALL_DATA) ${srcdir}/mqtt/token.h ${includedir}
+	$(INSTALL_DATA) ${srcdir}/mqtt/topic.h ${includedir}
 
 .PHONY: uninstall
 
 uninstall:
 	$(RM) $(libdir)/$(LIB) $(libdir)/$(LIB_MAJOR_LINK) \
 		$(libdir)/$(LIB_LINK)
+
+	$(RM) ${includedir}/async_client.h ${includedir}/callback.h \
+		${includedir}/client.h ${includedir}/connect_options.h \
+		${includedir}/delivery_token.h ${includedir}/exception.h \
+		${includedir}/iaction_listener.h ${includedir}/iclient_persistence.h \
+		${includedir}/ipersistable.h ${includedir}/message.h \
+		${includedir}/token.h ${includedir}/topic.h
 
 .PHONY: clean
 
