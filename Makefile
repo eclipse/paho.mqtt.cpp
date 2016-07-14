@@ -56,7 +56,7 @@ ifndef exec_prefix
   exec_prefix = ${prefix}
 endif
 
-includedir = $(prefix)/include
+includedir = $(prefix)/include/mqtt
 libdir = $(exec_prefix)/lib
 
 # ----- Definitions for the shared library -----
