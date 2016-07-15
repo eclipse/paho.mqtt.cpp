@@ -26,10 +26,9 @@ function install_mqtt_c_client_from_github() {
     git clone https://github.com/eclipse/paho.mqtt.c.git
     mkdir -p paho.mqtt.c/build/output
     cd paho.mqtt.c/build/output
-    mqtt_c_src="../../src"
     cmake -GNinja -DPAHO_WITH_SSL=TRUE \
         -DPAHO_BUILD_DOCUMENTATION=FALSE \
-        -DPAHO_BUILD_SAMPLES=TRUE $mqtt_c_src
+        -DPAHO_BUILD_SAMPLES=TRUE ../../
     ninja
     cd ../../
     sudo make install
