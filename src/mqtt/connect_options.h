@@ -137,31 +137,11 @@ public:
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
 	 * @param top 
-	 * @param payload 
-	 * @param n 
-	 * @param qos 
-	 * @param retained 
-	 */
-	void set_will(const topic& top, void* payload, size_t n, int qos, bool retained) {
-		set_will(top.get_name(), payload, n, qos, retained);
-	}
-	/**
-	 * Sets the "Last Will and Testament" (LWT) for the connection.
-	 * @param top 
-	 * @param payload 
-	 * @param n 
-	 * @param qos 
-	 * @param retained 
-	 */
-	void set_will(const std::string& top, void* payload, size_t n, int qos, bool retained);
-	/**
-	 * Sets up the will information, based on the supplied parameters. 
-	 * @param top 
 	 * @param msg 
 	 * @param qos 
 	 * @param retained 
 	 */
-	void set_will(const std::string& top, message msg, int qos, bool retained);
+	void set_will(const std::string& top, const std::string& msg, int qos, bool retained);
 
 	std::string to_str() const;
 };
