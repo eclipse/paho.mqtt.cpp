@@ -50,20 +50,16 @@ public:
 	explicit exception(int reasonCode) : std::runtime_error("mqtt::exception"),
 											code_(reasonCode) {}
 	/**
-	 * Returns the underlying cause of this exception, if available.
-	 */
-	//java.lang.Throwable 	getCause()
-	/**
 	 * Returns the detail message for this exception.
 	 */
-	std::string get_message()  const { return std::string(what()); }
+	std::string get_message() const { return std::string(what()); }
 	/**
 	 * Returns the reason code for this exception.
 	 */
 	int get_reason_code() const { return code_; }
 	/**
-	 * Returns a String representation of this exception. 
-	 * @return std::tring 
+	 * Returns a string representation of this exception. 
+	 * @return A string representation of this exception. 
 	 */
 	std::string to_str() const { return std::string(what()); }
 	/**
@@ -71,7 +67,7 @@ public:
 	 * @return const char* 
 	 */
 	virtual const char* what() const noexcept {
-		return std::exception::what();
+		return (std::string("MQTT exception ")+std::to_string(code_)).c_str();
 	}
 };
 

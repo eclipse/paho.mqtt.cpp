@@ -216,9 +216,6 @@ public:
 	 * @param cli 
 	 */
 	token(iasync_client& cli, const std::vector<std::string>& topics);
-
-	//token(const std::string& logContext);
-
 	/**
 	 * Return the async listener for this token.
 	 * @return iaction_listener 

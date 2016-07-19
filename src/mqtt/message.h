@@ -74,23 +74,29 @@ public:
 	/**
 	 * Constructs a message with the specified array as a payload, and all 
 	 * other values set to defaults. 
+	 * @param payload the bytes to use as the message payload 
+	 * @param n the number of bytes in the payload
 	 */
 	message(const void* payload, size_t len);
 	/**
 	 * Constructs a message with the specified string as a payload, and 
 	 * all other values set to defaults.
+	 * @param payload A string to use as the message payload.
 	 */
 	message(const std::string& payload);
 	/**
-	 * Constructs a message as a copy of the message structure.
+	 * Constructs a message as a copy of the message structure. 
+	 * @param msg A "C" MQTTAsync_message structure.
 	 */
 	message(const MQTTAsync_message& msg);
 	/**
-	 * Constructs a message as a copy of the other message.
+	 * Constructs a message as a copy of the other message. 
+	 * @param other The message to copy into this one. 
 	 */
 	message(const message& other);
 	/**
 	 * Moves the other message to this one.
+	 * @param other The message to move into this one. 
 	 */
 	message(message&& other);
 	/**
@@ -125,21 +131,26 @@ public:
 	/**
 	 * Returns whether or not this message might be a duplicate of one which 
 	 * has already been received. 
-	 * @return bool 
+	 * @return true this message might be a duplicate of one which 
+	 * has already been received, false otherwise
 	 */
 	bool is_duplicate() const { return msg_.dup != 0; }
 	/**
 	 * Returns whether or not this message should be/was retained by the 
 	 * server.
-	 * @return bool 
+	 * @return true if this message should be/was retained by the 
+	 * server, false otherwise.
 	 */
 	bool is_retained() const { return msg_.retained != 0; }
 	/**
-	 * Sets the payload of this message to be the specified byte array.
+	 * Sets the payload of this message to be the specified byte array. 
+	 * @param payload the bytes to use as the message payload 
+	 * @param n the number of bytes in the payload
 	 */
 	void set_payload(const void* payload, size_t n);
 	/**
-	 * Sets the payload of this message to be the specified string.
+	 * Sets the payload of this message to be the specified string. 
+	 * @param payload A string to use as the message payload.
 	 */
 	void set_payload(const std::string& payload);
 	/**
@@ -173,7 +184,29 @@ public:
 	}
 };
 
+/**
+ * Shared pointer to a message
+ */
 typedef message::ptr_t message_ptr;
+
+/**
+ * Constructs a message with the specified array as a payload, and all 
+ * other values set to defaults. 
+ * @param payload the bytes to use as the message payload 
+ * @param n the number of bytes in the payload
+ */
+inline message_ptr make_message(const void* payload, size_t len) {
+	return std::make_shared<mqtt::message>(payload, len);
+}
+
+/**
+ * Constructs a message with the specified string as a payload, and 
+ * all other values set to defaults.
+ * @param payload A string to use as the message payload.
+ */
+inline message_ptr make_message(const std::string& payload) {
+	return std::make_shared<mqtt::message>(payload);
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
