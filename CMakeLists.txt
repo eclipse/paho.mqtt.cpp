@@ -25,6 +25,10 @@ project("paho-mqtt-cpp" LANGUAGES CXX)
 ## library name
 set(PAHO_MQTT_CPP paho-mqttpp3)
 
+## CMake scripts and modules paths
+SET(CMAKE_SCRIPTS "${CMAKE_SOURCE_DIR}/cmake")
+SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
+
 ## build settings
 set(PAHO_VERSION_MAJOR 0)
 set(PAHO_VERSION_MINOR 2)
@@ -32,11 +36,15 @@ set(CLIENT_VERSION ${PAHO_VERSION_MAJOR}.${PAHO_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_MAJOR ${PAHO_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${PAHO_VERSION_MINOR})
 
+EXECUTE_PROCESS(COMMAND date -u OUTPUT_VARIABLE BUILD_TIMESTAMP)
+STRING(STRIP ${BUILD_TIMESTAMP} BUILD_TIMESTAMP)
+
 ## build options
 set(PAHO_BUILD_STATIC FALSE CACHE BOOL "Build static library")
 set(PAHO_BUILD_SAMPLES FALSE CACHE BOOL "Build sample programs")
 set(PAHO_BUILD_DOCUMENTATION FALSE CACHE BOOL "Create and install the HTML based API documentation (requires Doxygen)")
 set(PAHO_MQTT_C_PATH "" CACHE PATH "Add a path to paho.mqtt.c library and headers")
+SET(PAHO_BUILD_DEB_PACKAGE FALSE CACHE BOOL "Build debian package")
 
 ## build flags
 set(CMAKE_CXX_STANDARD 11)
@@ -57,7 +65,13 @@ endif()
 ## packaging settings
 if(WIN32)
     set(CPACK_GENERATOR "ZIP")
-elseif(UNIX)
+elseif(PAHO_BUILD_DEB_PACKAGE)
+    SET(CPACK_GENERATOR "DEB")
+    CONFIGURE_FILE(${CMAKE_SCRIPTS}/CPackDebConfig.cmake.in
+        ${CMAKE_BINARY_DIR}/CPackDebConfig.cmake @ONLY)
+    SET(CPACK_PROJECT_CONFIG_FILE ${CMAKE_BINARY_DIR}/CPackDebConfig.cmake)
+    ADD_SUBDIRECTORY(debian)
+else()
     set(CPACK_GENERATOR "TGZ")
 endif()
 

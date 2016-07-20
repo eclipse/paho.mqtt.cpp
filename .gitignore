@@ -1,6 +1,7 @@
 *.swp
 lib/
 obj/
+build/
 \.hg/
 \.hgignore
 src/samples/async_publish
