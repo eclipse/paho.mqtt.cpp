@@ -3,4 +3,6 @@ lib/
 obj/
 \.hg/
 \.hgignore
-
+src/samples/async_publish
+src/samples/async_subscribe
+src/samples/sync_publish
