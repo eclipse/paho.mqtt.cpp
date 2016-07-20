@@ -66,6 +66,8 @@ endif()
 if(WIN32)
     set(CPACK_GENERATOR "ZIP")
 elseif(PAHO_BUILD_DEB_PACKAGE)
+    INSTALL(DIRECTORY src/mqtt DESTINATION /usr/include/
+        FILES_MATCHING PATTERN "*.h")
     SET(CPACK_GENERATOR "DEB")
     CONFIGURE_FILE(${CMAKE_SCRIPTS}/CPackDebConfig.cmake.in
         ${CMAKE_BINARY_DIR}/CPackDebConfig.cmake @ONLY)
