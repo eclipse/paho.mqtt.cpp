@@ -169,11 +169,6 @@ public:
 	 */
 	void set_retained(bool retained) { msg_.retained = (retained) ? (!0) : 0; }
 	/**
-	 * Returns a string representation of this messages payload. 
-	 * @return std::string 
-	 */
-	std::string to_str() const { return get_payload(); }
-	/**
 	 * Determines if the QOS value is a valid one.
 	 * @param qos The QOS value.
 	 * @throw std::invalid_argument If the qos value is invalid.
@@ -211,6 +206,14 @@ inline message_ptr make_message(const std::string& payload) {
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
 }
+
+/**
+ * Output stream operator for mqtt::message
+ */
+
+std::ostream& operator<<(std::ostream& os, const mqtt::message& msg);
+
+std::ostream& operator<<(std::ostream& os, const mqtt::message_ptr msg);
 
 #endif		// __mqtt_message_h
 

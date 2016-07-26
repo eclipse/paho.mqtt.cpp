@@ -58,11 +58,6 @@ public:
 	 */
 	int get_reason_code() const { return code_; }
 	/**
-	 * Returns a string representation of this exception. 
-	 * @return A string representation of this exception. 
-	 */
-	std::string to_str() const { return std::string(what()); }
-	/**
 	 * Returns an explanatory string for the exception.
 	 * @return const char* 
 	 */
@@ -100,6 +95,11 @@ public:
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
 }
+
+/**
+ * Output stream operator for mqtt::exception
+ */
+std::ostream& operator<<(std::ostream& os, const mqtt::exception& ex);
 
 #endif		// __mqtt_token_h
 

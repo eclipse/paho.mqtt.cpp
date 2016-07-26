@@ -183,7 +183,6 @@ public:
 	 */
 	/*protected*/ void set_will(const std::string& top, message msg, int qos, bool retained);
 
-	std::string to_str() const;
 };
 
 /**

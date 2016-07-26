@@ -95,11 +95,6 @@ public:
 	 * @return delivery_token 
 	 */
 	idelivery_token_ptr publish(message_ptr msg);
-	/**
-	 * Returns a string representation of this topic.
-	 * @return std::string 
-	 */
-	std::string to_str() const { return name_; }
 };
 
 /**
@@ -110,6 +105,11 @@ typedef topic::ptr_t topic_ptr;
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
 }
+
+/**
+ * Output stream operator for mqtt::topic
+ */
+std::ostream& operator<<(std::ostream& os, const mqtt::topic& tp);
 
 #endif		// __mqtt_topic_h
 

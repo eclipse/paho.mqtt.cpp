@@ -39,5 +39,8 @@ idelivery_token_ptr topic::publish(message_ptr msg)
 // end namespace mqtt
 }
 
-
-
+std::ostream& operator<<(std::ostream& os, const mqtt::topic& tp)
+{
+	os << tp.get_name();
+	return os;
+}

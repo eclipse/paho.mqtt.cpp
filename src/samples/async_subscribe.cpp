@@ -116,7 +116,7 @@ class callback : public virtual mqtt::callback,
 	virtual void message_arrived(const std::string& topic, mqtt::message_ptr msg) {
 		std::cout << "Message arrived" << std::endl;
 		std::cout << "\ttopic: '" << topic << "'" << std::endl;
-		std::cout << "\t'" << msg->to_str() << "'\n" << std::endl;
+		std::cout << "\t'" << msg << "'\n" << std::endl;
 	}
 
 	virtual void delivery_complete(mqtt::idelivery_token_ptr token) {}
