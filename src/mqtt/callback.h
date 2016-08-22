@@ -45,6 +45,9 @@ class callback
 {
 public:
 	typedef std::shared_ptr<callback> ptr_t;
+
+	virtual ~callback() {};
+
 	/**
 	 * This method is called when the connection to the server is lost.
 	 * @param cause 

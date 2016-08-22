@@ -88,6 +88,8 @@ public:
 	 */
 	client(const std::string& serverURI, const std::string& clientId, 
 		   iclient_persistence* persistence);
+
+	virtual ~client();
 	/**
 	 * Close the client and releases all resource associated with the 
 	 * client. 

@@ -112,7 +112,7 @@ std::string message::get_payload() const
 	if (!msg_.payload || msg_.payloadlen == 0)
 		return std::string();
 
-	const char *p = (const char *) msg_.payload;
+	const char *p = static_cast<const char *>(msg_.payload);
 	return std::string(p, p+msg_.payloadlen);
 }
 
