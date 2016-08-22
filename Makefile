@@ -16,6 +16,12 @@ ifndef VERBOSE
   QUIET := @
 endif
 
+ifndef INSTALL
+INSTALL = install
+endif
+INSTALL_PROGRAM = $(INSTALL)
+INSTALL_DATA =  $(INSTALL) -m 644
+
 # ----- Directories -----
 
 SRC_DIR ?= src
@@ -36,6 +42,17 @@ INC_DIRS += $(INC_DIR) $(PAHO_C_INC_DIR)
 
 _MK_OBJ_DIR := $(shell mkdir -p $(OBJ_DIR))
 _MK_LIB_DIR := $(shell mkdir -p $(LIB_DIR))
+
+ifndef prefix
+	prefix = /usr/local
+endif
+
+ifndef exec_prefix
+	exec_prefix = ${prefix}
+endif
+
+includedir = $(prefix)/include
+libdir = $(exec_prefix)/lib
 
 # ----- Definitions for the shared library -----
 
@@ -132,6 +149,27 @@ clean:
 .PHONY: distclean
 distclean: clean
 	$(QUIET) rm -rf $(OBJ_DIR) $(LIB_DIR)
+
+.PHONY: samples
+samples: $(SRC_DIR)/samples
+	$(MAKE) -C $<
+
+# ----- Installation targets -----
+
+strip_options:
+	$(eval INSTALL_OPTS := -s)
+
+install-strip: $(TGT) strip_options install
+
+install: $(TGT)
+	$(INSTALL_DATA) ${INSTALL_OPTS} ${TGT} $(DESTDIR)${libdir}
+	ln -s $(DESTDIR)${libdir}/$(LIB) $(DESTDIR)${libdir}/$(LIB_MAJOR_LINK)
+	ln -s $(DESTDIR)${libdir}/$(LIB_MAJOR_LINK) $(DESTDIR)${libdir}/$(LIB_LINK)
+
+uninstall:
+	rm $(DESTDIR)${libdir}/${LIB}
+	rm $(DESTDIR)${libdir}/$(LIB_MAJOR_LINK)
+	rm $(DESTDIR)${libdir}/$(LIB_LINK)
 
 # ----- Header dependencies -----
 
