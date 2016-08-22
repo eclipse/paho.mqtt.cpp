@@ -30,6 +30,7 @@ extern "C" {
 
 #include "mqtt/message.h"
 #include "mqtt/topic.h"
+#include "mqtt/will_options.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -49,6 +50,9 @@ class connect_options
 	/** The underlying C connection options */
 	MQTTAsync_connectOptions opts_;
 
+	/** The Will Options **/
+	will_options will_;
+
 	/** The client has special access */
 	friend class async_client;
 
@@ -58,17 +62,14 @@ public:
 	 */
 	typedef std::shared_ptr<connect_options> ptr_t;
 	/**
-	 * Constructs a new MqttConnectOptions object using the default values.
+	 * Constructs a new object using the default values.
 	 */
-	connect_options() : opts_( MQTTAsync_connectOptions_initializer ) {}
+	connect_options();
 	/**
 	 * Returns the connection timeout value. 
 	 * @return int 
 	 */
 	int get_connection_timeout() const;
-
-	//java.util.Properties getDebug()
-           
 	/**
 	 * Returns the "keep alive" interval.
 	 * @return int 
@@ -84,15 +85,6 @@ public:
 		return std::string(opts_.password);
 	}
 	/**
-	 * Returns the socket factory that will be used when connecting, or null 
-	 * if one has not been set.
-	 */
-	//javax.net.SocketFactory get_socket_factory();
-	/**
-	 * Returns the SSL properties for the connection.
-	 */
-	//java.util.Properties get_ssl_properties();
-	/**
 	 * Returns the user name to use for the connection.
 	 * @return std::string 
 	 */
@@ -103,7 +95,7 @@ public:
 	 * Returns the topic to be used for last will and testament (LWT).
 	 * @return std::string 
 	 */
-	std::string get_will_destination() const;
+	std::string get_will_topic() const;
 	/**
 	 * Returns the message to be sent as last will and testament (LWT).
 	 * @return MqttMessage 
@@ -142,46 +134,15 @@ public:
 	 */
 	void set_password(const std::string& password);
 	/**
-	 * Sets the SocketFactory to use.
-	 */
-	//void set_socket_factory(javax.net.SocketFactory socketFactory)
-	/**
-	 * Sets the SSL properties for the connection.
-	 */
-	//void set_ssl_properties(java.util.Properties props);
-	/**
 	 * Sets the user name to use for the connection.
 	 * @param userName 
 	 */
 	void set_user_name(const std::string& userName);
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
-	 * @param top 
-	 * @param payload 
-	 * @param n 
-	 * @param qos 
-	 * @param retained 
+	 * @param will The LWT options.
 	 */
-	void set_will(const topic& top, void* payload, size_t n, int qos, bool retained) {
-		set_will(top.get_name(), payload, n, qos, retained);
-	}
-	/**
-	 * Sets the "Last Will and Testament" (LWT) for the connection.
-	 * @param top 
-	 * @param payload 
-	 * @param n 
-	 * @param qos 
-	 * @param retained 
-	 */
-	void set_will(const std::string& top, void* payload, size_t n, int qos, bool retained);
-	/**
-	 * Sets up the will information, based on the supplied parameters. 
-	 * @param top 
-	 * @param msg 
-	 * @param qos 
-	 * @param retained 
-	 */
-	/*protected*/ void set_will(const std::string& top, message msg, int qos, bool retained);
+	void set_will(const will_options& will);
 
 	std::string to_str() const;
 };
