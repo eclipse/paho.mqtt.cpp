@@ -31,6 +31,7 @@ extern "C" {
 #include "mqtt/message.h"
 #include "mqtt/topic.h"
 #include "mqtt/will_options.h"
+#include "mqtt/ssl_options.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -52,6 +53,15 @@ class connect_options
 
 	/** The Will Options **/
 	will_options will_;
+
+	/** The SSL Options **/
+	ssl_options ssl_;
+
+	/** The password to use for the connection. */
+	std::string password_;
+
+	/** The user name to use for the connection. */
+	std::string userName_;
 
 	/** The client has special access */
 	friend class async_client;
@@ -143,6 +153,11 @@ public:
 	 * @param will The LWT options.
 	 */
 	void set_will(const will_options& will);
+	/**
+	 * Sets the SSL for the connection.
+	 * @param ssl The SSL options.
+	 */
+	void set_ssl(const ssl_options& ssl);
 
 	std::string to_str() const;
 };

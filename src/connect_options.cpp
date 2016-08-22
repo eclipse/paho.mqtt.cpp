@@ -24,6 +24,7 @@ connect_options::connect_options()
 : opts_( MQTTAsync_connectOptions_initializer )
 {
 	opts_.will = nullptr;
+	opts_.ssl = nullptr;
 }
 
 std::string connect_options::get_will_topic() const
@@ -38,10 +39,14 @@ message connect_options::get_will_message() const
 
 void connect_options::set_password(const std::string& password)
 {
+	password_ = password;
+	opts_.password = password_.c_str();
 }
 
 void connect_options::set_user_name(const std::string& userName)
 {
+	userName_ = userName;
+	opts_.username = userName_.c_str();
 }
 
 void connect_options::set_will(const will_options& will)
@@ -52,6 +57,18 @@ void connect_options::set_will(const will_options& will)
 	will_.set_retained(will.get_retained());
 
 	opts_.will = &will_.opts_;
+}
+
+void connect_options::set_ssl(const ssl_options& ssl)
+{
+	ssl_.set_trust_store(ssl.get_trust_store());
+	ssl_.set_key_store(ssl.get_key_store());
+	ssl_.set_private_key(ssl.get_private_key());
+	ssl_.set_private_key_password(ssl.get_private_key_password());
+	ssl_.set_enabled_cipher_suites(ssl.get_enabled_cipher_suites());
+	ssl_.set_enable_server_cert_auth(ssl.get_enable_server_cert_auth());
+
+	opts_.ssl = &ssl_.opts_;
 }
 
 /////////////////////////////////////////////////////////////////////////////
