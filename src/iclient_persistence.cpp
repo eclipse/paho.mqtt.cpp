@@ -18,6 +18,7 @@
 
 #include "mqtt/iclient_persistence.h"
 #include <cstring>
+#include <cstdlib>
 
 namespace mqtt {
 
