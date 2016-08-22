@@ -36,13 +36,13 @@ using namespace std::chrono;
 const std::string DFLT_ADDRESS {"tcp://localhost:1883"};
 const std::string CLIENT_ID {"pub_speed_test"};
 
-const size_t	DFLT_PAYLOAD_SIZE = 1024;
-const int		DFLT_N_MSG = 1000,
-				DFLT_QOS = 1;
+constexpr size_t	DFLT_PAYLOAD_SIZE = 1024;
+constexpr int		DFLT_N_MSG = 1000;
+constexpr int		DFLT_QOS = 1;
 
 const string TOPIC {"test/speed"};
 
-const char* LWT_PAYLOAD = "pub_speed_test died unexpectedly.";
+constexpr const char* LWT_PAYLOAD = "pub_speed_test died unexpectedly.";
 
 // Queue for passing tokens to the wait thread
 mqtt::thread_queue<mqtt::delivery_token_ptr> que;

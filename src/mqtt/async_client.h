@@ -44,9 +44,9 @@
 
 namespace mqtt {
 
-const uint32_t	VERSION = 0x00050000;
-const string	VERSION_STR("mqttpp v. 0.5"),
-				COPYRIGHT("Copyright (c) 2013-2016 Frank Pagliughi");
+constexpr const uint32_t	VERSION = 0x00050000;
+const string	VERSION_STR("mqttpp v. 0.5");
+const string	COPYRIGHT("Copyright (c) 2013-2016 Frank Pagliughi");
 
 /////////////////////////////////////////////////////////////////////////////
 

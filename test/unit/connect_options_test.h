@@ -394,7 +394,7 @@ public:
 		const auto& c_struct = opts.opts_;
 
 		// Set as an int
-		const int TIMEOUT_SEC = 10;
+		constexpr int TIMEOUT_SEC = 10;
 		opts.set_connect_timeout(TIMEOUT_SEC);
 
 		CPPUNIT_ASSERT_EQUAL(TIMEOUT_SEC, (int) opts.get_connect_timeout().count());
