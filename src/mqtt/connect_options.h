@@ -159,7 +159,6 @@ public:
 	 */
 	void set_ssl(const ssl_options& ssl);
 
-	std::string to_str() const;
 };
 
 /**

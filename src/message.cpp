@@ -131,3 +131,14 @@ void message::set_payload(const std::string& payload)
 // end namespace mqtt
 }
 
+std::ostream& operator<<(std::ostream& os, const mqtt::message& msg)
+{
+	os << std::string(msg.get_payload());
+	return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const mqtt::message_ptr msg)
+{
+	os << std::string(msg->get_payload());
+	return os;
+}
