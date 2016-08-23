@@ -38,7 +38,7 @@ public:
 	response_options();
 	/**
 	 * Creates a response object with the specified callbacks. 
-	 * @param dtok A token to be used as the context.
+	 * @param tok A token to be used as the context.
 	 */
 	response_options(token* tok);
 
@@ -84,7 +84,7 @@ public:
 	delivery_response_options(delivery_token* dtok);
 	/**
 	 * Sets the callback context to a delivery token. 
-	 * @param tok The delivery token to be used as the callback context.
+	 * @param dtok The delivery token to be used as the callback context.
 	 */
 	void set_context(delivery_token* dtok) { 
 		opts_.context = dtok;

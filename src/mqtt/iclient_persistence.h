@@ -81,7 +81,7 @@ public:
 	 */
 	virtual ~iclient_persistence() {}
 	/**
-	 * Initialise the persistent store.
+	 * Initialize the persistent store.
 	 */
 	virtual void open(const std::string& clientId, const std::string& serverURI) =0;
 	/**
