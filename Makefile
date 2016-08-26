@@ -80,10 +80,12 @@ DEPS := $(OBJS:.o=.dep)
 
 # ----- Compiler flags, etc -----
 
-CC  = $(CROSS_COMPILE)gcc
-CXX = $(CROSS_COMPILE)g++
-AR  = $(CROSS_COMPILE)ar
-LD  = $(CROSS_COMPILE)ld
+ifneq ($(CROSS_COMPILE),)
+  CC  = $(CROSS_COMPILE)gcc
+  CXX = $(CROSS_COMPILE)g++
+  AR  = $(CROSS_COMPILE)ar
+  LD  = $(CROSS_COMPILE)ld
+endif
 
 CPPFLAGS += -Wall -fPIC
 CXXFLAGS += -std=c++11
@@ -98,7 +100,7 @@ endif
 
 CPPFLAGS += $(addprefix -D,$(DEFS)) $(addprefix -I,$(INC_DIRS))
 
-LIB_DEPS += c stdc++ pthread 
+LIB_DEPS += c stdc++ pthread
 
 LIB_DEP_FLAGS += $(addprefix -l,$(LIB_DEPS))
 

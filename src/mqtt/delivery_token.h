@@ -1,20 +1,20 @@
 /////////////////////////////////////////////////////////////////////////////
-/// @file delivery_token.h 
-/// Declaration of MQTT delivery_token class 
-/// @date May 1, 2013 
-/// @author Frank Pagliughi 
-/////////////////////////////////////////////////////////////////////////////  
+/// @file delivery_token.h
+/// Declaration of MQTT delivery_token class
+/// @date May 1, 2013
+/// @author Frank Pagliughi
+/////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
@@ -34,7 +34,7 @@ extern "C" {
 
 namespace mqtt {
 
-/////////////////////////////////////////////////////////////////////////////  
+/////////////////////////////////////////////////////////////////////////////
 
 /**
  * Provides a mechanism for tracking the delivery of a message.
@@ -42,18 +42,25 @@ namespace mqtt {
 class idelivery_token : public virtual itoken
 {
 public:
-	/** Smart pointer type for this object */
-	typedef std::shared_ptr<idelivery_token> ptr_t;
+	/** Smart/shared pointer to an object of this class */
+	using ptr_t = std::shared_ptr<idelivery_token>;
+	/** Smart/shared pointer to a const object of this class */
+	using const_ptr_t = std::shared_ptr<const idelivery_token>;
+
 	/**
-	 * Returns the message associated with this token. 
+	 * Gets the message associated with this token.
 	 * @return The message associated with this token.
 	 */
-	virtual message_ptr get_message() const =0;          
+	virtual const_message_ptr get_message() const =0;
 };
 
-typedef idelivery_token::ptr_t idelivery_token_ptr;
+/** Smart/shared pointer to a delivery token */
+using idelivery_token_ptr = idelivery_token::ptr_t;
 
-/////////////////////////////////////////////////////////////////////////////  
+/** Smart/shared pointer to a const delivery token */
+using const_idelivery_token_ptr = idelivery_token::const_ptr_t;
+
+/////////////////////////////////////////////////////////////////////////////
 
 /**
  * Provides a mechanism to track the delivery progress of a message.
@@ -64,38 +71,41 @@ class delivery_token : public virtual idelivery_token,
 						public token
 {
 	/** The message being tracked. */
-	message_ptr msg_;
+	const_message_ptr msg_;
 
 	/** Client has special access. */
 	friend class async_client;
 
 	/**
 	 * Sets the message to which this token corresponds.
-	 * @param msg 
+	 * @param msg
 	 */
-	void set_message(message_ptr msg) { msg_ = msg; }
+	void set_message(const_message_ptr msg) { msg_ = msg; }
 
 public:
-	/** Smart pointer type for this object */
-	typedef std::shared_ptr<delivery_token> ptr_t;
+	/** Smart/shared pointer to an object of this class */
+	using ptr_t = std::shared_ptr<delivery_token>;
+	/** Smart/shared pointer to a const object of this class */
+	using const_ptr_t = std::shared_ptr<delivery_token>;
 
 	delivery_token(iasync_client& cli) : token(cli) {}
 
 	delivery_token(iasync_client& cli, const std::string& topic) : token(cli, topic) {}
 
-	delivery_token(iasync_client& cli, const std::vector<std::string>& topics) 
+	delivery_token(iasync_client& cli, const std::vector<std::string>& topics)
 					: token(cli, topics) {}
 	/**
-	 * Returns the message associated with this token.
+	 * Gets the message associated with this token.
 	 * @return The message associated with this token.
 	 */
-	virtual message_ptr get_message() const { return msg_; }
+	const_message_ptr get_message() const override { return msg_; }
 };
 
-/**
- * Shared pointer to a delivery_token.
- */
-typedef delivery_token::ptr_t delivery_token_ptr;
+/** Smart/shared pointer to a delivery_token */
+using delivery_token_ptr = delivery_token::ptr_t;
+
+/** Smart/shared pointer to a const delivery_token */
+using const_delivery_token_ptr = delivery_token::const_ptr_t;
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt

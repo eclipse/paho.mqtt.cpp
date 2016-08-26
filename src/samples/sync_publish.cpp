@@ -1,18 +1,22 @@
 /*******************************************************************************
- * Copyright (c) 2013 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
+
+// This is a Paho C++ sample application for the synchronous (blocking) API.
+// It also demonstrates the use of custom message persistence, in this case
+// creating an in-memory store.
 
 #include <iostream>
 #include <cstdlib>
@@ -37,9 +41,14 @@ const int TIMEOUT = 10000;
 
 /////////////////////////////////////////////////////////////////////////////
 
+// Example of a simple, in-memory persistence class.
 class sample_mem_persistence : virtual public mqtt::iclient_persistence
 {
+	// Whether the store is open
 	bool open_;
+
+	// Use an STL map to store shared persistence pointers
+	// against string keys.
 	std::map<std::string, mqtt::ipersistable_ptr> store_;
 
 public:
@@ -47,7 +56,7 @@ public:
 
 	// "Open" the store
 	virtual void open(const std::string& clientId, const std::string& serverURI) {
-		std::cout << "[Opening persistence for '" << clientId 
+		std::cout << "[Opening persistence store for '" << clientId
 			<< "' at '" << serverURI << "']" << std::endl;
 		open_ = true;
 	}
@@ -55,13 +64,13 @@ public:
 	// Close the persistent store that was previously opened.
 	virtual void close() {
 		std::cout << "[Closing persistence store.]" << std::endl;
-		open_ = false; 
+		open_ = false;
 	}
 
 	// Clears persistence, so that it no longer contains any persisted data.
 	virtual void clear() {
 		std::cout << "[Clearing persistence store.]" << std::endl;
-		store_.clear(); 
+		store_.clear();
 	}
 
 	// Returns whether or not data is persisted using the specified key.
@@ -122,11 +131,11 @@ public:
 	}
 
 	// We're not subscrived to anything, so this should never be called.
-	virtual void message_arrived(const std::string& topic, mqtt::message_ptr msg) {
-	}
+	virtual void message_arrived(const std::string& topic,
+								 mqtt::const_message_ptr msg) {}
 
 	virtual void delivery_complete(mqtt::idelivery_token_ptr tok) {
-		std::cout << "\n\t[Delivery complete for token: " 
+		std::cout << "\n\t[Delivery complete for token: "
 			<< (tok ? tok->get_message_id() : -1) << "]" << std::endl;
 	}
 };
@@ -135,47 +144,49 @@ public:
 
 int main(int argc, char* argv[])
 {
+	std::cout << "Initialzing..." << std::endl;
 	sample_mem_persistence persist;
 	mqtt::client client(ADDRESS, CLIENTID, &persist);
-	
+
 	callback cb;
 	client.set_callback(cb);
 
 	mqtt::connect_options connOpts;
 	connOpts.set_keep_alive_interval(20);
 	connOpts.set_clean_session(true);
+	std::cout << "...OK" << std::endl;
 
 	try {
-		std::cout << "Connecting..." << std::flush;
+		std::cout << "\nConnecting..." << std::endl;
 		client.connect(connOpts);
-		std::cout << "OK" << std::endl;
+		std::cout << "...OK" << std::endl;
 
 		// First use a message pointer.
 
-		std::cout << "Sending message..." << std::flush;
-		mqtt::message_ptr pubmsg = std::make_shared<mqtt::message>(PAYLOAD1);
+		std::cout << "\nSending message..." << std::endl;
+		auto pubmsg = mqtt::make_message(PAYLOAD1);
 		pubmsg->set_qos(QOS);
 		client.publish(TOPIC, pubmsg);
-		std::cout << "OK" << std::endl;
+		std::cout << "...OK" << std::endl;
 
 		// Now try with itemized publish.
 
-		std::cout << "Sending next message..." << std::flush;
+		std::cout << "\nSending next message..." << std::endl;
 		client.publish(TOPIC, PAYLOAD2, strlen(PAYLOAD2)+1, 0, false);
-		std::cout << "OK" << std::endl;
+		std::cout << "...OK" << std::endl;
 
 		// Now try with a listener, but no token
 
-		std::cout << "Sending final message..." << std::flush;
-		pubmsg = std::make_shared<mqtt::message>(PAYLOAD3);
+		std::cout << "\nSending final message..." << std::endl;
+		pubmsg = mqtt::make_message(PAYLOAD3);
 		pubmsg->set_qos(QOS);
 		client.publish(TOPIC, pubmsg);
 		std::cout << "OK" << std::endl;
 
 		// Disconnect
-		std::cout << "Disconnecting..." << std::flush;
+		std::cout << "\nDisconnecting..." << std::endl;
 		client.disconnect();
-		std::cout << "OK" << std::endl;
+		std::cout << "...OK" << std::endl;
 	}
 	catch (const mqtt::persistence_exception& exc) {
 		std::cerr << "Persistence Error: " << exc.what() << " ["
@@ -188,6 +199,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+	std::cout << "\nExiting" << std::endl;
  	return 0;
 }
 

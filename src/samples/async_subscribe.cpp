@@ -1,13 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2013 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
@@ -59,10 +59,10 @@ public:
 /////////////////////////////////////////////////////////////////////////////
 
 /**
- * Local callback & listener class for use with the client connection. 
- * This is primarily intended to receive messages, but it will also monitor 
- * the connection to the broker. If the connection is lost, it will attempt 
- * to restore the connection and re-subscribe to the topic. 
+ * Local callback & listener class for use with the client connection.
+ * This is primarily intended to receive messages, but it will also monitor
+ * the connection to the broker. If the connection is lost, it will attempt
+ * to restore the connection and re-subscribe to the topic.
  */
 class callback : public virtual mqtt::callback,
 					public virtual mqtt::iaction_listener
@@ -113,7 +113,7 @@ class callback : public virtual mqtt::callback,
 		reconnect();
 	}
 
-	virtual void message_arrived(const std::string& topic, mqtt::message_ptr msg) {
+	virtual void message_arrived(const std::string& topic, mqtt::const_message_ptr msg) {
 		std::cout << "Message arrived" << std::endl;
 		std::cout << "\ttopic: '" << topic << "'" << std::endl;
 		std::cout << "\t'" << msg->to_str() << "'\n" << std::endl;
@@ -122,7 +122,7 @@ class callback : public virtual mqtt::callback,
 	virtual void delivery_complete(mqtt::idelivery_token_ptr token) {}
 
 public:
-	callback(mqtt::async_client& cli, mqtt::connect_options& connOpts) 
+	callback(mqtt::async_client& cli, mqtt::connect_options& connOpts)
 				: nretry_(0), cli_(cli), connOpts_(connOpts), subListener_("Subscription") {}
 };
 

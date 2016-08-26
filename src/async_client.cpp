@@ -1,15 +1,15 @@
 // async_client.cpp
 
 /*******************************************************************************
- * Copyright (c) 2013-14 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
@@ -31,26 +31,26 @@ namespace mqtt {
 /////////////////////////////////////////////////////////////////////////////
 
 async_client::async_client(const std::string& serverURI, const std::string& clientId)
-				: serverURI_(serverURI), clientId_(clientId), 
+				: serverURI_(serverURI), clientId_(clientId),
 					persist_(nullptr), userCallback_(nullptr)
 {
 	MQTTAsync_create(&cli_, serverURI.c_str(), clientId.c_str(),
 					 MQTTCLIENT_PERSISTENCE_DEFAULT, nullptr);
 }
 
-	
+
 async_client::async_client(const std::string& serverURI, const std::string& clientId,
 						   const std::string& persistDir)
-				: serverURI_(serverURI), clientId_(clientId), 
+				: serverURI_(serverURI), clientId_(clientId),
 					persist_(nullptr), userCallback_(nullptr)
 {
 	MQTTAsync_create(&cli_, serverURI.c_str(), clientId.c_str(),
 					 MQTTCLIENT_PERSISTENCE_DEFAULT, const_cast<char*>(persistDir.c_str()));
 }
 
-async_client::async_client(const std::string& serverURI, const std::string& clientId, 
+async_client::async_client(const std::string& serverURI, const std::string& clientId,
 						   iclient_persistence* persistence)
-				: serverURI_(serverURI), clientId_(clientId), 
+				: serverURI_(serverURI), clientId_(clientId),
 					persist_(nullptr), userCallback_(nullptr)
 {
 	if (!persistence) {
@@ -87,7 +87,7 @@ async_client::~async_client()
 // 'context' should be the address of the async_client object that
 // registered the callback.
 
-void async_client::on_connection_lost(void *context, char *cause) 
+void async_client::on_connection_lost(void *context, char *cause)
 {
 	if (context) {
 		async_client* cli = static_cast<async_client*>(context);
@@ -97,7 +97,7 @@ void async_client::on_connection_lost(void *context, char *cause)
 	}
 }
 
-int async_client::on_message_arrived(void* context, char* topicName, int topicLen, 
+int async_client::on_message_arrived(void* context, char* topicName, int topicLen,
 									 MQTTAsync_message* msg)
 {
 	if (context) {
@@ -105,7 +105,7 @@ int async_client::on_message_arrived(void* context, char* topicName, int topicLe
 		callback* cb = cli->get_callback();
 		if (cb) {
 			std::string topic(topicName, topicName+topicLen);
-			message_ptr m = std::make_shared<message>(*msg);
+			const_message_ptr m = std::make_shared<message>(*msg);
 			cb->message_arrived(topic, m);
 		}
 	}
@@ -122,13 +122,13 @@ int async_client::on_message_arrived(void* context, char* topicName, int topicLe
 // It is called for a message with a QOS >= 1, but it happens before the
 // on_success() call for the token. Thus we don't have the underlying
 // MQTTAsync_token of the outgoing message at the time of this callback.
-// 
+//
 // *** So using the Async C library we have no way to match this msgID with
 //     a delivery_token object. So this is useless to us.
-// 
+//
 // So, all in all, this callback in it's current implementation seems rather
 // redundant.
-// 
+//
 #if 0
 void async_client::on_delivery_complete(void* context, MQTTAsync_token msgID)
 {
@@ -171,17 +171,17 @@ void async_client::remove_token(itoken* tok)
 		return;
 
 	guard g(lock_);
-	for (auto p=pendingDeliveryTokens_.begin(); 
-		  p!=pendingDeliveryTokens_.end(); ++p) {
+	for (auto p=pendingDeliveryTokens_.begin();
+					p!=pendingDeliveryTokens_.end(); ++p) {
 		if (p->get() == tok) {
 			idelivery_token_ptr dtok = *p;
 			pendingDeliveryTokens_.erase(p);
 
-			// If there's a user callback registered, we can now call 
+			// If there's a user callback registered, we can now call
 			// delivery_complete()
 
 			if (userCallback_) {
-				message_ptr msg = dtok->get_message();
+				const_message_ptr msg = dtok->get_message();
 				if (msg && msg->get_qos() > 0) {
 					callback* cb = userCallback_;
 					g.unlock();
@@ -220,13 +220,13 @@ void async_client::free_topic_filters(std::vector<char*>& filts)
 // --------------------------------------------------------------------------
 // Connect
 
-itoken_ptr async_client::connect() throw(exception, security_exception)
+itoken_ptr async_client::connect()
 {
 	connect_options opts;
 	return connect(opts);
 }
 
-itoken_ptr async_client::connect(connect_options opts) throw(exception, security_exception)
+itoken_ptr async_client::connect(connect_options opts)
 {
 	token* ctok = new token(*this);
 	itoken_ptr tok = itoken_ptr(ctok);
@@ -246,8 +246,8 @@ itoken_ptr async_client::connect(connect_options opts) throw(exception, security
 	return tok;
 }
 
-itoken_ptr async_client::connect(connect_options opts, void* userContext, 
-								 iaction_listener& cb) throw(exception, security_exception)
+itoken_ptr async_client::connect(connect_options opts, void* userContext,
+								 iaction_listener& cb)
 {
 	token* ctok = new token(*this);
 	itoken_ptr tok = itoken_ptr(ctok);
@@ -271,7 +271,6 @@ itoken_ptr async_client::connect(connect_options opts, void* userContext,
 }
 
 itoken_ptr async_client::connect(void* userContext, iaction_listener& cb)
-							 throw(exception, security_exception)
 {
 	connect_options opts;
 	opts.opts_.keepAliveInterval = 30;
@@ -282,7 +281,7 @@ itoken_ptr async_client::connect(void* userContext, iaction_listener& cb)
 // --------------------------------------------------------------------------
 // Disconnect
 
-itoken_ptr async_client::disconnect(long timeout) throw(exception)
+itoken_ptr async_client::disconnect(long timeout)
 {
 	token* ctok = new token(*this);
 	itoken_ptr tok = itoken_ptr(ctok);
@@ -307,7 +306,6 @@ itoken_ptr async_client::disconnect(long timeout) throw(exception)
 }
 
 itoken_ptr async_client::disconnect(long timeout, void* userContext, iaction_listener& cb)
-							 throw(exception)
 {
 	token* ctok = new token(*this);
 	itoken_ptr tok = itoken_ptr(ctok);
@@ -362,32 +360,23 @@ std::vector<idelivery_token_ptr> async_client::get_pending_delivery_tokens() con
 // --------------------------------------------------------------------------
 // Publish
 
-idelivery_token_ptr async_client::publish(const std::string& topic, const void* payload, 
+idelivery_token_ptr async_client::publish(const std::string& topic, const void* payload,
 										  size_t n, int qos, bool retained)
-						throw(exception)			 
 {
-	message_ptr msg = std::make_shared<message>(payload, n);
-	msg->set_qos(qos);
-	msg->set_retained(retained);
-
+	const_message_ptr msg = make_message(payload, n, qos, retained);
 	return publish(topic, msg);
 }
 
-idelivery_token_ptr async_client::publish(const std::string& topic, 
+idelivery_token_ptr async_client::publish(const std::string& topic,
 										  const void* payload, size_t n,
-										  int qos, bool retained, void* userContext, 
+										  int qos, bool retained, void* userContext,
 										  iaction_listener& cb)
-						throw(exception)
 {
-	message_ptr msg = std::make_shared<message>(payload, n);
-	msg->set_qos(qos);
-	msg->set_retained(retained);
-
+	const_message_ptr msg = make_message(payload, n, qos, retained);
 	return publish(topic, msg, userContext, cb);
 }
 
-idelivery_token_ptr async_client::publish(const std::string& topic, message_ptr msg)
-						throw(exception)			 
+idelivery_token_ptr async_client::publish(const std::string& topic, const_message_ptr msg)
 {
 	delivery_token* dtok = new delivery_token(*this, topic);
 	idelivery_token_ptr tok = idelivery_token_ptr(dtok);
@@ -410,9 +399,8 @@ idelivery_token_ptr async_client::publish(const std::string& topic, message_ptr 
 	return tok;
 }
 
-idelivery_token_ptr async_client::publish(const std::string& topic, message_ptr msg, 
+idelivery_token_ptr async_client::publish(const std::string& topic, const_message_ptr msg,
 										  void* userContext, iaction_listener& cb)
-						throw(exception)			 
 {
 	delivery_token* dtok = new delivery_token(*this, topic);
 	idelivery_token_ptr tok = idelivery_token_ptr(dtok);
@@ -439,14 +427,14 @@ idelivery_token_ptr async_client::publish(const std::string& topic, message_ptr 
 
 // --------------------------------------------------------------------------
 
-void async_client::set_callback(callback& cb) throw(exception)
+void async_client::set_callback(callback& cb)
 {
 	guard g(lock_);
 	userCallback_ = &cb;
 
-	int rc = MQTTAsync_setCallbacks(cli_, this, 
-									&async_client::on_connection_lost, 
-									&async_client::on_message_arrived, 
+	int rc = MQTTAsync_setCallbacks(cli_, this,
+									&async_client::on_connection_lost,
+									&async_client::on_message_arrived,
 									nullptr /*&async_client::on_delivery_complete*/);
 
 	if (rc != MQTTASYNC_SUCCESS)
@@ -456,10 +444,9 @@ void async_client::set_callback(callback& cb) throw(exception)
 // --------------------------------------------------------------------------
 // Subscribe
 
-itoken_ptr async_client::subscribe(const topic_filter_collection& topicFilters, 
+itoken_ptr async_client::subscribe(const topic_filter_collection& topicFilters,
 								   const qos_collection& qos)
-						throw(std::invalid_argument,exception)
-		   
+
 {
 	if (topicFilters.size() != qos.size())
 		throw std::invalid_argument("Collection sizes don't match");
@@ -487,10 +474,9 @@ itoken_ptr async_client::subscribe(const topic_filter_collection& topicFilters,
 	return tok;
 }
 
-itoken_ptr async_client::subscribe(const topic_filter_collection& topicFilters, 
-								   const qos_collection& qos, 
+itoken_ptr async_client::subscribe(const topic_filter_collection& topicFilters,
+								   const qos_collection& qos,
 								   void* userContext, iaction_listener& cb)
-						throw(std::invalid_argument,exception)
 {
 	if (topicFilters.size() != qos.size())
 		throw std::invalid_argument("Collection sizes don't match");
@@ -524,7 +510,6 @@ itoken_ptr async_client::subscribe(const topic_filter_collection& topicFilters,
 }
 
 itoken_ptr async_client::subscribe(const std::string& topicFilter, int qos)
-						throw(exception)			 
 {
 	token* stok = new token(*this, topicFilter);
 	itoken_ptr tok = itoken_ptr(stok);
@@ -545,9 +530,8 @@ itoken_ptr async_client::subscribe(const std::string& topicFilter, int qos)
 	return tok;
 }
 
-itoken_ptr async_client::subscribe(const std::string& topicFilter, int qos, 
+itoken_ptr async_client::subscribe(const std::string& topicFilter, int qos,
 								   void* userContext, iaction_listener& cb)
-						throw(exception)			 
 {
 	token* stok = new token(*this, topicFilter);
 	itoken_ptr tok = itoken_ptr(stok);
@@ -575,7 +559,6 @@ itoken_ptr async_client::subscribe(const std::string& topicFilter, int qos,
 // Unsubscribe
 
 itoken_ptr async_client::unsubscribe(const std::string& topicFilter)
-						throw(exception)			 
 {
 	token* stok = new token(*this, topicFilter);
 	itoken_ptr tok = itoken_ptr(stok);
@@ -597,7 +580,6 @@ itoken_ptr async_client::unsubscribe(const std::string& topicFilter)
 }
 
 itoken_ptr async_client::unsubscribe(const topic_filter_collection& topicFilters)
-						throw(exception)			 
 {
 	size_t n = topicFilters.size();
 	std::vector<char*> filts = alloc_topic_filters(topicFilters);
@@ -622,9 +604,8 @@ itoken_ptr async_client::unsubscribe(const topic_filter_collection& topicFilters
 	return tok;
 }
 
-itoken_ptr async_client::unsubscribe(const topic_filter_collection& topicFilters, 
+itoken_ptr async_client::unsubscribe(const topic_filter_collection& topicFilters,
 									 void* userContext, iaction_listener& cb)
-						throw(exception)			 
 {
 	size_t n = topicFilters.size();
 	std::vector<char*> filts = alloc_topic_filters(topicFilters);
@@ -652,9 +633,8 @@ itoken_ptr async_client::unsubscribe(const topic_filter_collection& topicFilters
 	return tok;
 }
 
-itoken_ptr async_client::unsubscribe(const std::string& topicFilter, 
+itoken_ptr async_client::unsubscribe(const std::string& topicFilter,
 									 void* userContext, iaction_listener& cb)
-						throw(exception)				
 {
 	token* utok = new token(*this, topicFilter);
 	itoken_ptr tok = itoken_ptr(utok);

@@ -3,7 +3,7 @@
 /// Declaration of MQTT ssl_options class
 /// @date Jul 7, 2016
 /// @author Guilherme Ferreira
-/////////////////////////////////////////////////////////////////////////////  
+/////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
  * Copyright (c) 2016 Guilherme Ferreira <guilherme.maciel.ferreira@gmail.com>
@@ -19,6 +19,7 @@
  *
  * Contributors:
  *    Guilherme Ferreira - initial implementation and documentation
+ *    Frank Pagliughi - added copy & move operations
  *******************************************************************************/
 
 #ifndef __mqtt_ssl_options_h
@@ -45,93 +46,6 @@ class connect_options;
  */
 class ssl_options
 {
-public:
-	/**
-	 * Smart/shared pointer to this class.
-	 */
-	typedef std::shared_ptr<ssl_options> ptr_t;
-	/**
-	 * Constructs a new MqttConnectOptions object using the default values.
-	 */
-	ssl_options();
-
-	/**
-	 * Returns the file containing the public digital certificates trusted by
-	 * the client.
-	 * @return std::string
-	 */
-	std::string get_trust_store() const;
-
-	/**
-	 * Returns the file containing the public certificate chain of the client.
-	 * @return std::string
-	 */
-	std::string get_key_store() const;
-
-	/**
-	 * Returns the file containing the client's private key.
-	 * @return std::string
-	 */
-	std::string get_private_key() const;
-
-	/**
-	 * Returns the password to load the client's privateKey if encrypted.
-	 * @return std::string
-	 */
-	std::string get_private_key_password() const;
-
-	/**
-	 * Returns the list of cipher suites that the client will present to the
-	 * server during the SSL handshake.
-	 * @return std::string
-	 */
-	std::string get_enabled_cipher_suites() const;
-
-	/**
-	 * Returns the true/false to enable verification of the server certificate .
-	 * @return bool
-	 */
-	bool get_enable_server_cert_auth() const;
-
-	/**
-	 * Sets the file containing the public digital certificates trusted by
-	 * the client.
-	 * @param trustStore
-	 */
-	void set_trust_store(const std::string& trustStore);
-
-	/**
-	 * Sets the file containing the public certificate chain of the client.
-	 * @param keyStore
-	 */
-	void set_key_store(const std::string& keyStore);
-
-	/**
-	 * Sets the file containing the client's private key.
-	 * @param privateKey
-	 */
-	void set_private_key(const std::string& privateKey) ;
-
-	/**
-	 * Sets the password to load the client's privateKey if encrypted.
-	 * @param privateKeyPassword
-	 */
-	void set_private_key_password(const std::string& privateKeyPassword) ;
-
-	/**
-	 * Sets the list of cipher suites that the client will present to the server
-	 * during the SSL handshake.
-	 * @param enabledCipherSuites
-	 */
-	void set_enabled_cipher_suites(const std::string& enabledCipherSuites);
-
-	/**
-	 * Sets the if it's to enable verification of the server certificate.
-	 * @param enablServerCertAuth
-	 */
-	void set_enable_server_cert_auth(bool enablServerCertAuth);
-
-private:
 	/** The underlying C SSL options */
 	MQTTAsync_SSLOptions opts_;
 
@@ -158,12 +72,116 @@ private:
 
 	/** The connect options has special access */
 	friend class connect_options;
+
+public:
+	/** Smart/shared pointer to an object of this class. */
+	using ptr_t = std::shared_ptr<ssl_options>;
+	/** Smart/shared pointer to a const object of this class. */
+	using const_ptr_t = std::shared_ptr<const ssl_options>;
+
+	/**
+	 * Constructs a new MqttConnectOptions object using the default values.
+	 */
+	ssl_options();
+	/**
+	 * Copy constructor.
+	 * @param opt The other options to copy.
+	 */
+	ssl_options(const ssl_options& opt);
+	/**
+	 * Move constructor.
+	 * @param opt The other options to move to this one.
+	 */
+	ssl_options(ssl_options&& opt);
+	/**
+	 * Copy assignment.
+	 * @param opt The other options to copy.
+	 * @return A reference to this object.
+	 */
+	ssl_options& operator=(const ssl_options& opt);
+	/**
+	 * Move assignment.
+	 * @param opt The other options to move to this one.
+	 * @return A reference to this object.
+	 */
+	ssl_options& operator=(ssl_options&& opt);
+	/**
+	 * Returns the file containing the public digital certificates trusted by
+	 * the client.
+	 * @return std::string
+	 */
+	std::string get_trust_store() const { return trustStore_; }
+	/**
+	 * Returns the file containing the public certificate chain of the client.
+	 * @return std::string
+	 */
+	std::string get_key_store() const { return keyStore_; }
+	/**
+	 * Returns the file containing the client's private key.
+	 * @return std::string
+	 */
+	std::string get_private_key() const { return privateKey_; }
+	/**
+	 * Returns the password to load the client's privateKey if encrypted.
+	 * @return std::string
+	 */
+	std::string get_private_key_password() const { return privateKeyPassword_; }
+	/**
+	 * Returns the list of cipher suites that the client will present to the
+	 * server during the SSL handshake.
+	 * @return std::string
+	 */
+	std::string get_enabled_cipher_suites() const { return enabledCipherSuites_; }
+	/**
+	 * Returns the true/false to enable verification of the server certificate .
+	 * @return bool
+	 */
+	bool get_enable_server_cert_auth() const {
+		return opts_.enableServerCertAuth != 0;
+	}
+	/**
+	 * Sets the file containing the public digital certificates trusted by
+	 * the client.
+	 * @param trustStore
+	 */
+	void set_trust_store(const std::string& trustStore);
+
+	/**
+	 * Sets the file containing the public certificate chain of the client.
+	 * @param keyStore
+	 */
+	void set_key_store(const std::string& keyStore);
+
+	/**
+	 * Sets the file containing the client's private key.
+	 * @param privateKey
+	 */
+	void set_private_key(const std::string& privateKey);
+
+	/**
+	 * Sets the password to load the client's privateKey if encrypted.
+	 * @param privateKeyPassword
+	 */
+	void set_private_key_password(const std::string& privateKeyPassword);
+
+	/**
+	 * Sets the list of cipher suites that the client will present to the server
+	 * during the SSL handshake.
+	 * @param enabledCipherSuites
+	 */
+	void set_enabled_cipher_suites(const std::string& enabledCipherSuites);
+
+	/**
+	 * Sets the if it's to enable verification of the server certificate.
+	 * @param enablServerCertAuth
+	 */
+	void set_enable_server_cert_auth(bool enablServerCertAuth);
 };
 
 /**
  * Shared pointer to the ssl options class.
  */
-typedef ssl_options::ptr_t ssl_options_ptr;
+using ssl_options_ptr = ssl_options::ptr_t;
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt

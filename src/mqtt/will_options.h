@@ -19,6 +19,7 @@
  *
  * Contributors:
  *    Guilherme M. Ferreira - initial implementation and documentation
+ *    Frank Pagliughi - added copy & move operations
  *******************************************************************************/
 
 #ifndef __mqtt_will_options_h
@@ -44,34 +45,28 @@ class connect_options;
  */
 class will_options
 {
-public:
+	/** The underlying C LWT options */
+	MQTTAsync_willOptions opts_;
 
-	/**
-	 * Smart/shared pointer to this class.
-	 */
-	typedef std::shared_ptr<will_options> ptr_t;
+	/** LWT message topic **/
+	std::string topic_;
+
+	/** LWT message text */
+	std::string payload_;
+
+	/** The connect options has special access */
+	friend class connect_options;
+
+public:
+	/** Smart/shared pointer to this class. */
+	using ptr_t = std::shared_ptr<will_options>;
+	/** Smart/shared pointer to a const object of this class. */
+	using const_ptr_t = std::shared_ptr<const will_options>;
 
 	/**
 	 * Constructs a new object using the default values.
 	 */
 	will_options();
-
-	/**
-	 * Sets the "Last Will and Testament" (LWT) for the connection.
-	 * @param top The LWT message is published to the this topic.
-	 * @param payload The message that is published to the Will Topic.
-	 * @param payload_len The message size in bytes.
-	 * @param qos The message Quality of Service.
-	 * @param retained Tell the broker to keep the LWT message after send to subscribers.
-	 */
-	will_options(
-		const topic& top,
-		const void *payload,
-		const size_t payload_len,
-		const int qos,
-		const bool retained
-	);
-
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
 	 * @param top The LWT message is published to the this topic.
@@ -83,108 +78,125 @@ public:
 	will_options(
 		const std::string& top,
 		const void *payload,
-		const size_t payload_len,
-		const int qos,
-		const bool retained
+		size_t payload_len,
+		int qos,
+		bool retained
 	);
-
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
 	 * @param top The LWT message is published to the this topic.
-	 * @param msg The message that is published to the Will Topic.
+	 * @param payload The message that is published to the Will Topic.
+	 * @param payload_len The message size in bytes.
+	 * @param qos The message Quality of Service.
+	 * @param retained Tell the broker to keep the LWT message after send to subscribers.
+	 */
+	will_options(
+		const topic& top,
+		const void *payload,
+		size_t payload_len,
+		int qos,
+		bool retained
+	);
+	/**
+	 * Sets the "Last Will and Testament" (LWT) for the connection.
+	 * @param top The LWT message is published to the this topic.
+	 * @param payload The message payload that is published to the Will
+	 *  			  Topic.
 	 * @param qos The message Quality of Service.
 	 * @param retained Tell the broker to keep the LWT message after send to subscribers.
 	 */
 	will_options(
 		const std::string& top,
-		const message_ptr msg,
-		const int qos,
-		const bool retained
+		const std::string& payload,
+		int qos,
+		bool retained
 	);
-
 	/**
-	 * Destructor
+	 * Sets the "Last Will and Testament" (LWT) for the connection.
+	 * @param top The LWT message is published to the this topic.
+	 * @param msg The message that is published to the Will Topic.
 	 */
-	virtual ~will_options();
-
+	will_options(
+		const std::string& top,
+		const message& msg
+	);
+	/**
+	 * Copy constructor for the LWT options.
+	 * @param opt The other options.
+	 */
+	will_options(const will_options& opt);
+	/**
+	 * Move constructor for the LWT options.
+	 * @param opt The other options.
+	 */
+	will_options(will_options&& opt);
+	/**
+	 * Copy assignment for the LWT options.
+	 * @param opt The other options.
+	 */
+	will_options& operator=(const will_options& opt);
+	/**
+	 * Move assignment for the LWT options.
+	 * @param opt The other options.
+	 */
+	will_options& operator=(will_options&& opt);
 	/**
 	 * Returns the LWT message topic name.
 	 * @return std::string
 	 */
-	std::string get_topic() const {
-		return std::string(opts_.topicName);
-	}
-
+	std::string get_topic() const { return topic_; }
 	/**
-	 * Returns the LWT message text.
-	 * @return std::string
+	 * Returns the LWT message payload.
+	 * @return The LWT message payload.
 	 */
-	std::string get_message() const {
-		return std::string(opts_.message);
-	}
-
+	std::string get_payload() const { return payload_; }
 	/**
-	 * Returns QoS value.
-	 * @return int
+	 * Gets the QoS value for the LWT message.
+	 * @return The QoS value for the LWT message.
 	 */
-	int get_qos() const {
-		return opts_.qos;
-	}
-
+	int get_qos() const { return opts_.qos; }
 	/**
-	 * Returns retained flag.
-	 * @return int
+	 * Gets the 'retained' flag for the LWT message.
+	 * @return The 'retained' flag for the LWT message.
 	 */
-	int get_retained() const {
-		return opts_.retained;
+	int is_retained() const { return opts_.retained; }
+	/**
+	 * Gets the LWT message.
+	 * Note that this is a const pointer to a copy of the message, not to
+	 * the message itself.
+	 * @return A copy of the LWT message.
+	 */
+	const_message_ptr get_message() const {
+		return make_message(payload_, opts_.qos, opts_.retained);
 	}
-
 	/**
 	 * Sets the LWT message topic name.
 	 * @param top The topic where to sent the message
 	 */
 	void set_topic(const std::string& top);
-
 	/**
 	 * Sets the LWT message text.
 	 * @param msg The LWT message
 	 */
-	void set_message(const std::string& msg);
-
+	void set_payload(const std::string& msg);
 	/**
 	 * Sets the QoS value.
 	 * @param qos The LWT message QoS
 	 */
-	void set_qos(const int qos) {
-		opts_.qos = qos;
-	}
-
+	void set_qos(const int qos) { opts_.qos = qos; }
 	/**
 	 * Sets the retained flag.
-	 * @param retained Tell the broker to keep the LWT message after send to subscribers.
+	 * @param retained Tell the broker to keep the LWT message after send to
+	 *  			   subscribers.
 	 */
-	void set_retained(const int retained) {
-		opts_.retained = retained;
-	}
-
-private:
-	/** The underlying C LWT options */
-	MQTTAsync_willOptions opts_;
-
-	/** LWT message topic **/
-	std::string topic_;
-
-	/** LWT message text */
-	std::string message_;
-
-	/** The connect options has special access */
-	friend class connect_options;
+	void set_retained(const int retained) { opts_.retained = retained; }
 };
 
-/**
- * Shared pointer to the will options class.
- */
-typedef will_options::ptr_t will_options_ptr;
+/** Shared pointer to a will options object. */
+using will_options_ptr = will_options::ptr_t;
+
+/** Shared pointer to a const will options object. */
+using const_will_options_ptr = will_options::const_ptr_t;
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt

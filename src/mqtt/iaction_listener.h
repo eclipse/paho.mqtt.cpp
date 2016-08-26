@@ -1,20 +1,20 @@
 /////////////////////////////////////////////////////////////////////////////
-/// @file iaction_listener.h 
-/// Declaration of MQTT iaction_listener class 
-/// @date May 1, 2013 
-/// @author Frank Pagliughi 
-/////////////////////////////////////////////////////////////////////////////  
+/// @file iaction_listener.h
+/// Declaration of MQTT iaction_listener class
+/// @date May 1, 2013
+/// @author Frank Pagliughi
+/////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
@@ -33,15 +33,15 @@ extern "C" {
 #include <memory>
 
 namespace mqtt {
-	
+
 class itoken;
- 	
-/////////////////////////////////////////////////////////////////////////////  
+
+/////////////////////////////////////////////////////////////////////////////
 
 /**
- * Provides a mechanism for tracking the completion of an asynchronous 
- * action. 
- *  
+ * Provides a mechanism for tracking the completion of an asynchronous
+ * action.
+ *
  * A listener is registered on a token and that token is associated with
  * an action like connect or publish. When used with tokens on the
  * async_client the listener will be called back on the MQTT client's
@@ -52,28 +52,34 @@ class itoken;
 class iaction_listener
 {
 public:
-	/**
-	 * Shared pointer to this class.
-	 */
-	typedef std::shared_ptr<iaction_listener> ptr_t;
+	/** Smart/shared pointer to an object of this class. */
+	using ptr_t = std::shared_ptr<iaction_listener>;
+	/** Smart/shared pointer to a const object of this class. */
+	using const_ptr_t = std::shared_ptr<const iaction_listener>;
+
 	/**
 	 * Virtual base destructor.
 	 */
 	virtual ~iaction_listener() {}
 	/**
-	 * This method is invoked when an action fails. 
-	 * @param asyncActionToken 
-	 * @param exc 
+	 * This method is invoked when an action fails.
+	 * @param asyncActionToken
+	 * @param exc
 	 */
 	virtual void on_failure(const itoken& asyncActionToken /*, java.lang.Throwable exc*/) =0;
 	/**
-	 * This method is invoked when an action has completed successfully. 
-	 * @param asyncActionToken 
+	 * This method is invoked when an action has completed successfully.
+	 * @param asyncActionToken
 	 */
 	virtual void on_success(const itoken& asyncActionToken) =0;
 };
 
-typedef iaction_listener::ptr_t iaction_listener_ptr;
+/** Smart/shared pointer to an action listener */
+using iaction_listener_ptr = iaction_listener::ptr_t;
+
+/** Smart/shared pointer to a const action listener */
+using const_iaction_listener_ptr = iaction_listener::const_ptr_t;
+
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt

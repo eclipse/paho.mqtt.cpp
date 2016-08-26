@@ -21,20 +21,18 @@ namespace mqtt {
 /////////////////////////////////////////////////////////////////////////////
 
 connect_options::connect_options()
-: opts_( MQTTAsync_connectOptions_initializer )
+		: opts_(MQTTAsync_connectOptions_initializer)
 {
 	opts_.will = nullptr;
 	opts_.ssl = nullptr;
 }
 
-std::string connect_options::get_will_topic() const
+connect_options::connect_options(const std::string& userName, const std::string& password)
+		: opts_(MQTTAsync_connectOptions_initializer),
+			userName_(userName), password_(password)
 {
-	return will_.get_topic();
-}
-
-message connect_options::get_will_message() const
-{
-	return message(will_.get_message());
+	opts_.will = nullptr;
+	opts_.ssl = nullptr;
 }
 
 void connect_options::set_password(const std::string& password)
@@ -51,23 +49,13 @@ void connect_options::set_user_name(const std::string& userName)
 
 void connect_options::set_will(const will_options& will)
 {
-	will_.set_topic(will.get_topic());
-	will_.set_message(will.get_message());
-	will_.set_qos(will.get_qos());
-	will_.set_retained(will.get_retained());
-
+	will_ = will;
 	opts_.will = &will_.opts_;
 }
 
 void connect_options::set_ssl(const ssl_options& ssl)
 {
-	ssl_.set_trust_store(ssl.get_trust_store());
-	ssl_.set_key_store(ssl.get_key_store());
-	ssl_.set_private_key(ssl.get_private_key());
-	ssl_.set_private_key_password(ssl.get_private_key_password());
-	ssl_.set_enabled_cipher_suites(ssl.get_enabled_cipher_suites());
-	ssl_.set_enable_server_cert_auth(ssl.get_enable_server_cert_auth());
-
+	ssl_ = ssl;
 	opts_.ssl = &ssl_.opts_;
 }
 

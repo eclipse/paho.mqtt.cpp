@@ -1,13 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2013 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
@@ -31,7 +31,8 @@ const char* PAYLOAD1 = "Hello World!";
 const char* PAYLOAD2 = "Hi there!";
 const char* PAYLOAD3 = "Is anyone listening?";
 const char* PAYLOAD4 = "Someone is always listening.";
-const char* PAYLOAD5 = "Last will and testament.";
+
+const char* LWT_PAYLOAD = "Last will and testament.";
 
 const int  QOS = 1;
 const long TIMEOUT = 10000L;
@@ -55,10 +56,10 @@ public:
 	}
 
 	// We're not subscribed to anything, so this should never be called.
-	virtual void message_arrived(const std::string& topic, mqtt::message_ptr msg) {}
+	virtual void message_arrived(const std::string& topic, mqtt::const_message_ptr msg) {}
 
 	virtual void delivery_complete(mqtt::idelivery_token_ptr tok) {
-		std::cout << "Delivery complete for token: " 
+		std::cout << "Delivery complete for token: "
 			<< (tok ? tok->get_message_id() : -1) << std::endl;
 	}
 };
@@ -72,12 +73,12 @@ class action_listener : public virtual mqtt::iaction_listener
 {
 protected:
 	virtual void on_failure(const mqtt::itoken& tok) {
-		std::cout << "\n\tListener: Failure on token: " 
+		std::cout << "\n\tListener: Failure on token: "
 			<< tok.get_message_id() << std::endl;
 	}
 
 	virtual void on_success(const mqtt::itoken& tok) {
-		std::cout << "\n\tListener: Success on token: " 
+		std::cout << "\n\tListener: Success on token: "
 			<< tok.get_message_id() << std::endl;
 	}
 };
@@ -113,49 +114,54 @@ int main(int argc, char* argv[])
 	std::string address  = (argc > 1) ? std::string(argv[1]) : DFLT_ADDRESS,
 				clientID = (argc > 1) ? std::string(argv[2]) : DFLT_CLIENTID;
 
+	std::cout << "Initializing..." << std::endl;
 	mqtt::async_client client(address, clientID);
-	
+
 	callback cb;
 	client.set_callback(cb);
 
+	mqtt::connect_options conopts;
+	mqtt::message willmsg(LWT_PAYLOAD, 1, true);
+	mqtt::will_options will(TOPIC, willmsg);
+	conopts.set_will(will);
+
+	std::cout << "...OK" << std::endl;
+
 	try {
-		mqtt::connect_options conopts;
-		mqtt::message_ptr willmsg = mqtt::make_message(PAYLOAD5);
-		mqtt::will_options will(TOPIC, willmsg, 1, true);
-		conopts.set_will(will);
+		std::cout << "\nConnecting..." << std::endl;
 		mqtt::itoken_ptr conntok = client.connect(conopts);
-		std::cout << "Waiting for the connection..." << std::flush;
+		std::cout << "Waiting for the connection..." << std::endl;
 		conntok->wait_for_completion();
-		std::cout << "OK" << std::endl;
+		std::cout << "...OK" << std::endl;
 
 		// First use a message pointer.
 
-		std::cout << "Sending message..." << std::flush;
+		std::cout << "\nSending message..." << std::endl;
 		mqtt::message_ptr pubmsg = mqtt::make_message(PAYLOAD1);
 		pubmsg->set_qos(QOS);
 		client.publish(TOPIC, pubmsg)->wait_for_completion(TIMEOUT);
-		std::cout << "OK" << std::endl;
+		std::cout << "...OK" << std::endl;
 
 		// Now try with itemized publish.
 
-		std::cout << "Sending next message..." << std::flush;
+		std::cout << "\nSending next message..." << std::endl;
 		mqtt::idelivery_token_ptr pubtok;
 		pubtok = client.publish(TOPIC, PAYLOAD2, std::strlen(PAYLOAD2), QOS, false);
 		pubtok->wait_for_completion(TIMEOUT);
-		std::cout << "OK" << std::endl;
+		std::cout << "...OK" << std::endl;
 
 		// Now try with a listener
 
-		std::cout << "Sending next message..." << std::flush;
+		std::cout << "\nSending next message..." << std::endl;
 		action_listener listener;
 		pubmsg = mqtt::make_message(PAYLOAD3);
 		pubtok = client.publish(TOPIC, pubmsg, nullptr, listener);
 		pubtok->wait_for_completion();
-		std::cout << "OK" << std::endl;
+		std::cout << "...OK" << std::endl;
 
 		// Finally try with a listener, but no token
 
-		std::cout << "Sending final message..." << std::flush;
+		std::cout << "\nSending final message..." << std::endl;
 		delivery_action_listener deliveryListener;
 		pubmsg = mqtt::make_message(PAYLOAD4);
 		client.publish(TOPIC, pubmsg, nullptr, deliveryListener);
@@ -172,10 +178,10 @@ int main(int argc, char* argv[])
 			std::cout << "Error: There are pending delivery tokens!" << std::endl;
 
 		// Disconnect
-		std::cout << "Disconnecting..." << std::flush;
+		std::cout << "\nDisconnecting..." << std::endl;
 		conntok = client.disconnect();
 		conntok->wait_for_completion();
-		std::cout << "OK" << std::endl;
+		std::cout << "...OK" << std::endl;
 	}
 	catch (const mqtt::exception& exc) {
 		std::cerr << "Error: " << exc.what() << std::endl;

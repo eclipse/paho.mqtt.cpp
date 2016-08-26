@@ -1,20 +1,20 @@
 /////////////////////////////////////////////////////////////////////////////
-/// @file iclient_persistence.h 
+/// @file iclient_persistence.h
 /// Declaration of MQTT iclient_persistence interface
-/// @date May 1, 2013 
-/// @author Frank Pagliughi 
-/////////////////////////////////////////////////////////////////////////////  
+/// @date May 1, 2013
+/// @author Frank Pagliughi
+/////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
@@ -31,7 +31,7 @@ extern "C" {
 #include "mqtt/ipersistable.h"
 #include <string>
 #include <memory>
-#include <vector> 
+#include <vector>
 
 namespace mqtt {
 
@@ -62,7 +62,7 @@ public:
 
 	/** C-callbacks  */
 	static int persistence_open(void** handle, const char* clientID, const char* serverURI, void* context);
-	static int persistence_close(void* handle); 
+	static int persistence_close(void* handle);
 	static int persistence_put(void* handle, char* key, int bufcount, char* buffers[], int buflens[]);
 	static int persistence_get(void* handle, char* key, char** buffer, int* buflen);
 	static int persistence_remove(void* handle, char* key);
@@ -71,17 +71,18 @@ public:
 	static int persistence_containskey(void* handle, char* key);
 
 public:
-	/**
-	 * Smart/shared pointer to this class.
-	 */
-	typedef std::shared_ptr<iclient_persistence> ptr_t;
+	/** Smart/shared pointer to an object of this class. */
+	using ptr_t = std::shared_ptr<iclient_persistence>;
+	/** Smart/shared pointer to a const object of this class. */
+	using const_ptr_t = std::shared_ptr<const iclient_persistence>;
+
 	/**
 	 * Virtual destructor.
 	 */
 	virtual ~iclient_persistence() {}
-	/** 
+	/**
 	 * Initialise the persistent store.
-	 */          
+	 */
 	virtual void open(const std::string& clientId, const std::string& serverURI) =0;
 	/**
 	 * Close the persistent store that was previously opened.
@@ -92,15 +93,15 @@ public:
 	 */
 	virtual void clear() =0;
 	/**
-	 * Returns whether or not data is persisted using the specified key. 
-	 * @param key 
-	 * @return bool 
+	 * Returns whether or not data is persisted using the specified key.
+	 * @param key
+	 * @return bool
 	 */
 	virtual bool contains_key(const std::string& key) =0;
 	/**
 	 * Gets the specified data out of the persistent store.
-	 * @param key 
-	 * @return persistable 
+	 * @param key
+	 * @return persistable
 	 */
 	virtual ipersistable_ptr get(const std::string& key) const =0;
 	/**
@@ -109,21 +110,22 @@ public:
 	virtual std::vector<std::string> keys() const =0;
 	/**
 	 * Puts the specified data into the persistent store.
-	 * @param key 
-	 * @param persistable 
+	 * @param key
+	 * @param persistable
 	 */
 	virtual void put(const std::string& key, ipersistable_ptr persistable) =0;
 	/**
-	 * Remove the data for the specified key. 
-	 * @param key 
+	 * Remove the data for the specified key.
+	 * @param key
 	 */
 	virtual void remove(const std::string& key) =0;
 };
 
-/**
- * Shared pointer to a persistence client.
- */
-typedef std::shared_ptr<iclient_persistence> iclient_persistence_ptr;
+/** Smart/shared pointer to a persistence client */
+using iclient_persistence_ptr = iclient_persistence::ptr_t;
+
+/** Smart/shared pointer to a persistence client */
+using const_iclient_persistence_ptr = iclient_persistence::const_ptr_t;
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt

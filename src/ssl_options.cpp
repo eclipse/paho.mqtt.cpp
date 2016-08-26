@@ -12,48 +12,93 @@
  *
  * Contributors:
  *    Guilherme Ferreira - initial implementation and documentation
+ *    Frank Pagliughi - added copy & move operations
  *******************************************************************************/
 
 #include "mqtt/ssl_options.h"
+#include <utility>
+#include <cstring>
 
 namespace mqtt {
 
 
 /////////////////////////////////////////////////////////////////////////////
 
-ssl_options::ssl_options()
-: opts_( MQTTAsync_SSLOptions_initializer )
+ssl_options::ssl_options() : opts_(MQTTAsync_SSLOptions_initializer)
 {
 }
 
-std::string ssl_options::get_trust_store() const
+ssl_options::ssl_options(const ssl_options& opt)
+		: opts_(opt.opts_), trustStore_(opt.trustStore_), keyStore_(opt.keyStore_),
+			privateKey_(opt.privateKey_), privateKeyPassword_(opt.privateKeyPassword_),
+			enabledCipherSuites_(opt.enabledCipherSuites_)
 {
-	return std::string(opts_.trustStore);
+	opts_.trustStore = trustStore_.c_str();
+	opts_.keyStore = keyStore_.c_str();
+	opts_.privateKey = privateKey_.c_str();
+	opts_.privateKeyPassword = privateKeyPassword_.c_str();
+	opts_.enabledCipherSuites = enabledCipherSuites_.c_str();
 }
 
-std::string ssl_options::get_key_store() const
+ssl_options::ssl_options(ssl_options&& opt)
+		: opts_(opt.opts_), trustStore_(std::move(opt.trustStore_)),
+			keyStore_(std::move(opt.keyStore_)), privateKey_(std::move(opt.privateKey_)),
+			privateKeyPassword_(std::move(opt.privateKeyPassword_)),
+			enabledCipherSuites_(std::move(opt.enabledCipherSuites_))
 {
-	return std::string(opts_.keyStore);
+	opts_.trustStore = trustStore_.c_str();
+	opts_.keyStore = keyStore_.c_str();
+	opts_.privateKey = privateKey_.c_str();
+	opts_.privateKeyPassword = privateKeyPassword_.c_str();
+	opts_.enabledCipherSuites = enabledCipherSuites_.c_str();
 }
 
-std::string ssl_options::get_private_key() const
+ssl_options& ssl_options::operator=(const ssl_options& rhs)
 {
-	return std::string(opts_.privateKey);
+	if (&rhs == this)
+		return *this;
+
+	std::memcpy(&opts_, &rhs.opts_, sizeof(MQTTAsync_SSLOptions));
+
+	trustStore_ = rhs.trustStore_;
+	keyStore_ = rhs.keyStore_;
+	privateKey_ = rhs.privateKey_;
+	privateKeyPassword_ = rhs.privateKeyPassword_;
+	enabledCipherSuites_ = rhs.enabledCipherSuites_;
+
+	opts_.trustStore = trustStore_.c_str();
+	opts_.keyStore = keyStore_.c_str();
+	opts_.privateKey = privateKey_.c_str();
+	opts_.privateKeyPassword = privateKeyPassword_.c_str();
+	opts_.enabledCipherSuites = enabledCipherSuites_.c_str();
+
+	return *this;
 }
 
-std::string ssl_options::get_private_key_password() const
+ssl_options& ssl_options::operator=(ssl_options&& rhs)
 {
-	return std::string(opts_.privateKeyPassword);
-}
+	if (&rhs == this)
+		return *this;
 
-std::string ssl_options::get_enabled_cipher_suites() const
-{
-	return std::string(opts_.enabledCipherSuites);
-}
+	std::memcpy(&opts_, &rhs.opts_, sizeof(MQTTAsync_SSLOptions));
 
-bool ssl_options::get_enable_server_cert_auth() const
-{
-	return opts_.enableServerCertAuth;
+	trustStore_ = std::move(rhs.trustStore_);
+	keyStore_ = std::move(rhs.keyStore_);
+	privateKey_ = std::move(rhs.privateKey_);
+	privateKeyPassword_ = std::move(rhs.privateKeyPassword_);
+	enabledCipherSuites_ = std::move(rhs.enabledCipherSuites_);
+
+	// OPTIMIZE: We probably don't need to do any of the following,
+	// but just to be safe
+	std::memset(&rhs.opts_, 0, sizeof(MQTTAsync_SSLOptions));
+
+	opts_.trustStore = trustStore_.c_str();
+	opts_.keyStore = keyStore_.c_str();
+	opts_.privateKey = privateKey_.c_str();
+	opts_.privateKeyPassword = privateKeyPassword_.c_str();
+	opts_.enabledCipherSuites = enabledCipherSuites_.c_str();
+
+	return *this;
 }
 
 void ssl_options::set_trust_store(const std::string& trustStore)
@@ -88,7 +133,7 @@ void ssl_options::set_enabled_cipher_suites(const std::string& enabledCipherSuit
 
 void ssl_options::set_enable_server_cert_auth(bool enableServerCertAuth)
 {
-	opts_.enableServerCertAuth = enableServerCertAuth;
+	opts_.enableServerCertAuth = enableServerCertAuth ? (!0) : 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////
