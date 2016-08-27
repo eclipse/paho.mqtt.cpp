@@ -75,6 +75,7 @@ class delivery_token : public virtual idelivery_token,
 
 	/** Client has special access. */
 	friend class async_client;
+	friend class delivery_response_options;
 
 	/**
 	 * Sets the message to which this token corresponds.
@@ -88,10 +89,29 @@ public:
 	/** Smart/shared pointer to a const object of this class */
 	using const_ptr_t = std::shared_ptr<delivery_token>;
 
+	/**
+	 * Creates an empty delivery token connected to a particular client. 
+	 * @param cli The asynchronous client object.
+	 */
 	delivery_token(iasync_client& cli) : token(cli) {}
-
+	/**
+	 * Creates a delivery token connected to a particular client. 
+	 * @param cli The asynchronous client object. 
+	 * @param topic The topic that the message is assocaited with. 
+	 */
 	delivery_token(iasync_client& cli, const std::string& topic) : token(cli, topic) {}
-
+	/**
+	 * Creates a delivery token connected to a particular client. 
+	 * @param cli The asynchronous client object. 
+	 * @param topic The topic that the message is assocaited with. 
+	 */
+	delivery_token(iasync_client& cli, const std::string& topic, const_message_ptr msg) 
+			: token(cli, topic), msg_(msg) {}
+	/**
+	 * Creates a delivery token connected to a particular client. 
+	 * @param cli The asynchronous client object. 
+	 * @param topics The topics that the message is assocaited with. 
+	 */
 	delivery_token(iasync_client& cli, const std::vector<std::string>& topics)
 					: token(cli, topics) {}
 	/**

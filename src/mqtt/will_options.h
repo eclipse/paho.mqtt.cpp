@@ -54,6 +54,9 @@ class will_options
 	/** LWT message text */
 	std::string payload_;
 
+	/** A default C struct to support re-initializing variables */
+	static const MQTTAsync_willOptions DFLT_C_WILL;
+
 	/** The connect options has special access */
 	friend class connect_options;
 

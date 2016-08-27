@@ -19,6 +19,8 @@
 
 
 #include "mqtt/client.h"
+#include <memory>
+#include <iostream>
 
 namespace mqtt {
 
@@ -114,6 +116,14 @@ void client::publish(const std::string& top, const void* payload, size_t n,
 void client::publish(const std::string& top, const_message_ptr msg)
 {
 	cli_.publish(top, msg)->wait_for_completion(timeout_);
+}
+
+void client::publish(const std::string& top, const message& msg)
+{
+	std::shared_ptr<message> msgp(const_cast<message*>(&msg), [](message*){
+		std::cout << "Not destroying non-heap message" << std::endl;
+	});
+	cli_.publish(top, msgp)->wait_for_completion(timeout_);
 }
 
 void client::set_callback(callback& cb)

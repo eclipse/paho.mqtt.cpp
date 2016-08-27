@@ -175,12 +175,10 @@ int main(int argc, char* argv[])
 		client.publish(TOPIC, PAYLOAD2, strlen(PAYLOAD2)+1, 0, false);
 		std::cout << "...OK" << std::endl;
 
-		// Now try with a listener, but no token
+		// Now try with a listener, no token, and non-heap message
 
 		std::cout << "\nSending final message..." << std::endl;
-		pubmsg = mqtt::make_message(PAYLOAD3);
-		pubmsg->set_qos(QOS);
-		client.publish(TOPIC, pubmsg);
+		client.publish(TOPIC, mqtt::message(PAYLOAD3, QOS, false));
 		std::cout << "OK" << std::endl;
 
 		// Disconnect

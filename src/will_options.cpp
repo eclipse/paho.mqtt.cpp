@@ -21,6 +21,8 @@
 
 namespace mqtt {
 
+const MQTTAsync_willOptions will_options::DFLT_C_WILL(MQTTAsync_willOptions_initializer);
+
 /////////////////////////////////////////////////////////////////////////////
 
 will_options::will_options()
@@ -75,15 +77,15 @@ will_options::will_options(const will_options& opt)
 	opts_.message = payload_.c_str();
 }
 
-will_options::will_options(will_options&& opt)
-		: opts_(opt.opts_), topic_(std::move(opt.topic_)),
-			payload_(std::move(opt.payload_))
+will_options::will_options(will_options&& other)
+		: opts_(other.opts_), topic_(std::move(other.topic_)),
+			payload_(std::move(other.payload_))
 {
 	// OPTIMIZE: We probably don't need to do the following,
 	// but just to be safe
-	std::memset(&opt.opts_, 0, sizeof(MQTTAsync_willOptions));
 	opts_.topicName = topic_.c_str();
 	opts_.message = payload_.c_str();
+	std::memcpy(&other.opts_, &DFLT_C_WILL, sizeof(MQTTAsync_willOptions));
 }
 
 will_options& will_options::operator=(const will_options& rhs)
@@ -108,12 +110,11 @@ will_options& will_options::operator=(will_options&& rhs)
 		topic_ = std::move(rhs.topic_);
 		payload_ = std::move(rhs.payload_);
 
-		// OPTIMIZE: We probably don't need to do the following,
-		// but just to be safe
-		std::memset(&rhs.opts_, 0, sizeof(MQTTAsync_willOptions));
-
+		// OPTIMIZE: We probably don't need to do any of the following, but
+		// just to be safe
 		opts_.topicName = topic_.c_str();
 		opts_.message = payload_.c_str();
+		std::memcpy(&rhs.opts_, &DFLT_C_WILL, sizeof(MQTTAsync_willOptions));
 	}
 	return *this;
 }

@@ -73,8 +73,7 @@ message::message(message&& other)
 	msg_.payload = const_cast<char*>(payload_.data());
 	msg_.payloadlen = payload_.length();
 
-	other.msg_.payload = nullptr;
-	other.msg_.payloadlen = 0;
+	other.msg_ = MQTTAsync_message(MQTTAsync_message_initializer);
 }
 
 message::~message()
@@ -100,8 +99,7 @@ message& message::operator=(message&& rhs)
 		msg_.payload = const_cast<char*>(payload_.data());
 		msg_.payloadlen = payload_.length();
 
-		rhs.msg_.payload = nullptr;
-		rhs.msg_.payloadlen = 0;
+		rhs.msg_ = MQTTAsync_message(MQTTAsync_message_initializer);
 	}
 	return *this;
 }

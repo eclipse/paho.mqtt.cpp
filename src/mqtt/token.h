@@ -155,6 +155,8 @@ class token : public virtual itoken
 
 	/** Client has special access for full initialization */
 	friend class async_client;
+	friend class response_options;
+	friend class delivery_response_options;
 
 	void set_topics(const std::string& top) {
 		topics_.clear();
