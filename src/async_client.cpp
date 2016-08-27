@@ -20,6 +20,7 @@
 #include "mqtt/token.h"
 #include "mqtt/message.h"
 #include "mqtt/response_options.h"
+#include "mqtt/disconnect_options.h"
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -284,15 +285,9 @@ itoken_ptr async_client::disconnect(long timeout)
 	itoken_ptr tok = std::make_shared<token>(*this);
 	add_token(tok);
 
-	MQTTAsync_disconnectOptions disconnOpts(MQTTAsync_disconnectOptions_initializer);
+	disconnect_options opts(int(timeout), dynamic_cast<token*>(tok.get()));
 
-	// TODO: Check timeout range?
-	disconnOpts.timeout = int(timeout);
-	disconnOpts.onSuccess = &token::on_success;
-	disconnOpts.onFailure = &token::on_failure;
-	disconnOpts.context = dynamic_cast<token*>(tok.get());
-
-	int rc = MQTTAsync_disconnect(cli_, &disconnOpts);
+	int rc = MQTTAsync_disconnect(cli_, &opts.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(tok);
@@ -309,15 +304,9 @@ itoken_ptr async_client::disconnect(long timeout, void* userContext, iaction_lis
 	tok->set_action_callback(cb);
 	add_token(tok);
 
-	MQTTAsync_disconnectOptions disconnOpts(MQTTAsync_disconnectOptions_initializer);
+	disconnect_options opts(int(timeout), dynamic_cast<token*>(tok.get()));
 
-	// TODO: Check timeout range?
-	disconnOpts.timeout = int(timeout);
-	disconnOpts.onSuccess = &token::on_success;
-	disconnOpts.onFailure = &token::on_failure;
-	disconnOpts.context = dynamic_cast<token*>(tok.get());
-
-	int rc = MQTTAsync_disconnect(cli_, &disconnOpts);
+	int rc = MQTTAsync_disconnect(cli_, &opts.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(tok);

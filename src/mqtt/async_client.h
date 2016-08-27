@@ -32,7 +32,6 @@ extern "C" {
 #include "mqtt/delivery_token.h"
 #include "mqtt/iclient_persistence.h"
 #include "mqtt/iaction_listener.h"
-#include "mqtt/connect_options.h"
 #include "mqtt/exception.h"
 #include "mqtt/message.h"
 #include "mqtt/callback.h"

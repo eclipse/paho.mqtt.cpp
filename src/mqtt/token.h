@@ -157,6 +157,7 @@ class token : public virtual itoken
 	friend class async_client;
 	friend class response_options;
 	friend class delivery_response_options;
+	friend class disconnect_options;
 
 	void set_topics(const std::string& top) {
 		topics_.clear();
