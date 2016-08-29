@@ -238,7 +238,7 @@ public:
 	 * @return iasync_client
 	 */
 	virtual iasync_client* get_client() const {
-		return (iasync_client*) cli_;
+		return cli_;
 	}
 	/**
 	 * Returns an exception providing more detail if an operation failed.
@@ -250,7 +250,10 @@ public:
 	 * token.
 	 * @return int
 	 */
-	virtual int get_message_id() const { return int(tok_); }
+	virtual int get_message_id() const {
+		static_assert(sizeof(tok_) == sizeof(int), "MQTTAsync_token must fit into int");
+		return static_cast<int>(tok_);
+	}
 	/**
 	 * Returns the topic string(s) for the action being tracked by this
 	 * token.
@@ -305,7 +308,7 @@ public:
 	 */
 	template <class Rep, class Period>
 	bool wait_for_completion(const std::chrono::duration<Rep, Period>& relTime) {
-		wait_for_completion((long) std::chrono::duration_cast<std::chrono::milliseconds>(relTime).count());
+		wait_for_completion(static_cast<long>(std::chrono::duration_cast<std::chrono::milliseconds>(relTime).count()));
 		return rc_ == 0;
 	}
 	/**
