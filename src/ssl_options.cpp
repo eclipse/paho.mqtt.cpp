@@ -33,11 +33,14 @@ ssl_options::ssl_options(const ssl_options& opt)
 			privateKey_(opt.privateKey_), privateKeyPassword_(opt.privateKeyPassword_),
 			enabledCipherSuites_(opt.enabledCipherSuites_)
 {
-	opts_.trustStore = trustStore_.c_str();
-	opts_.keyStore = keyStore_.c_str();
-	opts_.privateKey = privateKey_.c_str();
-	opts_.privateKeyPassword = privateKeyPassword_.c_str();
-	opts_.enabledCipherSuites = enabledCipherSuites_.c_str();
+	// NOTE: By default, the Paho C treats nullptr char arrays as unset values,
+	// so we keep that semantic and only set those char arrays if the string
+	// is non-empty
+	opts_.trustStore = trustStore_.empty() ? nullptr : trustStore_.c_str();
+	opts_.keyStore = keyStore_.empty() ? nullptr : keyStore_.c_str();
+	opts_.privateKey = privateKey_.empty() ? nullptr : privateKey_.c_str();
+	opts_.privateKeyPassword = privateKeyPassword_.empty() ? nullptr : privateKeyPassword_.c_str();
+	opts_.enabledCipherSuites = enabledCipherSuites_.empty() ? nullptr : enabledCipherSuites_.c_str();
 }
 
 ssl_options::ssl_options(ssl_options&& opt)
@@ -46,11 +49,14 @@ ssl_options::ssl_options(ssl_options&& opt)
 			privateKeyPassword_(std::move(opt.privateKeyPassword_)),
 			enabledCipherSuites_(std::move(opt.enabledCipherSuites_))
 {
-	opts_.trustStore = trustStore_.c_str();
-	opts_.keyStore = keyStore_.c_str();
-	opts_.privateKey = privateKey_.c_str();
-	opts_.privateKeyPassword = privateKeyPassword_.c_str();
-	opts_.enabledCipherSuites = enabledCipherSuites_.c_str();
+	// NOTE: By default, the Paho C treats nullptr char arrays as unset values,
+	// so we keep that semantic and only set those char arrays if the string
+	// is non-empty
+	opts_.trustStore = trustStore_.empty() ? nullptr : trustStore_.c_str();
+	opts_.keyStore = keyStore_.empty() ? nullptr : keyStore_.c_str();
+	opts_.privateKey = privateKey_.empty() ? nullptr : privateKey_.c_str();
+	opts_.privateKeyPassword = privateKeyPassword_.empty() ? nullptr : privateKeyPassword_.c_str();
+	opts_.enabledCipherSuites = enabledCipherSuites_.empty() ? nullptr : enabledCipherSuites_.c_str();
 }
 
 ssl_options& ssl_options::operator=(const ssl_options& rhs)
@@ -66,11 +72,14 @@ ssl_options& ssl_options::operator=(const ssl_options& rhs)
 	privateKeyPassword_ = rhs.privateKeyPassword_;
 	enabledCipherSuites_ = rhs.enabledCipherSuites_;
 
-	opts_.trustStore = trustStore_.c_str();
-	opts_.keyStore = keyStore_.c_str();
-	opts_.privateKey = privateKey_.c_str();
-	opts_.privateKeyPassword = privateKeyPassword_.c_str();
-	opts_.enabledCipherSuites = enabledCipherSuites_.c_str();
+	// NOTE: By default, the Paho C treats nullptr char arrays as unset values,
+	// so we keep that semantic and only set those char arrays if the string
+	// is non-empty
+	opts_.trustStore = trustStore_.empty() ? nullptr : trustStore_.c_str();
+	opts_.keyStore = keyStore_.empty() ? nullptr : keyStore_.c_str();
+	opts_.privateKey = privateKey_.empty() ? nullptr : privateKey_.c_str();
+	opts_.privateKeyPassword = privateKeyPassword_.empty() ? nullptr : privateKeyPassword_.c_str();
+	opts_.enabledCipherSuites = enabledCipherSuites_.empty() ? nullptr : enabledCipherSuites_.c_str();
 
 	return *this;
 }
@@ -92,11 +101,14 @@ ssl_options& ssl_options::operator=(ssl_options&& rhs)
 	// but just to be safe
 	std::memset(&rhs.opts_, 0, sizeof(MQTTAsync_SSLOptions));
 
-	opts_.trustStore = trustStore_.c_str();
-	opts_.keyStore = keyStore_.c_str();
-	opts_.privateKey = privateKey_.c_str();
-	opts_.privateKeyPassword = privateKeyPassword_.c_str();
-	opts_.enabledCipherSuites = enabledCipherSuites_.c_str();
+	// NOTE: By default, the Paho C treats nullptr char arrays as unset values,
+	// so we keep that semantic and only set those char arrays if the string
+	// is non-empty
+	opts_.trustStore = trustStore_.empty() ? nullptr : trustStore_.c_str();
+	opts_.keyStore = keyStore_.empty() ? nullptr : keyStore_.c_str();
+	opts_.privateKey = privateKey_.empty() ? nullptr : privateKey_.c_str();
+	opts_.privateKeyPassword = privateKeyPassword_.empty() ? nullptr : privateKeyPassword_.c_str();
+	opts_.enabledCipherSuites = enabledCipherSuites_.empty() ? nullptr : enabledCipherSuites_.c_str();
 
 	return *this;
 }
@@ -104,31 +116,31 @@ ssl_options& ssl_options::operator=(ssl_options&& rhs)
 void ssl_options::set_trust_store(const std::string& trustStore)
 {
 	trustStore_ = trustStore;
-	opts_.trustStore = trustStore_.c_str();
+	opts_.trustStore = trustStore_.empty() ? nullptr : trustStore_.c_str();
 }
 
 void ssl_options::set_key_store(const std::string& keyStore)
 {
 	keyStore_ = keyStore;
-	opts_.keyStore = keyStore_.c_str();
+	opts_.keyStore = keyStore_.empty() ? nullptr : keyStore_.c_str();
 }
 
 void ssl_options::set_private_key(const std::string& privateKey)
 {
 	privateKey_ = privateKey;
-	opts_.privateKey = privateKey_.c_str();
+	opts_.privateKey = privateKey_.empty() ? nullptr : privateKey_.c_str();
 }
 
 void ssl_options::set_private_key_password(const std::string& privateKeyPassword)
 {
 	privateKeyPassword_ = privateKeyPassword;
-	opts_.privateKeyPassword = privateKeyPassword_.c_str();
+	opts_.privateKeyPassword = privateKeyPassword_.empty() ? nullptr : privateKeyPassword_.c_str();
 }
 
 void ssl_options::set_enabled_cipher_suites(const std::string& enabledCipherSuites)
 {
 	enabledCipherSuites_ = enabledCipherSuites;
-	opts_.enabledCipherSuites = enabledCipherSuites_.c_str();
+	opts_.enabledCipherSuites = enabledCipherSuites_.empty() ? nullptr : enabledCipherSuites_.c_str();
 }
 
 void ssl_options::set_enable_server_cert_auth(bool enableServerCertAuth)
