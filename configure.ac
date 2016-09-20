@@ -80,10 +80,6 @@ AC_ARG_ENABLE(
 	enable_samples=no
 )
 
-AS_IF([test "x$enable_samples" = "xyes"], [
-	AC_CONFIG_FILES([src/samples/Makefile])
-])
-
 AM_CONDITIONAL([PAHO_BUILD_SAMPLES], [test "$enable_samples" = yes])
 
 
@@ -168,9 +164,6 @@ AC_CHECK_HEADER([MQTTAsync.h], , AC_MSG_ERROR([missing paho.mqtt.c headers]))
 
 AC_CONFIG_HEADERS([config.h])
 
-AC_CONFIG_FILES([doc/Makefile])
-AC_CONFIG_FILES([src/mqtt/Makefile])
-AC_CONFIG_FILES([src/Makefile])
 AC_CONFIG_FILES([Makefile])
 
 AC_OUTPUT

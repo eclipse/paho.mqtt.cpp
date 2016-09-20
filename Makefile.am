@@ -14,19 +14,140 @@
 #     Guilherme Maciel Ferreira - initial contribuition
 #*******************************************************************************/
 
+AUTOMAKE_OPTIONS = subdir-objects color-tests
 ACLOCAL_AMFLAGS = -I m4
 
 ###############################################################################
-# Sub directories
+# Library: name
 ###############################################################################
 
-SUBDIRS  = src
-SUBDIRS += src/mqtt
+lib_LTLIBRARIES  = libpaho-mqttpp3.la
+
+###############################################################################
+# Library: source code
+###############################################################################
+
+libpaho_mqttpp3_la_SOURCES  = src/async_client.cpp
+libpaho_mqttpp3_la_SOURCES += src/client.cpp
+libpaho_mqttpp3_la_SOURCES += src/disconnect_options.cpp
+libpaho_mqttpp3_la_SOURCES += src/iclient_persistence.cpp
+libpaho_mqttpp3_la_SOURCES += src/message.cpp
+libpaho_mqttpp3_la_SOURCES += src/response_options.cpp
+libpaho_mqttpp3_la_SOURCES += src/token.cpp
+libpaho_mqttpp3_la_SOURCES += src/topic.cpp
+libpaho_mqttpp3_la_SOURCES += src/connect_options.cpp
+libpaho_mqttpp3_la_SOURCES += src/will_options.cpp
+libpaho_mqttpp3_la_SOURCES += src/ssl_options.cpp
+
+###############################################################################
+# Library compiler flags
+###############################################################################
+
+libpaho_mqttpp3_la_CXXFLAGS  = $(CXXFLAGS)
+libpaho_mqttpp3_la_CXXFLAGS += -fPIC
+libpaho_mqttpp3_la_CXXFLAGS += -I $(srcdir)/src -I src
+
+###############################################################################
+# Library: linker flags
+###############################################################################
+
+# Create SONAME entry. Same as -Wl,-soname,libname.so.major
+VERSION_INFO = `echo '$(PACKAGE_VERSION)' | $(SED) -e "s/\(.*\)\.\(.*\\)\.\(.*\)/\1:\3:\2/g" `
+libpaho_mqttpp3_la_LDFLAGS  = -version-info $(VERSION_INFO)
+
+libpaho_mqttpp3_la_LDFLAGS += $(LDFLAGS)
+libpaho_mqttpp3_la_LDFLAGS += $(LIBS)
+
+
+###############################################################################
+# Library: headers to install
+###############################################################################
+
+include_HEADERS  = src/mqtt/async_client.h
+include_HEADERS += src/mqtt/callback.h
+include_HEADERS += src/mqtt/client.h
+include_HEADERS += src/mqtt/connect_options.h
+include_HEADERS += src/mqtt/delivery_token.h
+include_HEADERS += src/mqtt/disconnect_options.h
+include_HEADERS += src/mqtt/exception.h
+include_HEADERS += src/mqtt/iaction_listener.h
+include_HEADERS += src/mqtt/iasync_client.h
+include_HEADERS += src/mqtt/iclient_persistence.h
+include_HEADERS += src/mqtt/ipersistable.h
+include_HEADERS += src/mqtt/message.h
+include_HEADERS += src/mqtt/response_options.h
+include_HEADERS += src/mqtt/token.h
+include_HEADERS += src/mqtt/topic.h
+include_HEADERS += src/mqtt/will_options.h
+include_HEADERS += src/mqtt/ssl_options.h
+
+
+###############################################################################
+# Samples
+###############################################################################
 
 if PAHO_BUILD_SAMPLES
-SUBDIRS += src/samples
+
+###############################################################################
+# Samples: binaries to build
+###############################################################################
+
+bin_PROGRAMS  = async_publish
+bin_PROGRAMS += async_subscribe
+bin_PROGRAMS += sync_publish
+
+###############################################################################
+# Samples: source code
+###############################################################################
+
+async_publish_SOURCES = src/samples/async_publish.cpp
+
+async_subscribe_SOURCES = src/samples/async_subscribe.cpp
+
+sync_publish_SOURCES = src/samples/sync_publish.cpp
+
+###############################################################################
+# Samples: compiler flags
+###############################################################################
+
+COMMONCXXFLAGS  = $(CXXFLAGS)
+COMMONCXXFLAGS += -I$(top_srcdir)/src/
+
+async_publish_CXXFLAGS = $(COMMONCXXFLAGS)
+
+async_subscribe_CXXFLAGS = $(COMMONCXXFLAGS)
+
+sync_publish_CXXFLAGS = $(COMMONCXXFLAGS)
+
+###############################################################################
+# Samples: linker flags
+###############################################################################
+
+COMMONLDFLAGS  = $(LDFLAGS)
+COMMONLDFLAGS += $(LIBS)
+COMMONLDFLAGS += libpaho-mqttpp3.la
+
+async_publish_LDADD = $(COMMONLDFLAGS)
+
+async_subscribe_LDADD = $(COMMONLDFLAGS)
+
+sync_publish_LDADD = $(COMMONLDFLAGS)
+
 endif
 
+###############################################################################
+# Documentation
+###############################################################################
+
 if PAHO_BUILD_DOC
-SUBDIRS += doc
+doxyfile.stamp:
+	$(MKDIR_P) @top_builddir@/doc
+	cd doc && $(DOXYGEN) Doxyfile
+	echo Timestamp > doxyfile.stamp
+
+CLEANFILES = doxyfile.stamp
+
+all-local: doxyfile.stamp
+clean-local:
+	rm -rf $(top_srcdir)/docs/man
 endif
