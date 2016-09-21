@@ -75,6 +75,7 @@ Option | Default Value | Description
  --[en/dis]able-doc | no | Build documentation
  --[en/dis]able-peak-warnings | no | Compile with peak warnings level
  --with-paho-mqtt-c |  | Path to a non-standard Paho MQTT C library
+ --with[out]-ssl | no | Build with OpenSSL support
 
 For example, in order to build only the static library:
 (under the assumption that "$PAHO_DIR" points to the directory which contains the paho.mqtt.c source tree)
