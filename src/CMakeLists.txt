@@ -35,7 +35,7 @@ elseif(UNIX)
 endif()
 
 ## use Object Library to optimize compilation
-add_library(common_obj OBJECT
+set(COMMON_SRC
     async_client.cpp
     client.cpp
     disconnect_options.cpp
@@ -45,8 +45,17 @@ add_library(common_obj OBJECT
     token.cpp
     topic.cpp
     connect_options.cpp
-    ssl_options.cpp
     will_options.cpp)
+
+if(PAHO_WITH_SSL)
+    set(COMMON_SRC
+        ${COMMON_SRC}
+        ssl_options.cpp)
+    add_definitions(-DOPENSSL)
+endif()
+
+add_library(common_obj OBJECT
+    ${COMMON_SRC})
 
 ## set position independent flag (-fPIC on Unix)
 set_property(TARGET common_obj
@@ -99,16 +108,27 @@ get_filename_component(PAHO_MQTT_C_BIN_DIR ${PAHO_MQTT_C_PATH}/bin ABSOLUTE)
 set(CMAKE_FIND_LIBRARY_PREFIXES ${CMAKE_FIND_LIBRARY_PREFIXES} "")
 set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} ".dll" ".lib")
 
-## find the Paho MQTT C library
-find_library(PAHO_MQTT_C_LIB
-    NAMES paho-mqtt3a
-          mqtt
-          paho-mqtt
-          mqtt3
-          paho-mqtt3
-          mqtt3a
-    PATHS ${PAHO_MQTT_C_LIB_DIR}
-          ${PAHO_MQTT_C_BIN_DIR})
+if(PAHO_WITH_SSL)
+    ## find the Paho MQTT C SSL library
+    find_library(PAHO_MQTT_C_LIB
+        NAMES paho-mqtt3as
+              mqtt3as
+        PATHS ${PAHO_MQTT_C_LIB_DIR}
+              ${PAHO_MQTT_C_BIN_DIR})
+
+    find_package(OpenSSL REQUIRED)
+else()
+    ## find the Paho MQTT C library
+    find_library(PAHO_MQTT_C_LIB
+        NAMES paho-mqtt3a
+              mqtt
+              paho-mqtt
+              mqtt3
+              paho-mqtt3
+              mqtt3a
+        PATHS ${PAHO_MQTT_C_LIB_DIR}
+              ${PAHO_MQTT_C_BIN_DIR})
+endif()
 
 ## use the Paho MQTT C library if found. Otherwise terminate the compilation
 if(${PAHO_MQTT_C_LIB} STREQUAL "PAHO_MQTT_C_LIB-NOTFOUND")

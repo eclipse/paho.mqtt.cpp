@@ -17,23 +17,31 @@
 ## Note: on OS X you should install XCode and the associated command-line tools
 
 ## install headers
+set(COMMON_HDR
+    async_client.h
+    callback.h
+    client.h
+    connect_options.h
+    delivery_token.h
+    disconnect_options.h
+    exception.h
+    iaction_listener.h
+    iasync_client.h
+    iclient_persistence.h
+    ipersistable.h
+    message.h
+    response_options.h
+    token.h
+    topic.h
+    will_options.h)
+
+if(PAHO_WITH_SSL)
+    set(COMMON_HDR
+        ${COMMON_HDR}
+        ssl_options.h)
+endif()
+
 install(
-    FILES async_client.h
-          callback.h
-          client.h
-          connect_options.h
-          delivery_token.h
-          disconnect_options.h
-          exception.h
-          iaction_listener.h
-          iasync_client.h
-          iclient_persistence.h
-          ipersistable.h
-          message.h
-          response_options.h
-          token.h
-          topic.h
-          will_options.h
-          ssl_options.h
+    FILES ${COMMON_HDR}
     DESTINATION include
 )

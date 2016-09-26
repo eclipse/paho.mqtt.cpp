@@ -24,7 +24,9 @@ connect_options::connect_options()
 		: opts_(MQTTAsync_connectOptions_initializer)
 {
 	opts_.will = nullptr;
+#if defined(OPENSSL)
 	opts_.ssl = nullptr;
+#endif
 }
 
 connect_options::connect_options(const std::string& userName, const std::string& password)
@@ -32,7 +34,9 @@ connect_options::connect_options(const std::string& userName, const std::string&
 			userName_(userName), password_(password)
 {
 	opts_.will = nullptr;
+#if defined(OPENSSL)
 	opts_.ssl = nullptr;
+#endif
 }
 
 void connect_options::set_password(const std::string& password)
@@ -53,11 +57,13 @@ void connect_options::set_will(const will_options& will)
 	opts_.will = &will_.opts_;
 }
 
+#if defined(OPENSSL)
 void connect_options::set_ssl(const ssl_options& ssl)
 {
 	ssl_ = ssl;
 	opts_.ssl = &ssl_.opts_;
 }
+#endif
 
 void connect_options::set_context(token* tok) 
 {

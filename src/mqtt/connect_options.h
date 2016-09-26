@@ -31,7 +31,9 @@ extern "C" {
 #include "mqtt/message.h"
 #include "mqtt/topic.h"
 #include "mqtt/will_options.h"
+#if defined(OPENSSL)
 #include "mqtt/ssl_options.h"
+#endif
 #include "mqtt/token.h"
 #include <string>
 #include <vector>
@@ -55,8 +57,10 @@ class connect_options
 	/** The LWT options */
 	will_options will_;
 
+#if defined(OPENSSL)
 	/** The SSL options  */
 	ssl_options ssl_;
+#endif
 
 	/** The user name to use for the connection. */
 	std::string userName_;
@@ -120,6 +124,13 @@ public:
 	 * @return The LWT options to use for the connection.
 	 */
 	const will_options& get_will_options() const { return will_; }
+#if defined(OPENSSL)
+	/**
+	 * Get the SSL options to use for the connection.
+	 * @return The SSL options to use for the connection.
+	 */
+	const ssl_options& get_ssl_options() const { return ssl_; }
+#endif
 	/**
 	 * Returns whether the server should remember state for the client
 	 * across reconnects.
@@ -162,11 +173,13 @@ public:
 	 * @param will The LWT options.
 	 */
 	void set_will(const will_options& will);
+#if defined(OPENSSL)
 	/**
 	 * Sets the SSL for the connection.
 	 * @param ssl The SSL options.
 	 */
 	void set_ssl(const ssl_options& ssl);
+#endif
 	/**
 	 * Sets the callback context to a delivery token. 
 	 * @param tok The delivery token to be used as the callback context.
