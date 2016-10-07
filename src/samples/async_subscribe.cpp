@@ -36,14 +36,14 @@ class action_listener : public virtual mqtt::iaction_listener
 {
 	std::string name_;
 
-	virtual void on_failure(const mqtt::itoken& tok) {
+	void on_failure(const mqtt::itoken& tok) override {
 		std::cout << name_ << " failure";
 		if (tok.get_message_id() != 0)
 			std::cout << " for token: [" << tok.get_message_id() << "]" << std::endl;
 		std::cout << std::endl;
 	}
 
-	virtual void on_success(const mqtt::itoken& tok) {
+	void on_success(const mqtt::itoken& tok) override {
 		std::cout << name_ << " success";
 		if (tok.get_message_id() != 0)
 			std::cout << " for token: [" << tok.get_message_id() << "]" << std::endl;
@@ -85,7 +85,7 @@ class callback : public virtual mqtt::callback,
 	}
 
 	// Re-connection failure
-	virtual void on_failure(const mqtt::itoken& tok) {
+	void on_failure(const mqtt::itoken& tok) override {
 		std::cout << "Connection failed" << std::endl;
 		if (++nretry_ > 5)
 			exit(1);
@@ -93,7 +93,7 @@ class callback : public virtual mqtt::callback,
 	}
 
 	// Re-connection success
-	virtual void on_success(const mqtt::itoken& tok) {
+	void on_success(const mqtt::itoken& tok) override {
 		std::cout << "\nConnection success" << std::endl;
 		std::cout << "\nSubscribing to topic '" << TOPIC << "'\n"
 			<< "\tfor client " << CLIENTID
@@ -103,7 +103,7 @@ class callback : public virtual mqtt::callback,
 		cli_.subscribe(TOPIC, QOS, nullptr, subListener_);
 	}
 
-	virtual void connection_lost(const std::string& cause) {
+	void connection_lost(const std::string& cause) override {
 		std::cout << "\nConnection lost" << std::endl;
 		if (!cause.empty())
 			std::cout << "\tcause: " << cause << std::endl;
@@ -113,13 +113,13 @@ class callback : public virtual mqtt::callback,
 		reconnect();
 	}
 
-	virtual void message_arrived(const std::string& topic, mqtt::const_message_ptr msg) {
+	void message_arrived(const std::string& topic, mqtt::const_message_ptr msg) override {
 		std::cout << "Message arrived" << std::endl;
 		std::cout << "\ttopic: '" << topic << "'" << std::endl;
 		std::cout << "\t'" << msg->to_str() << "'\n" << std::endl;
 	}
 
-	virtual void delivery_complete(mqtt::idelivery_token_ptr token) {}
+	void delivery_complete(mqtt::idelivery_token_ptr token) override {}
 
 public:
 	callback(mqtt::async_client& cli, mqtt::connect_options& connOpts)

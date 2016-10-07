@@ -49,16 +49,16 @@ inline void sleep(int ms) {
 class callback : public virtual mqtt::callback
 {
 public:
-	virtual void connection_lost(const std::string& cause) {
+	void connection_lost(const std::string& cause) override {
 		std::cout << "\nConnection lost" << std::endl;
 		if (!cause.empty())
 			std::cout << "\tcause: " << cause << std::endl;
 	}
 
 	// We're not subscribed to anything, so this should never be called.
-	virtual void message_arrived(const std::string& topic, mqtt::const_message_ptr msg) {}
+	void message_arrived(const std::string& topic, mqtt::const_message_ptr msg) override {}
 
-	virtual void delivery_complete(mqtt::idelivery_token_ptr tok) {
+	void delivery_complete(mqtt::idelivery_token_ptr tok) override {
 		std::cout << "Delivery complete for token: "
 			<< (tok ? tok->get_message_id() : -1) << std::endl;
 	}
@@ -72,12 +72,12 @@ public:
 class action_listener : public virtual mqtt::iaction_listener
 {
 protected:
-	virtual void on_failure(const mqtt::itoken& tok) {
+	void on_failure(const mqtt::itoken& tok) override {
 		std::cout << "\n\tListener: Failure on token: "
 			<< tok.get_message_id() << std::endl;
 	}
 
-	virtual void on_success(const mqtt::itoken& tok) {
+	void on_success(const mqtt::itoken& tok) override {
 		std::cout << "\n\tListener: Success on token: "
 			<< tok.get_message_id() << std::endl;
 	}
@@ -92,12 +92,12 @@ class delivery_action_listener : public action_listener
 {
 	bool done_;
 
-	virtual void on_failure(const mqtt::itoken& tok) {
+	void on_failure(const mqtt::itoken& tok) override {
 		action_listener::on_failure(tok);
 		done_ = true;
 	}
 
-	virtual void on_success(const mqtt::itoken& tok) {
+	void on_success(const mqtt::itoken& tok) override {
 		action_listener::on_success(tok);
 		done_ = true;
 	}

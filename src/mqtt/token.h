@@ -156,7 +156,7 @@ public:
 	 * Return the async listener for this token.
 	 * @return iaction_listener
 	 */
-	virtual iaction_listener* get_action_callback() const {
+	iaction_listener* get_action_callback() const override {
 		// TODO: Guard?
 		return listener_;
 	}
@@ -165,20 +165,15 @@ public:
 	 * asynchronous action.
 	 * @return iasync_client
 	 */
-	virtual iasync_client* get_client() const {
+	iasync_client* get_client() const override {
 		return cli_;
 	}
-	/**
-	 * Returns an exception providing more detail if an operation failed.
-	 * @return Exception
-	 */
-	//virtual exception get_exception();
 	/**
 	 * Returns the message ID of the message that is associated with the
 	 * token.
 	 * @return int
 	 */
-	virtual int get_message_id() const {
+	int get_message_id() const override {
 		static_assert(sizeof(tok_) == sizeof(int), "MQTTAsync_token must fit into int");
 		return static_cast<int>(tok_);
 	}
@@ -186,13 +181,13 @@ public:
 	 * Returns the topic string(s) for the action being tracked by this
 	 * token.
 	 */
-	virtual const std::vector<std::string>& get_topics() const {
+	const std::vector<std::string>& get_topics() const override {
 		return topics_;
 	}
 	/**
 	 * Retrieve the context associated with an action.
 	 */
-	virtual void* get_user_context() const {
+	void* get_user_context() const override {
 		guard g(lock_);
 		return userContext_;
 	}
@@ -200,12 +195,12 @@ public:
 	 * Returns whether or not the action has finished.
 	 * @return bool
 	 */
-	virtual bool is_complete() const { return complete_; }
+	bool is_complete() const override { return complete_; }
 	/**
 	 * Register a listener to be notified when an action completes.
 	 * @param listener
 	 */
-	virtual void set_action_callback(iaction_listener& listener) {
+	void set_action_callback(iaction_listener& listener) override {
 		guard g(lock_);
 		listener_ = &listener;
 	}
@@ -213,7 +208,7 @@ public:
 	 * Store some context associated with an action.
 	 * @param userContext
 	 */
-	virtual void set_user_context(void* userContext) {
+	void set_user_context(void* userContext) override {
 		guard g(lock_);
 		userContext_ = userContext;
 	}
@@ -221,13 +216,13 @@ public:
 	 * Blocks the current thread until the action this token is associated
 	 * with has completed.
 	 */
-	virtual void wait_for_completion();
+	void wait_for_completion() override;
 	/**
 	 * Blocks the current thread until the action this token is associated
 	 * with has completed.
 	 * @param timeout The timeout (in milliseconds)
 	 */
-	virtual void wait_for_completion(long timeout);
+	void wait_for_completion(long timeout) override;
 	/**
 	 * Waits a relative amount of time for the action to complete.
 	 * @param relTime The amount of time to wait for the event.
