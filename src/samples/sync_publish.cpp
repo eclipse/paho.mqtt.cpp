@@ -55,31 +55,31 @@ public:
 	sample_mem_persistence() : open_(false) {}
 
 	// "Open" the store
-	virtual void open(const std::string& clientId, const std::string& serverURI) {
+	void open(const std::string& clientId, const std::string& serverURI) override {
 		std::cout << "[Opening persistence store for '" << clientId
 			<< "' at '" << serverURI << "']" << std::endl;
 		open_ = true;
 	}
 
 	// Close the persistent store that was previously opened.
-	virtual void close() {
+	void close() override {
 		std::cout << "[Closing persistence store.]" << std::endl;
 		open_ = false;
 	}
 
 	// Clears persistence, so that it no longer contains any persisted data.
-	virtual void clear() {
+	void clear() override {
 		std::cout << "[Clearing persistence store.]" << std::endl;
 		store_.clear();
 	}
 
 	// Returns whether or not data is persisted using the specified key.
-	virtual bool contains_key(const std::string &key) {
+	bool contains_key(const std::string &key) override {
 		return store_.find(key) != store_.end();
 	}
 
 	// Gets the specified data out of the persistent store.
-	virtual mqtt::ipersistable_ptr get(const std::string& key) const {
+	mqtt::ipersistable_ptr get(const std::string& key) const override {
 		std::cout << "[Searching persistence for key '"
 			<< key << "']" << std::endl;
 		auto p = store_.find(key);
@@ -93,7 +93,7 @@ public:
 	/**
 	 * Returns the keys in this persistent data store.
 	 */
-	virtual std::vector<std::string> keys() const {
+	std::vector<std::string> keys() const override {
 		std::vector<std::string> ks;
 		for (const auto& k : store_)
 			ks.push_back(k.first);
@@ -101,7 +101,7 @@ public:
 	}
 
 	// Puts the specified data into the persistent store.
-	virtual void put(const std::string& key, mqtt::ipersistable_ptr persistable) {
+	void put(const std::string& key, mqtt::ipersistable_ptr persistable) override {
 		std::cout << "[Persisting data with key '"
 			<< key << "']" << std::endl;
 
@@ -109,7 +109,7 @@ public:
 	}
 
 	// Remove the data for the specified key.
-	virtual void remove(const std::string &key) {
+	void remove(const std::string &key) override {
 		std::cout << "[Persistence removing key '" << key << "']" << std::endl;
 		auto p = store_.find(key);
 		if (p == store_.end())
@@ -124,17 +124,17 @@ public:
 class callback : public virtual mqtt::callback
 {
 public:
-	virtual void connection_lost(const std::string& cause) {
+	void connection_lost(const std::string& cause) override {
 		std::cout << "\nConnection lost" << std::endl;
 		if (!cause.empty())
 			std::cout << "\tcause: " << cause << std::endl;
 	}
 
 	// We're not subscrived to anything, so this should never be called.
-	virtual void message_arrived(const std::string& topic,
-								 mqtt::const_message_ptr msg) {}
+	void message_arrived(const std::string& topic,
+								 mqtt::const_message_ptr msg) override {}
 
-	virtual void delivery_complete(mqtt::idelivery_token_ptr tok) {
+	void delivery_complete(mqtt::idelivery_token_ptr tok) override {
 		std::cout << "\n\t[Delivery complete for token: "
 			<< (tok ? tok->get_message_id() : -1) << "]" << std::endl;
 	}

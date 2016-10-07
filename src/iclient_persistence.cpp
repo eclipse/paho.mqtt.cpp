@@ -48,18 +48,18 @@ public:
 				payload_(static_cast<const uint8_t*>(payload)), payloadlen_(payloadlen) 
 	{}
 
-	virtual const uint8_t* get_header_bytes() const { return hdr_; }
-	virtual size_t get_header_length() const { return hdrlen_; }
-	virtual size_t get_header_offset() const { return 0; }
+	const uint8_t* get_header_bytes() const override { return hdr_; }
+	size_t get_header_length() const override { return hdrlen_; }
+	size_t get_header_offset() const override { return 0; }
 
-	virtual const uint8_t* get_payload_bytes() const { return payload_; }
-	virtual size_t get_payload_length() const { return payloadlen_; }
-	virtual size_t get_payload_offset() const { return 0; }
+	const uint8_t* get_payload_bytes() const override { return payload_; }
+	size_t get_payload_length() const override { return payloadlen_; }
+	size_t get_payload_offset() const override { return 0; }
 
-	virtual std::vector<uint8_t> get_header_byte_arr() const {
+	std::vector<uint8_t> get_header_byte_arr() const override {
 		return std::vector<uint8_t>(hdr_, hdr_+hdrlen_);
 	}
-	virtual std::vector<uint8_t> get_payload_byte_arr() const {
+	std::vector<uint8_t> get_payload_byte_arr() const override {
 		return std::vector<uint8_t>(payload_, payload_+payloadlen_);
 	}
 };
