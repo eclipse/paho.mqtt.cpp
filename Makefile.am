@@ -89,7 +89,7 @@ include_HEADERS += src/mqtt/ssl_options.h
 if PAHO_BUILD_SAMPLES
 
 ###############################################################################
-# Samples: binaries to build
+# Samples: names
 ###############################################################################
 
 bin_PROGRAMS  = async_publish
@@ -134,6 +134,37 @@ async_subscribe_LDADD = $(COMMONLDFLAGS)
 sync_publish_LDADD = $(COMMONLDFLAGS)
 
 endif
+
+###############################################################################
+# Test: names
+###############################################################################
+
+check_PROGRAMS  = mqttpp-unittest
+
+TESTS = $(check_PROGRAMS)
+
+###############################################################################
+# Test: source code
+###############################################################################
+
+mqttpp_unittest_SOURCES = test/unit/test.cpp
+
+###############################################################################
+# Test: compiler flags
+###############################################################################
+
+mqttpp_unittest_CXXFLAGS  = $(CXXFLAGS)
+mqttpp_unittest_CXXFLAGS += -I $(srcdir)/src
+
+###############################################################################
+# Test: linker flags
+###############################################################################
+
+mqttpp_unittest_LDFLAGS  = $(LDFLAGS)
+mqttpp_unittest_LDFLAGS += $(LIBS)
+
+mqttpp_unittest_LDADD  = libpaho-mqttpp3.la
+mqttpp_unittest_LDADD += -lcppunit
 
 ###############################################################################
 # Documentation
