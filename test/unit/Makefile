@@ -16,7 +16,7 @@ PAHO_CPP_INC_DIR ?= $(abspath ../..)/src
 TGT = mqttpp-unittest
 
 .PHONY: all
-all: $(TGT)
+all: $(TGT) run
 
 ifneq ($(CROSS_COMPILE),)
   CC  = $(CROSS_COMPILE)gcc
@@ -53,6 +53,8 @@ LDLIBS += -ldl
 $(TGT): test.cpp $(HDR_TESTS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS)
 
+run: $(TGT)
+	LD_LIBRARY_PATH=$(PAHO_C_LIB_DIR):$(PAHO_CPP_LIB_DIR) ./$(TGT)
 
 .PHONY: clean distclean dump
 

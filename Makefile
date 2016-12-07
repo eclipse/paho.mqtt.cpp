@@ -24,6 +24,7 @@ INSTALL_DATA =  $(INSTALL) -m 644
 
 SRC_DIR ?= src
 INC_DIR ?= src
+TEST_DIR ?= test
 
 LIB_DIR ?= $(CROSS_COMPILE)lib
 OBJ_DIR ?= $(CROSS_COMPILE)obj
@@ -167,6 +168,10 @@ distclean: clean
 samples: $(SRC_DIR)/samples $(LIB_DIR)/$(LIB_LINK)
 	$(MAKE) -C $<
 
+.PHONY: check
+check: $(TEST_DIR)/unit $(LIB_DIR)/$(LIB_LINK)
+	$(MAKE) -C $<
+
 # ----- Installation targets -----
 
 strip_options:
@@ -196,4 +201,3 @@ $(OBJ_DIR)/%.dep: %.cpp
 	$(QUIET) $(CXX) -M $(CPPFLAGS) $(CXXFLAGS) $< > $@.$$$$; \
 	sed 's,\($*\)\.o[ :]*,$$(OBJ_DIR)/\1.o $@ : ,g' < $@.$$$$ > $@; \
 	$(RM) $@.$$$$
-

@@ -1,6 +1,7 @@
 lib/
 \.hg/
 \.hgignore
+\test/unit/mqttpp-unittest
 .deps/
 .libs/
 *.vp*
