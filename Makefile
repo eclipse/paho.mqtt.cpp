@@ -130,11 +130,11 @@ $(TGT): $(OBJS)
 	@echo Creating library: $@
 	$(QUIET) $(CC) $(LDFLAGS) -o $@ $^ $(LIB_DEP_FLAGS)
 
-$(LIB_DIR)/$(LIB_LINK): $(LIB_DIR)/$(LIB_MAJOR_LINK)
-	$(QUIET) cd $(LIB_DIR) ; $(RM) $(LIB_LINK) ; ln -s $(LIB_MAJOR_LINK) $(LIB_LINK)
-
 $(LIB_DIR)/$(LIB_MAJOR_LINK): $(TGT)
 	$(QUIET) cd $(LIB_DIR) ; $(RM) $(LIB_MAJOR_LINK) ; ln -s $(LIB) $(LIB_MAJOR_LINK)
+
+$(LIB_DIR)/$(LIB_LINK): $(LIB_DIR)/$(LIB_MAJOR_LINK)
+	$(QUIET) cd $(LIB_DIR) ; $(RM) $(LIB_LINK) ; ln -s $(LIB_MAJOR_LINK) $(LIB_LINK)
 
 .PHONY: dump
 dump:
@@ -162,7 +162,7 @@ distclean: clean
 	$(QUIET) rm -rf $(OBJ_DIR) $(LIB_DIR)
 
 .PHONY: samples
-samples: $(SRC_DIR)/samples
+samples: $(SRC_DIR)/samples $(LIB_DIR)/$(LIB_LINK)
 	$(MAKE) -C $<
 
 # ----- Installation targets -----
