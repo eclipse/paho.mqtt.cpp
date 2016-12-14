@@ -149,5 +149,4 @@ void ssl_options::set_enable_server_cert_auth(bool enableServerCertAuth)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-
 } // end namespace mqtt

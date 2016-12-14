@@ -19,6 +19,7 @@
 
 #include "message_test.h"
 #include "will_options_test.h"
+#include "ssl_options_test.h"
 #include "connect_options_test.h"
 
 using namespace CppUnit;
@@ -29,6 +30,7 @@ int main(int argc, char* argv[])
 {
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::message_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::will_options_test );
+	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::ssl_options_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::connect_options_test );
 
 	TextUi::TestRunner runner;
