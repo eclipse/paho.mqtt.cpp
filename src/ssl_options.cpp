@@ -28,6 +28,28 @@ ssl_options::ssl_options() : opts_(MQTTAsync_SSLOptions_initializer)
 {
 }
 
+ssl_options::ssl_options(
+		const std::string& trustStore,
+		const std::string& keyStore,
+		const std::string& privateKey,
+		const std::string& privateKeyPassword,
+		const std::string& enabledCipherSuites,
+		const bool enableServerCertAuth)
+		: opts_(MQTTAsync_SSLOptions_initializer),
+		  trustStore_(trustStore),
+		  keyStore_(keyStore),
+		  privateKey_(privateKey),
+		  privateKeyPassword_(privateKeyPassword),
+		  enabledCipherSuites_(enabledCipherSuites)
+{
+	opts_.trustStore = trustStore_.empty() ? nullptr : trustStore_.c_str();
+	opts_.keyStore = keyStore_.empty() ? nullptr : keyStore_.c_str();
+	opts_.privateKey = privateKey_.empty() ? nullptr : privateKey_.c_str();
+	opts_.privateKeyPassword = privateKeyPassword_.empty() ? nullptr : privateKeyPassword_.c_str();
+	opts_.enabledCipherSuites = enabledCipherSuites_.empty() ? nullptr : enabledCipherSuites_.c_str();
+	opts_.enableServerCertAuth = enableServerCertAuth;
+}
+
 ssl_options::ssl_options(const ssl_options& opt)
 		: opts_(opt.opts_), trustStore_(opt.trustStore_), keyStore_(opt.keyStore_),
 			privateKey_(opt.privateKey_), privateKeyPassword_(opt.privateKeyPassword_),

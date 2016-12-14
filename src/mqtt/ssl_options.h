@@ -84,6 +84,27 @@ public:
 	 */
 	ssl_options();
 	/**
+	 * Argument constructor.
+	 * @param trustStore The file containing the public digital certificates
+	 * trusted by the client.
+	 * @param keyStore The file containing the public certificate chain of the
+	 * client.
+	 * @param privateKey The file containing the client's private key.
+	 * @param privateKeyPassword The password to load the client's privateKey
+	 * if encrypted.
+	 * @param enabledCipherSuites The list of cipher suites that the client
+	 * will present to the server during the SSL handshake.
+	 * @param enableServerCertAuth True/False option to enable verification of
+	 * the server certificate
+	 */
+	ssl_options(
+			const std::string& trustStore,
+			const std::string& keyStore,
+			const std::string& privateKey,
+			const std::string& privateKeyPassword,
+			const std::string& enabledCipherSuites,
+			const bool enableServerCertAuth);
+	/**
 	 * Copy constructor.
 	 * @param opt The other options to copy.
 	 */
