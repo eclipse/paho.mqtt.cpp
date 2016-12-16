@@ -32,6 +32,11 @@ void disconnect_options::set_context(token* tok)
 	}
 }
 
+token* disconnect_options::get_context()
+{
+	return static_cast<token*>(opts_.context);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // end namespace 'mqtt'
 }
