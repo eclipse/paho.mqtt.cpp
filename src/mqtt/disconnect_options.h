@@ -15,6 +15,8 @@ extern "C" {
 
 namespace mqtt {
 
+class disconnect_options_test;
+
 /////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -26,6 +28,7 @@ class disconnect_options
 
 	/** The client has special access */
 	friend class async_client;
+	friend class disconnect_options_test;
 
 public:
 	/**
@@ -67,4 +70,3 @@ public:
 }
 
 #endif		// __mqtt_disconnect_options_h
-
