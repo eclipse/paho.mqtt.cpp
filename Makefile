@@ -30,7 +30,11 @@ OBJ_DIR ?= $(CROSS_COMPILE)obj
 
 ifdef DEVELOP
   PAHO_C_DIR := $(abspath ../paho.mqtt.c)
+  PAHO_C_LIB_DIR ?= $(PAHO_C_DIR)/build/output
   PAHO_C_INC_DIR ?= $(PAHO_C_DIR)/src
+else
+  PAHO_C_LIB_DIR ?= /usr/local/lib
+  PAHO_C_INC_DIR ?= /usr/local/include
 endif
 
 vpath %.cpp $(SRC_DIR)
@@ -110,9 +114,7 @@ LIB_DEP_FLAGS += $(addprefix -l,$(LIB_DEPS))
 
 LDFLAGS := -g -shared -Wl,-soname,$(LIB_MAJOR_LINK) -L$(LIB_DIR)
 
-ifdef DEVELOP
-  LDFLAGS += -L$(PAHO_C_DIR)/build/output
-endif
+LDFLAGS += -L$(PAHO_C_LIB_DIR)
 
 
 # ----- Compiler directives -----
