@@ -29,6 +29,8 @@ TEST_DIR ?= test
 LIB_DIR ?= $(CROSS_COMPILE)lib
 OBJ_DIR ?= $(CROSS_COMPILE)obj
 
+COV_DIR ?= $(CROSS_COMPILE)cov
+
 ifdef DEVELOP
   PAHO_C_DIR := $(abspath ../paho.mqtt.c)
   PAHO_C_LIB_DIR ?= $(PAHO_C_DIR)/build/output
@@ -117,6 +119,10 @@ LDFLAGS := -g -shared -Wl,-soname,$(LIB_MAJOR_LINK) -L$(LIB_DIR)
 
 LDFLAGS += -L$(PAHO_C_LIB_DIR)
 
+ifdef COVERAGE
+  CXXFLAGS += -fprofile-arcs -ftest-coverage
+  LDFLAGS += -fprofile-arcs -pg -lgcov
+endif
 
 # ----- Compiler directives -----
 
@@ -171,6 +177,13 @@ samples: $(SRC_DIR)/samples $(LIB_DIR)/$(LIB_LINK)
 .PHONY: check
 check: $(TEST_DIR)/unit $(LIB_DIR)/$(LIB_LINK)
 	$(MAKE) -C $<
+
+.PHONY: coverage
+coverage:
+	$(MAKE) COVERAGE=1 test
+	lcov --directory $(OBJ_DIR) --base-directory ./ --capture --output-file coverage.info
+	genhtml coverage.info -o $(COV_DIR)
+	firefox $(COV_DIR)/index.html
 
 # ----- Installation targets -----
 
