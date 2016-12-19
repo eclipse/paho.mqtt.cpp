@@ -11,6 +11,8 @@ else
   PAHO_C_INC_DIR ?= /usr/local/include
 endif
 
+PAHO_CPP_INC_DIR ?= $(abspath ../..)/src
+
 TGT = mqttpp-unittest
 
 .PHONY: all
@@ -26,7 +28,7 @@ endif
 HDR_TESTS = $(wildcard *.h)
 
 CXXFLAGS += -Wall -std=c++11
-CPPFLAGS += -I../../src -I$(PAHO_C_INC_DIR)
+CPPFLAGS += -I$(PAHO_CPP_INC_DIR) -I$(PAHO_C_INC_DIR)
 
 ifdef DEBUG
   CPPFLAGS += -DDEBUG
