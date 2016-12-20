@@ -22,6 +22,7 @@
 #include "ssl_options_test.h"
 #include "connect_options_test.h"
 #include "disconnect_options_test.h"
+#include "iclient_persistence_test.h"
 
 using namespace CppUnit;
 
@@ -34,6 +35,7 @@ int main(int argc, char* argv[])
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::ssl_options_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::connect_options_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::disconnect_options_test );
+	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::iclient_persistence_test );
 
 	TextUi::TestRunner runner;
 	TestFactoryRegistry &registry = TestFactoryRegistry::getRegistry();
