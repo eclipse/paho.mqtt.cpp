@@ -1,4 +1,9 @@
-// topic.cpp
+/////////////////////////////////////////////////////////////////////////////
+/// @file version.h
+/// Declaration of MQTT version info
+/// @date Dec 31, 2016
+/// @author Luis Castedo
+/////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
  * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
@@ -13,31 +18,22 @@
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
- *    Frank Pagliughi - initial implementation and documentation
+ *    L - initial implementation and documentation
  *******************************************************************************/
 
+#ifndef __mqtt_version_h
+#define __mqtt_version_h
 
-#include "mqtt/topic.h"
-#include "mqtt/async_client.h"
+#include <string>
 
 namespace mqtt {
 
-/////////////////////////////////////////////////////////////////////////////
-
-idelivery_token_ptr topic::publish(const void* payload, size_t n,
-								   int qos, bool retained)
-{
-	return cli_->publish(name_, payload, n, qos, retained);
-}
-
-idelivery_token_ptr topic::publish(const_message_ptr msg)
-{
-	return cli_->publish(name_, msg);
-}
+extern const uint32_t    VERSION;
+extern const std::string VERSION_STR, COPYRIGHT;
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
 }
 
-
+#endif // __mqtt_version_h
 

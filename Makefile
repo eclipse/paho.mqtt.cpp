@@ -5,7 +5,10 @@
 # SRC_IGNORE = this.c that.cpp
 #
 
-MODULE = mqttpp
+MODULE = paho-mqttpp3
+
+# Define CROSS_COMPILE to specify a prefix for GCC
+#CROSS_COMPILE=arm-linux-gnueabihf-
 
 # ----- Tools -----
 
@@ -13,25 +16,49 @@ ifndef VERBOSE
   QUIET := @
 endif
 
+ifndef INSTALL
+INSTALL = install
+endif
+INSTALL_PROGRAM = $(INSTALL)
+INSTALL_DATA =  $(INSTALL) -m 644
+
 # ----- Directories -----
 
-LIB_DIR ?= lib
-OBJ_DIR ?= obj
 SRC_DIR ?= src
-INC_DIR ?= $(SRC_DIR)
+INC_DIR ?= src
 
-PAHO_C_HEADERS ?= /usr/local/include
+LIB_DIR ?= $(CROSS_COMPILE)lib
+OBJ_DIR ?= $(CROSS_COMPILE)obj
 
-INC_DIRS += $(INC_DIR) $(PAHO_C_HEADERS)
+ifdef DEVELOP
+  PAHO_C_INC_DIR ?= $(abspath ../paho.mqtt.c)/src
+else
+  PAHO_C_INC_DIR ?= /usr/local/include
+endif
+
+vpath %.cpp $(SRC_DIR)
+
+INC_DIRS += $(INC_DIR) $(PAHO_C_INC_DIR)
 
 _MK_OBJ_DIR := $(shell mkdir -p $(OBJ_DIR))
 _MK_LIB_DIR := $(shell mkdir -p $(LIB_DIR))
+
+ifndef prefix
+	prefix = /usr/local
+endif
+
+ifndef exec_prefix
+	exec_prefix = ${prefix}
+endif
+
+includedir = $(prefix)/include
+libdir = $(exec_prefix)/lib
 
 # ----- Definitions for the shared library -----
 
 LIB_BASE  ?= $(MODULE)
 LIB_MAJOR ?= 0
-LIB_MINOR ?= 1
+LIB_MINOR ?= 2
 
 LIB_LINK = lib$(LIB_BASE).so
 LIB_MAJOR_LINK = $(LIB_LINK).$(LIB_MAJOR)
@@ -42,19 +69,26 @@ TGT = $(LIB_DIR)/$(LIB)
 
 # ----- Sources -----
 
-SRCS += $(wildcard $(SRC_DIR)/*.cpp)
+SRCS += $(notdir $(wildcard $(SRC_DIR)/*.cpp))
 
 ifdef SRC_IGNORE
   SRCS := $(filter-out $(SRC_IGNORE),$(SRCS))
 endif
 
-OBJS := $(subst $(SRC_DIR),$(OBJ_DIR),$(SRCS:.cpp=.o))
+OBJS := $(addprefix $(OBJ_DIR)/,$(SRCS:.cpp=.o))
 DEPS := $(OBJS:.o=.dep)
 
 # ----- Compiler flags, etc -----
 
-CXXFLAGS += -std=c++0x
+ifneq ($(CROSS_COMPILE),)
+  CC  = $(CROSS_COMPILE)gcc
+  CXX = $(CROSS_COMPILE)g++
+  AR  = $(CROSS_COMPILE)ar
+  LD  = $(CROSS_COMPILE)ld
+endif
+
 CPPFLAGS += -Wall -fPIC
+CXXFLAGS += -std=c++11
 
 ifdef DEBUG
   DEFS += DEBUG
@@ -66,7 +100,7 @@ endif
 
 CPPFLAGS += $(addprefix -D,$(DEFS)) $(addprefix -I,$(INC_DIRS))
 
-LIB_DEPS += c stdc++ pthread 
+LIB_DEPS += c stdc++ pthread
 
 LIB_DEP_FLAGS += $(addprefix -l,$(LIB_DEPS))
 
@@ -74,7 +108,7 @@ LDFLAGS := -g -shared -Wl,-soname,$(LIB_MAJOR_LINK) -L$(LIB_DIR)
 
 # ----- Compiler directives -----
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+$(OBJ_DIR)/%.o: %.cpp
 	@echo $(CXX) $<
 	$(QUIET) $(COMPILE.cpp) $(OUTPUT_OPTION) $<
 
@@ -82,11 +116,6 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 .PHONY: all
 all: $(TGT) $(LIB_DIR)/$(LIB_LINK) $(LIB_DIR)/$(LIB_MAJOR_LINK)
-
-# This might work for a static library
-#$(TGT): $(OBJS)
-#	@echo Creating library: $@
-#	$(QUIET) $(AR) $(ARFLAGS) $@ $^
 
 $(TGT): $(OBJS)
 	@echo Creating library: $@
@@ -104,6 +133,7 @@ dump:
 	@echo TGT=$(TGT)
 	@echo LIB_DIR=$(LIB_DIR)
 	@echo OBJ_DIR=$(OBJ_DIR)
+	@echo INC_DIRS=$(INC_DIRS)
 	@echo CFLAGS=$(CFLAGS)
 	@echo CPPFLAGS=$(CPPFLAGS)
 	@echo CXX=$(CXX)
@@ -121,6 +151,27 @@ clean:
 .PHONY: distclean
 distclean: clean
 	$(QUIET) rm -rf $(OBJ_DIR) $(LIB_DIR)
+
+.PHONY: samples
+samples: $(SRC_DIR)/samples
+	$(MAKE) -C $<
+
+# ----- Installation targets -----
+
+strip_options:
+	$(eval INSTALL_OPTS := -s)
+
+install-strip: $(TGT) strip_options install
+
+install: $(TGT)
+	$(INSTALL_DATA) ${INSTALL_OPTS} ${TGT} $(DESTDIR)${libdir}
+	ln -s $(DESTDIR)${libdir}/$(LIB) $(DESTDIR)${libdir}/$(LIB_MAJOR_LINK)
+	ln -s $(DESTDIR)${libdir}/$(LIB_MAJOR_LINK) $(DESTDIR)${libdir}/$(LIB_LINK)
+
+uninstall:
+	rm $(DESTDIR)${libdir}/${LIB}
+	rm $(DESTDIR)${libdir}/$(LIB_MAJOR_LINK)
+	rm $(DESTDIR)${libdir}/$(LIB_LINK)
 
 # ----- Header dependencies -----
 

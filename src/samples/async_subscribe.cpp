@@ -1,13 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2013 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
@@ -39,14 +39,14 @@ class action_listener : public virtual mqtt::iaction_listener
 	virtual void on_failure(const mqtt::itoken& tok) {
 		std::cout << name_ << " failure";
 		if (tok.get_message_id() != 0)
-			std::cout << " (token: " << tok.get_message_id() << ")" << std::endl;
+			std::cout << " for token: [" << tok.get_message_id() << "]" << std::endl;
 		std::cout << std::endl;
 	}
 
 	virtual void on_success(const mqtt::itoken& tok) {
 		std::cout << name_ << " success";
 		if (tok.get_message_id() != 0)
-			std::cout << " (token: " << tok.get_message_id() << ")" << std::endl;
+			std::cout << " for token: [" << tok.get_message_id() << "]" << std::endl;
 		if (!tok.get_topics().empty())
 			std::cout << "\ttoken topic: '" << tok.get_topics()[0] << "', ..." << std::endl;
 		std::cout << std::endl;
@@ -58,22 +58,25 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Local callback & listener class for use with the client connection.
+ * This is primarily intended to receive messages, but it will also monitor
+ * the connection to the broker. If the connection is lost, it will attempt
+ * to restore the connection and re-subscribe to the topic.
+ */
 class callback : public virtual mqtt::callback,
 					public virtual mqtt::iaction_listener
 
 {
 	int nretry_;
 	mqtt::async_client& cli_;
-	action_listener& listener_;
+	mqtt::connect_options& connOpts_;
+	action_listener subListener_;
 
 	void reconnect() {
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		mqtt::connect_options connOpts;
-		connOpts.set_keep_alive_interval(20);
-		connOpts.set_clean_session(true);
-
+		std::this_thread::sleep_for(std::chrono::milliseconds(2500));
 		try {
-			cli_.connect(connOpts, nullptr, *this);
+			cli_.connect(connOpts_, nullptr, *this);
 		}
 		catch (const mqtt::exception& exc) {
 			std::cerr << "Error: " << exc.what() << std::endl;
@@ -83,7 +86,7 @@ class callback : public virtual mqtt::callback,
 
 	// Re-connection failure
 	virtual void on_failure(const mqtt::itoken& tok) {
-		std::cout << "Reconnection failed." << std::endl;
+		std::cout << "Connection failed" << std::endl;
 		if (++nretry_ > 5)
 			exit(1);
 		reconnect();
@@ -91,8 +94,13 @@ class callback : public virtual mqtt::callback,
 
 	// Re-connection success
 	virtual void on_success(const mqtt::itoken& tok) {
-		std::cout << "Reconnection success" << std::endl;;
-		cli_.subscribe(TOPIC, QOS, nullptr, listener_);
+		std::cout << "\nConnection success" << std::endl;
+		std::cout << "\nSubscribing to topic '" << TOPIC << "'\n"
+			<< "\tfor client " << CLIENTID
+			<< " using QoS" << QOS << "\n"
+			<< "Press Q<Enter> to quit\n" << std::endl;
+
+		cli_.subscribe(TOPIC, QOS, nullptr, subListener_);
 	}
 
 	virtual void connection_lost(const std::string& cause) {
@@ -100,12 +108,12 @@ class callback : public virtual mqtt::callback,
 		if (!cause.empty())
 			std::cout << "\tcause: " << cause << std::endl;
 
-		std::cout << "Reconnecting." << std::endl;
+		std::cout << "Reconnecting..." << std::endl;
 		nretry_ = 0;
 		reconnect();
 	}
 
-	virtual void message_arrived(const std::string& topic, mqtt::message_ptr msg) {
+	virtual void message_arrived(const std::string& topic, mqtt::const_message_ptr msg) {
 		std::cout << "Message arrived" << std::endl;
 		std::cout << "\ttopic: '" << topic << "'" << std::endl;
 		std::cout << "\t'" << msg->to_str() << "'\n" << std::endl;
@@ -114,43 +122,45 @@ class callback : public virtual mqtt::callback,
 	virtual void delivery_complete(mqtt::idelivery_token_ptr token) {}
 
 public:
-	callback(mqtt::async_client& cli, action_listener& listener) 
-				: cli_(cli), listener_(listener) {}
+	callback(mqtt::async_client& cli, mqtt::connect_options& connOpts)
+				: nretry_(0), cli_(cli), connOpts_(connOpts), subListener_("Subscription") {}
 };
 
 /////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[])
 {
-	mqtt::async_client client(ADDRESS, CLIENTID);
-	action_listener subListener("Subscription");
-
-	callback cb(client, subListener);
-	client.set_callback(cb);
-
 	mqtt::connect_options connOpts;
 	connOpts.set_keep_alive_interval(20);
 	connOpts.set_clean_session(true);
 
+	mqtt::async_client client(ADDRESS, CLIENTID);
+
+	callback cb(client, connOpts);
+	client.set_callback(cb);
+
+	// Start the connection.
+	// When completed, the callback will subscribe to topic.
+
 	try {
-		mqtt::itoken_ptr conntok = client.connect(connOpts);
-		std::cout << "Waiting for the connection..." << std::flush;
-		conntok->wait_for_completion();
-		std::cout << "OK" << std::endl;
+		std::cout << "Connecting to the MQTT server..." << std::flush;
+		client.connect(connOpts, nullptr, cb);
+	}
+	catch (const mqtt::exception& exc) {
+		std::cerr << "\nERROR: Unable to connect to MQTT server: " << ADDRESS << std::endl;
+		return 1;
+	}
 
-		std::cout << "Subscribing to topic " << TOPIC << "\n"
-			<< "for client " << CLIENTID
-			<< " using QoS" << QOS << "\n\n"
-			<< "Press Q<Enter> to quit\n" << std::endl;
+	// Just block till user tells us to quit.
 
-		client.subscribe(TOPIC, QOS, nullptr, subListener);
+	while (std::tolower(std::cin.get()) != 'q')
+		;
 
-		while (std::tolower(std::cin.get()) != 'q')
-			;
+	// Disconnect
 
-		std::cout << "Disconnecting..." << std::flush;
-		conntok = client.disconnect();
-		conntok->wait_for_completion();
+	try {
+		std::cout << "\nDisconnecting from the MQTT server..." << std::flush;
+		client.disconnect()->wait_for_completion();
 		std::cout << "OK" << std::endl;
 	}
 	catch (const mqtt::exception& exc) {
