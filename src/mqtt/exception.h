@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////  
 
 /*******************************************************************************
- * Copyright (c) 2013 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -38,40 +38,37 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////  
 
-/**
- * Provides a mechanism for tracking the completion of an asynchronous 
- * action. 
+/** 
+ * Base mqtt::exception. 
+ * This wraps the error codes which originate from the underlying C library.
  */
 class exception : public std::runtime_error
 {
+	/** The error code from the C library */
 	int code_;
 
 public:
 	explicit exception(int reasonCode) : std::runtime_error("mqtt::exception"),
 											code_(reasonCode) {}
 	/**
-	 * Returns the underlying cause of this exception, if available.
-	 */
-	//java.lang.Throwable 	getCause()
-	/**
 	 * Returns the detail message for this exception.
 	 */
-	std::string get_message()  const { return std::string(what()); }
+	std::string get_message() const { return std::string(what()); }
 	/**
 	 * Returns the reason code for this exception.
 	 */
 	int get_reason_code() const { return code_; }
 	/**
-	 * Returns a String representation of this exception. 
-	 * @return std::tring 
+	 * Gets a string representation of this exception. 
+	 * @return A string representation of this exception. 
 	 */
-	std::string to_str() const { return std::string(what()); }
+	std::string to_str() const { return get_message(); }
 	/**
 	 * Returns an explanatory string for the exception.
 	 * @return const char* 
 	 */
 	virtual const char* what() const noexcept {
-		return std::exception::what();
+		return (std::string("MQTT exception ")+std::to_string(code_)).c_str();
 	}
 };
 
