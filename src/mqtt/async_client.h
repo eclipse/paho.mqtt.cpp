@@ -28,6 +28,7 @@ extern "C" {
 	#include "MQTTAsync.h"
 }
 
+#include "mqtt/version.h"
 #include "mqtt/token.h"
 #include "mqtt/delivery_token.h"
 #include "mqtt/iclient_persistence.h"
@@ -43,10 +44,6 @@ extern "C" {
 #include <stdexcept>
 
 namespace mqtt {
-
-const uint32_t		VERSION = 0x00030000;
-const std::string	VERSION_STR("mqttpp v. 0.3"),
-					COPYRIGHT("Copyright (c) 2013-2016 Frank Pagliughi");
 
 /////////////////////////////////////////////////////////////////////////////
 
