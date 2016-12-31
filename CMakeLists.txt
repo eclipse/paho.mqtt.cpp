@@ -27,7 +27,7 @@ set(MQTTPP_VERSION_PATCH 0)
 set(MQTTPP_VERSION ${MQTTPP_VERSION_MAJOR}.${MQTTPP_VERSION_MINOR}.${MQTTPP_VERSION_PATCH})
 
 ## build options
-set(PAHO_BUILD_DOCUMENTATION FALSE CACHE BOOL "Create and install the HTML based API documentation (requires Doxygen)")
+set(MQTTPP_BUILD_DOCUMENTATION FALSE CACHE BOOL "Create and install the HTML based API documentation (requires Doxygen)")
 set(MQTTPP_BUILD_SAMPLES FALSE CACHE BOOL "Build sample programs")
 
 # packaging settings
@@ -57,6 +57,6 @@ if(MQTTPP_BUILD_SAMPLES)
     add_subdirectory(src/samples)
 endif()
 
-if(PAHO_BUILD_DOCUMENTATION)
+if(MQTTPP_BUILD_DOCUMENTATION)
     add_subdirectory(doc)
 endif()
