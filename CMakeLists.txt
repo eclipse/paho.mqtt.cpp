@@ -29,6 +29,7 @@ set(MQTTPP_VERSION ${MQTTPP_VERSION_MAJOR}.${MQTTPP_VERSION_MINOR}.${MQTTPP_VERS
 ## build options
 set(MQTTPP_BUILD_DOCUMENTATION FALSE CACHE BOOL "Create and install the HTML based API documentation (requires Doxygen)")
 set(MQTTPP_BUILD_SAMPLES FALSE CACHE BOOL "Build sample programs")
+set(MQTTPP_BUILD_TESTS FALSE CACHE BOOL "Build test programs")
 
 # packaging settings
 set(CPACK_PACKAGE_VERSION_MAJOR ${MQTTPP_VERSION_MAJOR})
@@ -55,6 +56,11 @@ add_subdirectory(src)
 
 if(MQTTPP_BUILD_SAMPLES)
     add_subdirectory(src/samples)
+endif()
+
+if(MQTTPP_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(test/unit)
 endif()
 
 if(MQTTPP_BUILD_DOCUMENTATION)
