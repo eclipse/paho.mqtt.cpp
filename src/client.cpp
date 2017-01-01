@@ -2,15 +2,15 @@
 // Implementation of the client class for the mqtt C++ client library.
 
 /*******************************************************************************
- * Copyright (c) 2013 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
@@ -19,6 +19,8 @@
 
 
 #include "mqtt/client.h"
+#include <memory>
+#include <iostream>
 
 namespace mqtt {
 
@@ -37,7 +39,7 @@ client::client(const std::string& serverURI, const std::string& clientId,
 {
 }
 
-client::client(const std::string& serverURI, const std::string& clientId, 
+client::client(const std::string& serverURI, const std::string& clientId,
 			   iclient_persistence* persistence)
 			: cli_(serverURI, clientId, persistence), timeout_(-1)
 {
@@ -105,15 +107,23 @@ bool client::is_connected() const
 	return cli_.is_connected();
 }
 
-void client::publish(const std::string& top, const void* payload, size_t n, 
+void client::publish(const std::string& top, const void* payload, size_t n,
 					 int qos, bool retained)
 {
 	cli_.publish(top, payload, n, qos, retained)->wait_for_completion(timeout_);
 }
 
-void client::publish(const std::string& top, message_ptr msg)
+void client::publish(const std::string& top, const_message_ptr msg)
 {
 	cli_.publish(top, msg)->wait_for_completion(timeout_);
+}
+
+void client::publish(const std::string& top, const message& msg)
+{
+	std::shared_ptr<message> msgp(const_cast<message*>(&msg), [](message*){
+		std::cout << "Not destroying non-heap message" << std::endl;
+	});
+	cli_.publish(top, msgp)->wait_for_completion(timeout_);
 }
 
 void client::set_callback(callback& cb)
@@ -140,7 +150,7 @@ void client::subscribe(const topic_filter_collection& topicFilters)
 	cli_.subscribe(topicFilters, qos)->wait_for_completion(timeout_);
 }
 
-void client::subscribe(const topic_filter_collection& topicFilters, 
+void client::subscribe(const topic_filter_collection& topicFilters,
 					   const qos_collection& qos)
 {
 	cli_.subscribe(topicFilters, qos)->wait_for_completion(timeout_);
@@ -158,11 +168,7 @@ void client::unsubscribe(const std::string& topicFilter)
 
 void client::unsubscribe(const topic_filter_collection& topicFilters)
 {
-	qos_collection qos;
-	for (size_t i=0; i<topicFilters.size(); ++i)
-		qos.push_back(DFLT_QOS);
-
-	cli_.subscribe(topicFilters, qos)->wait_for_completion(timeout_);
+	cli_.unsubscribe(topicFilters)->wait_for_completion(timeout_);
 }
 
 /////////////////////////////////////////////////////////////////////////////

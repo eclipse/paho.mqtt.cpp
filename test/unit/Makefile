@@ -1,4 +1,4 @@
-# Makefile for the paho-mqttpp (C++) sample applications
+# Makefile for the paho-mqttpp (C++) unit tests
 
 ifdef DEVELOP
   PAHO_C_LIB_DIR ?= $(abspath ../../../paho.mqtt.c)/build/output
@@ -8,8 +8,10 @@ else
   PAHO_C_INC_DIR ?= /usr/local/include
 endif
 
+TGT = mqttpp-unittest
 
-all: async_publish async_subscribe sync_publish
+.PHONY: all
+all: $(TGT)
 
 ifneq ($(CROSS_COMPILE),)
   CC  = $(CROSS_COMPILE)gcc
@@ -18,8 +20,10 @@ ifneq ($(CROSS_COMPILE),)
   LD  = $(CROSS_COMPILE)ld
 endif
 
+HDR_TESTS = $(wildcard *.h)
+
 CXXFLAGS += -Wall -std=c++11
-CPPFLAGS += -I.. -I$(PAHO_C_INC_DIR)
+CPPFLAGS += -I../../src -I$(PAHO_C_INC_DIR)
 
 ifdef DEBUG
   CPPFLAGS += -DDEBUG
@@ -29,22 +33,22 @@ else
   CXXFLAGS += -O2
 endif
 
-LDLIBS += -L../../lib -L$(PAHO_C_LIB_DIR) -lpaho-mqttpp3 -lpaho-mqtt3a
+LDLIBS += -L../../lib -L$(PAHO_C_LIB_DIR) -lpaho-mqttpp3 -lpaho-mqtt3a -lcppunit -ldl
 
-async_publish: async_publish.cpp
+$(TGT): test.cpp $(HDR_TESTS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS)
 
-async_subscribe: async_subscribe.cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS)
 
-sync_publish: sync_publish.cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS)
-
-.PHONY: clean distclean
+.PHONY: clean distclean dump
 
 clean:
-	rm -f async_publish async_subscribe sync_publish
+	rm -f $(TGT)
 
 distclean: clean
+
+dump:
+	@echo CXX: $(CXX)
+	@echo Tests: $(HDR_TESTS)
+
 
 

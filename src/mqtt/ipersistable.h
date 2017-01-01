@@ -1,20 +1,20 @@
 /////////////////////////////////////////////////////////////////////////////
-/// @file ipersistable.h 
+/// @file ipersistable.h
 /// Declaration of MQTT ipersistable interface.
-/// @date May 24, 2013 
-/// @author Frank Pagliughi 
-/////////////////////////////////////////////////////////////////////////////  
+/// @date May 24, 2013
+/// @author Frank Pagliughi
+/////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
@@ -31,11 +31,11 @@ extern "C" {
 #include <string>
 #include <memory>
 #include <vector>
-#include <stdexcept> 
+#include <stdexcept>
 
 namespace mqtt {
 
-/////////////////////////////////////////////////////////////////////////////  
+/////////////////////////////////////////////////////////////////////////////
 
 /**
  * Represents an object used to pass data to be persisted across the
@@ -76,60 +76,65 @@ namespace mqtt {
 class ipersistable
 {
 public:
-	/**
-	 * Smart/shared pointer to this class.
-	 */
-	typedef std::shared_ptr<ipersistable> ptr_t;
+	/** Smart/shared pointer to an object of this class. */
+	using ptr_t = std::shared_ptr<ipersistable>;
+	/** Smart/shared pointer to a const object of this class. */
+	using const_ptr_t = std::shared_ptr<const ipersistable>;
+
 	/**
 	 * Virtual destructor
 	 */
 	virtual ~ipersistable() {}
 	/**
-	 * Returns the header bytes in an array. 
-	 * @return std::vector<uint8_t> 
+	 * Returns the header bytes in an array.
+	 * @return std::vector<uint8_t>
 	 */
 	virtual const uint8_t* get_header_bytes() const =0;
 	/**
-	 * Returns the header bytes in an array. 
-	 * @return std::vector<uint8_t> 
+	 * Returns the header bytes in an array.
+	 * @return std::vector<uint8_t>
 	 */
 	virtual std::vector<uint8_t> get_header_byte_arr() const =0;
 	/**
-	 * Returns the length of the header. 
-	 * @return int 
+	 * Returns the length of the header.
+	 * @return int
 	 */
 	virtual size_t get_header_length() const =0;
 	/**
-	 * Returns the offset of the header within the byte array returned by 
-	 * get_header_bytes(). 
-	 * @return int 
+	 * Returns the offset of the header within the byte array returned by
+	 * get_header_bytes().
+	 * @return int
 	 */
 	virtual size_t get_header_offset() const =0;
 	/**
 	 * Returns the payload bytes in an array.
-	 * @return std::vector<uint8_t> 
+	 * @return std::vector<uint8_t>
 	 */
 	virtual const uint8_t* get_payload_bytes() const =0;
 	/**
 	 * Returns the payload bytes in an array.
-	 * @return std::vector<uint8_t> 
+	 * @return std::vector<uint8_t>
 	 */
 	virtual std::vector<uint8_t> get_payload_byte_arr() const =0;
 	/**
 	 * Returns the length of the payload.
-	 * @return int 
+	 * @return int
 	 */
 	virtual size_t get_payload_length() const =0;
 	/**
-	 * Returns the offset of the payload within the byte array returned by 
-	 * get_payload_bytes(). 
-	 * 
-	 * @return int 
+	 * Returns the offset of the payload within the byte array returned by
+	 * get_payload_bytes().
+	 *
+	 * @return int
 	 */
 	virtual size_t get_payload_offset() const =0;
 };
 
-typedef ipersistable::ptr_t ipersistable_ptr;
+/** Smart/shared pointer to a persistable object */
+using ipersistable_ptr = ipersistable::ptr_t ;
+
+/** Smart/shared pointer to a const persistable object */
+using const_ipersistable_ptr = ipersistable::const_ptr_t ;
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
