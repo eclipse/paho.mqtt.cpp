@@ -38,13 +38,13 @@ connect_options::connect_options(const std::string& userName, const std::string&
 void connect_options::set_password(const std::string& password)
 {
 	password_ = password;
-	opts_.password = password_.c_str();
+	opts_.password = password_.empty() ? nullptr : password_.c_str();
 }
 
 void connect_options::set_user_name(const std::string& userName)
 {
 	userName_ = userName;
-	opts_.username = userName_.c_str();
+	opts_.username = userName_.empty() ? nullptr : userName_.c_str();
 }
 
 void connect_options::set_will(const will_options& will)
