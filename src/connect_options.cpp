@@ -33,6 +33,8 @@ connect_options::connect_options(const std::string& userName, const std::string&
 {
 	opts_.will = nullptr;
 	opts_.ssl = nullptr;
+	opts_.password = password_.c_str();
+	opts_.username = userName_.c_str();
 }
 
 void connect_options::set_password(const std::string& password)
