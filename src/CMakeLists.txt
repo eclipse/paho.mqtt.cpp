@@ -38,6 +38,7 @@ endif()
 set(COMMON_SRC
     async_client.cpp
     client.cpp
+    delivery_response_options.cpp
     disconnect_options.cpp
     iclient_persistence.cpp
     message.cpp

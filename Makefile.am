@@ -29,6 +29,7 @@ lib_LTLIBRARIES  = libpaho-mqttpp3.la
 
 libpaho_mqttpp3_la_SOURCES  = src/async_client.cpp
 libpaho_mqttpp3_la_SOURCES += src/client.cpp
+libpaho_mqttpp3_la_SOURCES += src/delivery_response_options.cpp
 libpaho_mqttpp3_la_SOURCES += src/disconnect_options.cpp
 libpaho_mqttpp3_la_SOURCES += src/iclient_persistence.cpp
 libpaho_mqttpp3_la_SOURCES += src/message.cpp

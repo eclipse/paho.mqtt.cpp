@@ -20,6 +20,7 @@
 #include "mqtt/token.h"
 #include "mqtt/message.h"
 #include "mqtt/response_options.h"
+#include "mqtt/delivery_response_options.h"
 #include "mqtt/disconnect_options.h"
 #include <thread>
 #include <mutex>
@@ -598,4 +599,3 @@ itoken_ptr async_client::unsubscribe(const std::string& topicFilter,
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
 }
-

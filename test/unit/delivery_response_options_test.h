@@ -23,7 +23,7 @@
 #include <cppunit/ui/text/TestRunner.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "mqtt/response_options.h"
+#include "mqtt/delivery_response_options.h"
 
 #include "dummy_async_client.h"
 
