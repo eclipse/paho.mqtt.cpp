@@ -17,6 +17,7 @@ extern "C" {
 namespace mqtt {
 
 class response_options_test;
+class delivery_response_options_test;
 
 /////////////////////////////////////////////////////////////////////////////
 //							response_options
@@ -74,6 +75,7 @@ class delivery_response_options
 
 	/** The client has special access */
 	friend class async_client;
+	friend class delivery_response_options_test;
 
 public:
 	/**
