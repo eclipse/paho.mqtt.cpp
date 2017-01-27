@@ -79,6 +79,10 @@ ssl_options::ssl_options(ssl_options&& opt)
 	opts_.privateKey = privateKey_.empty() ? nullptr : privateKey_.c_str();
 	opts_.privateKeyPassword = privateKeyPassword_.empty() ? nullptr : privateKeyPassword_.c_str();
 	opts_.enabledCipherSuites = enabledCipherSuites_.empty() ? nullptr : enabledCipherSuites_.c_str();
+
+	// NOTE: leave the source object "empty" (i.e. with default values)
+	MQTTAsync_SSLOptions dfltSSLOpt = MQTTAsync_SSLOptions_initializer;
+	std::memcpy(&opt.opts_, &dfltSSLOpt, sizeof(opt.opts_));
 }
 
 ssl_options& ssl_options::operator=(const ssl_options& rhs)
@@ -119,9 +123,10 @@ ssl_options& ssl_options::operator=(ssl_options&& rhs)
 	privateKeyPassword_ = std::move(rhs.privateKeyPassword_);
 	enabledCipherSuites_ = std::move(rhs.enabledCipherSuites_);
 
-	// OPTIMIZE: We probably don't need to do any of the following,
-	// but just to be safe
-	std::memset(&rhs.opts_, 0, sizeof(MQTTAsync_SSLOptions));
+	// NOTE: the correct semantic is to leave the source object
+	// "empty" (i.e. with default values)
+	MQTTAsync_SSLOptions dfltSSLOpt = MQTTAsync_SSLOptions_initializer;
+	std::memcpy(&rhs.opts_, &dfltSSLOpt, sizeof(rhs.opts_));
 
 	// NOTE: By default, the Paho C treats nullptr char arrays as unset values,
 	// so we keep that semantic and only set those char arrays if the string
