@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 {
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::message_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( will_options_test );
-	CPPUNIT_TEST_SUITE_REGISTRATION( connect_options_test );
+	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::connect_options_test );
 
 	TextUi::TestRunner runner;
 	TestFactoryRegistry &registry = TestFactoryRegistry::getRegistry();
