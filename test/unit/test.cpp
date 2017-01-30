@@ -27,7 +27,7 @@ using namespace CppUnit;
 
 int main(int argc, char* argv[])
 {
-	CPPUNIT_TEST_SUITE_REGISTRATION( message_test );
+	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::message_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( will_options_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( connect_options_test );
 
