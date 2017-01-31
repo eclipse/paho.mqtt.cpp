@@ -105,13 +105,13 @@ int iclient_persistence::persistence_put(void* handle, char* key, int bufcount,
 	try {
 		if (handle && bufcount > 0) {
 			ipersistable_ptr p;
+			std::string buf;
 			if (bufcount == 1)
 				p = std::make_shared<persistence_wrapper>(buffers[0], buflens[0]);
 			else if (bufcount == 2)
 				p = std::make_shared<persistence_wrapper>(buffers[0], buflens[0],
 														  buffers[1], buflens[1]);
 			else {
-				std::string buf;
 				for (int i=0; i<bufcount; ++i) {
 					if (buffers[i] && buflens[i] > 0)
 						buf.append(buffers[i], buflens[i]);
