@@ -64,7 +64,7 @@ endif
 
 LDLIBS += -L$(PAHO_CPP_LIB_DIR) -lpaho-mqttpp3
 LDLIBS += -L$(PAHO_C_LIB_DIR) -l$(PAHO_C_LIB)
-LDLIBS += -lcppunit -ldl
+LDLIBS += -lgtest -ldl
 
 $(TGT): test.cpp $(HDR_TESTS) $(HDRS)
 	@echo "Building unit tests."
@@ -89,4 +89,3 @@ dump:
 	@echo CXXFLAGS: $(CXXFLAGS)
 	@echo LDFLAGS: $(LDFLAGS)
 	@echo LDLIBS: $(LDLIBS)
-

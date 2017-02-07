@@ -15,13 +15,13 @@
  *
  * Contributors:
  *    Guilherme M. Ferreira - initial implementation and documentation
+ *    Guilherme M. Ferreira - changed test framework from CppUnit to GTest
  *******************************************************************************/
 
 #ifndef __mqtt_exception_test_h
 #define __mqtt_exception_test_h
 
-#include <cppunit/ui/text/TestRunner.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include <gtest/gtest.h>
 
 #include "mqtt/exception.h"
 
@@ -29,79 +29,68 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-class exception_test : public CppUnit::TestFixture
+class exception_test : public ::testing::Test
 {
-	CPPUNIT_TEST_SUITE( exception_test );
-
-	CPPUNIT_TEST( test_user_constructor );
-	CPPUNIT_TEST( test_get_message );
-	CPPUNIT_TEST( test_get_reason_code );
-	CPPUNIT_TEST( test_to_str );
-	CPPUNIT_TEST( test_what );
-
-	CPPUNIT_TEST_SUITE_END();
-
 public:
-	void setUp() {}
-	void tearDown() {}
+	void SetUp() {}
+	void TearDown() {}
+};
 
 // ----------------------------------------------------------------------
 // Test user constructor
 // ----------------------------------------------------------------------
 
-	void test_user_constructor() {
-		mqtt::exception ex1(MQTTASYNC_FAILURE);
-		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex1.get_reason_code());
+TEST_F(exception_test, test_user_constructor) {
+	mqtt::exception ex1(MQTTASYNC_FAILURE);
+	EXPECT_EQ(MQTTASYNC_FAILURE, ex1.get_reason_code());
 
-		mqtt::exception ex2(MQTTASYNC_PERSISTENCE_ERROR);
-		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_PERSISTENCE_ERROR, ex2.get_reason_code());
+	mqtt::exception ex2(MQTTASYNC_PERSISTENCE_ERROR);
+	EXPECT_EQ(MQTTASYNC_PERSISTENCE_ERROR, ex2.get_reason_code());
 
-		mqtt::exception ex3(MQTTASYNC_OPERATION_INCOMPLETE);
-		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_OPERATION_INCOMPLETE, ex3.get_reason_code());
-	}
+	mqtt::exception ex3(MQTTASYNC_OPERATION_INCOMPLETE);
+	EXPECT_EQ(MQTTASYNC_OPERATION_INCOMPLETE, ex3.get_reason_code());
+}
 
 // ----------------------------------------------------------------------
 // Test get_message()
 // ----------------------------------------------------------------------
 
-	void test_get_message() {
-		std::string msg1 { "MQTT exception -1" };
-		mqtt::exception ex1(MQTTASYNC_FAILURE, msg1);
-		CPPUNIT_ASSERT_EQUAL(msg1, ex1.get_message());
-	}
+TEST_F(exception_test, test_get_message) {
+	std::string msg1 { "MQTT exception -1" };
+	mqtt::exception ex1(MQTTASYNC_FAILURE, msg1);
+	EXPECT_EQ(msg1, ex1.get_message());
+}
 
 // ----------------------------------------------------------------------
 // Test get_reason_code()
 // ----------------------------------------------------------------------
 
-	void test_get_reason_code() {
-		mqtt::exception ex1(MQTTASYNC_FAILURE);
-		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex1.get_reason_code());
-	}
+TEST_F(exception_test, test_get_reason_code) {
+	mqtt::exception ex1(MQTTASYNC_FAILURE);
+	EXPECT_EQ(MQTTASYNC_FAILURE, ex1.get_reason_code());
+}
 
 // ----------------------------------------------------------------------
 // Test to string
 // ----------------------------------------------------------------------
 
-	void test_to_str() {
-		mqtt::exception ex1(MQTTASYNC_FAILURE);
-		std::string msg1 { "MQTT error [-1]" };
+TEST_F(exception_test, test_to_str) {
+	mqtt::exception ex1(MQTTASYNC_FAILURE);
+	std::string msg1 { "MQTT error [-1]" };
 
-		CPPUNIT_ASSERT_EQUAL(msg1, ex1.to_string());
-	}
+	EXPECT_EQ(msg1, ex1.to_string());
+}
 
 // ----------------------------------------------------------------------
 // Test get name
 // ----------------------------------------------------------------------
 
-	void test_what() {
-		mqtt::exception ex1(MQTTASYNC_FAILURE);
-		const char *msg1 = "MQTT error [-1]";
+TEST_F(exception_test, test_what) {
+	mqtt::exception ex1(MQTTASYNC_FAILURE);
+	const char *msg1 = "MQTT error [-1]";
 
-		CPPUNIT_ASSERT(!strcmp(msg1, ex1.what()));
-	}
-
-};
+	EXPECT_STRCASEEQ(msg1, ex1.what());
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt

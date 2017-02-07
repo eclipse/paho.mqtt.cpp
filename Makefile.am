@@ -255,7 +255,7 @@ mqttpp_unittest_LDFLAGS  = $(LDFLAGS)
 mqttpp_unittest_LDFLAGS += $(LIBS)
 
 mqttpp_unittest_LDADD  = libpaho-mqttpp3.la
-mqttpp_unittest_LDADD += -lcppunit
+mqttpp_unittest_LDADD += -lgtest
 
 ###############################################################################
 # Documentation

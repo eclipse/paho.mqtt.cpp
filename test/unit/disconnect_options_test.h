@@ -15,13 +15,13 @@
  *
  * Contributors:
  *    Guilherme M. Ferreira - initial implementation and documentation
+ *    Guilherme M. Ferreira - changed test framework from CppUnit to GTest
  *******************************************************************************/
 
 #ifndef __mqtt_disconnect_options_test_h
 #define __mqtt_disconnect_options_test_h
 
-#include <cppunit/ui/text/TestRunner.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include <gtest/gtest.h>
 
 #include "mqtt/disconnect_options.h"
 
@@ -31,109 +31,104 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-class disconnect_options_test : public CppUnit::TestFixture
+class disconnect_options_test : public ::testing::Test
 {
-	CPPUNIT_TEST_SUITE( disconnect_options_test );
-
-	CPPUNIT_TEST( test_dflt_constructor );
-	CPPUNIT_TEST( test_user_constructor );
-	CPPUNIT_TEST( test_set_timeout );
-	CPPUNIT_TEST( test_set_token );
-
-	CPPUNIT_TEST_SUITE_END();
-
+protected:
 	const int DFLT_TIMEOUT = 0;
 
 	const std::string EMPTY_STR;
 	mqtt::test::dummy_async_client cli;
 
+	MQTTAsync_disconnectOptions& get_c_struct(mqtt::disconnect_options& opts) {
+		return opts.opts_;
+	}
+
 public:
-	void setUp() {}
-	void tearDown() {}
+	void SetUp() {}
+	void TearDown() {}
+};
 
 // ----------------------------------------------------------------------
 // Test default constructor
 // ----------------------------------------------------------------------
 
-	void test_dflt_constructor() {
-		mqtt::disconnect_options opts;
+TEST_F(disconnect_options_test, test_dflt_constructor) {
+	mqtt::disconnect_options opts;
 
-		CPPUNIT_ASSERT_EQUAL(DFLT_TIMEOUT, (int) opts.get_timeout().count());
-		CPPUNIT_ASSERT(!opts.get_token());
+	EXPECT_EQ(DFLT_TIMEOUT, (int) opts.get_timeout().count());
+	EXPECT_EQ(nullptr, opts.get_token());
 
-		const auto& c_struct = opts.opts_;
+	const auto& c_struct = get_c_struct(opts);
 
-		CPPUNIT_ASSERT(nullptr == c_struct.onSuccess);
-		CPPUNIT_ASSERT(nullptr == c_struct.onFailure);
+	EXPECT_EQ(nullptr, c_struct.onSuccess);
+	EXPECT_EQ(nullptr, c_struct.onFailure);
 
-		CPPUNIT_ASSERT_EQUAL(DFLT_TIMEOUT, c_struct.timeout);
-	}
+	EXPECT_EQ(DFLT_TIMEOUT, c_struct.timeout);
+}
 
 // ----------------------------------------------------------------------
 // Test user constructor
 // ----------------------------------------------------------------------
 
-	void test_user_constructor() {
-		const int TIMEOUT = 10;
+TEST_F(disconnect_options_test, test_user_constructor) {
+	const int TIMEOUT = 10;
 
-		auto tok = token::create(cli);
-		mqtt::disconnect_options opts { TIMEOUT, tok };
+	auto tok = token::create(cli);
+	mqtt::disconnect_options opts { TIMEOUT, tok };
 
-		const auto& c_struct = opts.opts_;
+	const auto& c_struct = get_c_struct(opts);
 
-		CPPUNIT_ASSERT(nullptr != c_struct.onSuccess);
-		CPPUNIT_ASSERT(nullptr != c_struct.onFailure);
+	EXPECT_NE(nullptr, c_struct.onSuccess);
+	EXPECT_NE(nullptr, c_struct.onFailure);
 
-		CPPUNIT_ASSERT_EQUAL(TIMEOUT, (int) opts.get_timeout().count());
-		CPPUNIT_ASSERT_EQUAL(tok, opts.get_token());
-	}
+	EXPECT_EQ(TIMEOUT, (int) opts.get_timeout().count());
+	EXPECT_EQ(tok, opts.get_token());
+}
 
 // ----------------------------------------------------------------------
 // Test set timeout
 // ----------------------------------------------------------------------
 
-	void test_set_timeout() {
-		mqtt::disconnect_options opts;
-		const auto& c_struct = opts.opts_;
+TEST_F(disconnect_options_test, test_set_timeout) {
+	mqtt::disconnect_options opts;
+	const auto& c_struct = get_c_struct(opts);
 
-		const int TIMEOUT = 5000;	// ms
+	const int TIMEOUT = 5000;	// ms
 
-		// Set with integer
-		opts.set_timeout(TIMEOUT);
-		CPPUNIT_ASSERT_EQUAL(TIMEOUT, (int) opts.get_timeout().count());
-		CPPUNIT_ASSERT_EQUAL(TIMEOUT, c_struct.timeout);
+	// Set with integer
+	opts.set_timeout(TIMEOUT);
+	EXPECT_EQ(TIMEOUT, (int) opts.get_timeout().count());
+	EXPECT_EQ(TIMEOUT, c_struct.timeout);
 
-		// Set with chrono duration
-		opts.set_timeout(std::chrono::seconds(2*TIMEOUT/1000));
-		CPPUNIT_ASSERT_EQUAL(2*TIMEOUT, (int) opts.get_timeout().count());
-		CPPUNIT_ASSERT_EQUAL(2*TIMEOUT, c_struct.timeout);
-	}
+	// Set with chrono duration
+	opts.set_timeout(std::chrono::seconds(2*TIMEOUT/1000));
+	EXPECT_EQ(2*TIMEOUT, (int) opts.get_timeout().count());
+	EXPECT_EQ(2*TIMEOUT, c_struct.timeout);
+}
 
 // ----------------------------------------------------------------------
 // Test set contect token
 // ----------------------------------------------------------------------
 
-	void test_set_token() {
-		auto tok = token::create(cli);
-		mqtt::disconnect_options opts;
+TEST_F(disconnect_options_test, test_set_token) {
+	auto tok = token::create(cli);
+	mqtt::disconnect_options opts;
 
-		const auto& c_struct = opts.opts_;
+	const auto& c_struct = get_c_struct(opts);
 
-		CPPUNIT_ASSERT(nullptr == c_struct.onSuccess);
-		CPPUNIT_ASSERT(nullptr == c_struct.onFailure);
+	EXPECT_EQ(nullptr, c_struct.onSuccess);
+	EXPECT_EQ(nullptr, c_struct.onFailure);
 
-		opts.set_token(mqtt::token_ptr());
-		CPPUNIT_ASSERT(nullptr == c_struct.onSuccess);
-		CPPUNIT_ASSERT(nullptr == c_struct.onFailure);
+	opts.set_token(mqtt::token_ptr());
+	EXPECT_EQ(nullptr, c_struct.onSuccess);
+	EXPECT_EQ(nullptr, c_struct.onFailure);
 
-		opts.set_token(tok);
-		CPPUNIT_ASSERT(nullptr != c_struct.onSuccess);
-		CPPUNIT_ASSERT(nullptr != c_struct.onFailure);
+	opts.set_token(tok);
+	EXPECT_NE(nullptr, c_struct.onSuccess);
+	EXPECT_NE(nullptr, c_struct.onFailure);
 
-		CPPUNIT_ASSERT_EQUAL(tok, opts.get_token());
-	}
-
-};
+	EXPECT_EQ(tok, opts.get_token());
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace 'mqtt'

@@ -15,13 +15,13 @@
  *
  * Contributors:
  *    Guilherme M. Ferreira - initial implementation and documentation
+ *    Guilherme M. Ferreira - changed test framework from CppUnit to GTest
  *******************************************************************************/
 
 #ifndef __mqtt_delivery_response_options_test_h
 #define __mqtt_delivery_response_options_test_h
 
-#include <cppunit/ui/text/TestRunner.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include <gtest/gtest.h>
 
 #include "mqtt/response_options.h"
 
@@ -31,68 +31,65 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-class delivery_response_options_test : public CppUnit::TestFixture
+class delivery_response_options_test : public ::testing::Test
 {
-	CPPUNIT_TEST_SUITE( delivery_response_options_test );
-
-	CPPUNIT_TEST( test_dflt_constructor );
-	CPPUNIT_TEST( test_user_constructor );
-	CPPUNIT_TEST( test_set_token );
-
-	CPPUNIT_TEST_SUITE_END();
+protected:
+	MQTTAsync_responseOptions& get_c_struct(mqtt::delivery_response_options& opts) {
+		return opts.opts_;
+	}
 
 public:
-	void setUp() {}
-	void tearDown() {}
+
+	void SetUp() {}
+	void TearDown() {}
+};
 
 // ----------------------------------------------------------------------
 // Test default constructor
 // ----------------------------------------------------------------------
 
-	void test_dflt_constructor() {
-		mqtt::delivery_response_options opts;
-		MQTTAsync_responseOptions& c_struct = opts.opts_;
+TEST_F(delivery_response_options_test, test_dflt_constructor) {
+	mqtt::delivery_response_options opts;
+	MQTTAsync_responseOptions& c_struct = get_c_struct(opts);
 
-		CPPUNIT_ASSERT(c_struct.context == nullptr);
+	EXPECT_EQ(c_struct.context, nullptr);
 
-		// Make sure the callback functions are set during object construction
-		CPPUNIT_ASSERT(c_struct.onSuccess != nullptr);
-		CPPUNIT_ASSERT(c_struct.onFailure != nullptr);
-	}
+	// Make sure the callback functions are set during object construction
+	EXPECT_NE(c_struct.onSuccess, nullptr);
+	EXPECT_NE(c_struct.onFailure, nullptr);
+}
 
 // ----------------------------------------------------------------------
 // Test user constructor
 // ----------------------------------------------------------------------
 
-	void test_user_constructor() {
-		mqtt::test::dummy_async_client client;
-		mqtt::delivery_token_ptr token { new mqtt::delivery_token{ client } };
-		mqtt::delivery_response_options opts { token };
-		MQTTAsync_responseOptions& c_struct = opts.opts_;
+TEST_F(delivery_response_options_test, test_user_constructor) {
+	mqtt::test::dummy_async_client client;
+	mqtt::delivery_token_ptr token { new mqtt::delivery_token{ client } };
+	mqtt::delivery_response_options opts { token };
+	MQTTAsync_responseOptions& c_struct = get_c_struct(opts);
 
-		CPPUNIT_ASSERT(c_struct.context == token.get());
+	EXPECT_EQ(c_struct.context, token.get());
 
-		// Make sure the callback functions are set during object construction
-		CPPUNIT_ASSERT(c_struct.onSuccess != nullptr);
-		CPPUNIT_ASSERT(c_struct.onFailure != nullptr);
-	}
+	// Make sure the callback functions are set during object construction
+	EXPECT_NE(c_struct.onSuccess, nullptr);
+	EXPECT_NE(c_struct.onFailure, nullptr);
+}
 
 // ----------------------------------------------------------------------
 // Test set context
 // ----------------------------------------------------------------------
 
-	void test_set_token() {
-		mqtt::delivery_response_options opts;
-		MQTTAsync_responseOptions& c_struct = opts.opts_;
+TEST_F(delivery_response_options_test, test_set_token) {
+	mqtt::delivery_response_options opts;
+	MQTTAsync_responseOptions& c_struct = get_c_struct(opts);
 
-		CPPUNIT_ASSERT(c_struct.context == nullptr);
-		mqtt::test::dummy_async_client client;
-		mqtt::delivery_token_ptr token { new mqtt::delivery_token{ client } };
-		opts.set_token( token );
-		CPPUNIT_ASSERT(c_struct.context == token.get());
-	}
-
-};
+	EXPECT_EQ(c_struct.context, nullptr);
+	mqtt::test::dummy_async_client client;
+	mqtt::delivery_token_ptr token { new mqtt::delivery_token{ client } };
+	opts.set_token( token );
+	EXPECT_EQ(c_struct.context, token.get());
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace 'mqtt'
