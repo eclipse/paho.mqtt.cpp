@@ -53,6 +53,14 @@ public:
 		dtok_ = dtok;
 		opts_.context = dtok.get();
 	}
+
+	/**
+	 * Synchronize the token's (context) message ID with the message ID from
+	 * delivery_response_options. Because the delivery_response_options's message
+	 * ID is updated by the Paho MQTT C right after the message is sent, but the
+	 * token's message ID is updated only after the response arrives.
+	 */
+	void update_message_id();
 };
 
 /////////////////////////////////////////////////////////////////////////////
