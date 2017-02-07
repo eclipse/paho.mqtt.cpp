@@ -321,6 +321,12 @@ itoken_ptr async_client::disconnect(long timeout, void* userContext, iaction_lis
 
 idelivery_token_ptr async_client::get_pending_delivery_token(int msgID) const
 {
+	// Messages with QOS=1 or QOS=2 that require a response/acknowledge should
+	// have a non-zero 16-bit message ID. The library keeps the token objects
+	// for all of these messages that are in flight. When the acknowledge comes
+	// back from the broker, the C++ library can look up the token from the
+	// msgID and signal it, indicating completion.
+
 	if (msgID > 0) {
 		guard g(lock_);
 		for (const auto& t : pendingDeliveryTokens_) {
@@ -335,8 +341,11 @@ std::vector<idelivery_token_ptr> async_client::get_pending_delivery_tokens() con
 {
 	std::vector<idelivery_token_ptr> toks;
 	guard g(lock_);
-	for (const auto& t : pendingDeliveryTokens_)
-		toks.push_back(t);
+	for (const auto& t : pendingDeliveryTokens_) {
+		if (t->get_message_id() > 0) {
+			toks.push_back(t);
+		}
+	}
 	return toks;
 }
 
