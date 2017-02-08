@@ -32,35 +32,33 @@ namespace mqtt {
 
 class persistence_wrapper : virtual public ipersistable
 {
-	const uint8_t* hdr_;
-	const size_t hdrlen_;
-	const uint8_t* payload_;
-	const size_t payloadlen_;
+	const std::vector<uint8_t> hdr_;
+	const std::vector<uint8_t> payload_;
 
 public:
-	persistence_wrapper(const void* payload, size_t payloadlen) 
-			: hdr_(nullptr), hdrlen_(0), 
-				payload_(static_cast<const uint8_t*>(payload)), payloadlen_(payloadlen) 
+	persistence_wrapper(const void* payload, size_t payloadlen)
+			: hdr_(),
+			  payload_(static_cast<const uint8_t*>(payload), static_cast<const uint8_t*>(payload) + payloadlen)
 	{}
 	persistence_wrapper(const void* hdr, size_t hdrlen,
 						const void* payload, size_t payloadlen)
-			: hdr_(static_cast<const uint8_t*>(hdr)), hdrlen_(hdrlen), 
-				payload_(static_cast<const uint8_t*>(payload)), payloadlen_(payloadlen) 
+			: hdr_(static_cast<const uint8_t*>(hdr), static_cast<const uint8_t*>(hdr) + hdrlen),
+			  payload_(static_cast<const uint8_t*>(payload), static_cast<const uint8_t*>(payload) + payloadlen)
 	{}
 
-	const uint8_t* get_header_bytes() const override { return hdr_; }
-	size_t get_header_length() const override { return hdrlen_; }
+	const uint8_t* get_header_bytes() const override { return hdr_.data(); }
+	size_t get_header_length() const override { return hdr_.size(); }
 	size_t get_header_offset() const override { return 0; }
 
-	const uint8_t* get_payload_bytes() const override { return payload_; }
-	size_t get_payload_length() const override { return payloadlen_; }
+	const uint8_t* get_payload_bytes() const override { return payload_.data(); }
+	size_t get_payload_length() const override { return payload_.size(); }
 	size_t get_payload_offset() const override { return 0; }
 
 	std::vector<uint8_t> get_header_byte_arr() const override {
-		return std::vector<uint8_t>(hdr_, hdr_+hdrlen_);
+		return std::vector<uint8_t>(hdr_);
 	}
 	std::vector<uint8_t> get_payload_byte_arr() const override {
-		return std::vector<uint8_t>(payload_, payload_+payloadlen_);
+		return std::vector<uint8_t>(payload_);
 	}
 };
 
@@ -105,13 +103,13 @@ int iclient_persistence::persistence_put(void* handle, char* key, int bufcount,
 	try {
 		if (handle && bufcount > 0) {
 			ipersistable_ptr p;
-			std::string buf;
 			if (bufcount == 1)
 				p = std::make_shared<persistence_wrapper>(buffers[0], buflens[0]);
 			else if (bufcount == 2)
 				p = std::make_shared<persistence_wrapper>(buffers[0], buflens[0],
 														  buffers[1], buflens[1]);
 			else {
+				std::string buf;
 				for (int i=0; i<bufcount; ++i) {
 					if (buffers[i] && buflens[i] > 0)
 						buf.append(buffers[i], buflens[i]);
