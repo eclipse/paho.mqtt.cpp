@@ -136,9 +136,9 @@ public:
 	virtual std::string get_server_uri() const;
 	/**
 	 * Return the maximum time to wait for an action to complete.
-	 * @return long
+	 * @return int
 	 */
-	virtual long get_time_to_wait() const;
+	virtual int get_time_to_wait() const;
 	/**
 	 * Get a topic object which can be used to publish messages.
 	 * @param tpc
