@@ -18,6 +18,7 @@
  *******************************************************************************/
 
 #include "async_client_test.h"
+#include "client_test.h"
 #include "message_test.h"
 #include "will_options_test.h"
 #include "ssl_options_test.h"
@@ -37,6 +38,7 @@ using namespace CppUnit;
 int main(int argc, char* argv[])
 {
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::async_client_test );
+	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::client_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::message_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::will_options_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::ssl_options_test );
