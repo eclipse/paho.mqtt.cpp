@@ -27,6 +27,8 @@ connect_options::connect_options()
 #if defined(OPENSSL)
 	opts_.ssl = nullptr;
 #endif
+	opts_.onSuccess = &token::on_success;
+	opts_.onFailure = &token::on_failure;
 }
 
 connect_options::connect_options(const std::string& userName, const std::string& password)
