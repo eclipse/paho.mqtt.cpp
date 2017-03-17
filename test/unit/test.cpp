@@ -27,6 +27,7 @@
 #include "iclient_persistence_test.h"
 #include "token_test.h"
 #include "topic_test.h"
+#include "exception_test.h"
 
 using namespace CppUnit;
 
@@ -44,6 +45,7 @@ int main(int argc, char* argv[])
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::iclient_persistence_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::token_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::topic_test );
+	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::exception_test );
 
 	TextUi::TestRunner runner;
 	TestFactoryRegistry &registry = TestFactoryRegistry::getRegistry();
