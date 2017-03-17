@@ -64,6 +64,14 @@ matrix:
       env: COMPILER=g++-4.9
     # GCC 5
     - compiler: gcc
+      before_install:
+        - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/${COMPILER} 50
+        - sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/${COVERAGE} 50
+        - ./travis_install_lcov.sh
+        # gcc version MUST match gcov version
+        - g++ --version
+        - gcov --version
+        - lcov --version
       addons:
         apt:
           sources:
@@ -79,7 +87,11 @@ matrix:
             - cmake-data
             - doxygen
             - mosquitto
-      env: COMPILER=g++-5
+      after_success:
+        - ./travis_execute_lcov.sh
+      env:
+        - COMPILER=g++-5
+        - COVERAGE=gcov-5
     # GCC 6
     - compiler: gcc
       addons:
@@ -141,9 +153,9 @@ matrix:
 
 script:
   # Test Makefile building
-  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && make CXX=$COMPILER VERBOSE=1 && sudo make install && make CXX=$COMPILER VERBOSE=1 check
+  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && make CXX=$COMPILER VERBOSE=1 && sudo make install && make CXX=$COMPILER VERBOSE=1 COVERAGE=1 check
   - make clean && sudo make uninstall && pushd test/unit && make clean && popd
-  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && make CXX=$COMPILER VERBOSE=1 SSL=0 && sudo make install && make CXX=$COMPILER VERBOSE=1 SSL=0 check
+  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && make CXX=$COMPILER VERBOSE=1 SSL=0 && sudo make install && make CXX=$COMPILER VERBOSE=1 SSL=0 COVERAGE=1 check
   - make clean && sudo make uninstall && pushd test/unit && make clean && popd
   # Test CMake building
   - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && rm -rf build_cmake && mkdir build_cmake && pushd build_cmake && cmake -DCMAKE_CXX_COMPILER=$COMPILER -DPAHO_BUILD_SAMPLES=ON -DPAHO_BUILD_STATIC=ON -DPAHO_BUILD_DOCUMENTATION=OFF -DPAHO_WITH_SSL=OFF .. && make && sudo make install; popd
