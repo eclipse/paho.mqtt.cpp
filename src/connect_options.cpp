@@ -59,6 +59,20 @@ void connect_options::set_ssl(const ssl_options& ssl)
 	opts_.ssl = &ssl_.opts_;
 }
 
+void connect_options::set_context(token* tok) 
+{
+	opts_.context = tok;
+
+	if (tok) {
+		opts_.onSuccess = &token::on_success;
+		opts_.onFailure = &token::on_failure;
+	}
+	else {
+		opts_.onSuccess = nullptr;
+		opts_.onFailure = nullptr;
+	}
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 } // end namespace mqtt

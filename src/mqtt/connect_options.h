@@ -32,6 +32,7 @@ extern "C" {
 #include "mqtt/topic.h"
 #include "mqtt/will_options.h"
 #include "mqtt/ssl_options.h"
+#include "mqtt/token.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -166,7 +167,15 @@ public:
 	 * @param ssl The SSL options.
 	 */
 	void set_ssl(const ssl_options& ssl);
-
+	/**
+	 * Sets the callback context to a delivery token. 
+	 * @param tok The delivery token to be used as the callback context.
+	 */
+	void set_context(token* tok);
+	/**
+	 * Gets a string representation of the object. 
+	 * @return 
+	 */
 	std::string to_str() const;
 };
 

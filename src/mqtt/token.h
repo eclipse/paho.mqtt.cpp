@@ -153,10 +153,11 @@ class token : public virtual itoken
 	/** The action success/failure code */
 	int rc_;
 
-	/** Client has special access for full initialization */
+	/** Client and token-related options have special access */
 	friend class async_client;
 	friend class response_options;
 	friend class delivery_response_options;
+	friend class connect_options;
 	friend class disconnect_options;
 
 	void set_topics(const std::string& top) {
