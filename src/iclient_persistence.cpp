@@ -136,15 +136,15 @@ int iclient_persistence::persistence_get(void* handle, char* key,
 		if (handle) {
 			ipersistable_ptr p = static_cast<iclient_persistence*>(handle)->get(key);
 
-			size_t	hdrlen = p->get_header_length(),
-					payloadlen = p->get_payload_length();
+			size_t hdrlen = p->get_header_length();
+			size_t payloadlen = p->get_payload_length();
 
 			if (!p->get_header_bytes()) hdrlen = 0;
 			if (!p->get_payload_bytes()) payloadlen = 0;
 
 			// TODO: Check range
-			*buflen = (int) (hdrlen + payloadlen);
-			char* buf = (char*) malloc(*buflen);
+			*buflen = static_cast<int>(hdrlen + payloadlen);
+			char* buf = static_cast<char*>(calloc(*buflen, sizeof(char)));
 			std::memcpy(buf, p->get_header_bytes(), hdrlen);
 			std::memcpy(buf+hdrlen, p->get_payload_bytes(), payloadlen);
 			*buffer = buf;
