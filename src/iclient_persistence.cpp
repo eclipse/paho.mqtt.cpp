@@ -143,8 +143,8 @@ int iclient_persistence::persistence_get(void* handle, char* key,
 			if (!p->get_payload_bytes()) payloadlen = 0;
 
 			// TODO: Check range
-			*buflen = (int) (hdrlen + payloadlen);
-			char* buf = (char*) malloc(*buflen);
+			*buflen = static_cast<int>(hdrlen + payloadlen);
+			char* buf = static_cast<char*>(malloc(*buflen));
 			std::memcpy(buf, p->get_header_bytes(), hdrlen);
 			std::memcpy(buf+hdrlen, p->get_payload_bytes(), payloadlen);
 			*buffer = buf;
@@ -180,10 +180,10 @@ int iclient_persistence::persistence_keys(void* handle, char*** keys, int* nkeys
 			if (n == 0)
 				*keys = nullptr;
 			else {
-				*keys = (char**) malloc(n*sizeof(char*));
+				*keys = static_cast<char**>(malloc(n*sizeof(char*)));
 				for (size_t i=0; i<n; ++i) {
 					size_t len = k[i].size();
-					(*keys)[i] = (char*) malloc(len+1);
+					(*keys)[i] = static_cast<char*>(malloc(len+1));
 					std::memcpy((*keys)[i], k[i].data(), len);
 					(*keys)[i][len] = '\0';
 				}
