@@ -76,14 +76,14 @@ public:
 	 * Constructs a message with the specified array as a payload, and all
 	 * other values set to defaults.
 	 * @param payload the bytes to use as the message payload
-	 * @param n the number of bytes in the payload
+	 * @param len the number of bytes in the payload
 	 */
 	message(const void* payload, size_t len);
 	/**
 	 * Constructs a message with the specified array as a payload, and all
 	 * other values set to defaults.
 	 * @param payload the bytes to use as the message payload
-	 * @param n the number of bytes in the payload
+	 * @param len the number of bytes in the payload
 	 * @param qos The quality of service for the message.
 	 * @param retained Whether the message should be retained by the broker.
 	 */
@@ -210,7 +210,7 @@ using const_message_ptr = message::const_ptr_t;
  * Constructs a message with the specified array as a payload, and all
  * other values set to defaults.
  * @param payload the bytes to use as the message payload
- * @param n the number of bytes in the payload
+ * @param len the number of bytes in the payload
  */
 inline message_ptr make_message(const void* payload, size_t len) {
 	return std::make_shared<mqtt::message>(payload, len);
@@ -220,7 +220,7 @@ inline message_ptr make_message(const void* payload, size_t len) {
  * Constructs a message with the specified array as a payload, and all
  * other values set to defaults.
  * @param payload the bytes to use as the message payload
- * @param n the number of bytes in the payload
+ * @param len the number of bytes in the payload
  * @param qos The quality of service for the message.
  * @param retained Whether the message should be retained by the broker.
  */

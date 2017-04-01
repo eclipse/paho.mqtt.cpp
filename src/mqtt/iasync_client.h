@@ -93,7 +93,8 @@ public:
 	 *  			  defaults.
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
-	 *
+	 * @param cb callback listener that will be notified when the connect
+	 *  			   completes.
 	 * @return token used to track and wait for the connect to complete. The
 	 *  	   token will be passed to any callback that has been set.
 	 * @throw exception for non security related problems

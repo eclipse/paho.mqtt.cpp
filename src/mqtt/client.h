@@ -79,7 +79,7 @@ public:
 		   const std::string& persistDir);
 	/**
 	 * Create a client that can be used to communicate with an MQTT server.
-	 * This allows the caller to specify a user-defined persistance object,
+	 * This allows the caller to specify a user-defined persistence object,
 	 * or use no persistence.
 	 * @param serverURI
 	 * @param clientId
@@ -153,9 +153,9 @@ public:
 	/**
 	 * Publishes a message to a topic on the server and return once it is
 	 * delivered.
-	 * @param topic
-	 * @param payload
-	 * @param n
+	 * @param top The topic to publish
+	 * @param payload The data to publish
+	 * @param n The size in bytes of the data
 	 * @param qos
 	 * @param retained
 	 */
@@ -176,7 +176,7 @@ public:
 	/**
 	 * Sets the callback listener to use for events that happen
 	 * asynchronously.
-	 * @param callback
+	 * @param cb The callback functions
 	 */
 	virtual void set_callback(callback& cb);
 	/**
@@ -192,27 +192,30 @@ public:
 	/**
 	 * Subscribes to a one or more topics, which may include wildcards using
 	 * a QoS of 1.
+	 * @param topicFilters A set of topics to subscribe
 	 */
 	virtual void subscribe(const topic_filter_collection& topicFilters);
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
-	 * @param string
+	 * @param topicFilters A collection of topics to subscribe
+	 * @param qos A collection of QoS for each topic
 	 */
 	virtual void subscribe(const topic_filter_collection& topicFilters,
 						   const qos_collection& qos);
 	/**
 	 * Subscribe to a topic, which may include wildcards.
-	 * @param topicFilter
-	 * @param qos
+	 * @param topicFilter A single topic to subscribe
+	 * @param qos The QoS of the subscription
 	 */
 	virtual void subscribe(const std::string& topicFilter, int qos);
 	/**
 	 * Requests the server unsubscribe the client from a topic.
-	 * @param topicFilter
+	 * @param topicFilter A single topic to unsubscribe.
 	 */
 	virtual void unsubscribe(const std::string& topicFilter);
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
+	 * @param topicFilters A collection of topics to unsubscribe.
 	 */
 	virtual void unsubscribe(const topic_filter_collection& topicFilters);
 };

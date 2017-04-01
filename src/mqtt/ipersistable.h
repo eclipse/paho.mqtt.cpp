@@ -66,7 +66,7 @@ namespace mqtt {
  *
  * @li
  * It could return the header and payload as a contiguous byte array with
- * the header bytes preceeding the payload. The contiguous byte array should
+ * the header bytes preceding the payload. The contiguous byte array should
  * be set as the header byte array, with the payload byte array being null.
  * For example, return a single byte array with offset 0 and length 40004.
  * This is useful when recovering from a file where the header and payload

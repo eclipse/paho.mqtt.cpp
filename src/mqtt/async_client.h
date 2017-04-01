@@ -139,7 +139,7 @@ public:
 	/**
 	 * Create an async_client that can be used to communicate with an MQTT
 	 * server.
-	 * This allows the caller to specify a user-defined persistance object,
+	 * This allows the caller to specify a user-defined persistence object,
 	 * or use no persistence.
 	 * @param serverURI the address of the server to connect to, specified
 	 *  				as a URI.
@@ -178,6 +178,8 @@ public:
 	 *  			  defaults.
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
+	 * @param cb callback listener that will be notified when the connect
+	 *  			   completes.
 	 * @return token used to track and wait for the connect to complete. The
 	 *  	   token will be passed to any callback that has been set.
 	 * @throw exception for non security related problems
@@ -189,7 +191,7 @@ public:
 	 *
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
-	 * @param callback listener that will be notified when the connect
+	 * @param cb callback listener that will be notified when the connect
 	 *  			   completes.
 	 * @return token used to track and wait for the connect to complete. The
 	 *  	   token will be passed to any callback that has been set.
@@ -226,7 +228,7 @@ public:
 	 *  					 quiesce.
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
-	 * @param callback listener that will be notified when the disconnect
+	 * @param cb callback listener that will be notified when the disconnect
 	 *  			   completes.
 	 * @return itoken_ptr Token used to track and wait for disconnect to
 	 *  	   complete. The token will be passed to the callback methods if
@@ -239,7 +241,7 @@ public:
 	 * Disconnects from the server.
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
-	 * @param callback listener that will be notified when the disconnect
+	 * @param cb callback listener that will be notified when the disconnect
 	 *  			   completes.
 	 * @return itoken_ptr Token used to track and wait for disconnect to
 	 *  	   complete. The token will be passed to the callback methods if
@@ -323,7 +325,7 @@ public:
 	 * @param msg the message to deliver to the server
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
-	 * @param callback optional listener that will be notified when message
+	 * @param cb callback optional listener that will be notified when message
 	 *  			   delivery has completed to the requested quality of
 	 *  			   service
 	 * @return token used to track and wait for the publish to complete. The
@@ -334,7 +336,7 @@ public:
 	/**
 	 * Sets a callback listener to use for events that happen
 	 * asynchronously.
-	 * @param callback which will be invoked for certain asynchronous events
+	 * @param cb callback which will be invoked for certain asynchronous events
 	 */
 	virtual void set_callback(callback& cb);
 	/**

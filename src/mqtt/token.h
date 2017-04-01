@@ -212,17 +212,20 @@ public:
 	token(iasync_client& cli);
 	/**
 	 * Constructs a token object.
+	 * @param cli
 	 * @param tok
 	 */
 	token(iasync_client& cli, MQTTAsync_token tok);
 	/**
 	 * Constructs a token object.
 	 * @param cli
+	 * @param topic
 	 */
 	token(iasync_client& cli, const std::string& topic);
 	/**
 	 * Constructs a token object.
 	 * @param cli
+	 * @param topics
 	 */
 	token(iasync_client& cli, const std::vector<std::string>& topics);
 	/**

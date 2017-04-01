@@ -64,9 +64,8 @@ public:
 	/**
 	 * This method is invoked when an action fails.
 	 * @param asyncActionToken
-	 * @param exc
 	 */
-	virtual void on_failure(const itoken& asyncActionToken /*, java.lang.Throwable exc*/) =0;
+	virtual void on_failure(const itoken& asyncActionToken) =0;
 	/**
 	 * This method is invoked when an action has completed successfully.
 	 * @param asyncActionToken
