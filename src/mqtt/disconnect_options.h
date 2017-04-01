@@ -53,6 +53,13 @@ public:
 	 * @param tok The delivery token to be used as the callback context.
 	 */
 	void set_context(token* tok);
+
+	/**
+	 * Gets the callback context to a delivery token.
+	 * @return The delivery token to be used as the callback context.
+	 */
+	token* get_context();
+
 };
 
 /////////////////////////////////////////////////////////////////////////////
