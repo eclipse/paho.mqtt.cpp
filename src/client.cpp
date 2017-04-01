@@ -92,7 +92,7 @@ std::vector<idelivery_token_ptr> client::get_pending_delivery_tokens() const
 	return cli_.get_pending_delivery_tokens();
 }
 
-long client::get_time_to_wait() const
+int client::get_time_to_wait() const
 {
 	return timeout_;
 }
