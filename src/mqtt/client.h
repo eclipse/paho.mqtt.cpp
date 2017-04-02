@@ -24,7 +24,7 @@
 #ifndef __mqtt_client_h
 #define __mqtt_client_h
 
-#include "async_client.h"
+#include "mqtt/async_client.h"
 
 #include <string>
 #include <memory>
