@@ -135,9 +135,100 @@ $ $PAHO_DIR/configure --host=arm-linux-gnueabi
 ```
 
 
-### Windows
+### CMake
 
-TBD
+The CMake is a cross-platform building system suitable for Unix and non-Unix platforms, like Microsoft Windows.
+
+#### Unix and GNU/Linux
+
+On Unix systems CMake creates Makefiles.
+
+##### Build requirements
+
+The build process currently supports a number of Unix and Linux flavors. The build process requires the following tools:
+  * CMake (http://cmake.org)
+  * GNU Make (https://www.gnu.org/software/make/), and
+  * GCC (https://gcc.gnu.org/).
+
+On Debian based systems this would mean that the following packages have to be installed:
+
+```
+apt-get install build-essential gcc make cmake cmake-gui cmake-curses-gui
+```
+
+The documentation requires doxygen and optionally graphviz:
+
+```
+apt-get install doxygen graphviz
+```
+
+##### Build instructions
+
+Before compiling, determine the value of some variables in order to configure features, library locations, and other options:
+
+Variable | Default Value | Description
+------------ | ------------- | -------------
+PAHO_MQTT_C_PATH | "" | Add a path paho.mqtt.c library and headers
+PAHO_BUILD_DOCUMENTATION | FALSE | Create and install the HTML based API documentation (requires Doxygen)
+PAHO_BUILD_SAMPLES | FALSE | Build sample programs
+
+Using these variables CMake can be used to generate your Makefiles. The out-of-source build is the default on CMake. Therefore it is recommended to invoke all build commands inside your chosen build directory.
+
+An example build session targeting the build platform could look like this:
+
+```
+$ git clone https://github.com/eclipse/paho.mqtt.cpp
+$ cd paho.mqtt.cpp
+$ mkdir build
+$ cd build
+$ cmake -DPAHO_BUILD_DOCUMENTATION=TRUE -DPAHO_BUILD_SAMPLES=TRUE \
+  -DPAHO_MQTT_C_PATH=../paho.mqtt.c ..
+$ make
+```
+
+or
+
+```
+$ cmake -DCMAKE_INSTALL_PREFIX=/tmp/paho-cpp -DPAHO_MQTT_C_PATH=/tmp/paho-c \
+  -DPAHO_BUILD_SAMPLES:BOOL=ON -DPAHO_BUILD_STATIC:BOOL=ON \
+  -DPAHO_BUILD_DOCUMENTATION:BOOL=ON
+$ make
+```
+
+Invoking cmake and specifying build options can also be performed using cmake-gui or ccmake (see https://cmake.org/runningcmake/). For example:
+
+```
+$ ccmake ..
+$ make
+```
+
+To use another compiler:
+
+```
+$ cmake -DCMAKE_CXX_COMPILER=clang++
+$ make
+```
+
+#### Windows
+
+On Windows systems CMake creates Visual Studio project files.
+
+##### Build requirements
+
+The build process currently supports a number Windows versions. The build process requires the following tools:
+  * CMake GUI (http://cmake.org), and
+  * Visual Studio (https://www.gnu.org/software/make/).
+
+##### Build instructions
+
+First install and open the cmake-gui application. This tutorial is based on cmake-gui 3.5.2.
+
+Second, select the path to the Paho MQTT C library (PAHO_MQTT_C_PATH). Remember that the Paho MQTT C must be installed on the system. Next, choose if it is supposed to build the documentation (PAHO_BUILD_DOCUMENTATION) and/or the sample applications (PAHO_BUILD_SAMPLES).
+
+Once the configuration is done, click on the Configure button, select the version of the Visual Studio, and then click on Generate button.
+
+At the end of this process you have a Visual Studio solution.
+
 
 ## Example
 
