@@ -78,7 +78,7 @@ int iclient_persistence::persistence_open(void** handle, const char* clientID,
 		if (context) {
 			static_cast<iclient_persistence*>(context)->open(clientID, serverURI);
 			*handle = context;
-			return 0;
+			return MQTTASYNC_SUCCESS;
 		}
 	}
 	catch (...) {}
@@ -91,7 +91,7 @@ int iclient_persistence::persistence_close(void* handle)
 	try {
 		if (handle) {
 			static_cast<iclient_persistence*>(handle)->close();
-			return 0;
+			return MQTTASYNC_SUCCESS;
 		}
 	}
 	catch (...) {}
@@ -121,7 +121,7 @@ int iclient_persistence::persistence_put(void* handle, char* key, int bufcount,
 				p = std::make_shared<persistence_wrapper>(&buf[0], buf.size());
 			}
 			static_cast<iclient_persistence*>(handle)->put(key, p);
-			return 0;
+			return MQTTASYNC_SUCCESS;
 		}
 	}
 	catch (...) {}
@@ -148,7 +148,7 @@ int iclient_persistence::persistence_get(void* handle, char* key,
 			std::memcpy(buf, p->get_header_bytes(), hdrlen);
 			std::memcpy(buf+hdrlen, p->get_payload_bytes(), payloadlen);
 			*buffer = buf;
-			return 0;
+			return MQTTASYNC_SUCCESS;
 		}
 	}
 	catch (...) {}
@@ -161,7 +161,7 @@ int iclient_persistence::persistence_remove(void* handle, char* key)
 	try {
 		if (handle) {
 			static_cast<iclient_persistence*>(handle)->remove(key);
-			return 0;
+			return MQTTASYNC_SUCCESS;
 		}
 	}
 	catch (...) {}
@@ -188,7 +188,7 @@ int iclient_persistence::persistence_keys(void* handle, char*** keys, int* nkeys
 					(*keys)[i][len] = '\0';
 				}
 			}
-			return 0;
+			return MQTTASYNC_SUCCESS;
 		}
 	}
 	catch (...) {}
@@ -201,7 +201,7 @@ int iclient_persistence::persistence_clear(void* handle)
 	try {
 		if (handle) {
 			static_cast<iclient_persistence*>(handle)->clear();
-			return 0;
+			return MQTTASYNC_SUCCESS;
 		}
 	}
 	catch (...) {}
@@ -214,7 +214,7 @@ int iclient_persistence::persistence_containskey(void* handle, char* key)
 	try {
 		if (handle &&
 				static_cast<iclient_persistence*>(handle)->contains_key(key))
-			return 0;
+			return MQTTASYNC_SUCCESS;
 	}
 	catch (...) {}
 
