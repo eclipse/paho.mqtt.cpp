@@ -37,7 +37,9 @@ libpaho_mqttpp3_la_SOURCES += src/token.cpp
 libpaho_mqttpp3_la_SOURCES += src/topic.cpp
 libpaho_mqttpp3_la_SOURCES += src/connect_options.cpp
 libpaho_mqttpp3_la_SOURCES += src/will_options.cpp
+if PAHO_WITH_SSL
 libpaho_mqttpp3_la_SOURCES += src/ssl_options.cpp
+endif
 
 ###############################################################################
 # Library compiler flags
@@ -79,7 +81,9 @@ include_HEADERS += src/mqtt/response_options.h
 include_HEADERS += src/mqtt/token.h
 include_HEADERS += src/mqtt/topic.h
 include_HEADERS += src/mqtt/will_options.h
+if PAHO_WITH_SSL
 include_HEADERS += src/mqtt/ssl_options.h
+endif
 
 
 ###############################################################################

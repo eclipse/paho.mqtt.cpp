@@ -158,6 +158,33 @@ AC_ARG_WITH(
 AC_SEARCH_LIBS([MQTTAsync_create], [mqtt paho-mqtt mqtt3 paho-mqtt3 mqtt3a paho-mqtt3a], , AC_MSG_ERROR([missing paho.mqtt.c library]))
 AC_CHECK_HEADER([MQTTAsync.h], , AC_MSG_ERROR([missing paho.mqtt.c headers]))
 
+
+# Add OpenSSL support to build secure PAHO libraries
+AC_ARG_WITH(
+	[ssl],
+	AS_HELP_STRING(
+		[--with-ssl=@<:@yes/no@:>@],
+		[with OpenSSL support @<:@default=no@:>@]
+	),
+	,
+	with_ssl=no
+)
+
+AS_IF([test "x$with_ssl" = "xyes"], [
+	AC_CHECK_HEADER([openssl/crypto.h], , AC_MSG_ERROR([missing openssl/crypto.h header]))
+	AC_CHECK_LIB([crypto], [CRYPTO_num_locks], , AC_MSG_ERROR([missing crypto library]))
+
+	AC_CHECK_HEADER([openssl/ssl.h], , AC_MSG_ERROR([missing openssl/ssl.h header]))
+	AC_CHECK_LIB([ssl], [SSL_connect], , AC_MSG_ERROR([missing ssl library]))
+
+	AC_CHECK_LIB([paho-mqtt3as], [MQTTAsync_create], , AC_MSG_ERROR([missing paho.mqtt.c SSL library]))
+
+	AC_DEFINE([OPENSSL], [], [OpenSSL support])
+])
+
+AM_CONDITIONAL([PAHO_WITH_SSL], [test "$with_ssl" = yes])
+
+
 ###############################################################################
 # Output files
 ###############################################################################
@@ -180,6 +207,7 @@ echo "                      Build samples : $enable_samples"
 echo "                Build documentation : $enable_doc"
 echo "          Enable peak warning level : $enable_peak_warnings"
 echo "                   With Paho MQTT C : $with_paho_mqtt_c"
+echo "               With OpenSSL library : $with_ssl"
 echo "                      With CPPFLAGS : $CPPFLAGS"
 echo "                        With CFLAGS : $CFLAGS"
 echo "                      With CXXFLAGS : $CXXFLAGS"
