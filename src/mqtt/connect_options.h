@@ -138,6 +138,15 @@ public:
 	 */
 	bool is_clean_session() const { return opts_.cleansession != 0; }
 	/**
+      * Gets the version of MQTT to be used on the connect.
+	  * @return
+	  * @li MQTTVERSION_DEFAULT (0) = default: start with 3.1.1, and if that
+	  *     fails, fall back to 3.1 
+	  * @li MQTTVERSION_3_1 (3) = only try version 3.1 
+	  * @li MQTTVERSION_3_1_1 (4) = only try version 3.1.1 
+	  */
+	int get_mqtt_version() const { return opts_.MQTTVersion; }
+	/**
 	 * Sets whether the server should remember state for the client across
 	 * reconnects.
 	 * @param cleanSession
@@ -185,6 +194,15 @@ public:
 	 * @param tok The delivery token to be used as the callback context.
 	 */
 	void set_context(token* tok);
+	/**
+      * Sets the version of MQTT to be used on the connect.
+	  * @param mqttVersion The MQTT version to use for the connection:
+	  *   @li MQTTVERSION_DEFAULT (0) = default: start with 3.1.1, and if
+	  *       that fails, fall back to 3.1
+	  *   @li MQTTVERSION_3_1 (3) = only try version 3.1 
+	  *   @li MQTTVERSION_3_1_1 (4) = only try version 3.1.1 
+	  */
+	void set_mqtt_version(int mqttVersion) { opts_.MQTTVersion = mqttVersion; }
 	/**
 	 * Gets a string representation of the object. 
 	 * @return 
