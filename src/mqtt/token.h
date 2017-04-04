@@ -154,7 +154,6 @@ class token : public virtual itoken
 	int rc_;
 
 	/** Client and token-related options have special access */
-	friend class async_client;
 	friend class response_options;
 	friend class delivery_response_options;
 	friend class connect_options;
