@@ -28,37 +28,12 @@ extern "C" {
 	#include "MQTTAsync.h"
 }
 
+#include "mqtt/idelivery_token.h"
 #include "mqtt/token.h"
 #include "mqtt/message.h"
 #include <memory>
 
 namespace mqtt {
-
-/////////////////////////////////////////////////////////////////////////////
-
-/**
- * Provides a mechanism for tracking the delivery of a message.
- */
-class idelivery_token : public virtual itoken
-{
-public:
-	/** Smart/shared pointer to an object of this class */
-	using ptr_t = std::shared_ptr<idelivery_token>;
-	/** Smart/shared pointer to a const object of this class */
-	using const_ptr_t = std::shared_ptr<const idelivery_token>;
-
-	/**
-	 * Gets the message associated with this token.
-	 * @return The message associated with this token.
-	 */
-	virtual const_message_ptr get_message() const =0;
-};
-
-/** Smart/shared pointer to a delivery token */
-using idelivery_token_ptr = idelivery_token::ptr_t;
-
-/** Smart/shared pointer to a const delivery token */
-using const_idelivery_token_ptr = idelivery_token::const_ptr_t;
 
 /////////////////////////////////////////////////////////////////////////////
 

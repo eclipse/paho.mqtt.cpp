@@ -28,6 +28,7 @@ extern "C" {
 	#include "MQTTAsync.h"
 }
 
+#include "mqtt/itoken.h"
 #include "mqtt/iaction_listener.h"
 #include "mqtt/exception.h"
 #include <string>
@@ -41,83 +42,6 @@ extern "C" {
 namespace mqtt {
 
 class iasync_client;
-
-/////////////////////////////////////////////////////////////////////////////
-
-/**
- * Provides a mechanism for tracking the completion of an asynchronous task.
- */
-class itoken
-{
-public:
-	/** Shared pointer to a token */
-	using ptr_t = std::shared_ptr<itoken>;
-	/**
-	 * Virtual base destructor.
-	 */
-	virtual ~itoken() {}
-	/**
-	 * Return the async listener for this token.
-	 * @return iaction_listener
-	 */
-	virtual iaction_listener* get_action_callback() const =0;
-	/**
-	 * Returns the MQTT client that is responsible for processing the
-	 * asynchronous action.
-	 * @return iasync_client
-	 */
-	virtual iasync_client* get_client() const =0;
-	/**
-	 * Returns an exception providing more detail if an operation failed.
-	 * @return Exception
-	 */
-	//virtual exception get_exception() =0;
-	/**
-	 * Returns the message ID of the message that is associated with the
-	 * token.
-	 * @return int
-	 */
-	virtual int get_message_id() const =0;
-	/**
-	 * Returns the topic string(s) for the action being tracked by this
-	 * token.
-	 * @return std::vector<std::string>
-	 */
-	virtual const std::vector<std::string>& get_topics() const =0;
-	/**
-	 * Retrieve the context associated with an action.
-	 * @return void*
-	 */
-	virtual void* get_user_context() const =0;
-	/**
-	 * Returns whether or not the action has finished.
-	 * @return bool
-	 */
-	virtual bool is_complete() const =0;
-	/**
-	 * Register a listener to be notified when an action completes.
-	 * @param listener
-	 */
-	virtual void set_action_callback(iaction_listener& listener) =0;
-	/**
-	 * Store some context associated with an action.
-	 * @param userContext
-	 */
-	virtual void set_user_context(void* userContext) =0;
-	/**
-	 * Blocks the current thread until the action this token is associated
-	 * with has completed.
-	 */
-	virtual void wait_for_completion() =0;
-	/**
-	 * Blocks the current thread until the action this token is associated
-	 * with has completed.
-	 * @param timeout
-	 */
-	virtual void wait_for_completion(long timeout) =0;
-};
-
-using itoken_ptr = itoken::ptr_t;
 
 /////////////////////////////////////////////////////////////////////////////
 
