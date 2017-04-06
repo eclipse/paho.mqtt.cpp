@@ -138,6 +138,13 @@ public:
 		opts_.keepAliveInterval = keepAliveInterval;
 	}
 	/**
+	 * Sets the MQTT version.
+	 * @param mqttVersion
+	 */
+	void set_mqtt_version(int mqttVersion) {
+		opts_.MQTTVersion = mqttVersion;
+	}
+	/**
 	 * Sets the password to use for the connection.
 	 */
 	void set_password(const std::string& password);
