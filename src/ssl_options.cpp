@@ -28,6 +28,28 @@ ssl_options::ssl_options() : opts_(MQTTAsync_SSLOptions_initializer)
 {
 }
 
+ssl_options::ssl_options(
+		const std::string& trustStore,
+		const std::string& keyStore,
+		const std::string& privateKey,
+		const std::string& privateKeyPassword,
+		const std::string& enabledCipherSuites,
+		const bool enableServerCertAuth)
+		: opts_(MQTTAsync_SSLOptions_initializer),
+		  trustStore_(trustStore),
+		  keyStore_(keyStore),
+		  privateKey_(privateKey),
+		  privateKeyPassword_(privateKeyPassword),
+		  enabledCipherSuites_(enabledCipherSuites)
+{
+	opts_.trustStore = trustStore_.empty() ? nullptr : trustStore_.c_str();
+	opts_.keyStore = keyStore_.empty() ? nullptr : keyStore_.c_str();
+	opts_.privateKey = privateKey_.empty() ? nullptr : privateKey_.c_str();
+	opts_.privateKeyPassword = privateKeyPassword_.empty() ? nullptr : privateKeyPassword_.c_str();
+	opts_.enabledCipherSuites = enabledCipherSuites_.empty() ? nullptr : enabledCipherSuites_.c_str();
+	opts_.enableServerCertAuth = enableServerCertAuth;
+}
+
 ssl_options::ssl_options(const ssl_options& opt)
 		: opts_(opt.opts_), trustStore_(opt.trustStore_), keyStore_(opt.keyStore_),
 			privateKey_(opt.privateKey_), privateKeyPassword_(opt.privateKeyPassword_),
@@ -57,6 +79,10 @@ ssl_options::ssl_options(ssl_options&& opt)
 	opts_.privateKey = privateKey_.empty() ? nullptr : privateKey_.c_str();
 	opts_.privateKeyPassword = privateKeyPassword_.empty() ? nullptr : privateKeyPassword_.c_str();
 	opts_.enabledCipherSuites = enabledCipherSuites_.empty() ? nullptr : enabledCipherSuites_.c_str();
+
+	// NOTE: leave the source object "empty" (i.e. with default values)
+	MQTTAsync_SSLOptions dfltSSLOpt = MQTTAsync_SSLOptions_initializer;
+	std::memcpy(&opt.opts_, &dfltSSLOpt, sizeof(opt.opts_));
 }
 
 ssl_options& ssl_options::operator=(const ssl_options& rhs)
@@ -97,9 +123,10 @@ ssl_options& ssl_options::operator=(ssl_options&& rhs)
 	privateKeyPassword_ = std::move(rhs.privateKeyPassword_);
 	enabledCipherSuites_ = std::move(rhs.enabledCipherSuites_);
 
-	// OPTIMIZE: We probably don't need to do any of the following,
-	// but just to be safe
-	std::memset(&rhs.opts_, 0, sizeof(MQTTAsync_SSLOptions));
+	// NOTE: the correct semantic is to leave the source object
+	// "empty" (i.e. with default values)
+	MQTTAsync_SSLOptions dfltSSLOpt = MQTTAsync_SSLOptions_initializer;
+	std::memcpy(&rhs.opts_, &dfltSSLOpt, sizeof(rhs.opts_));
 
 	// NOTE: By default, the Paho C treats nullptr char arrays as unset values,
 	// so we keep that semantic and only set those char arrays if the string
