@@ -5,11 +5,11 @@
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
@@ -28,7 +28,7 @@ namespace mqtt {
 // These are the callbacks directly from the C library.
 // The 'context' is a raw pointer to the token object.
 
-void token::on_failure(void* context, MQTTAsync_failureData* rsp) 
+void token::on_failure(void* context, MQTTAsync_failureData* rsp)
 {
 	if (context) {
 		token* tok = static_cast<token*>(context);
@@ -37,7 +37,7 @@ void token::on_failure(void* context, MQTTAsync_failureData* rsp)
 	}
 }
 
-void token::on_success(void* context, MQTTAsync_successData* rsp) 
+void token::on_success(void* context, MQTTAsync_successData* rsp)
 {
 	if (context) {
 		token* tok = static_cast<token*>(context);
@@ -47,8 +47,9 @@ void token::on_success(void* context, MQTTAsync_successData* rsp)
 }
 
 // --------------------------------------------------------------------------
+// Object callbacks
 
-void token::on_success(MQTTAsync_successData* rsp) 
+void token::on_success(MQTTAsync_successData* rsp)
 {
 	guard g(lock_);
 	iaction_listener* listener = listener_;
@@ -86,36 +87,29 @@ void token::on_failure(MQTTAsync_failureData* rsp)
 
 // --------------------------------------------------------------------------
 
-token::token(iasync_client& cli) : tok_(MQTTAsync_token(0)), cli_(&cli), 
-						userContext_(nullptr), listener_(nullptr),
-						complete_(false), rc_(0)
+token::token(iasync_client& cli) : token(cli, MQTTAsync_token(0))
 {
 }
 
-token::token(iasync_client& cli, MQTTAsync_token tok) : tok_(tok), cli_(&cli), 
-						userContext_(nullptr), listener_(nullptr),
-						complete_(false), rc_(0)
+token::token(iasync_client& cli, MQTTAsync_token tok)
+				: tok_(tok), cli_(&cli),
+					userContext_(nullptr), listener_(nullptr),
+					complete_(false), rc_(0)
 {
 }
 
 token::token(iasync_client& cli, const std::string& top)
-				: tok_(MQTTAsync_token(0)), cli_(&cli), 
-						userContext_(nullptr), listener_(nullptr),
-						complete_(false), rc_(0)
+				: token(cli, MQTTAsync_token(0))
 {
 	topics_.push_back(top);
 }
 
 token::token(iasync_client& cli, const std::vector<std::string>& topics)
-				: tok_(MQTTAsync_token(0)), topics_(topics), cli_(&cli), 
+				: tok_(MQTTAsync_token(0)), topics_(topics), cli_(&cli),
 						userContext_(nullptr), listener_(nullptr),
 						complete_(false), rc_(0)
 {
 }
-
-//exception token::get_exception()
-//{
-//}
 
 void token::wait_for_completion()
 {
@@ -136,7 +130,7 @@ void token::wait_for_completion(long timeout)
 		cond_.wait(g, [this]{return complete_;});
 	}
 	else {
-		if (!cond_.wait_for(g, std::chrono::milliseconds(timeout), 
+		if (!cond_.wait_for(g, std::chrono::milliseconds(timeout),
 							[this]{return complete_;}))
 			throw exception(MQTTASYNC_FAILURE);	// TODO: Get a timout error number
 	}

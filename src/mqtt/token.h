@@ -50,8 +50,13 @@ class iasync_client;
 class itoken
 {
 public:
-	/** Shared pointer to a token */
+	/** Smart/shared pointer to an object of this class */
 	using ptr_t = std::shared_ptr<itoken>;
+	/** Smart/shared pointer to a const object of this class */
+	using const_ptr_t = std::shared_ptr<itoken>;
+	/** Weak pointer to an object of this class */
+	using weak_ptr_t = std::weak_ptr<itoken>;
+
 	/**
 	 * Virtual base destructor.
 	 */
@@ -67,11 +72,6 @@ public:
 	 * @return iasync_client
 	 */
 	virtual iasync_client* get_client() const =0;
-	/**
-	 * Returns an exception providing more detail if an operation failed.
-	 * @return Exception
-	 */
-	//virtual exception get_exception() =0;
 	/**
 	 * Returns the message ID of the message that is associated with the
 	 * token.
@@ -199,10 +199,12 @@ class token : public virtual itoken
 	void on_failure(MQTTAsync_failureData* rsp);
 
 public:
-	/** Smart pointer to an object of this class */
+	/** Smart/shared pointer to an object of this class */
 	using ptr_t = std::shared_ptr<token>;
-	/** Smart pointer to an object of this class */
+	/** Smart/shared pointer to an object of this class */
 	using const_ptr_t = std::shared_ptr<const token>;
+	/** Weak pointer to an object of this class */
+	using weak_ptr_t = std::weak_ptr<token>;
 
 	/**
 	 * Constructs a token object.
@@ -324,7 +326,6 @@ public:
 			throw exception(rc_);
 		return true;
 	}
-
 };
 
 /** Smart/shared pointer to a token object */

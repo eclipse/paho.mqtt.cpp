@@ -98,6 +98,9 @@ else
   CPPFLAGS += -O2 -Wno-unused-result -Werror
 endif
 
+# TODO: Make this optional
+DEFS += OPENSSL
+
 CPPFLAGS += $(addprefix -D,$(DEFS)) $(addprefix -I,$(INC_DIRS))
 
 LIB_DEPS += c stdc++ pthread

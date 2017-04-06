@@ -17,32 +17,24 @@
 #include <iostream>
 #include <cstdlib>
 #include <string>
-#include <thread>	// For sleep
-#include <atomic>
 #include <chrono>
 #include <cstring>
 #include "mqtt/async_client.h"
 
 using namespace std;
 
-const string DFLT_ADDRESS {"tcp://localhost:1883"};
-const string DFLT_CLIENT_ID {"AsyncPublisher"};
+const string DFLT_ADDRESS {"ssl://localhost:18885"};
+const string DFLT_CLIENT_ID {"CppAsyncPublisherSSL"};
 
 const string TOPIC {"hello"};
 
 const char* PAYLOAD1 = "Hello World!";
 const char* PAYLOAD2 = "Hi there!";
-const char* PAYLOAD3 = "Is anyone listening?";
-const char* PAYLOAD4 = "Someone is always listening.";
 
 const char* LWT_PAYLOAD = "Last will and testament.";
 
 const int  QOS = 1;
 const long TIMEOUT = 10000L;
-
-inline void sleep(int ms) {
-	this_thread::sleep_for(std::chrono::milliseconds(ms));
-}
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -69,49 +61,6 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////
 
-/**
- * A base action listener.
- */
-class action_listener : public virtual mqtt::iaction_listener
-{
-protected:
-	void on_failure(const mqtt::itoken& tok) override {
-		cout << "\tListener failure for token: "
-			<< tok.get_message_id() << endl;
-	}
-
-	void on_success(const mqtt::itoken& tok) override {
-		cout << "\tListener success for token: "
-			<< tok.get_message_id() << endl;
-	}
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
-/**
- * A derived action listener for publish events.
- */
-class delivery_action_listener : public action_listener
-{
-	atomic<bool> done_;
-
-	void on_failure(const mqtt::itoken& tok) override {
-		action_listener::on_failure(tok);
-		done_ = true;
-	}
-
-	void on_success(const mqtt::itoken& tok) override {
-		action_listener::on_success(tok);
-		done_ = true;
-	}
-
-public:
-	delivery_action_listener() : done_(false) {}
-	bool is_done() const { return done_; }
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
 int main(int argc, char* argv[])
 {
 	string	address  = (argc > 1) ? string(argv[1]) : DFLT_ADDRESS,
@@ -123,16 +72,22 @@ int main(int argc, char* argv[])
 	callback cb;
 	client.set_callback(cb);
 
-	mqtt::connect_options conopts;
+	mqtt::connect_options connopts("testuser", "testpassword");
+
+	mqtt::ssl_options sslopts;
+	sslopts.set_trust_store("test-root-ca.crt");
+
 	mqtt::message willmsg(LWT_PAYLOAD, 1, true);
 	mqtt::will_options will(TOPIC, willmsg);
-	conopts.set_will(will);
+
+	connopts.set_will(will);
+	connopts.set_ssl(sslopts);
 
 	cout << "  ...OK" << endl;
 
 	try {
 		cout << "\nConnecting..." << endl;
-		mqtt::itoken_ptr conntok = client.connect(conopts);
+		mqtt::itoken_ptr conntok = client.connect(connopts);
 		cout << "Waiting for the connection..." << endl;
 		conntok->wait_for_completion();
 		cout << "  ...OK" << endl;
@@ -153,26 +108,6 @@ int main(int argc, char* argv[])
 		pubtok->wait_for_completion(TIMEOUT);
 		cout << "  ...OK" << endl;
 
-		// Now try with a listener
-
-		cout << "\nSending next message..." << endl;
-		action_listener listener;
-		pubmsg = mqtt::make_message(PAYLOAD3);
-		pubtok = client.publish(TOPIC, pubmsg, nullptr, listener);
-		pubtok->wait_for_completion();
-		cout << "  ...OK" << endl;
-
-		// Finally try with a listener, but no token
-
-		cout << "\nSending final message..." << endl;
-		delivery_action_listener deliveryListener;
-		pubmsg = mqtt::make_message(PAYLOAD4);
-		client.publish(TOPIC, pubmsg, nullptr, deliveryListener);
-
-		while (!deliveryListener.is_done()) {
-			sleep(100);
-		}
-		cout << "OK" << endl;
 
 		// Double check that there are no pending tokens
 

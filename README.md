@@ -95,6 +95,7 @@ $ cd paho.mqtt.c
 $ git checkout -t origin/develop
 $ make
 $ export PAHO_MQTT_C_PATH=$PWD
+$ export LD_LIBRARY_PATH=$PWD/build/output
 $ cd ..
 ```
 
@@ -241,7 +242,7 @@ int main(int argc, char* argv[])
 {
     sample_mem_persistence persist;
     mqtt::client client(ADDRESS, CLIENTID, &persist);
-    
+
     callback cb;
     client.set_callback(cb);
 
@@ -250,45 +251,45 @@ int main(int argc, char* argv[])
     connOpts.set_clean_session(true);
 
     try {
-        std::cout << "Connecting..." << std::flush;
+        cout << "Connecting..." << flush;
         client.connect(connOpts);
-        std::cout << "OK" << std::endl;
+        cout << "OK" << endl;
 
         // First use a message pointer.
 
-        std::cout << "Sending message..." << std::flush;
-        mqtt::message_ptr pubmsg = std::make_shared(PAYLOAD1);
+        cout << "Sending message..." << flush;
+        mqtt::message_ptr pubmsg = mqtt::make_message(PAYLOAD1);
         pubmsg->set_qos(QOS);
         client.publish(TOPIC, pubmsg);
-        std::cout << "OK" << std::endl;
+        cout << "OK" << endl;
 
         // Now try with itemized publish.
 
-        std::cout << "Sending next message..." << std::flush;
+        cout << "Sending next message..." << flush;
         client.publish(TOPIC, PAYLOAD2, strlen(PAYLOAD2)+1, 0, false);
-        std::cout << "OK" << std::endl;
+        cout << "OK" << endl;
 
         // Now try with a listener, but no token
 
-        std::cout << "Sending final message..." << std::flush;
-        pubmsg = std::make_shared(PAYLOAD3);
+        cout << "Sending final message..." << flush;
+        pubmsg = mqtt::make_message(PAYLOAD3);
         pubmsg->set_qos(QOS);
         client.publish(TOPIC, pubmsg);
-        std::cout << "OK" << std::endl;
+        cout << "OK" << endl;
 
         // Disconnect
-        std::cout << "Disconnecting..." << std::flush;
+        cout << "Disconnecting..." << flush;
         client.disconnect();
-        std::cout << "OK" << std::endl;
+        cout << "OK" << endl;
     }
     catch (const mqtt::persistence_exception& exc) {
-        std::cerr << "Persistence Error: " << exc.what() << " ["
-            << exc.get_reason_code() << "]" << std::endl;
+        cerr << "Persistence Error: " << exc.what() << " ["
+            << exc.get_reason_code() << "]" << endl;
         return 1;
     }
     catch (const mqtt::exception& exc) {
-        std::cerr << "Error: " << exc.what() << " ["
-            << exc.get_reason_code() << "]" << std::endl;
+        cerr << "Error: " << exc.what() << " ["
+            << exc.get_reason_code() << "]" << endl;
         return 1;
     }
 
@@ -298,7 +299,8 @@ int main(int argc, char* argv[])
 
 -----------
 
-The API organization and documentation were adapted from the Paho Java library
+The API organization and documentation were adapted from:
+The Paho Java library
 by Dave Locke.
 Copyright (c) 2012, IBM Corp
 
@@ -314,10 +316,10 @@ Copyright (c) 2013 IBM Corp.
 
  All rights reserved. This program and the accompanying materials
  are made available under the terms of the Eclipse Public License v1.0
- and Eclipse Distribution License v1.0 which accompany this distribution. 
+ and Eclipse Distribution License v1.0 which accompany this distribution.
 
- The Eclipse Public License is available at 
+ The Eclipse Public License is available at
     http://www.eclipse.org/legal/epl-v10.html
- and the Eclipse Distribution License is available at 
+ and the Eclipse Distribution License is available at
    http://www.eclipse.org/org/documents/edl-v10.php.
 

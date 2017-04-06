@@ -32,6 +32,9 @@ class response_options
 	/** The underlying C structure */
 	MQTTAsync_responseOptions opts_;
 
+	/** The token to which we are connected */
+	token::weak_ptr_t tok_;
+
 	/** The client has special access */
 	friend class async_client;
 	friend class response_options_test;
@@ -43,22 +46,17 @@ public:
 	 */
 	response_options();
 	/**
-	 * Creates a response object with the specified callbacks. 
+	 * Creates a response object with the specified callbacks.
 	 * @param tok A token to be used as the context.
 	 */
-	response_options(token* tok);
-
-	#if 0
-	MQTTAsync_responseOptions* c_ptr() { return &opts_; }
-	const MQTTAsync_responseOptions* c_ptr() const { return &opts_; }
-	#endif
-
+	response_options(const token_ptr& tok);
 	/**
-	 * Sets the callback context to a generic token. 
+	 * Sets the callback context to a generic token.
 	 * @param tok The token to be used as the callback context.
 	 */
-	void set_context(token* tok) {
-		opts_.context = tok;
+	void set_token(const token_ptr& tok) {
+		tok_ = tok;
+		opts_.context = tok.get();
 	}
 };
 
@@ -75,6 +73,9 @@ class delivery_response_options
 	/** The underlying C structure */
 	MQTTAsync_responseOptions opts_;
 
+	/** The delivery token to which we are connected */
+	delivery_token::weak_ptr_t dtok_;
+
 	/** The client has special access */
 	friend class async_client;
 	friend class delivery_response_options_test;
@@ -88,13 +89,14 @@ public:
 	 * Creates a response object tied to the specific delivery token.
 	 * @param dtok A delivery token to be used as the context.
 	 */
-	delivery_response_options(delivery_token* dtok);
+	delivery_response_options(const delivery_token_ptr& dtok);
 	/**
-	 * Sets the callback context to a delivery token. 
+	 * Sets the callback context to a delivery token.
 	 * @param dtok The delivery token to be used as the callback context.
 	 */
-	void set_context(delivery_token* dtok) { 
-		opts_.context = dtok;
+	void set_token(const delivery_token_ptr& dtok) {
+		dtok_ = dtok;
+		opts_.context = dtok.get();
 	}
 };
 

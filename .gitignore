@@ -3,6 +3,7 @@ lib/
 \.hgignore
 .deps/
 .libs/
+*.vp*
 aclocal.m4
 # AC_CONFIG_AUX_DIR created by /bootstrap
 autotools_build/
