@@ -16,6 +16,10 @@ extern "C" {
 
 namespace mqtt {
 
+class response_options_test;
+class delivery_response_options_test;
+class token_test;
+
 /////////////////////////////////////////////////////////////////////////////
 //							response_options
 /////////////////////////////////////////////////////////////////////////////
@@ -30,6 +34,8 @@ class response_options
 
 	/** The client has special access */
 	friend class async_client;
+	friend class response_options_test;
+	friend class token_test;
 
 public:
 	/**
@@ -57,12 +63,12 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-//							response_options
+//							delivery_response_options
 /////////////////////////////////////////////////////////////////////////////
 
 /**
- * The response options for asynchronous calls targeted at delivery. 
- * Each of these objects is tied to a specific delivery_token. 
+ * The response options for asynchronous calls targeted at delivery.
+ * Each of these objects is tied to a specific delivery_token.
  */
 class delivery_response_options
 {
@@ -71,6 +77,7 @@ class delivery_response_options
 
 	/** The client has special access */
 	friend class async_client;
+	friend class delivery_response_options_test;
 
 public:
 	/**

@@ -38,6 +38,7 @@ extern "C" {
 namespace mqtt {
 
 class connect_options;
+class ssl_options_test;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -72,6 +73,7 @@ class ssl_options
 
 	/** The connect options has special access */
 	friend class connect_options;
+	friend class ssl_options_test;
 
 public:
 	/** Smart/shared pointer to an object of this class. */
