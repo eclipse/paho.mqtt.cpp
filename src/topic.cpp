@@ -30,6 +30,11 @@ idelivery_token_ptr topic::publish(const void* payload, size_t n,
 	return cli_->publish(name_, payload, n, qos, retained);
 }
 
+idelivery_token_ptr topic::publish(const std::string& payload, int qos, bool retained)
+{
+	return publish(payload.data(), payload.length(), qos, retained);
+}
+
 idelivery_token_ptr topic::publish(const_message_ptr msg)
 {
 	return cli_->publish(name_, msg);

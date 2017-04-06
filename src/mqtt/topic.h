@@ -50,7 +50,7 @@ class topic
 
 	/** The client to which this topic is connected */
 	// TODO: Make this a smart pointer
-	async_client* cli_;
+	iasync_client* cli_;
 
 public:
 	/**
@@ -62,7 +62,7 @@ public:
 	 * @param name
 	 * @param cli
 	 */
-	topic(const std::string& name, async_client& cli) : name_(name), cli_(&cli) {}
+	topic(const std::string& name, iasync_client& cli) : name_{name}, cli_{&cli} {}
 	/**
 	 * Returns the name of the queue or topic.
 	 * @return std::string
@@ -86,9 +86,7 @@ public:
 	 *
 	 * @return delivery_token
 	 */
-	idelivery_token_ptr publish(const std::string& payload, int qos, bool retained) {
-		return publish(payload.data(), payload.length(), qos, retained);
-	}
+	idelivery_token_ptr publish(const std::string& payload, int qos, bool retained);
 	/**
 	 * Publishes the specified message to this topic, but does not wait for
 	 * delivery of the message to complete.
