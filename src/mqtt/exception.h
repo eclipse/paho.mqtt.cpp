@@ -108,4 +108,3 @@ public:
 }
 
 #endif		// __mqtt_token_h
-

@@ -42,6 +42,8 @@ extern "C" {
 namespace mqtt {
 
 class async_client;
+class connect_options_test;
+class token_test;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -70,6 +72,8 @@ class connect_options
 
 	/** The client has special access */
 	friend class async_client;
+	friend class connect_options_test;
+	friend class token_test;
 
 public:
 	/** Smart/shared pointer to an object of this class. */
@@ -218,4 +222,3 @@ using connect_options_ptr = connect_options::ptr_t;
 }
 
 #endif		// __mqtt_connect_options_h
-

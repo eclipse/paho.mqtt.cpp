@@ -338,4 +338,3 @@ using const_token_ptr = token::const_ptr_t;
 }
 
 #endif		// __mqtt_token_h
-

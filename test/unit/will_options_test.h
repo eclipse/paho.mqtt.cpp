@@ -24,7 +24,12 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "mqtt/will_options.h"
+
+#include "dummy_async_client.h"
+
 #include <cstring>
+
+namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -33,7 +38,10 @@ class will_options_test : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE( will_options_test );
 
 	CPPUNIT_TEST( test_dflt_constructor );
-	CPPUNIT_TEST( test_buf_constructor  );
+	CPPUNIT_TEST( test_string_buf_constructor  );
+	CPPUNIT_TEST( test_topic_buf_constructor  );
+	CPPUNIT_TEST( test_string_string_constructor  );
+	CPPUNIT_TEST( test_string_message_constructor  );
 	CPPUNIT_TEST( test_copy_constructor );
 	CPPUNIT_TEST( test_move_constructor );
 	CPPUNIT_TEST( test_copy_assignment  );
@@ -50,20 +58,18 @@ class will_options_test : public CppUnit::TestFixture
 	const std::string PAYLOAD = std::string(BUF);
 	const int QOS = 1;
 
-	mqtt::will_options opts_;
-	mqtt::message msg_;
-
+	mqtt::will_options orgOpts;
 
 public:
 	void setUp() {
-		msg_ = mqtt::message(PAYLOAD, QOS, true);
-		opts_ = mqtt::will_options(TOPIC, msg_);
+		orgOpts = mqtt::will_options(TOPIC, BUF, N, QOS, true);
 	}
 	void tearDown() {}
 
-	// ----------------------------------------------------------------------
+// ----------------------------------------------------------------------
+// Test the default constructor
+// ----------------------------------------------------------------------
 
-	// Test the default constructor
 	void test_dflt_constructor() {
 		mqtt::will_options opts;
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, opts.get_topic());
@@ -72,8 +78,26 @@ public:
 		CPPUNIT_ASSERT(!opts.is_retained());
 	}
 
-	// Test the raw buffer (void*) constructor
-	void test_buf_constructor() {
+// ----------------------------------------------------------------------
+// Test the raw buffer (void*) constructor
+// ----------------------------------------------------------------------
+
+	void test_string_buf_constructor() {
+		test::dummy_async_client cli;
+		mqtt::topic topic { TOPIC, cli };
+		mqtt::will_options opts(topic, BUF, N, QOS, true);
+
+		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload());
+		CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
+		CPPUNIT_ASSERT(opts.is_retained());
+	}
+
+// ----------------------------------------------------------------------
+// Test the raw buffer (void*) constructor
+// ----------------------------------------------------------------------
+
+	void test_topic_buf_constructor() {
 		mqtt::will_options opts(TOPIC, BUF, N, QOS, true);
 
 		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
@@ -82,9 +106,38 @@ public:
 		CPPUNIT_ASSERT(opts.is_retained());
 	}
 
-	// Test the copy constructor
+// ----------------------------------------------------------------------
+// Test the string payload constructor
+// ----------------------------------------------------------------------
+
+	void test_string_string_constructor() {
+		mqtt::will_options opts(TOPIC, PAYLOAD, QOS, true);
+
+		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload());
+		CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
+		CPPUNIT_ASSERT(opts.is_retained());
+	}
+
+// ----------------------------------------------------------------------
+// Test the message payload constructor
+// ----------------------------------------------------------------------
+
+	void test_string_message_constructor() {
+		mqtt::message msg(PAYLOAD, QOS, true);
+		mqtt::will_options opts(TOPIC, msg);
+
+		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload());
+		CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
+		CPPUNIT_ASSERT(opts.is_retained());
+	}
+
+// ----------------------------------------------------------------------
+// Test the copy constructor
+// ----------------------------------------------------------------------
+
 	void test_copy_constructor() {
-		mqtt::will_options orgOpts(TOPIC, BUF, N, QOS, true);
 		mqtt::will_options opts(orgOpts);
 
 		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
@@ -93,9 +146,9 @@ public:
 		CPPUNIT_ASSERT(opts.is_retained());
 
 		// Make sure it's a true copy, not linked to the original
-		orgOpts.set_topic("");
-		orgOpts.set_payload("");
-		orgOpts.set_qos(0);
+		orgOpts.set_topic(EMPTY_STR);
+		orgOpts.set_payload(EMPTY_STR);
+		orgOpts.set_qos(DFLT_QOS);
 		orgOpts.set_retained(false);
 
 		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
@@ -104,9 +157,11 @@ public:
 		CPPUNIT_ASSERT(opts.is_retained());
 	}
 
-	// Test the move constructor
+// ----------------------------------------------------------------------
+// Test the move constructor
+// ----------------------------------------------------------------------
+
 	void test_move_constructor() {
-		mqtt::will_options orgOpts(TOPIC, msg_);
 		mqtt::will_options opts(std::move(orgOpts));
 
 		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
@@ -117,15 +172,18 @@ public:
 		// Check that the original was moved
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_topic());
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_payload());
-		CPPUNIT_ASSERT_EQUAL(0, orgOpts.get_qos());
+		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, orgOpts.get_qos());
 		CPPUNIT_ASSERT(!orgOpts.is_retained());
 	}
 
-	// Test the copy assignment operator=(const&)
+// ----------------------------------------------------------------------
+// Test the copy assignment operator=(const&)
+// ----------------------------------------------------------------------
+
 	void test_copy_assignment() {
 		mqtt::will_options opts;
 
-		opts = opts_;
+		opts = orgOpts;
 
 		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
 		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload());
@@ -133,10 +191,10 @@ public:
 		CPPUNIT_ASSERT(opts.is_retained());
 
 		// Make sure it's a true copy, not linked to the original
-		opts_.set_topic("");
-		opts_.set_payload("");
-		opts_.set_qos(0);
-		opts_.set_retained(false);
+		orgOpts.set_topic(EMPTY_STR);
+		orgOpts.set_payload(EMPTY_STR);
+		orgOpts.set_qos(DFLT_QOS);
+		orgOpts.set_retained(false);
 
 		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
 		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload());
@@ -152,9 +210,11 @@ public:
 		CPPUNIT_ASSERT(opts.is_retained());
 	}
 
-	// Test the move assignment, operator=(&&)
+// ----------------------------------------------------------------------
+// Test the move assignment, operator=(&&)
+// ----------------------------------------------------------------------
+
 	void test_move_assignment() {
-		mqtt::will_options orgOpts(TOPIC, msg_);
 		mqtt::will_options opts;
 
 		opts = std::move(orgOpts);
@@ -167,7 +227,7 @@ public:
 		// Check that the original was moved
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_topic());
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_payload());
-		CPPUNIT_ASSERT_EQUAL(0, orgOpts.get_qos());
+		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, orgOpts.get_qos());
 		CPPUNIT_ASSERT(!orgOpts.is_retained());
 
 		// Self assignment should cause no harm
@@ -180,6 +240,8 @@ public:
 	}
 };
 
+/////////////////////////////////////////////////////////////////////////////
+// end namespace mqtt
+}
+
 #endif		//  __mqtt_will_options_test_h
-
-
