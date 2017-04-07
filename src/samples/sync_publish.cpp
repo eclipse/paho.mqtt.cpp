@@ -36,7 +36,7 @@ const std::string PAYLOAD1("Hello World!");
 const char* PAYLOAD2 = "Hi there!";
 const char* PAYLOAD3 = "Is anyone listening?";
 
-const int QOS = 1;
+const mqtt::QoS QOS = mqtt::QoS::QOS1;
 const int TIMEOUT = 10000;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
 		// Now try with itemized publish.
 
 		std::cout << "\nSending next message..." << std::endl;
-		client.publish(TOPIC, PAYLOAD2, strlen(PAYLOAD2)+1, 0, false);
+		client.publish(TOPIC, PAYLOAD2, strlen(PAYLOAD2)+1, mqtt::QoS::QOS0, false);
 		std::cout << "...OK" << std::endl;
 
 		// Now try with a listener, no token, and non-heap message

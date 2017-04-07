@@ -62,7 +62,7 @@ public:
 	/** Type for a collection of filters */
 	using topic_filter_collection = std::vector<std::string>;
 	/** Type for a collection of QOS values */
-	using qos_collection = std::vector<int>;
+	using qos_collection = std::vector<QoS>;
 
 	/**
 	 * Virtual destructor
@@ -186,7 +186,7 @@ public:
 	 *  	   token will be passed to callback methods if set.
 	 */
 	virtual idelivery_token_ptr publish(const std::string& topic, const void* payload,
-										size_t n, int qos, bool retained) =0;
+										size_t n, QoS qos, bool retained) =0;
 	/**
 	 * Publishes a message to a topic on the server
 	 * @param topic The topic to deliver the message to
@@ -203,7 +203,7 @@ public:
 	 */
 	virtual idelivery_token_ptr publish(const std::string& topic,
 										const void* payload, size_t n,
-										int qos, bool retained, void* userContext,
+										QoS qos, bool retained, void* userContext,
 										iaction_listener& cb) =0;
 	/**
 	 * Publishes a message to a topic on the server Takes an Message
@@ -282,7 +282,7 @@ public:
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	virtual itoken_ptr subscribe(const std::string& topicFilter, int qos) =0;
+	virtual itoken_ptr subscribe(const std::string& topicFilter, QoS qos) =0;
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 * @param topicFilter the topic to subscribe to, which can include
@@ -299,7 +299,7 @@ public:
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	virtual itoken_ptr subscribe(const std::string& topicFilter, int qos,
+	virtual itoken_ptr subscribe(const std::string& topicFilter, QoS qos,
 								 void* userContext, iaction_listener& callback) =0;
 	/**
 	 * Requests the server unsubscribe the client from a topic.

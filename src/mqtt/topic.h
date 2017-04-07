@@ -30,6 +30,7 @@ extern "C" {
 
 #include "mqtt/delivery_token.h"
 #include "mqtt/message.h"
+#include "mqtt/qos.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -77,7 +78,7 @@ public:
 	 *
 	 * @return delivery_token
 	 */
-	idelivery_token_ptr publish(const void* payload, size_t n, int qos, bool retained);
+	idelivery_token_ptr publish(const void* payload, size_t n, QoS qos, bool retained);
 	/**
 	 * Publishes a message on the topic.
 	 * @param payload
@@ -86,7 +87,7 @@ public:
 	 *
 	 * @return delivery_token
 	 */
-	idelivery_token_ptr publish(const std::string& payload, int qos, bool retained);
+	idelivery_token_ptr publish(const std::string& payload, QoS qos, bool retained);
 	/**
 	 * Publishes the specified message to this topic, but does not wait for
 	 * delivery of the message to complete.

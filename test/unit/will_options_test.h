@@ -24,6 +24,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "mqtt/will_options.h"
+#include "mqtt/qos.h"
 
 #include "dummy_async_client.h"
 
@@ -50,13 +51,13 @@ class will_options_test : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE_END();
 
 	const std::string EMPTY_STR;
-	const int DFLT_QOS = 0;
+	const mqtt::QoS DFLT_QOS = mqtt::QoS::QOS0;
 
 	const std::string TOPIC = "hello";
 	const char* BUF = "Hello there";
 	const size_t N = std::strlen(BUF);
 	const std::string PAYLOAD = std::string(BUF);
-	const int QOS = 1;
+	const mqtt::QoS QOS = mqtt::QoS::QOS1;
 
 	mqtt::will_options orgOpts;
 

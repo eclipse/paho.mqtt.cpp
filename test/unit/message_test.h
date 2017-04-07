@@ -44,17 +44,16 @@ class message_test : public CppUnit::TestFixture
 	CPPUNIT_TEST( test_move_constructor );
 	CPPUNIT_TEST( test_copy_assignment );
 	CPPUNIT_TEST( test_move_assignment );
-	CPPUNIT_TEST( test_validate_qos );
 
 	CPPUNIT_TEST_SUITE_END();
 
 	const std::string EMPTY_STR;
-	const int DFLT_QOS = 0;
+	const mqtt::QoS DFLT_QOS = mqtt::QoS::QOS0;
 
 	const char* BUF = "Hello there";
 	const size_t N = std::strlen(BUF);
 	const std::string PAYLOAD = std::string(BUF);
-	const int QOS = 1;
+	const mqtt::QoS QOS = mqtt::QoS::QOS1;
 
 	mqtt::message orgMsg;
 
@@ -129,7 +128,7 @@ public:
 		MQTTAsync_message c_msg = MQTTAsync_message_initializer;
 		c_msg.payload = const_cast<char*>(BUF);
 		c_msg.payloadlen = N;
-		c_msg.qos = QOS;
+		c_msg.qos = static_cast<int>(QOS);
 		c_msg.retained = 1;
 		c_msg.dup = 1;
 		mqtt::message msg(c_msg);
@@ -232,52 +231,6 @@ public:
 		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
-	}
-
-// ----------------------------------------------------------------------
-// Test the validate_qos()
-// ----------------------------------------------------------------------
-
-	void test_validate_qos() {
-		bool pass_lower = false;
-		try {
-			mqtt::message::validate_qos(-1);
-		} catch (std::invalid_argument& ex) {
-			pass_lower = true;
-		}
-		CPPUNIT_ASSERT(pass_lower);
-
-		bool pass_0 = true;
-		try {
-			mqtt::message::validate_qos(0);
-		} catch (std::invalid_argument& ex) {
-			pass_0 = false;
-		}
-		CPPUNIT_ASSERT(pass_0);
-
-		bool pass_1 = true;
-		try {
-			mqtt::message::validate_qos(1);
-		} catch (std::invalid_argument& ex) {
-			pass_1 = false;
-		}
-		CPPUNIT_ASSERT(pass_1);
-
-		bool pass_2 = true;
-		try {
-			mqtt::message::validate_qos(2);
-		} catch (std::invalid_argument& ex) {
-			pass_2 = false;
-		}
-		CPPUNIT_ASSERT(pass_2);
-
-		bool pass_higher = false;
-		try {
-			mqtt::message::validate_qos(3);
-		} catch (std::invalid_argument& ex) {
-			pass_higher = true;
-		}
-		CPPUNIT_ASSERT(pass_higher);
 	}
 
 };

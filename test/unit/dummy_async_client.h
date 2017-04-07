@@ -25,6 +25,7 @@
 #include "mqtt/iasync_client.h"
 #include "mqtt/token.h"
 #include "mqtt/connect_options.h"
+#include "mqtt/qos.h"
 
 namespace mqtt {
 namespace test {
@@ -89,14 +90,14 @@ public:
 	};
 
 	mqtt::idelivery_token_ptr publish(const std::string& topic, const void* payload,
-			size_t n, int qos, bool retained) override {
+			size_t n, mqtt::QoS qos, bool retained) override {
 		auto msg = mqtt::make_message(payload, n, qos, retained);
 		return publish(topic, msg);
 	};
 
 	mqtt::idelivery_token_ptr publish(const std::string& topic,
 			const void* payload, size_t n,
-			int qos, bool retained, void* userContext,
+			mqtt::QoS qos, bool retained, void* userContext,
 			mqtt::iaction_listener& cb) override {
 		return mqtt::idelivery_token_ptr{};
 	}
@@ -123,11 +124,11 @@ public:
 		return mqtt::itoken_ptr{};
 	}
 
-	mqtt::itoken_ptr subscribe(const std::string& topicFilter, int qos) override {
+	mqtt::itoken_ptr subscribe(const std::string& topicFilter, mqtt::QoS qos) override {
 		return mqtt::itoken_ptr{};
 	}
 
-	mqtt::itoken_ptr subscribe(const std::string& topicFilter, int qos,
+	mqtt::itoken_ptr subscribe(const std::string& topicFilter, mqtt::QoS qos,
 			void* userContext, mqtt::iaction_listener& callback) override {
 		return mqtt::itoken_ptr{};
 	}

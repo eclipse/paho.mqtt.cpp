@@ -25,6 +25,7 @@
 #define __mqtt_client_h
 
 #include "async_client.h"
+#include "mqtt/qos.h"
 
 #include <string>
 #include <memory>
@@ -40,7 +41,7 @@ namespace mqtt {
 class client
 {
 	/** The default quality of service */
-	static const int DFLT_QOS;
+	static const QoS DFLT_QOS;
 	/** The actual client */
 	async_client cli_;
 	/**
@@ -160,7 +161,7 @@ public:
 	 * @param retained
 	 */
 	virtual void publish(const std::string& top, const void* payload, size_t n,
-						 int qos, bool retained);
+						 QoS qos, bool retained);
 	/**
 	 * Publishes a message to a topic on the server.
 	 * @param top The topic to publish on
@@ -207,7 +208,7 @@ public:
 	 * @param topicFilter A single topic to subscribe
 	 * @param qos The QoS of the subscription
 	 */
-	virtual void subscribe(const std::string& topicFilter, int qos);
+	virtual void subscribe(const std::string& topicFilter, QoS qos);
 	/**
 	 * Requests the server unsubscribe the client from a topic.
 	 * @param topicFilter A single topic to unsubscribe.

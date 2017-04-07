@@ -21,6 +21,8 @@
 #include "mqtt/message.h"
 #include "mqtt/response_options.h"
 #include "mqtt/disconnect_options.h"
+
+#include <algorithm>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -184,7 +186,7 @@ void async_client::remove_token(itoken* tok)
 
 			if (userCallback_) {
 				const_message_ptr msg = dtok->get_message();
-				if (msg && msg->get_qos() > 0) {
+				if (msg && msg->get_qos() > QoS::QOS0) {
 					callback* cb = userCallback_;
 					g.unlock();
 					cb->delivery_complete(dtok);
@@ -342,7 +344,7 @@ std::vector<idelivery_token_ptr> async_client::get_pending_delivery_tokens() con
 // Publish
 
 idelivery_token_ptr async_client::publish(const std::string& topic, const void* payload,
-										  size_t n, int qos, bool retained)
+										  size_t n, QoS qos, bool retained)
 {
 	auto msg = make_message(payload, n, qos, retained);
 	return publish(topic, msg);
@@ -350,7 +352,7 @@ idelivery_token_ptr async_client::publish(const std::string& topic, const void* 
 
 idelivery_token_ptr async_client::publish(const std::string& topic,
 										  const void* payload, size_t n,
-										  int qos, bool retained, void* userContext,
+										  QoS qos, bool retained, void* userContext,
 										  iaction_listener& cb)
 {
 	auto msg = make_message(payload, n, qos, retained);
@@ -429,9 +431,28 @@ itoken_ptr async_client::subscribe(const topic_filter_collection& topicFilters,
 
 	response_options opts(std::dynamic_pointer_cast<token>(tok));
 
+	// TODO Problem - the MQTTAsync_subscribeMany() needs an int array of QoS
+	// elements. But we receive a const std::vector<QoS>. The code must:
+	// 1) Convert the array of QoS to an array of int, because if the C code
+	//    uses pointers to iterate over the array, the QoS array might provide
+	//    elements with different size and the iteration can go wrong.
+	// 2) Create a modifiable array, because the const array might be stored
+	//    in a read-only memory, for example.
+	// The code bellow does not work:
+	//    std::vector<int> vqos(qos.size());
+	//    std::copy(qos.begin(), qos.end(), vqos.begin());
+	static_assert(sizeof(QoS) == sizeof(int), "QoS and int size must match");
+
+	std::unique_ptr<int[]> qos_array{ new int[qos.size()] };
+	std::transform(qos.begin(), qos.end(), qos_array.get(),
+			[] (const QoS& qos) -> int {
+				return static_cast<int>(qos);
+			}
+	);
+
 	int rc = MQTTAsync_subscribeMany(cli_, static_cast<int>(topicFilters.size()),
 									 static_cast<char**>(&filts[0]),
-									 const_cast<int*>(&qos[0]), &opts.opts_);
+									 qos_array.get(), &opts.opts_);
 
 	free_topic_filters(filts);
 	if (rc != MQTTASYNC_SUCCESS) {
@@ -460,9 +481,28 @@ itoken_ptr async_client::subscribe(const topic_filter_collection& topicFilters,
 
 	response_options opts(std::dynamic_pointer_cast<token>(tok));
 
+	// TODO Problem - the MQTTAsync_subscribeMany() needs an int array of QoS
+	// elements. But we receive a const std::vector<QoS>. The code must:
+	// 1) Convert the array of QoS to an array of int, because if the C code
+	//    uses pointers to iterate over the array, the QoS array might provide
+	//    elements with different size and the iteration can go wrong.
+	// 2) Create a modifiable array, because the const array might be stored
+	//    in a read-only memory, for example.
+	// The code bellow does not work:
+	//    std::vector<int> vqos(qos.size());
+	//    std::copy(qos.begin(), qos.end(), vqos.begin());
+	static_assert(sizeof(QoS) == sizeof(int), "QoS and int size must match");
+
+	std::unique_ptr<int[]> qos_array{ new int[qos.size()] };
+	std::transform(qos.begin(), qos.end(), qos_array.get(),
+			[] (const QoS& qos) -> int {
+					return static_cast<int>(qos);
+			}
+	);
+
 	int rc = MQTTAsync_subscribeMany(cli_, static_cast<int>(topicFilters.size()),
 									 static_cast<char**>(&filts[0]),
-									 const_cast<int*>(&qos[0]), &opts.opts_);
+									 qos_array.get(), &opts.opts_);
 
 	free_topic_filters(filts);
 	if (rc != MQTTASYNC_SUCCESS) {
@@ -473,14 +513,14 @@ itoken_ptr async_client::subscribe(const topic_filter_collection& topicFilters,
 	return tok;
 }
 
-itoken_ptr async_client::subscribe(const std::string& topicFilter, int qos)
+itoken_ptr async_client::subscribe(const std::string& topicFilter, QoS qos)
 {
 	itoken_ptr tok = std::make_shared<token>(*this, topicFilter);
 	add_token(tok);
 
 	response_options opts(std::dynamic_pointer_cast<token>(tok));
 
-	int rc = MQTTAsync_subscribe(cli_, topicFilter.c_str(), qos, &opts.opts_);
+	int rc = MQTTAsync_subscribe(cli_, topicFilter.c_str(), static_cast<int>(qos), &opts.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(tok);
@@ -490,7 +530,7 @@ itoken_ptr async_client::subscribe(const std::string& topicFilter, int qos)
 	return tok;
 }
 
-itoken_ptr async_client::subscribe(const std::string& topicFilter, int qos,
+itoken_ptr async_client::subscribe(const std::string& topicFilter, QoS qos,
 								   void* userContext, iaction_listener& cb)
 {
 	itoken_ptr tok = std::make_shared<token>(*this, topicFilter);
@@ -500,7 +540,7 @@ itoken_ptr async_client::subscribe(const std::string& topicFilter, int qos,
 
 	response_options opts(std::dynamic_pointer_cast<token>(tok));
 
-	int rc = MQTTAsync_subscribe(cli_, topicFilter.c_str(), qos, &opts.opts_);
+	int rc = MQTTAsync_subscribe(cli_, topicFilter.c_str(), static_cast<int>(qos), &opts.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(tok);

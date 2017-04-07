@@ -28,6 +28,7 @@ extern "C" {
 	#include "MQTTAsync.h"
 }
 
+#include "mqtt/qos.h"
 #include "mqtt/message.h"
 #include "mqtt/topic.h"
 #include "mqtt/will_options.h"
