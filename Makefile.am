@@ -100,6 +100,10 @@ bin_PROGRAMS  = async_publish
 bin_PROGRAMS += async_subscribe
 bin_PROGRAMS += sync_publish
 
+if PAHO_WITH_SSL
+bin_PROGRAMS += ssl_publish
+endif
+
 ###############################################################################
 # Samples: source code
 ###############################################################################
@@ -109,6 +113,18 @@ async_publish_SOURCES = src/samples/async_publish.cpp
 async_subscribe_SOURCES = src/samples/async_subscribe.cpp
 
 sync_publish_SOURCES = src/samples/sync_publish.cpp
+
+if PAHO_WITH_SSL
+ssl_publish_SOURCES = src/samples/ssl_publish.cpp
+endif
+
+###############################################################################
+# Samples: proprocessor flags
+###############################################################################
+
+if PAHO_WITH_SSL
+ssl_publish_CPPFLAGS = $(COMMONCPPFLAGS)
+endif
 
 ###############################################################################
 # Samples: compiler flags
@@ -123,6 +139,10 @@ async_subscribe_CXXFLAGS = $(COMMONCXXFLAGS)
 
 sync_publish_CXXFLAGS = $(COMMONCXXFLAGS)
 
+if PAHO_WITH_SSL
+ssl_publish_CXXFLAGS = $(COMMONCXXFLAGS)
+endif
+
 ###############################################################################
 # Samples: linker flags
 ###############################################################################
@@ -136,6 +156,10 @@ async_publish_LDADD = $(COMMONLDFLAGS)
 async_subscribe_LDADD = $(COMMONLDFLAGS)
 
 sync_publish_LDADD = $(COMMONLDFLAGS)
+
+if PAHO_WITH_SSL
+ssl_publish_LDADD = $(COMMONLDFLAGS)
+endif
 
 endif
 
