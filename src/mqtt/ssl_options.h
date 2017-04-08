@@ -25,10 +25,7 @@
 #ifndef __mqtt_ssl_options_h
 #define __mqtt_ssl_options_h
 
-extern "C" {
-	#include "MQTTAsync.h"
-}
-
+#include "MQTTAsync.h"
 #include "mqtt/message.h"
 #include "mqtt/topic.h"
 #include <string>
@@ -75,6 +72,24 @@ class ssl_options
 	friend class connect_options;
 	friend class ssl_options_test;
 
+	/**
+	 * Gets a pointer to the C-language NUL-terminated strings for the 
+	 * struct. 
+	 * @note In the SSL options, by default, the Paho C treats nullptr char
+	 * arrays as unset values, so we keep that semantic and only set those
+	 * char arrays if the string is non-empty.
+	 * @param str The C++ string object. 
+	 * @return Pointer to a NUL terminated string. This is only valid until 
+	 *  	   the next time the string is updated.
+	 */
+	const char* c_str(const std::string& str) {
+		return str.empty() ? nullptr : str.c_str();
+	}
+	/**
+	 * Updates the underlying C structure to match our strings.
+	 */
+	void update_c_struct();
+
 public:
 	/** Smart/shared pointer to an object of this class. */
 	using ptr_t = std::shared_ptr<ssl_options>;
@@ -105,7 +120,7 @@ public:
 			const std::string& privateKey,
 			const std::string& privateKeyPassword,
 			const std::string& enabledCipherSuites,
-			const bool enableServerCertAuth);
+			bool enableServerCertAuth);
 	/**
 	 * Copy constructor.
 	 * @param opt The other options to copy.

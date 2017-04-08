@@ -80,7 +80,7 @@ public:
 
 	void test_dflt_constructor() {
 		mqtt::will_options opts;
-		MQTTAsync_willOptions& c_struct = opts.opts_;
+		const MQTTAsync_willOptions& c_struct = opts.opts_;
 
 		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
 		CPPUNIT_ASSERT(c_struct.topicName == nullptr);
@@ -101,7 +101,7 @@ public:
 		mqtt::topic topic { TOPIC, cli };
 
 		mqtt::will_options opts(topic, BUF, N, QOS, true);
-		MQTTAsync_willOptions& c_struct = opts.opts_;
+		const MQTTAsync_willOptions& c_struct = opts.opts_;
 
 		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
 		CPPUNIT_ASSERT(!strcmp(c_struct.topicName, TOPIC.c_str()));

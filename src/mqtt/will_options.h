@@ -69,7 +69,8 @@ class will_options
 	 * Some structs, such as this one, require valid pointers at all times, 
 	 * while others expect NULL pointers for missing parameters. 
 	 * @param str The C++ string object. 
-	 * @return Pointer to a NUL terminated string.
+	 * @return Pointer to a NUL terminated string. This is only valid until 
+	 *  	   the next time the string is updated.
 	 */
 	const char* c_str(const std::string& str) {
 		//return str.empty() ? nullptr : str.c_str();

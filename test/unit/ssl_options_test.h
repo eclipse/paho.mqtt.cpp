@@ -45,6 +45,12 @@ class ssl_options_test : public CppUnit::TestFixture
 
 	CPPUNIT_TEST_SUITE_END();
 
+	// C struct signature/eyecatcher
+	const char* CSIG = "MQTS";
+	const size_t CSIG_LEN = std::strlen(CSIG);
+
+	const bool DFLT_SERVER_CERT = true;
+
 	const std::string EMPTY_STR;
 	const std::string TRUST_STORE { "trust store" };
 	const std::string KEY_STORE { "key store" };
@@ -78,15 +84,18 @@ public:
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, opts.get_key_store());
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, opts.get_private_key());
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, opts.get_private_key_password());
-		CPPUNIT_ASSERT_EQUAL(true, opts.get_enable_server_cert_auth());
+		CPPUNIT_ASSERT_EQUAL(DFLT_SERVER_CERT, opts.get_enable_server_cert_auth());
 
 		// Make sure the empty string represents a nullptr for C library
-		MQTTAsync_SSLOptions copts = opts.opts_;
-		CPPUNIT_ASSERT_EQUAL(static_cast<const char*>(nullptr), static_cast<const char*>(copts.trustStore));
-		CPPUNIT_ASSERT_EQUAL(static_cast<const char*>(nullptr), static_cast<const char*>(copts.keyStore));
-		CPPUNIT_ASSERT_EQUAL(static_cast<const char*>(nullptr), static_cast<const char*>(copts.privateKey));
-		CPPUNIT_ASSERT_EQUAL(static_cast<const char*>(nullptr), static_cast<const char*>(copts.privateKeyPassword));
-		CPPUNIT_ASSERT_EQUAL(static_cast<const char*>(nullptr), static_cast<const char*>(copts.enabledCipherSuites));
+		const MQTTAsync_SSLOptions& c_struct = opts.opts_;
+
+		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
+		CPPUNIT_ASSERT(c_struct.trustStore == nullptr);
+		CPPUNIT_ASSERT(c_struct.keyStore == nullptr);
+		CPPUNIT_ASSERT(c_struct.privateKey == nullptr);
+		CPPUNIT_ASSERT(c_struct.privateKeyPassword == nullptr);
+		CPPUNIT_ASSERT(c_struct.enabledCipherSuites == nullptr);
+		CPPUNIT_ASSERT_EQUAL(DFLT_SERVER_CERT, c_struct.enableServerCertAuth != 0);
 	}
 
 // ----------------------------------------------------------------------
@@ -94,8 +103,8 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_user_constructor() {
-		mqtt::ssl_options opts{TRUST_STORE, KEY_STORE, PRIVATE_KEY,
-			PRIVATE_KEY_PASSWORD, ENABLED_CIPHER_SUITES, SERVER_CERT};
+		mqtt::ssl_options opts { TRUST_STORE, KEY_STORE, PRIVATE_KEY,
+			PRIVATE_KEY_PASSWORD, ENABLED_CIPHER_SUITES, SERVER_CERT };
 
 		CPPUNIT_ASSERT_EQUAL(TRUST_STORE, opts.get_trust_store());
 		CPPUNIT_ASSERT_EQUAL(KEY_STORE, opts.get_key_store());
@@ -103,6 +112,17 @@ public:
 		CPPUNIT_ASSERT_EQUAL(PRIVATE_KEY_PASSWORD, opts.get_private_key_password());
 		CPPUNIT_ASSERT_EQUAL(ENABLED_CIPHER_SUITES, opts.get_enabled_cipher_suites());
 		CPPUNIT_ASSERT_EQUAL(SERVER_CERT, opts.get_enable_server_cert_auth());
+
+		// Check the underlying C struct
+		const MQTTAsync_SSLOptions& c_struct = opts.opts_;
+
+		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
+		CPPUNIT_ASSERT(!strcmp(c_struct.trustStore, TRUST_STORE.c_str()));
+		CPPUNIT_ASSERT(!strcmp(c_struct.keyStore, KEY_STORE.c_str()));
+		CPPUNIT_ASSERT(!strcmp(c_struct.privateKey, PRIVATE_KEY.c_str()));
+		CPPUNIT_ASSERT(!strcmp(c_struct.privateKeyPassword, PRIVATE_KEY_PASSWORD.c_str()));
+		CPPUNIT_ASSERT(!strcmp(c_struct.enabledCipherSuites, ENABLED_CIPHER_SUITES.c_str()));
+		CPPUNIT_ASSERT_EQUAL(SERVER_CERT, c_struct.enableServerCertAuth != 0);
 	}
 
 // ----------------------------------------------------------------------
@@ -119,12 +139,23 @@ public:
 		CPPUNIT_ASSERT_EQUAL(ENABLED_CIPHER_SUITES, opts.get_enabled_cipher_suites());
 		CPPUNIT_ASSERT_EQUAL(SERVER_CERT, opts.get_enable_server_cert_auth());
 
+		// Check the underlying C struct
+		const MQTTAsync_SSLOptions& c_struct = opts.opts_;
+
+		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
+		CPPUNIT_ASSERT(!strcmp(c_struct.trustStore, TRUST_STORE.c_str()));
+		CPPUNIT_ASSERT(!strcmp(c_struct.keyStore, KEY_STORE.c_str()));
+		CPPUNIT_ASSERT(!strcmp(c_struct.privateKey, PRIVATE_KEY.c_str()));
+		CPPUNIT_ASSERT(!strcmp(c_struct.privateKeyPassword, PRIVATE_KEY_PASSWORD.c_str()));
+		CPPUNIT_ASSERT(!strcmp(c_struct.enabledCipherSuites, ENABLED_CIPHER_SUITES.c_str()));
+		CPPUNIT_ASSERT_EQUAL(SERVER_CERT, c_struct.enableServerCertAuth != 0);
+
 		// Make sure it's a true copy, not linked to the original
-		orgOpts.set_trust_store("");
-		orgOpts.set_key_store("");
-		orgOpts.set_private_key("");
-		orgOpts.set_private_key_password("");
-		orgOpts.set_enabled_cipher_suites("");
+		orgOpts.set_trust_store(EMPTY_STR);
+		orgOpts.set_key_store(EMPTY_STR);
+		orgOpts.set_private_key(EMPTY_STR);
+		orgOpts.set_private_key_password(EMPTY_STR);
+		orgOpts.set_enabled_cipher_suites(EMPTY_STR);
 		orgOpts.set_enable_server_cert_auth(!SERVER_CERT);
 
 		CPPUNIT_ASSERT_EQUAL(TRUST_STORE, opts.get_trust_store());
@@ -242,13 +273,6 @@ public:
 	void test_set_user() {
 		mqtt::ssl_options opts;
 
-		const std::string TRUST_STORE("trust store");
-		const std::string KEY_STORE("key store");
-		const std::string PRIVATE_KEY("private key");
-		const std::string PRIVATE_KEY_PASSWORD("private key password");
-		const std::string ENABLED_CIPHER_SUITES("cipher suite");
-		const bool SERVER_CERT = false;
-
 		opts.set_trust_store(TRUST_STORE);
 		opts.set_key_store(KEY_STORE);
 		opts.set_private_key(PRIVATE_KEY);
@@ -269,23 +293,22 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_set_empty_strings() {
-		mqtt::ssl_options opts;
-
-		opts.set_trust_store(EMPTY_STR);
-		opts.set_key_store(EMPTY_STR);
-		opts.set_private_key(EMPTY_STR);
-		opts.set_private_key_password(EMPTY_STR);
-		opts.set_enabled_cipher_suites(EMPTY_STR);
+		orgOpts.set_trust_store(EMPTY_STR);
+		orgOpts.set_key_store(EMPTY_STR);
+		orgOpts.set_private_key(EMPTY_STR);
+		orgOpts.set_private_key_password(EMPTY_STR);
+		orgOpts.set_enabled_cipher_suites(EMPTY_STR);
 
 		// Make sure the empty string represents a nullptr for C library
-		MQTTAsync_SSLOptions copts = opts.opts_;
-		CPPUNIT_ASSERT_EQUAL(static_cast<const char*>(nullptr), static_cast<const char*>(copts.trustStore));
-		CPPUNIT_ASSERT_EQUAL(static_cast<const char*>(nullptr), static_cast<const char*>(copts.keyStore));
-		CPPUNIT_ASSERT_EQUAL(static_cast<const char*>(nullptr), static_cast<const char*>(copts.privateKey));
-		CPPUNIT_ASSERT_EQUAL(static_cast<const char*>(nullptr), static_cast<const char*>(copts.privateKeyPassword));
-		CPPUNIT_ASSERT_EQUAL(static_cast<const char*>(nullptr), static_cast<const char*>(copts.enabledCipherSuites));
-	}
+		const MQTTAsync_SSLOptions& c_struct = orgOpts.opts_;
 
+		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
+		CPPUNIT_ASSERT(c_struct.trustStore == nullptr);
+		CPPUNIT_ASSERT(c_struct.keyStore == nullptr);
+		CPPUNIT_ASSERT(c_struct.privateKey == nullptr);
+		CPPUNIT_ASSERT(c_struct.privateKeyPassword == nullptr);
+		CPPUNIT_ASSERT(c_struct.enabledCipherSuites == nullptr);
+	}
 };
 
 /////////////////////////////////////////////////////////////////////////////
