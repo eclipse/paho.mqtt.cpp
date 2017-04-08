@@ -20,6 +20,7 @@
 #include "mqtt/token.h"
 #include "mqtt/message.h"
 #include "mqtt/response_options.h"
+#include "mqtt/delivery_response_options.h"
 #include "mqtt/disconnect_options.h"
 #include <thread>
 #include <mutex>
@@ -112,8 +113,8 @@ int async_client::on_message_arrived(void* context, char* topicName, int topicLe
 		}
 	}
 
-    MQTTAsync_freeMessage(&msg);
-    MQTTAsync_free(topicName);
+	MQTTAsync_freeMessage(&msg);
+	MQTTAsync_free(topicName);
 
 	// TODO: Should the user code determine the return value?
 	// The Java version does doesn't seem to...
@@ -159,8 +160,8 @@ void async_client::add_token(itoken_ptr tok)
 void async_client::add_token(idelivery_token_ptr tok)
 {
 	if (tok) {
-	   guard g(lock_);
-	   pendingDeliveryTokens_.push_back(tok);
+		guard g(lock_);
+		pendingDeliveryTokens_.push_back(tok);
 	}
 }
 
@@ -375,6 +376,8 @@ idelivery_token_ptr async_client::publish(const std::string& topic, const_messag
 
 	int rc = MQTTAsync_sendMessage(cli_, topic.c_str(), &(msg->msg_),
 								   &opts.opts_);
+
+	opts.update_message_id();
 
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(tok);
@@ -607,4 +610,3 @@ itoken_ptr async_client::unsubscribe(const std::string& topicFilter,
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
 }
-
