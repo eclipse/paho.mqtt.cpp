@@ -36,14 +36,18 @@ connect_options::connect_options(const std::string& userName, const std::string&
 connect_options::connect_options(const connect_options& opt) : opts_(opt.opts_)
 {
 	set_will(opt.will_);
+#if defined(OPENSSL)
 	set_ssl(opt.ssl_);
+#endif
 	set_user_name(opt.userName_);
 	set_password(opt.password_);
 }
 
 connect_options::connect_options(connect_options&& opt) : opts_(opt.opts_),
 						will_(std::move(opt.will_)),
+#if defined(OPENSSL)
 						ssl_(std::move(opt.ssl_)),
+#endif
 						userName_(std::move(opt.userName_)),
 						password_(std::move(opt.password_))
 {
@@ -67,11 +71,13 @@ void connect_options::set_will(const will_options& will)
 	opts_.will = &will_.opts_;
 }
 
+#if defined(OPENSSL)
 void connect_options::set_ssl(const ssl_options& ssl)
 {
 	ssl_ = ssl;
 	opts_.ssl = &ssl_.opts_;
 }
+#endif
 
 void connect_options::set_context(token* tok) 
 {
