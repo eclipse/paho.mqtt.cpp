@@ -90,7 +90,7 @@ private:
 	friend class token;
 	virtual void add_token(itoken_ptr tok);
 	virtual void add_token(idelivery_token_ptr tok);
-	virtual void remove_token(itoken* tok);
+	virtual void remove_token(itoken* tok) override;
 	virtual void remove_token(itoken_ptr tok) { remove_token(tok.get()); }
 	void remove_token(idelivery_token_ptr tok) { remove_token(tok.get()); }
 
