@@ -16,6 +16,7 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
+#include "mqtt/types.h"
 #include "mqtt/iclient_persistence.h"
 #include <cstring>
 #include <cstdlib>
@@ -32,35 +33,37 @@ namespace mqtt {
 
 class persistence_wrapper : virtual public ipersistable
 {
-	const uint8_t* hdr_;
-	const size_t hdrlen_;
-	const uint8_t* payload_;
-	const size_t payloadlen_;
+	const byte_buffer hdr_;
+	const byte_buffer payload_;
 
 public:
 	persistence_wrapper(const void* payload, size_t payloadlen) 
-			: hdr_(nullptr), hdrlen_(0), 
-				payload_(static_cast<const uint8_t*>(payload)), payloadlen_(payloadlen) 
-	{}
+			: payload_(static_cast<const byte*>(payload), 
+					   static_cast<const byte*>(payload) + payloadlen) {}
+	persistence_wrapper(const byte_buffer& payload)
+			: payload_(payload) {}
 	persistence_wrapper(const void* hdr, size_t hdrlen,
 						const void* payload, size_t payloadlen)
-			: hdr_(static_cast<const uint8_t*>(hdr)), hdrlen_(hdrlen), 
-				payload_(static_cast<const uint8_t*>(payload)), payloadlen_(payloadlen) 
-	{}
+			: hdr_(static_cast<const byte*>(hdr), 
+				   static_cast<const byte*>(hdr) + hdrlen),
+				payload_(static_cast<const byte*>(payload), 
+						 static_cast<const byte*>(payload) + payloadlen) {}
+	persistence_wrapper(const byte_buffer& hdr, const byte_buffer& payload)
+			: hdr_(hdr), payload_(payload) {}
 
-	const uint8_t* get_header_bytes() const override { return hdr_; }
-	size_t get_header_length() const override { return hdrlen_; }
+	const byte* get_header_bytes() const override { return hdr_.data(); }
+	size_t get_header_length() const override { return hdr_.size(); }
 	size_t get_header_offset() const override { return 0; }
 
-	const uint8_t* get_payload_bytes() const override { return payload_; }
-	size_t get_payload_length() const override { return payloadlen_; }
+	const byte* get_payload_bytes() const override { return payload_.data(); }
+	size_t get_payload_length() const override { return payload_.size(); }
 	size_t get_payload_offset() const override { return 0; }
 
-	std::vector<uint8_t> get_header_byte_arr() const override {
-		return std::vector<uint8_t>(hdr_, hdr_+hdrlen_);
+	std::vector<byte> get_header_byte_arr() const override {
+		return std::vector<byte>(hdr_.data(), hdr_.data()+hdr_.size());
 	}
-	std::vector<uint8_t> get_payload_byte_arr() const override {
-		return std::vector<uint8_t>(payload_, payload_+payloadlen_);
+	std::vector<byte> get_payload_byte_arr() const override {
+		return std::vector<byte>(payload_.data(), payload_.data()+payload_.size());
 	}
 };
 

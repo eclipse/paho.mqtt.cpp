@@ -20,13 +20,8 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-connect_options::connect_options()
-		: opts_(MQTTAsync_connectOptions_initializer)
+connect_options::connect_options() : opts_(MQTTAsync_connectOptions_initializer)
 {
-	opts_.will = nullptr;
-#if defined(OPENSSL)
-	opts_.ssl = nullptr;
-#endif
 	opts_.onSuccess = &token::on_success;
 	opts_.onFailure = &token::on_failure;
 }
@@ -36,6 +31,22 @@ connect_options::connect_options(const std::string& userName, const std::string&
 {
 	set_user_name(userName);
 	set_password(password);
+}
+
+connect_options::connect_options(const connect_options& opt) : opts_(opt.opts_)
+{
+	set_will(opt.will_);
+	set_ssl(opt.ssl_);
+	set_user_name(opt.userName_);
+	set_password(opt.password_);
+}
+
+connect_options::connect_options(connect_options&& opt) : opts_(opt.opts_),
+						will_(std::move(opt.will_)),
+						ssl_(std::move(opt.ssl_)),
+						userName_(std::move(opt.userName_)),
+						password_(std::move(opt.password_))
+{
 }
 
 void connect_options::set_password(const std::string& password)
@@ -56,13 +67,11 @@ void connect_options::set_will(const will_options& will)
 	opts_.will = &will_.opts_;
 }
 
-#if defined(OPENSSL)
 void connect_options::set_ssl(const ssl_options& ssl)
 {
 	ssl_ = ssl;
 	opts_.ssl = &ssl_.opts_;
 }
-#endif
 
 void connect_options::set_context(token* tok) 
 {

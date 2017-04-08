@@ -37,14 +37,16 @@ using namespace CppUnit;
 
 int main(int argc, char* argv[])
 {
-	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::async_client_test );
-	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::client_test );
-	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::message_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::will_options_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::ssl_options_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::connect_options_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::disconnect_options_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::response_options_test );
+
+	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::async_client_test );
+	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::client_test );
+
+	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::message_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::delivery_response_options_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::iclient_persistence_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::token_test );

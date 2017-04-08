@@ -25,10 +25,7 @@
 #ifndef __mqtt_will_options_h
 #define __mqtt_will_options_h
 
-extern "C" {
-	#include "MQTTAsync.h"
-}
-
+#include "MQTTAsync.h"
 #include "mqtt/message.h"
 #include "mqtt/topic.h"
 #include <string>
@@ -41,7 +38,12 @@ class connect_options;
 /////////////////////////////////////////////////////////////////////////////
 
 /**
- * Holds the set of options that govern the Last Will and Testament feature.
+ * Holds the set of options that govern the Last Will and Testament feature. 
+ *
+ * @note
+ * This wraps struct v0 of the C library's MQTTAsync_willOptions structure.
+ * For the C library v1.1.0 (Paho 1.2), the topic and payload pointers are
+ * required to be valid (non-NULL), even if empty.
  */
 class will_options
 {
@@ -59,6 +61,20 @@ class will_options
 
 	/** The connect options has special access */
 	friend class connect_options;
+	friend class will_options_test;
+
+	/**
+	 * Gets a pointer to the C-language NUL-terminated strings for the 
+	 * struct. 
+	 * Some structs, such as this one, require valid pointers at all times, 
+	 * while others expect NULL pointers for missing parameters. 
+	 * @param str The C++ string object. 
+	 * @return Pointer to a NUL terminated string.
+	 */
+	const char* c_str(const std::string& str) {
+		//return str.empty() ? nullptr : str.c_str();
+		return str.c_str();
+	}
 
 public:
 	/** Smart/shared pointer to this class. */
@@ -76,53 +92,39 @@ public:
 	 * @param payload The message that is published to the Will Topic.
 	 * @param payload_len The message size in bytes
 	 * @param qos The message Quality of Service.
-	 * @param retained Tell the broker to keep the LWT message after send to subscribers.
+	 * @param retained Tell the broker to keep the LWT message after send to
+	 *  			   subscribers.
 	 */
-	will_options(
-		const std::string& top,
-		const void *payload,
-		size_t payload_len,
-		int qos,
-		bool retained
-	);
+	will_options(const std::string& top, const void *payload, size_t payload_len,
+				 int qos, bool retained);
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
 	 * @param top The LWT message is published to the this topic.
 	 * @param payload The message that is published to the Will Topic.
 	 * @param payload_len The message size in bytes.
 	 * @param qos The message Quality of Service.
-	 * @param retained Tell the broker to keep the LWT message after send to subscribers.
+	 * @param retained Tell the broker to keep the LWT message after send to
+	 *  			   subscribers.
 	 */
-	will_options(
-		const topic& top,
-		const void *payload,
-		size_t payload_len,
-		int qos,
-		bool retained
-	);
+	will_options(const topic& top, const void *payload, size_t payload_len,
+				 int qos, bool retained);
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
 	 * @param top The LWT message is published to the this topic.
 	 * @param payload The message payload that is published to the Will
 	 *  			  Topic.
 	 * @param qos The message Quality of Service.
-	 * @param retained Tell the broker to keep the LWT message after send to subscribers.
+	 * @param retained Tell the broker to keep the LWT message after send to
+	 *  			   subscribers.
 	 */
-	will_options(
-		const std::string& top,
-		const std::string& payload,
-		int qos,
-		bool retained
-	);
+	will_options(const std::string& top, const std::string& payload,
+				 int qos, bool retained);
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
 	 * @param top The LWT message is published to the this topic.
 	 * @param msg The message that is published to the Will Topic.
 	 */
-	will_options(
-		const std::string& top,
-		const message& msg
-	);
+	will_options(const std::string& top, const message& msg);
 	/**
 	 * Copy constructor for the LWT options.
 	 * @param opt The other options.
@@ -162,7 +164,7 @@ public:
 	 * Gets the 'retained' flag for the LWT message.
 	 * @return The 'retained' flag for the LWT message.
 	 */
-	int is_retained() const { return opts_.retained; }
+	bool is_retained() const { return opts_.retained != 0; }
 	/**
 	 * Gets the LWT message.
 	 * Note that this is a const pointer to a copy of the message, not to
@@ -192,7 +194,7 @@ public:
 	 * @param retained Tell the broker to keep the LWT message after send to
 	 *  			   subscribers.
 	 */
-	void set_retained(const int retained) { opts_.retained = retained; }
+	void set_retained(bool retained) { opts_.retained = retained ? (!0) : 0; }
 };
 
 /** Shared pointer to a will options object. */
