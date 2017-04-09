@@ -24,10 +24,7 @@
 #ifndef __mqtt_async_client_h
 #define __mqtt_async_client_h
 
-extern "C" {
-	#include "MQTTAsync.h"
-}
-
+#include "MQTTAsync.h"
 #include "mqtt/token.h"
 #include "mqtt/delivery_token.h"
 #include "mqtt/iclient_persistence.h"

@@ -37,7 +37,6 @@ const char* PAYLOAD2 = "Hi there!";
 const char* PAYLOAD3 = "Is anyone listening?";
 
 const int QOS = 1;
-const int TIMEOUT = 10000;
 
 /////////////////////////////////////////////////////////////////////////////
 

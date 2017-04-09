@@ -7,10 +7,7 @@
 #ifndef __mqtt_response_options_h
 #define __mqtt_response_options_h
 
-extern "C" {
-	#include "MQTTAsync.h"
-}
-
+#include "MQTTAsync.h"
 #include "mqtt/token.h"
 #include "mqtt/delivery_token.h"
 

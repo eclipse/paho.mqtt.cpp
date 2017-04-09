@@ -24,10 +24,7 @@
 #ifndef __mqtt_callback_h
 #define __mqtt_callback_h
 
-extern "C" {
-	#include "MQTTAsync.h"
-}
-
+#include "MQTTAsync.h"
 #include "mqtt/delivery_token.h"
 #include <string>
 #include <vector>

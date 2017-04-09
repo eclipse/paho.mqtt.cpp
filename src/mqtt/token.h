@@ -24,10 +24,7 @@
 #ifndef __mqtt_token_h
 #define __mqtt_token_h
 
-extern "C" {
-	#include "MQTTAsync.h"
-}
-
+#include "MQTTAsync.h"
 #include "mqtt/iaction_listener.h"
 #include "mqtt/exception.h"
 #include <string>
@@ -154,6 +151,7 @@ class token : public virtual itoken
 	int rc_;
 
 	/** Client and token-related options have special access */
+	friend class async_client;
 	friend class response_options;
 	friend class delivery_response_options;
 	friend class connect_options;
@@ -167,6 +165,15 @@ class token : public virtual itoken
 		topics_ = top;
 	}
 
+	/**
+	 * Sets the ID for the message.
+	 * This is a guaranteed atomic operation.
+	 * @param msgid The ID of the message.
+	 */
+	void set_message_id(MQTTAsync_token msgid) {
+		guard g(lock_);
+		tok_ = msgid;
+	}
 	/**
 	 * C-style callback for success.
 	 * This simply passes the call on to the proper token object for
@@ -242,16 +249,14 @@ public:
 	 * asynchronous action.
 	 * @return iasync_client
 	 */
-	iasync_client* get_client() const override {
-		return cli_;
-	}
+	iasync_client* get_client() const override { return cli_; }
 	/**
 	 * Returns the message ID of the message that is associated with the
 	 * token.
 	 * @return int
 	 */
 	int get_message_id() const override {
-		static_assert(sizeof(tok_) == sizeof(int), "MQTTAsync_token must fit into int");
+		static_assert(sizeof(tok_) <= sizeof(int), "MQTTAsync_token must fit into int");
 		return static_cast<int>(tok_);
 	}
 	/**

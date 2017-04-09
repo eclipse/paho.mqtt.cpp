@@ -24,10 +24,7 @@
 #ifndef __mqtt_connect_options_h
 #define __mqtt_connect_options_h
 
-extern "C" {
-	#include "MQTTAsync.h"
-}
-
+#include "MQTTAsync.h"
 #include "mqtt/message.h"
 #include "mqtt/topic.h"
 #include "mqtt/will_options.h"
@@ -87,12 +84,12 @@ public:
 	connect_options(const std::string& userName,
 					const std::string& password);
 	/**
-	 * Copy constructor. 
+	 * Copy constructor.
 	 * @param opt Another object to copy.
 	 */
 	connect_options(const connect_options& opt);
 	/**
-	 * Move constructor. 
+	 * Move constructor.
 	 * @param opt Another object to move into this new one.
 	 */
 	connect_options(connect_options&& opt);
@@ -147,9 +144,9 @@ public:
       * Gets the version of MQTT to be used on the connect.
 	  * @return
 	  * @li MQTTVERSION_DEFAULT (0) = default: start with 3.1.1, and if that
-	  *     fails, fall back to 3.1 
-	  * @li MQTTVERSION_3_1 (3) = only try version 3.1 
-	  * @li MQTTVERSION_3_1_1 (4) = only try version 3.1.1 
+	  *     fails, fall back to 3.1
+	  * @li MQTTVERSION_3_1 (3) = only try version 3.1
+	  * @li MQTTVERSION_3_1_1 (4) = only try version 3.1.1
 	  */
 	int get_mqtt_version() const { return opts_.MQTTVersion; }
 	/**
@@ -194,7 +191,7 @@ public:
 	 */
 	void set_ssl(const ssl_options& ssl);
 	/**
-	 * Sets the callback context to a delivery token. 
+	 * Sets the callback context to a delivery token.
 	 * @param tok The delivery token to be used as the callback context.
 	 */
 	void set_context(token* tok);
@@ -203,13 +200,13 @@ public:
 	  * @param mqttVersion The MQTT version to use for the connection:
 	  *   @li MQTTVERSION_DEFAULT (0) = default: start with 3.1.1, and if
 	  *       that fails, fall back to 3.1
-	  *   @li MQTTVERSION_3_1 (3) = only try version 3.1 
-	  *   @li MQTTVERSION_3_1_1 (4) = only try version 3.1.1 
+	  *   @li MQTTVERSION_3_1 (3) = only try version 3.1
+	  *   @li MQTTVERSION_3_1_1 (4) = only try version 3.1.1
 	  */
 	void set_mqtt_version(int mqttVersion) { opts_.MQTTVersion = mqttVersion; }
 	/**
-	 * Gets a string representation of the object. 
-	 * @return 
+	 * Gets a string representation of the object.
+	 * @return
 	 */
 	std::string to_str() const;
 };

@@ -24,10 +24,7 @@
 #ifndef __mqtt_ipersistable_h
 #define __mqtt_ipersistable_h
 
-extern "C" {
-	#include "MQTTAsync.h"
-}
-
+#include "MQTTAsync.h"
 #include "mqtt/types.h"
 #include <string>
 #include <memory>

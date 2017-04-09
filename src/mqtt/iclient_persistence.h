@@ -24,10 +24,7 @@
 #ifndef __mqtt_iclient_persistence_h
 #define __mqtt_iclient_persistence_h
 
-extern "C" {
-	#include "MQTTAsync.h"
-}
-
+#include "MQTTAsync.h"
 #include "mqtt/ipersistable.h"
 #include <string>
 #include <memory>
