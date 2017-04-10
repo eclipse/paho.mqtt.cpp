@@ -150,7 +150,9 @@ int main(int argc, char* argv[])
 		cout << "\nSending next message..." << endl;
 		mqtt::idelivery_token_ptr pubtok;
 		pubtok = client.publish(TOPIC, PAYLOAD2, strlen(PAYLOAD2), QOS, false);
-		cout << "  ...with message ID: " << pubtok->get_message_id() << endl;
+		cout << "  ...with token: " << pubtok->get_message_id() << endl;
+		cout << "  ...for message with " << pubtok->get_message()->get_payload().size()
+			<< " bytes" << endl;
 		pubtok->wait_for_completion(TIMEOUT);
 		cout << "  ...OK" << endl;
 

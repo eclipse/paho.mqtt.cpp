@@ -372,6 +372,8 @@ idelivery_token_ptr async_client::publish(const std::string& topic, const_messag
 	add_token(tok);
 
 	auto dtok = std::dynamic_pointer_cast<delivery_token>(tok);
+	dtok->set_message(msg);
+
 	delivery_response_options opts(dtok);
 
 	int rc = MQTTAsync_sendMessage(cli_, topic.c_str(), &(msg->msg_),
@@ -397,6 +399,8 @@ idelivery_token_ptr async_client::publish(const std::string& topic, const_messag
 	add_token(tok);
 
 	auto dtok = std::dynamic_pointer_cast<delivery_token>(tok);
+	dtok->set_message(msg);
+
 	delivery_response_options opts(dtok);
 
 	int rc = MQTTAsync_sendMessage(cli_, topic.c_str(), &(msg->msg_),

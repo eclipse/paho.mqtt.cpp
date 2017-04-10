@@ -136,7 +136,7 @@ public:
 	/**
 	 * Gets the payload
 	 */
-	std::string get_payload() const { return payload_; }
+	const std::string& get_payload() const { return payload_; }
 	/**
 	 * Returns the quality of service for this message.
 	 * @return The quality of service for this message.
