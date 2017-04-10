@@ -17,10 +17,13 @@
 ## Note: on OS X you should install XCode and the associated command-line tools
 
 ## cmake flags
-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 
 ## project name
-project("paho-mqtt-cpp" LANGUAGES CXX)
+project("paho-mqtt-cpp")
+
+## project language
+enable_language(CXX)
 
 ## library name
 set(PAHO_MQTT_CPP paho-mqttpp3)
