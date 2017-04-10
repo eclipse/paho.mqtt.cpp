@@ -1,0 +1,141 @@
+language: cpp
+
+sudo: required
+
+dist: trusty
+
+os: linux
+
+install:
+  # Install Paho MQTT C (Need only paho-mqtt3a and paho-mqtt3as)
+  - git clone https://github.com/eclipse/paho.mqtt.c.git && cd paho.mqtt.c/build && cmake -DCMAKE_INSTALL_PREFIX=/tmp/paho-c -DPAHO_WITH_SSL=ON .. && make && make install && cd ../..
+  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/tmp/paho-c/lib
+
+addons:
+  apt:
+    sources:
+      - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
+    packages:
+      - cppcheck
+      - libcppunit-dev # Install CppUnit
+      - git
+      - cmake
+      - cmake-data
+      - doxygen
+
+matrix:
+  include:
+    # GCC 4.8
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
+          packages:
+            - g++-4.8
+            - cppcheck
+            - libcppunit-dev # Install CppUnit
+            - git
+            - cmake
+            - cmake-data
+            - doxygen
+      env: COMPILER=g++-4.8
+    # GCC 4.9
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
+          packages:
+            - g++-4.9
+            - cppcheck
+            - libcppunit-dev # Install CppUnit
+            - git
+            - cmake
+            - cmake-data
+            - doxygen
+      env: COMPILER=g++-4.9
+    # GCC 5
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
+          packages:
+            - g++-5
+            - cppcheck
+            - libcppunit-dev # Install CppUnit
+            - git
+            - cmake
+            - cmake-data
+            - doxygen
+      env: COMPILER=g++-5
+    # GCC 6
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
+          packages:
+            - g++-6
+            - cppcheck
+            - libcppunit-dev # Install CppUnit
+            - git
+            - cmake
+            - cmake-data
+            - doxygen
+      env: COMPILER=g++-6
+    # Clang 3.6
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.6
+            - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
+          packages:
+            - clang-3.6
+            - cppcheck
+            - libcppunit-dev # Install CppUnit
+            - git
+            - cmake
+            - cmake-data
+            - doxygen
+      env: COMPILER=clang++-3.6
+    # Clang 3.8
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.8
+            - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
+          packages:
+            - clang-3.8
+            - cppcheck
+            - libcppunit-dev # Install CppUnit
+            - git
+            - cmake
+            - cmake-data
+            - doxygen
+      env: COMPILER=clang++-3.8
+  exclude:
+    - compiler: gcc
+
+script:
+  # Test Makefile building
+  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && make clean && make CXX=$COMPILER PAHO_C_INC_DIR=/tmp/paho-c/include/ PAHO_C_LIB_DIR=/tmp/paho-c/lib
+  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && make clean && make CXX=$COMPILER PAHO_C_INC_DIR=/tmp/paho-c/include/ PAHO_C_LIB_DIR=/tmp/paho-c/lib PAHO_CPP_LIB_DIR=../../lib check
+  # Test CMake building
+  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && rm -rf build_cmake && mkdir build_cmake && cd build_cmake && cmake -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_INSTALL_PREFIX=/tmp/paho-cpp -DPAHO_MQTT_C_PATH=/tmp/paho-c -DPAHO_BUILD_SAMPLES=ON -DPAHO_BUILD_STATIC=ON -DPAHO_BUILD_DOCUMENTATION=OFF -DPAHO_WITH_SSL=OFF .. && make && make install; cd ..
+  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && rm -rf build_cmake && mkdir build_cmake && cd build_cmake && cmake -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_INSTALL_PREFIX=/tmp/paho-cpp -DPAHO_MQTT_C_PATH=/tmp/paho-c -DPAHO_BUILD_SAMPLES=ON -DPAHO_BUILD_STATIC=ON -DPAHO_BUILD_DOCUMENTATION=ON  -DPAHO_WITH_SSL=ON  .. && make && make install; cd ..
+  # Test Autotools building
+  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && ./bootstrap && rm -rf build_autotools/ && mkdir build_autotools/ && cd build_autotools/ && ../configure CXX=$COMPILER --with-paho-mqtt-c=/tmp/paho-c/ --enable-samples=yes --enable-static=yes --enable-doc=no  --with-ssl=no  && make && make check; cat test-suite.log; cd -
+  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && ./bootstrap && rm -rf build_autotools/ && mkdir build_autotools/ && cd build_autotools/ && ../configure CXX=$COMPILER --with-paho-mqtt-c=/tmp/paho-c/ --enable-samples=yes --enable-static=yes --enable-doc=yes --with-ssl=yes && make && make check; cat test-suite.log; cd -
+  # Static Analysis
+  - cppcheck --enable=all --std=c++11 --force --quiet src/*.cpp
+
