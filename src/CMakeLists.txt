@@ -96,10 +96,20 @@ if(PAHO_BUILD_STATIC)
 endif()
 
 ## extract Paho MQTT C include directory
-get_filename_component(PAHO_MQTT_C_INC_DIR ${PAHO_MQTT_C_PATH}/include ABSOLUTE)
+get_filename_component(PAHO_MQTT_C_DEV_INC_DIR ${PAHO_MQTT_C_PATH}/src ABSOLUTE)
+get_filename_component(PAHO_MQTT_C_STD_INC_DIR ${PAHO_MQTT_C_PATH}/include ABSOLUTE)
+set(PAHO_MQTT_C_INC_DIR
+    ${PAHO_MQTT_C_DEV_INC_DIR}
+    ${PAHO_MQTT_C_STD_INC_DIR})
 
 ## extract Paho MQTT C library directory
-get_filename_component(PAHO_MQTT_C_LIB_DIR ${PAHO_MQTT_C_PATH}/lib ABSOLUTE)
+get_filename_component(PAHO_MQTT_C_DEV_LIB_DIR ${PAHO_MQTT_C_PATH}/build/output ABSOLUTE)
+get_filename_component(PAHO_MQTT_C_STD_LIB_DIR ${PAHO_MQTT_C_PATH}/lib ABSOLUTE)
+get_filename_component(PAHO_MQTT_C_STD64_LIB_DIR ${PAHO_MQTT_C_PATH}/lib64 ABSOLUTE)
+set(PAHO_MQTT_C_LIB_DIR
+    ${PAHO_MQTT_C_DEV_LIB_DIR}
+    ${PAHO_MQTT_C_STD_LIB_DIR}
+    ${PAHO_MQTT_C_STD64_LIB_DIR})
 
 ## extract Paho MQTT C binary directory (Windows may place libraries there)
 get_filename_component(PAHO_MQTT_C_BIN_DIR ${PAHO_MQTT_C_PATH}/bin ABSOLUTE)
