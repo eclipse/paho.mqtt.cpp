@@ -17,7 +17,11 @@
 ## Note: on OS X you should install XCode and the associated command-line tools
 
 ## Paho MQTT C include directory
-get_filename_component(PAHO_MQTT_C_INC_DIR ${PAHO_MQTT_C_PATH}/include ABSOLUTE)
+get_filename_component(PAHO_MQTT_C_DEV_INC_DIR ${PAHO_MQTT_C_PATH}/src ABSOLUTE)
+get_filename_component(PAHO_MQTT_C_STD_INC_DIR ${PAHO_MQTT_C_PATH}/include ABSOLUTE)
+set(PAHO_MQTT_C_INC_DIR
+    ${PAHO_MQTT_C_DEV_INC_DIR}
+    ${PAHO_MQTT_C_STD_INC_DIR})
 
 ## Paho MQTT C++ include directory
 get_filename_component(PAHO_MQTT_CPP_INC_DIR ${CMAKE_SOURCE_DIR}/src ABSOLUTE)
