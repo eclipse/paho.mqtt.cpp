@@ -43,5 +43,5 @@ endif()
 
 install(
     FILES ${COMMON_HDR}
-    DESTINATION include
+    DESTINATION include/mqtt
 )
