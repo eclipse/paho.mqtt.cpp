@@ -152,9 +152,11 @@ class token : public virtual itoken
 
 	/** Client and token-related options have special access */
 	friend class async_client;
+	friend class token_test;
+
+	friend class connect_options;
 	friend class response_options;
 	friend class delivery_response_options;
-	friend class connect_options;
 	friend class disconnect_options;
 
 	void set_topics(const std::string& top) {

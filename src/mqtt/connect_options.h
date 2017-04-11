@@ -54,7 +54,7 @@ class connect_options
 	/** The LWT options */
 	will_options will_;
 
-	/** The SSL options  */
+	/** The SSL options */
 	ssl_options ssl_;
 
 	/** The user name to use for the connection. */
@@ -63,10 +63,27 @@ class connect_options
 	/** The password to use for the connection. */
 	std::string password_;
 
+	/** Shared token pointer for context, if any */
+	const_token_ptr tok_;
+
 	/** The client has special access */
 	friend class async_client;
 	friend class connect_options_test;
 	friend class token_test;
+
+	/**
+	 * Gets a pointer to the C-language NUL-terminated strings for the 
+	 * struct. 
+	 * @note In the connect options, by default, the Paho C treats 
+	 * nullptr char arrays as unset values, so we keep that semantic and 
+	 * only set those char arrays if the string is non-empty. 
+	 * @param str The C++ string object. 
+	 * @return Pointer to a NUL terminated string. This is only valid until 
+	 *  	   the next time the string is updated.
+	 */
+	const char* c_str(const std::string& str) {
+		return str.empty() ? nullptr : str.c_str();
+	}
 
 public:
 	/** Smart/shared pointer to an object of this class. */
@@ -93,6 +110,16 @@ public:
 	 * @param opt Another object to move into this new one.
 	 */
 	connect_options(connect_options&& opt);
+	/**
+	 * Copy assignment.
+	 * @param opt Another object to copy.
+	 */
+	connect_options& operator=(const connect_options& opt);
+	/**
+	 * Move assignment.
+	 * @param opt Another object to move into this new one.
+	 */
+	connect_options& operator=(connect_options&& opt);
 	/**
 	 * Returns the "keep alive" interval.
 	 * @return int
@@ -194,7 +221,7 @@ public:
 	 * Sets the callback context to a delivery token.
 	 * @param tok The delivery token to be used as the callback context.
 	 */
-	void set_context(token* tok);
+	void set_token(const_token_ptr tok);
 	/**
       * Sets the version of MQTT to be used on the connect.
 	  * @param mqttVersion The MQTT version to use for the connection:
@@ -219,3 +246,4 @@ using connect_options_ptr = connect_options::ptr_t;
 }
 
 #endif		// __mqtt_connect_options_h
+

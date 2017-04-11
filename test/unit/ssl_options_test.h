@@ -256,14 +256,16 @@ public:
 		CPPUNIT_ASSERT_EQUAL(!SERVER_CERT, orgOpts.get_enable_server_cert_auth());
 
 		// Self assignment should cause no harm
-		opts = std::move(opts);
-
-		CPPUNIT_ASSERT_EQUAL(TRUST_STORE, opts.get_trust_store());
-		CPPUNIT_ASSERT_EQUAL(KEY_STORE, opts.get_key_store());
-		CPPUNIT_ASSERT_EQUAL(PRIVATE_KEY, opts.get_private_key());
-		CPPUNIT_ASSERT_EQUAL(PRIVATE_KEY_PASSWORD, opts.get_private_key_password());
-		CPPUNIT_ASSERT_EQUAL(ENABLED_CIPHER_SUITES, opts.get_enabled_cipher_suites());
-		CPPUNIT_ASSERT_EQUAL(SERVER_CERT, opts.get_enable_server_cert_auth());
+		// (clang++ is smart enough to warn about this)
+		#if !defined(__clang__)
+			opts = std::move(opts);
+			CPPUNIT_ASSERT_EQUAL(TRUST_STORE, opts.get_trust_store());
+			CPPUNIT_ASSERT_EQUAL(KEY_STORE, opts.get_key_store());
+			CPPUNIT_ASSERT_EQUAL(PRIVATE_KEY, opts.get_private_key());
+			CPPUNIT_ASSERT_EQUAL(PRIVATE_KEY_PASSWORD, opts.get_private_key_password());
+			CPPUNIT_ASSERT_EQUAL(ENABLED_CIPHER_SUITES, opts.get_enabled_cipher_suites());
+			CPPUNIT_ASSERT_EQUAL(SERVER_CERT, opts.get_enable_server_cert_auth());
+		#endif
 	}
 
 // ----------------------------------------------------------------------

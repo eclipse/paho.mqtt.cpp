@@ -294,12 +294,14 @@ public:
 		CPPUNIT_ASSERT(orgOpts.opts_.message == nullptr);
 
 		// Self assignment should cause no harm
-		opts = std::move(opts);
-
-		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload());
-		CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
-		CPPUNIT_ASSERT_EQUAL(RETAINED, opts.is_retained());
+		// (clang++ is smart enough to warn about this)
+		#if !defined(__clang__)
+			opts = std::move(opts);
+			CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
+			CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload());
+			CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
+			CPPUNIT_ASSERT_EQUAL(RETAINED, opts.is_retained());
+		#endif
 	}
 
 // ----------------------------------------------------------------------

@@ -183,7 +183,7 @@ public:
 	 * @throw security_exception for security related problems
 	 */
 	itoken_ptr connect(connect_options options, void* userContext,
-							   iaction_listener& cb) override;
+					   iaction_listener& cb) override;
 	/**
 	 *
 	 * @param userContext optional object used to pass context to the
@@ -233,7 +233,7 @@ public:
 	 * @throw exception for problems encountered while disconnecting
 	 */
 	itoken_ptr disconnect(long quiesceTimeout, void* userContext,
-								  iaction_listener& cb) override;
+						  iaction_listener& cb) override;
 	/**
 	 * Disconnects from the server.
 	 * @param userContext optional object used to pass context to the

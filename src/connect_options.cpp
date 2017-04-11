@@ -12,9 +12,11 @@
  *
  * Contributors:
  *    Guilherme M. Ferreira - initial implementation and documentation
+ *    Frannk Pagliughi - Copy and move operations. Bug fixes.
  *******************************************************************************/
 
 #include "mqtt/connect_options.h"
+#include <cstring>
 
 namespace mqtt {
 
@@ -22,8 +24,6 @@ namespace mqtt {
 
 connect_options::connect_options() : opts_(MQTTAsync_connectOptions_initializer)
 {
-	opts_.onSuccess = &token::on_success;
-	opts_.onFailure = &token::on_failure;
 }
 
 connect_options::connect_options(const std::string& userName, const std::string& password)
@@ -35,8 +35,12 @@ connect_options::connect_options(const std::string& userName, const std::string&
 
 connect_options::connect_options(const connect_options& opt) : opts_(opt.opts_)
 {
-	set_will(opt.will_);
-	set_ssl(opt.ssl_);
+	if (opts_.will)
+		set_will(opt.will_);
+
+	if (opts_.ssl)
+		set_ssl(opt.ssl_);
+
 	set_user_name(opt.userName_);
 	set_password(opt.password_);
 }
@@ -47,18 +51,64 @@ connect_options::connect_options(connect_options&& opt) : opts_(opt.opts_),
 						userName_(std::move(opt.userName_)),
 						password_(std::move(opt.password_))
 {
+	if (opts_.will)
+		opts_.will = &will_.opts_;
+
+	if (opts_.ssl)
+		opts_.ssl = &ssl_.opts_;
+
+	opts_.username = c_str(userName_);
+	opts_.password = c_str(password_);
 }
+
+connect_options& connect_options::operator=(const connect_options& opt)
+{
+	std::memcpy(&opts_, &opt.opts_, sizeof(MQTTAsync_connectOptions));
+
+	if (opts_.will)
+		set_will(opt.will_);
+
+	if (opts_.ssl)
+		set_ssl(opt.ssl_);
+
+	set_user_name(opt.userName_);
+	set_password(opt.password_);
+
+	return *this;
+}
+
+connect_options& connect_options::operator=(connect_options&& opt)
+{
+	std::memcpy(&opts_, &opt.opts_, sizeof(MQTTAsync_connectOptions));
+
+	will_ = std::move(opt.will_);
+	ssl_ = std::move(opt.ssl_);
+	userName_ = std::move(opt.userName_);
+	password_ = std::move(opt.password_);
+
+	if (opts_.will)
+		opts_.will = &will_.opts_;
+
+	if (opts_.ssl)
+		opts_.ssl = &ssl_.opts_;
+
+	opts_.username = c_str(userName_);
+	opts_.password = c_str(password_);
+
+	return *this;
+}
+
 
 void connect_options::set_password(const std::string& password)
 {
 	password_ = password;
-	opts_.password = password_.empty() ? nullptr : password_.c_str();
+	opts_.password = c_str(password_);
 }
 
 void connect_options::set_user_name(const std::string& userName)
 {
 	userName_ = userName;
-	opts_.username = userName_.empty() ? nullptr : userName_.c_str();
+	opts_.username = c_str(userName_);
 }
 
 void connect_options::set_will(const will_options& will)
@@ -73,9 +123,10 @@ void connect_options::set_ssl(const ssl_options& ssl)
 	opts_.ssl = &ssl_.opts_;
 }
 
-void connect_options::set_context(token* tok) 
+void connect_options::set_token(const_token_ptr tok)
 {
-	opts_.context = tok;
+	tok_ = tok;
+	opts_.context = const_cast<token*>(tok.get());
 
 	if (tok) {
 		opts_.onSuccess = &token::on_success;
@@ -90,3 +141,4 @@ void connect_options::set_context(token* tok)
 /////////////////////////////////////////////////////////////////////////////
 
 } // end namespace mqtt
+
