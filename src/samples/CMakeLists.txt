@@ -57,10 +57,29 @@ target_link_libraries(sync_publish
     ${PAHO_MQTT_C}
     ${PAHO_MQTT_CPP})
 
+set(INSTALL_TARGETS
+    async_publish
+    async_subscribe
+    sync_publish)
+
+if(PAHO_WITH_SSL)
+    ## SSL binary files
+    add_executable(ssl_publish ssl_publish.cpp)
+
+    ## link SSL binaries
+    target_link_libraries(ssl_publish
+        ${PAHO_MQTT_C}
+        ${PAHO_MQTT_CPP})
+
+    set(INSTALL_TARGETS
+        ${INSTALL_TARGETS}
+        ssl_publish)
+
+    add_definitions(-DOPENSSL)
+endif()
+
 ## install binaries
-install(TARGETS async_publish
-                async_subscribe
-                sync_publish
+install(TARGETS ${INSTALL_TARGETS}
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
 )
