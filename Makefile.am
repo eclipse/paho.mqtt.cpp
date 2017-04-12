@@ -41,8 +41,20 @@ if PAHO_WITH_SSL
 libpaho_mqttpp3_la_SOURCES += src/ssl_options.cpp
 endif
 
+
 ###############################################################################
-# Library compiler flags
+# Library: proprocessor flags
+###############################################################################
+
+COMMONCPPFLAGS  = $(AM_CPPFLAGS)
+if PAHO_WITH_SSL
+COMMONCPPFLAGS += -DOPENSSL
+endif
+
+libpaho_mqttpp3_la_CPPFLAGS  = $(COMMONCPPFLAGS)
+
+###############################################################################
+# Library: compiler flags
 ###############################################################################
 
 libpaho_mqttpp3_la_CXXFLAGS  = $(CXXFLAGS)
@@ -111,6 +123,16 @@ async_subscribe_SOURCES = src/samples/async_subscribe.cpp
 sync_publish_SOURCES = src/samples/sync_publish.cpp
 
 ###############################################################################
+# Samples: proprocessor flags
+###############################################################################
+
+async_publish_CPPFLAGS = $(COMMONCPPFLAGS)
+
+async_subscribe_CPPFLAGS = $(COMMONCPPFLAGS)
+
+sync_publish_CPPFLAGS = $(COMMONCPPFLAGS)
+
+###############################################################################
 # Samples: compiler flags
 ###############################################################################
 
@@ -152,6 +174,12 @@ TESTS = $(check_PROGRAMS)
 ###############################################################################
 
 mqttpp_unittest_SOURCES = test/unit/test.cpp
+
+###############################################################################
+# Test: preprocessor flags
+###############################################################################
+
+mqttpp_unittest_CPPFLAGS  = $(COMMONCPPFLAGS)
 
 ###############################################################################
 # Test: compiler flags

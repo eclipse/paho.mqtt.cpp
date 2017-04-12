@@ -7,10 +7,7 @@
 #ifndef __mqtt_disconnect_options_h
 #define __mqtt_disconnect_options_h
 
-extern "C" {
-	#include "MQTTAsync.h"
-}
-
+#include "MQTTAsync.h"
 #include "mqtt/token.h"
 
 namespace mqtt {
@@ -43,18 +40,18 @@ public:
 	 */
 	disconnect_options(int timeout, token* tok);
 	/**
-	 * Sets the timeout for disconnecting. 
-	 * This allows for any remaining in-flight messages to be delivered. 
+	 * Sets the timeout for disconnecting.
+	 * This allows for any remaining in-flight messages to be delivered.
 	 * @param timeout The timeout (in milliseconds).
 	 */
 	void set_timeout(int timeout) { opts_.timeout = timeout; }
 	/**
-	 * Gets the timeout used for disconnecting. 
+	 * Gets the timeout used for disconnecting.
 	 * @return The timeout for disconnecting (in milliseconds).
 	 */
 	int get_timeout() const { return opts_.timeout; }
 	/**
-	 * Sets the callback context to a delivery token. 
+	 * Sets the callback context to a delivery token.
 	 * @param tok The delivery token to be used as the callback context.
 	 */
 	void set_context(token* tok);

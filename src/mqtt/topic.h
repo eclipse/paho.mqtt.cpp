@@ -24,10 +24,7 @@
 #ifndef __mqtt_topic_h
 #define __mqtt_topic_h
 
-extern "C" {
-	#include "MQTTAsync.h"
-}
-
+#include "MQTTAsync.h"
 #include "mqtt/delivery_token.h"
 #include "mqtt/message.h"
 #include <string>

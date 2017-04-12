@@ -24,10 +24,8 @@
 #ifndef __mqtt_ipersistable_h
 #define __mqtt_ipersistable_h
 
-extern "C" {
-	#include "MQTTAsync.h"
-}
-
+#include "MQTTAsync.h"
+#include "mqtt/types.h"
 #include <string>
 #include <memory>
 #include <vector>
@@ -89,12 +87,12 @@ public:
 	 * Returns the header bytes in an array.
 	 * @return std::vector<uint8_t>
 	 */
-	virtual const uint8_t* get_header_bytes() const =0;
+	virtual const byte* get_header_bytes() const =0;
 	/**
 	 * Returns the header bytes in an array.
 	 * @return std::vector<uint8_t>
 	 */
-	virtual std::vector<uint8_t> get_header_byte_arr() const =0;
+	virtual std::vector<byte> get_header_byte_arr() const =0;
 	/**
 	 * Returns the length of the header.
 	 * @return int
@@ -110,12 +108,12 @@ public:
 	 * Returns the payload bytes in an array.
 	 * @return std::vector<uint8_t>
 	 */
-	virtual const uint8_t* get_payload_bytes() const =0;
+	virtual const byte* get_payload_bytes() const =0;
 	/**
 	 * Returns the payload bytes in an array.
 	 * @return std::vector<uint8_t>
 	 */
-	virtual std::vector<uint8_t> get_payload_byte_arr() const =0;
+	virtual std::vector<byte> get_payload_byte_arr() const =0;
 	/**
 	 * Returns the length of the payload.
 	 * @return int

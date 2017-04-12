@@ -28,7 +28,6 @@ const std::string CLIENTID("AsyncSubcriber");
 const std::string TOPIC("hello");
 
 const int  QOS = 1;
-const long TIMEOUT = 10000L;
 
 /////////////////////////////////////////////////////////////////////////////
 

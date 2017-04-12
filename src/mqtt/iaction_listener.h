@@ -24,10 +24,7 @@
 #ifndef __mqtt_iaction_listener_h
 #define __mqtt_iaction_listener_h
 
-extern "C" {
-	#include "MQTTAsync.h"
-}
-
+#include "MQTTAsync.h"
 #include <string>
 #include <vector>
 #include <memory>

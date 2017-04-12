@@ -24,10 +24,7 @@
 #ifndef __mqtt_delivery_token_h
 #define __mqtt_delivery_token_h
 
-extern "C" {
-	#include "MQTTAsync.h"
-}
-
+#include "MQTTAsync.h"
 #include "mqtt/token.h"
 #include "mqtt/message.h"
 #include <memory>
@@ -46,6 +43,8 @@ public:
 	using ptr_t = std::shared_ptr<idelivery_token>;
 	/** Smart/shared pointer to a const object of this class */
 	using const_ptr_t = std::shared_ptr<const idelivery_token>;
+	/** Weak pointer to an object of this class */
+	using weak_ptr_t = std::weak_ptr<idelivery_token>;
 
 	/**
 	 * Gets the message associated with this token.
@@ -75,7 +74,6 @@ class delivery_token : public virtual idelivery_token,
 
 	/** Client has special access. */
 	friend class async_client;
-	friend class delivery_response_options;
 
 	/**
 	 * Sets the message to which this token corresponds.
@@ -88,29 +86,31 @@ public:
 	using ptr_t = std::shared_ptr<delivery_token>;
 	/** Smart/shared pointer to a const object of this class */
 	using const_ptr_t = std::shared_ptr<delivery_token>;
+	/** Weak pointer to an object of this class */
+	using weak_ptr_t = std::weak_ptr<delivery_token>;
 
 	/**
-	 * Creates an empty delivery token connected to a particular client. 
+	 * Creates an empty delivery token connected to a particular client.
 	 * @param cli The asynchronous client object.
 	 */
 	delivery_token(iasync_client& cli) : token(cli) {}
 	/**
-	 * Creates a delivery token connected to a particular client. 
-	 * @param cli The asynchronous client object. 
+	 * Creates a delivery token connected to a particular client.
+	 * @param cli The asynchronous client object.
 	 * @param topic The topic that the message is associated with.
 	 */
 	delivery_token(iasync_client& cli, const std::string& topic) : token(cli, topic) {}
 	/**
-	 * Creates a delivery token connected to a particular client. 
-	 * @param cli The asynchronous client object. 
+	 * Creates a delivery token connected to a particular client.
+	 * @param cli The asynchronous client object.
 	 * @param topic The topic that the message is associated with.
 	 * @param msg The message data.
 	 */
-	delivery_token(iasync_client& cli, const std::string& topic, const_message_ptr msg) 
+	delivery_token(iasync_client& cli, const std::string& topic, const_message_ptr msg)
 			: token(cli, topic), msg_(msg) {}
 	/**
-	 * Creates a delivery token connected to a particular client. 
-	 * @param cli The asynchronous client object. 
+	 * Creates a delivery token connected to a particular client.
+	 * @param cli The asynchronous client object.
 	 * @param topics The topics that the message is associated with.
 	 */
 	delivery_token(iasync_client& cli, const std::vector<std::string>& topics)

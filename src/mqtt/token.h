@@ -24,10 +24,7 @@
 #ifndef __mqtt_token_h
 #define __mqtt_token_h
 
-extern "C" {
-	#include "MQTTAsync.h"
-}
-
+#include "MQTTAsync.h"
 #include "mqtt/iaction_listener.h"
 #include "mqtt/exception.h"
 #include <string>
@@ -50,8 +47,13 @@ class iasync_client;
 class itoken
 {
 public:
-	/** Shared pointer to a token */
+	/** Smart/shared pointer to an object of this class */
 	using ptr_t = std::shared_ptr<itoken>;
+	/** Smart/shared pointer to a const object of this class */
+	using const_ptr_t = std::shared_ptr<itoken>;
+	/** Weak pointer to an object of this class */
+	using weak_ptr_t = std::weak_ptr<itoken>;
+
 	/**
 	 * Virtual base destructor.
 	 */
@@ -67,11 +69,6 @@ public:
 	 * @return iasync_client
 	 */
 	virtual iasync_client* get_client() const =0;
-	/**
-	 * Returns an exception providing more detail if an operation failed.
-	 * @return Exception
-	 */
-	//virtual exception get_exception() =0;
 	/**
 	 * Returns the message ID of the message that is associated with the
 	 * token.
@@ -154,6 +151,7 @@ class token : public virtual itoken
 	int rc_;
 
 	/** Client and token-related options have special access */
+	friend class async_client;
 	friend class response_options;
 	friend class delivery_response_options;
 	friend class connect_options;
@@ -167,6 +165,15 @@ class token : public virtual itoken
 		topics_ = top;
 	}
 
+	/**
+	 * Sets the ID for the message.
+	 * This is a guaranteed atomic operation.
+	 * @param msgid The ID of the message.
+	 */
+	void set_message_id(MQTTAsync_token msgid) {
+		guard g(lock_);
+		tok_ = msgid;
+	}
 	/**
 	 * C-style callback for success.
 	 * This simply passes the call on to the proper token object for
@@ -199,10 +206,12 @@ class token : public virtual itoken
 	void on_failure(MQTTAsync_failureData* rsp);
 
 public:
-	/** Smart pointer to an object of this class */
+	/** Smart/shared pointer to an object of this class */
 	using ptr_t = std::shared_ptr<token>;
-	/** Smart pointer to an object of this class */
+	/** Smart/shared pointer to an object of this class */
 	using const_ptr_t = std::shared_ptr<const token>;
+	/** Weak pointer to an object of this class */
+	using weak_ptr_t = std::weak_ptr<token>;
 
 	/**
 	 * Constructs a token object.
@@ -240,16 +249,14 @@ public:
 	 * asynchronous action.
 	 * @return iasync_client
 	 */
-	iasync_client* get_client() const override {
-		return cli_;
-	}
+	iasync_client* get_client() const override { return cli_; }
 	/**
 	 * Returns the message ID of the message that is associated with the
 	 * token.
 	 * @return int
 	 */
 	int get_message_id() const override {
-		static_assert(sizeof(tok_) == sizeof(int), "MQTTAsync_token must fit into int");
+		static_assert(sizeof(tok_) <= sizeof(int), "MQTTAsync_token must fit into int");
 		return static_cast<int>(tok_);
 	}
 	/**
@@ -324,7 +331,6 @@ public:
 			throw exception(rc_);
 		return true;
 	}
-
 };
 
 /** Smart/shared pointer to a token object */

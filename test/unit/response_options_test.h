@@ -37,7 +37,7 @@ class response_options_test : public CppUnit::TestFixture
 
 	CPPUNIT_TEST( test_dflt_constructor );
 	CPPUNIT_TEST( test_user_constructor );
-	CPPUNIT_TEST( test_set_context );
+	CPPUNIT_TEST( test_set_token );
 
 	CPPUNIT_TEST_SUITE_END();
 
@@ -67,11 +67,11 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_user_constructor() {
-		mqtt::token token { cli };
-		mqtt::response_options opts { &token };
+		mqtt::token_ptr token { std::make_shared<mqtt::token>(cli) };
+		mqtt::response_options opts { token };
 		MQTTAsync_responseOptions& c_struct = opts.opts_;
 
-		CPPUNIT_ASSERT(c_struct.context != nullptr);
+		CPPUNIT_ASSERT(c_struct.context == token.get());
 
 		// Make sure the callback functions are set during object construction
 		CPPUNIT_ASSERT(c_struct.onSuccess != nullptr);
@@ -82,14 +82,14 @@ public:
 // Test set context
 // ----------------------------------------------------------------------
 
-	void test_set_context() {
+	void test_set_token() {
 		mqtt::response_options opts;
 		MQTTAsync_responseOptions& c_struct = opts.opts_;
 
 		CPPUNIT_ASSERT(c_struct.context == nullptr);
-		mqtt::token token{ cli };
-		opts.set_context( &token );
-		CPPUNIT_ASSERT(c_struct.context != nullptr);
+		mqtt::token_ptr token { std::make_shared<mqtt::token>(cli) };
+		opts.set_token( token );
+		CPPUNIT_ASSERT(c_struct.context == token.get());
 	}
 
 };

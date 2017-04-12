@@ -24,10 +24,7 @@
 #ifndef __mqtt_async_client_h
 #define __mqtt_async_client_h
 
-extern "C" {
-	#include "MQTTAsync.h"
-}
-
+#include "MQTTAsync.h"
 #include "mqtt/token.h"
 #include "mqtt/delivery_token.h"
 #include "mqtt/iclient_persistence.h"
@@ -90,7 +87,7 @@ private:
 	friend class token;
 	virtual void add_token(itoken_ptr tok);
 	virtual void add_token(idelivery_token_ptr tok);
-	virtual void remove_token(itoken* tok);
+	virtual void remove_token(itoken* tok) override;
 	virtual void remove_token(itoken_ptr tok) { remove_token(tok.get()); }
 	void remove_token(idelivery_token_ptr tok) { remove_token(tok.get()); }
 
