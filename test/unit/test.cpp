@@ -45,9 +45,6 @@ int main(int argc, char* argv[])
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::disconnect_options_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::response_options_test );
 
-	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::async_client_test );
-	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::client_test );
-
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::message_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::delivery_response_options_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::iclient_persistence_test );
@@ -55,9 +52,12 @@ int main(int argc, char* argv[])
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::topic_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::exception_test );
 
+	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::async_client_test );
+	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::client_test );
+
 	TextUi::TestRunner runner;
 	TestFactoryRegistry &registry = TestFactoryRegistry::getRegistry();
 
 	runner.addTest(registry.makeTest());
-	return (runner.run()) ? 0 : 1;
+	return runner.run() ? 0 : 1;
 }

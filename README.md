@@ -7,7 +7,7 @@ This code builds a library which enables C++11 applications to connect to an [MQ
 
 Both synchronous and asynchronous modes of operation are supported.
 
-This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) by Ian Craggs
+This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) by Ian Craggs, et al.
 
 ## Building from source
 
@@ -33,7 +33,7 @@ $ $PAHO_DIR/configure CC=clang CXX=clang++
 ```
 
 The library uses C++11 features, and thus requires a conforming compiler such as g++ 4.8 or above.
-The Paho MQTT C++ library can be built against the current release version of the Paho MQTT C library or the latest development tree, if it is stable.
+The Paho MQTT C++ library can be built against the current release version of the Paho MQTT C library or the latest development tree.
 
 #### Build instructions (current release on systems with Autotools)
 
@@ -139,7 +139,7 @@ $ $PAHO_DIR/configure --host=arm-linux-gnueabi
 
 ### CMake
 
-The CMake is a cross-platform building system suitable for Unix and non-Unix platforms, like Microsoft Windows.
+CMake is a cross-platform building system suitable for Unix and non-Unix platforms, like Microsoft Windows.
 
 #### Unix and GNU/Linux
 
@@ -184,8 +184,8 @@ $ git clone https://github.com/eclipse/paho.mqtt.cpp
 $ cd paho.mqtt.cpp
 $ mkdir build
 $ cd build
-$ cmake -DPAHO_BUILD_DOCUMENTATION=TRUE -DPAHO_BUILD_SAMPLES=TRUE \
-  -DPAHO_MQTT_C_PATH=../paho.mqtt.c ..
+$ cmake -DPAHO_WITH_SSL=TRUE -DPAHO_BUILD_DOCUMENTATION=TRUE -DPAHO_BUILD_SAMPLES=TRUE \
+-DPAHO_MQTT_C_PATH=../../paho.mqtt.c ..
 $ make
 ```
 
@@ -232,6 +232,29 @@ Once the configuration is done, click on the Configure button, select the versio
 
 At the end of this process you have a Visual Studio solution.
 
+#### Updating CMake on Ubuntu 14.04 / Mint 17 (LTS)
+
+The version of cmake on Ubuntu 14.04 LTS is pretty old and has some problems with Paho C++ library. A newer version can be added by downloading the source and building it. If the older cmake can be removed from the system using the package manager, or it can be kept, using the Ububtu alternatives to chose between the versions. For example:
+
+```
+$ wget http://www.cmake.org/files/v3.6/cmake-3.6.3.tar.gz 
+$ tar -xvzf cmake-3.6.3.tar.gz 
+$ cd cmake-3.6.3/
+$ ./configure
+$ make
+$ sudo make install
+$ sudo mv /usr/bin/cmake /usr/bin/cmake-2.8
+$ sudo update-alternatives --install /usr/bin/cmake cmake /usr/local/bin/cmake 100
+$ sudo update-alternatives --install /usr/bin/cmake cmake /usr/bin/cmake-2.8 200
+$ cmake --version
+cmake version 3.6.3
+```
+
+You can speed up the build on multi-core systems, by specifying parallel buid jobs for the configure and make steps, above, such as the following for a 4-core system:
+```
+$ ./configure --parallel=4
+$ make -j4
+```
 
 ## Example
 
@@ -251,36 +274,20 @@ int main(int argc, char* argv[])
     connOpts.set_clean_session(true);
 
     try {
-        cout << "Connecting..." << flush;
         client.connect(connOpts);
-        cout << "OK" << endl;
 
         // First use a message pointer.
 
-        cout << "Sending message..." << flush;
         mqtt::message_ptr pubmsg = mqtt::make_message(PAYLOAD1);
         pubmsg->set_qos(QOS);
         client.publish(TOPIC, pubmsg);
-        cout << "OK" << endl;
 
         // Now try with itemized publish.
 
-        cout << "Sending next message..." << flush;
         client.publish(TOPIC, PAYLOAD2, strlen(PAYLOAD2)+1, 0, false);
-        cout << "OK" << endl;
-
-        // Now try with a listener, but no token
-
-        cout << "Sending final message..." << flush;
-        pubmsg = mqtt::make_message(PAYLOAD3);
-        pubmsg->set_qos(QOS);
-        client.publish(TOPIC, pubmsg);
-        cout << "OK" << endl;
 
         // Disconnect
-        cout << "Disconnecting..." << flush;
         client.disconnect();
-        cout << "OK" << endl;
     }
     catch (const mqtt::persistence_exception& exc) {
         cerr << "Persistence Error: " << exc.what() << " ["
@@ -300,6 +307,7 @@ int main(int argc, char* argv[])
 -----------
 
 The API organization and documentation were adapted from:
+
 The Paho Java library
 by Dave Locke.
 Copyright (c) 2012, IBM Corp
@@ -311,7 +319,9 @@ Copyright (c) 2012, IBM Corp
 
 -----------
 
-This code requires the Paho C library by Ian Craggs
+This code requires:
+
+The Paho C library by Ian Craggs
 Copyright (c) 2013 IBM Corp.
 
  All rights reserved. This program and the accompanying materials

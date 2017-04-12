@@ -38,7 +38,7 @@ class connect_options;
 /////////////////////////////////////////////////////////////////////////////
 
 /**
- * Holds the set of options that govern the Last Will and Testament feature. 
+ * Holds the set of options that govern the Last Will and Testament feature.
  *
  * @note
  * This wraps struct v0 of the C library's MQTTAsync_willOptions structure.
@@ -61,21 +61,21 @@ class will_options
 
 	/** The connect options has special access */
 	friend class connect_options;
+	friend class connect_options_test;
 	friend class will_options_test;
 
 	/**
-	 * Gets a pointer to the C-language NUL-terminated strings for the 
-	 * struct. 
-	 * Some structs, such as this one, require valid pointers at all times, 
-	 * while others expect NULL pointers for missing parameters. 
-	 * @param str The C++ string object. 
-	 * @return Pointer to a NUL terminated string. This is only valid until 
-	 *  	   the next time the string is updated.
+	 * Gets a pointer to the C-language NUL-terminated strings for the
+	 * struct.
+	 * Some structs, such as this one, require valid pointers at all times,
+	 * while others expect NULL pointers for missing parameters.
+	 * So we always return a pointer to a valid C char array, even when
+	 * empty.
+	 * @param str The C++ string object.
+	 * @return Pointer to a NUL terminated string. This is only valid until
+	 *  	   the next time the string is updated. This is never nullptr.
 	 */
-	const char* c_str(const std::string& str) {
-		//return str.empty() ? nullptr : str.c_str();
-		return str.c_str();
-	}
+	const char* c_str(const std::string& str) { return str.c_str(); }
 
 public:
 	/** Smart/shared pointer to this class. */

@@ -70,16 +70,17 @@ class ssl_options
 
 	/** The connect options has special access */
 	friend class connect_options;
+	friend class connect_options_test;
 	friend class ssl_options_test;
 
 	/**
-	 * Gets a pointer to the C-language NUL-terminated strings for the 
-	 * struct. 
+	 * Gets a pointer to the C-language NUL-terminated strings for the
+	 * struct.
 	 * @note In the SSL options, by default, the Paho C treats nullptr char
 	 * arrays as unset values, so we keep that semantic and only set those
 	 * char arrays if the string is non-empty.
-	 * @param str The C++ string object. 
-	 * @return Pointer to a NUL terminated string. This is only valid until 
+	 * @param str The C++ string object.
+	 * @return Pointer to a NUL terminated string. This is only valid until
 	 *  	   the next time the string is updated.
 	 */
 	const char* c_str(const std::string& str) {

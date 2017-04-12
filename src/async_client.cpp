@@ -112,8 +112,8 @@ int async_client::on_message_arrived(void* context, char* topicName, int topicLe
 		}
 	}
 
-    MQTTAsync_freeMessage(&msg);
-    MQTTAsync_free(topicName);
+	MQTTAsync_freeMessage(&msg);
+	MQTTAsync_free(topicName);
 
 	// TODO: Should the user code determine the return value?
 	// The Java version does doesn't seem to...
@@ -223,9 +223,8 @@ void async_client::free_topic_filters(std::vector<char*>& filts)
 // Connect
 
 itoken_ptr async_client::connect()
-{
-	connect_options opts;
-	return connect(opts);
+{ 
+	return connect(connect_options());
 }
 
 itoken_ptr async_client::connect(connect_options opts)
@@ -233,7 +232,7 @@ itoken_ptr async_client::connect(connect_options opts)
 	itoken_ptr tok = std::make_shared<token>(*this);
 	add_token(tok);
 
-	opts.set_context(dynamic_cast<token*>(tok.get()));
+	opts.set_token(std::dynamic_pointer_cast<token>(tok));
 
 	int rc = MQTTAsync_connect(cli_, &opts.opts_);
 
@@ -253,7 +252,7 @@ itoken_ptr async_client::connect(connect_options opts, void* userContext,
 	tok->set_action_callback(cb);
 	add_token(tok);
 
-	opts.set_context(dynamic_cast<token*>(tok.get()));
+	opts.set_token(std::dynamic_pointer_cast<token>(tok));
 
 	int rc = MQTTAsync_connect(cli_, &opts.opts_);
 

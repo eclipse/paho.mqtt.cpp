@@ -227,11 +227,13 @@ public:
 		CPPUNIT_ASSERT(!orgMsg.is_retained());
 
 		// Self assignment should cause no harm
-		msg = std::move(msg);
-
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload());
-		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
-		CPPUNIT_ASSERT(msg.is_retained());
+		// (clang++ is smart enough to warn about this)
+		#if !defined(__clang__)
+			msg = std::move(msg);
+			CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload());
+			CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
+			CPPUNIT_ASSERT(msg.is_retained());
+		#endif
 	}
 
 // ----------------------------------------------------------------------
@@ -239,45 +241,26 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_validate_qos() {
-		bool pass_lower = false;
 		try {
 			mqtt::message::validate_qos(-1);
-		} catch (std::invalid_argument& ex) {
-			pass_lower = true;
-		}
-		CPPUNIT_ASSERT(pass_lower);
+			CPPUNIT_FAIL("message shouldn't accept QoS <min");
+		} 
+		catch (std::invalid_argument& ex) {}
 
-		bool pass_0 = true;
-		try {
-			mqtt::message::validate_qos(0);
-		} catch (std::invalid_argument& ex) {
-			pass_0 = false;
+		for (int i=0; i<=2; ++i) {
+			try {
+				mqtt::message::validate_qos(0);
+			} 
+			catch (std::invalid_argument& ex) {
+				CPPUNIT_FAIL("mesage should accept valid QoS: "+std::to_string(i));
+			}
 		}
-		CPPUNIT_ASSERT(pass_0);
 
-		bool pass_1 = true;
-		try {
-			mqtt::message::validate_qos(1);
-		} catch (std::invalid_argument& ex) {
-			pass_1 = false;
-		}
-		CPPUNIT_ASSERT(pass_1);
-
-		bool pass_2 = true;
-		try {
-			mqtt::message::validate_qos(2);
-		} catch (std::invalid_argument& ex) {
-			pass_2 = false;
-		}
-		CPPUNIT_ASSERT(pass_2);
-
-		bool pass_higher = false;
 		try {
 			mqtt::message::validate_qos(3);
-		} catch (std::invalid_argument& ex) {
-			pass_higher = true;
+			CPPUNIT_FAIL("message shouldn't accept QoS >max");
 		}
-		CPPUNIT_ASSERT(pass_higher);
+		catch (std::invalid_argument& ex) {}
 	}
 
 };

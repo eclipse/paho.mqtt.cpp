@@ -93,9 +93,10 @@ class async_client_test : public CppUnit::TestFixture
 
 	// NOTE: This test case requires network access. It uses one of
 	//       the public available MQTT brokers
-	const std::string GOOD_SERVER_URI { "tcp://m2m.eclipse.org:1883" };
+	//const std::string GOOD_SERVER_URI { "tcp://m2m.eclipse.org:1883" };
+	const std::string GOOD_SERVER_URI { "tcp://localhost:1883" };
 	const std::string BAD_SERVER_URI  { "one://invalid.address" };
-	const std::string CLIENT_ID { "async_client_test" };
+	const std::string CLIENT_ID { "async_client_unit_test" };
 	const std::string PERSISTENCE_DIR { "/tmp" };
 	const std::string TOPIC { "TOPIC" };
 	const int GOOD_QOS { 0 };
@@ -152,10 +153,15 @@ public:
 		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
-		mqtt::itoken_ptr token_conn { cli.connect() };
-		CPPUNIT_ASSERT(nullptr != token_conn);
-		token_conn->wait_for_completion();
-		CPPUNIT_ASSERT(cli.is_connected());
+		try {
+			mqtt::itoken_ptr token_conn = cli.connect();
+			CPPUNIT_ASSERT(token_conn);
+			token_conn->wait_for_completion();
+			CPPUNIT_ASSERT(cli.is_connected());
+		}
+		catch (const std::exception& exc) {
+			CPPUNIT_FAIL(std::string("Connection failure: ")+exc.what());
+		}
 	}
 
 	void test_connect_1_arg() {
@@ -164,7 +170,7 @@ public:
 
 		mqtt::connect_options co;
 		mqtt::itoken_ptr token_conn { cli.connect(co) };
-		CPPUNIT_ASSERT(nullptr != token_conn);
+		CPPUNIT_ASSERT(token_conn);
 		token_conn->wait_for_completion();
 		CPPUNIT_ASSERT(cli.is_connected());
 	}
@@ -181,8 +187,9 @@ public:
 		int reason_code = MQTTASYNC_SUCCESS;
 		try {
 			token_conn = cli.connect(co);
-			CPPUNIT_ASSERT(nullptr != token_conn);
-		} catch (mqtt::exception& ex) {
+			CPPUNIT_ASSERT(token_conn);
+		}
+		catch (mqtt::exception& ex) {
 			reason_code = ex.get_reason_code();
 		}
 		CPPUNIT_ASSERT(nullptr == token_conn);
@@ -196,7 +203,7 @@ public:
 
 		mqtt::test::dummy_action_listener listener;
 		mqtt::itoken_ptr token_conn { cli.connect(&CONTEXT, listener) };
-		CPPUNIT_ASSERT(nullptr != token_conn);
+		CPPUNIT_ASSERT(token_conn);
 		token_conn->wait_for_completion();
 		CPPUNIT_ASSERT(cli.is_connected());
 		CPPUNIT_ASSERT_EQUAL(CONTEXT, *static_cast<int*>(token_conn->get_user_context()));
@@ -210,7 +217,7 @@ public:
 		mqtt::connect_options co;
 		mqtt::test::dummy_action_listener listener;
 		mqtt::itoken_ptr token_conn { cli.connect(co, &CONTEXT, listener) };
-		CPPUNIT_ASSERT(nullptr != token_conn);
+		CPPUNIT_ASSERT(token_conn);
 		token_conn->wait_for_completion();
 		CPPUNIT_ASSERT(cli.is_connected());
 		CPPUNIT_ASSERT_EQUAL(CONTEXT, *static_cast<int*>(token_conn->get_user_context()));
@@ -230,9 +237,10 @@ public:
 		int reason_code = MQTTASYNC_SUCCESS;
 		try {
 			token_conn = cli.connect(co, &CONTEXT, listener);
-			CPPUNIT_ASSERT(nullptr != token_conn);
+			CPPUNIT_ASSERT(token_conn);
 			token_conn->wait_for_completion();
-		} catch (mqtt::exception& ex) {
+		}
+		catch (mqtt::exception& ex) {
 			reason_code = ex.get_reason_code();
 		}
 		CPPUNIT_ASSERT(nullptr == token_conn);
@@ -251,12 +259,12 @@ public:
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::itoken_ptr token_conn { cli.connect() };
-		CPPUNIT_ASSERT(nullptr != token_conn);
+		CPPUNIT_ASSERT(token_conn);
 		token_conn->wait_for_completion();
 		CPPUNIT_ASSERT(cli.is_connected());
 
 		mqtt::itoken_ptr token_disconn { cli.disconnect() };
-		CPPUNIT_ASSERT(nullptr != token_disconn);
+		CPPUNIT_ASSERT(token_disconn);
 		token_disconn->wait_for_completion();
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 	}
@@ -266,12 +274,12 @@ public:
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::itoken_ptr token_conn { cli.connect() };
-		CPPUNIT_ASSERT(nullptr != token_conn);
+		CPPUNIT_ASSERT(token_conn);
 		token_conn->wait_for_completion();
 		CPPUNIT_ASSERT(cli.is_connected());
 
 		mqtt::itoken_ptr token_disconn { cli.disconnect(0) };
-		CPPUNIT_ASSERT(nullptr != token_disconn);
+		CPPUNIT_ASSERT(token_disconn);
 		token_disconn->wait_for_completion();
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 	}
@@ -284,8 +292,9 @@ public:
 		int reason_code = MQTTASYNC_SUCCESS;
 		try {
 			token_disconn = cli.disconnect(0);
-			CPPUNIT_ASSERT(nullptr != token_disconn);
-		} catch (mqtt::exception& ex) {
+			CPPUNIT_ASSERT(token_disconn);
+		}
+		catch (mqtt::exception& ex) {
 			reason_code = ex.get_reason_code();
 		}
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
@@ -297,13 +306,13 @@ public:
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::itoken_ptr token_conn { cli.connect() };
-		CPPUNIT_ASSERT(nullptr != token_conn);
+		CPPUNIT_ASSERT(token_conn);
 		token_conn->wait_for_completion();
 		CPPUNIT_ASSERT(cli.is_connected());
 
 		mqtt::test::dummy_action_listener listener;
 		mqtt::itoken_ptr token_disconn { cli.disconnect(&CONTEXT, listener) };
-		CPPUNIT_ASSERT(nullptr != token_disconn);
+		CPPUNIT_ASSERT(token_disconn);
 		token_disconn->wait_for_completion();
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 		CPPUNIT_ASSERT_EQUAL(CONTEXT, *static_cast<int*>(token_disconn->get_user_context()));
@@ -314,13 +323,13 @@ public:
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::itoken_ptr token_conn { cli.connect() };
-		CPPUNIT_ASSERT(nullptr != token_conn);
+		CPPUNIT_ASSERT(token_conn);
 		token_conn->wait_for_completion();
 		CPPUNIT_ASSERT(cli.is_connected());
 
 		mqtt::test::dummy_action_listener listener;
 		mqtt::itoken_ptr token_disconn { cli.disconnect(0, &CONTEXT, listener) };
-		CPPUNIT_ASSERT(nullptr != token_disconn);
+		CPPUNIT_ASSERT(token_disconn);
 		token_disconn->wait_for_completion();
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 		CPPUNIT_ASSERT_EQUAL(CONTEXT, *static_cast<int*>(token_disconn->get_user_context()));
@@ -335,8 +344,9 @@ public:
 		int reason_code = MQTTASYNC_SUCCESS;
 		try {
 			token_disconn = cli.disconnect(0, &CONTEXT, listener);
-			CPPUNIT_ASSERT(nullptr != token_disconn);
-		} catch (mqtt::exception& ex) {
+			CPPUNIT_ASSERT(token_disconn);
+		}
+		catch (mqtt::exception& ex) {
 			reason_code = ex.get_reason_code();
 		}
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
@@ -356,7 +366,7 @@ public:
 		CPPUNIT_ASSERT_EQUAL(2, GOOD_QOS_COLL[2]);
 
 		mqtt::itoken_ptr token_conn { cli.connect() };
-		CPPUNIT_ASSERT(nullptr != token_conn);
+		CPPUNIT_ASSERT(token_conn);
 		token_conn->wait_for_completion();
 		CPPUNIT_ASSERT(cli.is_connected());
 
@@ -382,16 +392,16 @@ public:
 		// Messages with QOS=2 are kept by the library
 		mqtt::message_ptr msg2 { mqtt::make_message(PAYLOAD, GOOD_QOS_COLL[2], RETAINED) };
 		token_pub = cli.publish(TOPIC, msg2);
-		CPPUNIT_ASSERT(nullptr != token_pub);
+		CPPUNIT_ASSERT(token_pub);
 		token_pending = cli.get_pending_delivery_token(message_id++);
-		CPPUNIT_ASSERT(nullptr != token_pending);
+		CPPUNIT_ASSERT(token_pending);
 
 		// Messages with QOS=1 are kept by the library
 		mqtt::message_ptr msg1 { mqtt::make_message(PAYLOAD, GOOD_QOS_COLL[1], RETAINED) };
 		token_pub = cli.publish(TOPIC, msg1);
-		CPPUNIT_ASSERT(nullptr != token_pub);
+		CPPUNIT_ASSERT(token_pub);
 		token_pending = cli.get_pending_delivery_token(message_id++);
-		CPPUNIT_ASSERT(nullptr != token_pending);
+		CPPUNIT_ASSERT(token_pending);
 
 		// NOTE: Messages with QOS=0 are fire-and-forget. These just get sent
 		// to the broker without any tracking. Their tokens are signaled as
@@ -402,12 +412,12 @@ public:
 		// Messages with QOS=0 are NOT kept by the library
 		mqtt::message_ptr msg0 { mqtt::make_message(PAYLOAD, GOOD_QOS_COLL[0], RETAINED) };
 		token_pub = cli.publish(TOPIC, msg0);
-		CPPUNIT_ASSERT(nullptr != token_pub);
+		CPPUNIT_ASSERT(token_pub);
 		token_pending = cli.get_pending_delivery_token(message_id++);
-		CPPUNIT_ASSERT(nullptr == token_pending);
+		CPPUNIT_ASSERT(!token_pending);
 
 		mqtt::itoken_ptr token_disconn { cli.disconnect() };
-		CPPUNIT_ASSERT(nullptr != token_disconn);
+		CPPUNIT_ASSERT(token_disconn);
 		token_disconn->wait_for_completion();
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 	}
@@ -421,7 +431,7 @@ public:
 		CPPUNIT_ASSERT_EQUAL(2, GOOD_QOS_COLL[2]);
 
 		mqtt::itoken_ptr token_conn { cli.connect() };
-		CPPUNIT_ASSERT(nullptr != token_conn);
+		CPPUNIT_ASSERT(token_conn);
 		token_conn->wait_for_completion();
 		CPPUNIT_ASSERT(cli.is_connected());
 
@@ -434,17 +444,17 @@ public:
 		// Messages with QOS=0 are NOT kept by the library
 		mqtt::message_ptr msg0 { mqtt::make_message(PAYLOAD, GOOD_QOS_COLL[0], RETAINED) };
 		token_pub = cli.publish(TOPIC, msg0);
-		CPPUNIT_ASSERT(nullptr != token_pub);
+		CPPUNIT_ASSERT(token_pub);
 
 		// Messages with QOS=1 are kept by the library
 		mqtt::message_ptr msg1 { mqtt::make_message(PAYLOAD, GOOD_QOS_COLL[1], RETAINED) };
 		token_pub = cli.publish(TOPIC, msg1);
-		CPPUNIT_ASSERT(nullptr != token_pub);
+		CPPUNIT_ASSERT(token_pub);
 
 		// Messages with QOS=2 are kept by the library
 		mqtt::message_ptr msg2 { mqtt::make_message(PAYLOAD, GOOD_QOS_COLL[2], RETAINED) };
 		token_pub = cli.publish(TOPIC, msg2);
-		CPPUNIT_ASSERT(nullptr != token_pub);
+		CPPUNIT_ASSERT(token_pub);
 
 		// NOTE: Only tokens for messages with QOS=1 and QOS=2 are kept. That's
 		// why the vector's size does not account for QOS=0 message tokens
@@ -452,7 +462,7 @@ public:
 		CPPUNIT_ASSERT_EQUAL(2, static_cast<int>(tokens_pending.size()));
 
 		mqtt::itoken_ptr token_disconn { cli.disconnect() };
-		CPPUNIT_ASSERT(nullptr != token_disconn);
+		CPPUNIT_ASSERT(token_disconn);
 		token_disconn->wait_for_completion();
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 	}
@@ -466,17 +476,17 @@ public:
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::itoken_ptr token_conn { cli.connect() };
-		CPPUNIT_ASSERT(nullptr != token_conn);
+		CPPUNIT_ASSERT(token_conn);
 		token_conn->wait_for_completion();
 		CPPUNIT_ASSERT(cli.is_connected());
 
 		mqtt::message_ptr msg { mqtt::make_message(PAYLOAD) };
 		mqtt::idelivery_token_ptr token_pub { cli.publish(TOPIC, msg) };
-		CPPUNIT_ASSERT(nullptr != token_pub);
+		CPPUNIT_ASSERT(token_pub);
 		token_pub->wait_for_completion(TIMEOUT);
 
 		mqtt::itoken_ptr token_disconn { cli.disconnect() };
-		CPPUNIT_ASSERT(nullptr != token_disconn);
+		CPPUNIT_ASSERT(token_disconn);
 		token_disconn->wait_for_completion();
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 	}
@@ -489,9 +499,10 @@ public:
 		try {
 			mqtt::message_ptr msg { mqtt::make_message(PAYLOAD) };
 			mqtt::idelivery_token_ptr token_pub { cli.publish(TOPIC, msg) };
-			CPPUNIT_ASSERT(nullptr != token_pub);
+			CPPUNIT_ASSERT(token_pub);
 			token_pub->wait_for_completion(TIMEOUT);
-		} catch (mqtt::exception& ex) {
+		}
+		catch (mqtt::exception& ex) {
 			reason_code = ex.get_reason_code();
 		}
 		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_DISCONNECTED, reason_code);
@@ -502,19 +513,19 @@ public:
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::itoken_ptr token_conn { cli.connect() };
-		CPPUNIT_ASSERT(nullptr != token_conn);
+		CPPUNIT_ASSERT(token_conn);
 		token_conn->wait_for_completion();
 		CPPUNIT_ASSERT(cli.is_connected());
 
 		mqtt::message_ptr msg { mqtt::make_message(PAYLOAD) };
 		mqtt::test::dummy_action_listener listener;
 		mqtt::idelivery_token_ptr token_pub { cli.publish(TOPIC, msg, &CONTEXT, listener) };
-		CPPUNIT_ASSERT(nullptr != token_pub);
+		CPPUNIT_ASSERT(token_pub);
 		token_pub->wait_for_completion(TIMEOUT);
 		CPPUNIT_ASSERT_EQUAL(CONTEXT, *static_cast<int*>(token_pub->get_user_context()));
 
 		mqtt::itoken_ptr token_disconn { cli.disconnect() };
-		CPPUNIT_ASSERT(nullptr != token_disconn);
+		CPPUNIT_ASSERT(token_disconn);
 		token_disconn->wait_for_completion();
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 	}
@@ -528,9 +539,10 @@ public:
 			mqtt::message_ptr msg { mqtt::make_message(PAYLOAD) };
 			mqtt::test::dummy_action_listener listener;
 			mqtt::idelivery_token_ptr token_pub { cli.publish(TOPIC, msg, &CONTEXT, listener) };
-			CPPUNIT_ASSERT(nullptr != token_pub);
+			CPPUNIT_ASSERT(token_pub);
 			token_pub->wait_for_completion(TIMEOUT);
-		} catch (mqtt::exception& ex) {
+		}
+		catch (mqtt::exception& ex) {
 			reason_code = ex.get_reason_code();
 		}
 		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_DISCONNECTED, reason_code);
@@ -541,18 +553,18 @@ public:
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::itoken_ptr token_conn { cli.connect() };
-		CPPUNIT_ASSERT(nullptr != token_conn);
+		CPPUNIT_ASSERT(token_conn);
 		token_conn->wait_for_completion();
 		CPPUNIT_ASSERT(cli.is_connected());
 
 		const void* payload { PAYLOAD.c_str() };
 		const size_t payload_size { PAYLOAD.size() };
 		mqtt::idelivery_token_ptr token_pub { cli.publish(TOPIC, payload, payload_size, GOOD_QOS, RETAINED) };
-		CPPUNIT_ASSERT(nullptr != token_pub);
+		CPPUNIT_ASSERT(token_pub);
 		token_pub->wait_for_completion(TIMEOUT);
 
 		mqtt::itoken_ptr token_disconn { cli.disconnect() };
-		CPPUNIT_ASSERT(nullptr != token_disconn);
+		CPPUNIT_ASSERT(token_disconn);
 		token_disconn->wait_for_completion();
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 	}
@@ -562,7 +574,7 @@ public:
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::itoken_ptr token_conn { cli.connect() };
-		CPPUNIT_ASSERT(nullptr != token_conn);
+		CPPUNIT_ASSERT(token_conn);
 		token_conn->wait_for_completion();
 		CPPUNIT_ASSERT(cli.is_connected());
 
@@ -570,12 +582,12 @@ public:
 		const size_t payload_size { PAYLOAD.size() };
 		mqtt::test::dummy_action_listener listener;
 		mqtt::idelivery_token_ptr token_pub { cli.publish(TOPIC, payload, payload_size, GOOD_QOS, RETAINED, &CONTEXT, listener) };
-		CPPUNIT_ASSERT(nullptr != token_pub);
+		CPPUNIT_ASSERT(token_pub);
 		token_pub->wait_for_completion(TIMEOUT);
 		CPPUNIT_ASSERT_EQUAL(CONTEXT, *static_cast<int*>(token_pub->get_user_context()));
 
 		mqtt::itoken_ptr token_disconn { cli.disconnect() };
-		CPPUNIT_ASSERT(nullptr != token_disconn);
+		CPPUNIT_ASSERT(token_disconn);
 		token_disconn->wait_for_completion();
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 	}
@@ -603,16 +615,16 @@ public:
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::itoken_ptr token_conn { cli.connect() };
-		CPPUNIT_ASSERT(nullptr != token_conn);
+		CPPUNIT_ASSERT(token_conn);
 		token_conn->wait_for_completion();
 		CPPUNIT_ASSERT(cli.is_connected());
 
 		mqtt::itoken_ptr token_sub { cli.subscribe(TOPIC, GOOD_QOS) };
-		CPPUNIT_ASSERT(nullptr != token_sub);
+		CPPUNIT_ASSERT(token_sub);
 		token_sub->wait_for_completion(TIMEOUT);
 
 		mqtt::itoken_ptr token_disconn { cli.disconnect() };
-		CPPUNIT_ASSERT(nullptr != token_disconn);
+		CPPUNIT_ASSERT(token_disconn);
 		token_disconn->wait_for_completion();
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 	}
@@ -624,9 +636,10 @@ public:
 		int reason_code = MQTTASYNC_SUCCESS;
 		try {
 			mqtt::itoken_ptr token_sub { cli.subscribe(TOPIC, BAD_QOS) };
-			CPPUNIT_ASSERT(nullptr != token_sub);
+			CPPUNIT_ASSERT(token_sub);
 			token_sub->wait_for_completion(TIMEOUT);
-		} catch (mqtt::exception& ex) {
+		}
+		catch (mqtt::exception& ex) {
 			reason_code = ex.get_reason_code();
 		}
 		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_DISCONNECTED, reason_code);
@@ -637,18 +650,18 @@ public:
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::itoken_ptr token_conn { cli.connect() };
-		CPPUNIT_ASSERT(nullptr != token_conn);
+		CPPUNIT_ASSERT(token_conn);
 		token_conn->wait_for_completion();
 		CPPUNIT_ASSERT(cli.is_connected());
 
 		mqtt::test::dummy_action_listener listener;
 		mqtt::itoken_ptr token_sub { cli.subscribe(TOPIC, GOOD_QOS, &CONTEXT, listener) };
-		CPPUNIT_ASSERT(nullptr != token_sub);
+		CPPUNIT_ASSERT(token_sub);
 		token_sub->wait_for_completion(TIMEOUT);
 		CPPUNIT_ASSERT_EQUAL(CONTEXT, *static_cast<int*>(token_sub->get_user_context()));
 
 		mqtt::itoken_ptr token_disconn { cli.disconnect() };
-		CPPUNIT_ASSERT(nullptr != token_disconn);
+		CPPUNIT_ASSERT(token_disconn);
 		token_disconn->wait_for_completion();
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 	}
@@ -661,9 +674,10 @@ public:
 		try {
 			mqtt::test::dummy_action_listener listener;
 			mqtt::itoken_ptr token_sub { cli.subscribe(TOPIC, BAD_QOS, &CONTEXT, listener) };
-			CPPUNIT_ASSERT(nullptr != token_sub);
+			CPPUNIT_ASSERT(token_sub);
 			token_sub->wait_for_completion(TIMEOUT);
-		} catch (mqtt::exception& ex) {
+		}
+		catch (mqtt::exception& ex) {
 			reason_code = ex.get_reason_code();
 		}
 		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_DISCONNECTED, reason_code);
@@ -674,16 +688,16 @@ public:
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::itoken_ptr token_conn { cli.connect() };
-		CPPUNIT_ASSERT(nullptr != token_conn);
+		CPPUNIT_ASSERT(token_conn);
 		token_conn->wait_for_completion();
 		CPPUNIT_ASSERT(cli.is_connected());
 
 		mqtt::itoken_ptr token_sub { cli.subscribe(TOPIC_COLL, GOOD_QOS_COLL) };
-		CPPUNIT_ASSERT(nullptr != token_sub);
+		CPPUNIT_ASSERT(token_sub);
 		token_sub->wait_for_completion(TIMEOUT);
 
 		mqtt::itoken_ptr token_disconn { cli.disconnect() };
-		CPPUNIT_ASSERT(nullptr != token_disconn);
+		CPPUNIT_ASSERT(token_disconn);
 		token_disconn->wait_for_completion();
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 	}
@@ -694,16 +708,18 @@ public:
 
 		try {
 			mqtt::itoken_ptr token_sub { cli.subscribe(TOPIC_COLL, BAD_QOS_COLL) };
-			CPPUNIT_ASSERT(nullptr != token_sub);
+			CPPUNIT_ASSERT(token_sub);
 			token_sub->wait_for_completion(TIMEOUT);
-		} catch (std::invalid_argument& ex) {}
+		}
+		catch (std::invalid_argument& ex) {}
 
 		int reason_code = MQTTASYNC_SUCCESS;
 		try {
 			mqtt::itoken_ptr token_sub { cli.subscribe(TOPIC_COLL, GOOD_QOS_COLL) };
-			CPPUNIT_ASSERT(nullptr != token_sub);
+			CPPUNIT_ASSERT(token_sub);
 			token_sub->wait_for_completion(TIMEOUT);
-		} catch (mqtt::exception& ex) {
+		}
+		catch (mqtt::exception& ex) {
 			reason_code = ex.get_reason_code();
 		}
 		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_DISCONNECTED, reason_code);
@@ -714,18 +730,18 @@ public:
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::itoken_ptr token_conn { cli.connect() };
-		CPPUNIT_ASSERT(nullptr != token_conn);
+		CPPUNIT_ASSERT(token_conn);
 		token_conn->wait_for_completion();
 		CPPUNIT_ASSERT(cli.is_connected());
 
 		mqtt::test::dummy_action_listener listener;
 		mqtt::itoken_ptr token_sub { cli.subscribe(TOPIC_COLL, GOOD_QOS_COLL, &CONTEXT, listener) };
-		CPPUNIT_ASSERT(nullptr != token_sub);
+		CPPUNIT_ASSERT(token_sub);
 		token_sub->wait_for_completion(TIMEOUT);
 		CPPUNIT_ASSERT_EQUAL(CONTEXT, *static_cast<int*>(token_sub->get_user_context()));
 
 		mqtt::itoken_ptr token_disconn { cli.disconnect() };
-		CPPUNIT_ASSERT(nullptr != token_disconn);
+		CPPUNIT_ASSERT(token_disconn);
 		token_disconn->wait_for_completion();
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 	}
@@ -738,16 +754,18 @@ public:
 
 		try {
 			mqtt::itoken_ptr token_sub { cli.subscribe(TOPIC_COLL, BAD_QOS_COLL, &CONTEXT, listener) };
-			CPPUNIT_ASSERT(nullptr != token_sub);
+			CPPUNIT_ASSERT(token_sub);
 			token_sub->wait_for_completion(TIMEOUT);
-		} catch (std::invalid_argument& ex) {}
+		}
+		catch (std::invalid_argument& ex) {}
 
 		int reason_code = MQTTASYNC_SUCCESS;
 		try {
 			mqtt::itoken_ptr token_sub { cli.subscribe(TOPIC_COLL, GOOD_QOS_COLL, &CONTEXT, listener) };
-			CPPUNIT_ASSERT(nullptr != token_sub);
+			CPPUNIT_ASSERT(token_sub);
 			token_sub->wait_for_completion(TIMEOUT);
-		} catch (mqtt::exception& ex) {
+		}
+		catch (mqtt::exception& ex) {
 			reason_code = ex.get_reason_code();
 		}
 		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_DISCONNECTED, reason_code);
@@ -762,16 +780,16 @@ public:
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::itoken_ptr token_conn { cli.connect() };
-		CPPUNIT_ASSERT(nullptr != token_conn);
+		CPPUNIT_ASSERT(token_conn);
 		token_conn->wait_for_completion();
 		CPPUNIT_ASSERT(cli.is_connected());
 
 		mqtt::itoken_ptr token_unsub { cli.unsubscribe(TOPIC) };
-		CPPUNIT_ASSERT(nullptr != token_unsub);
+		CPPUNIT_ASSERT(token_unsub);
 		token_unsub->wait_for_completion(TIMEOUT);
 
 		mqtt::itoken_ptr token_disconn { cli.disconnect() };
-		CPPUNIT_ASSERT(nullptr != token_disconn);
+		CPPUNIT_ASSERT(token_disconn);
 		token_disconn->wait_for_completion();
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 	}
@@ -783,9 +801,10 @@ public:
 		int reason_code = MQTTASYNC_SUCCESS;
 		try {
 			mqtt::itoken_ptr token_unsub { cli.unsubscribe(TOPIC) };
-			CPPUNIT_ASSERT(nullptr != token_unsub);
+			CPPUNIT_ASSERT(token_unsub);
 			token_unsub->wait_for_completion(TIMEOUT);
-		} catch (mqtt::exception& ex) {
+		}
+		catch (mqtt::exception& ex) {
 			reason_code = ex.get_reason_code();
 		}
 		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_DISCONNECTED, reason_code);
@@ -796,18 +815,18 @@ public:
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::itoken_ptr token_conn { cli.connect() };
-		CPPUNIT_ASSERT(nullptr != token_conn);
+		CPPUNIT_ASSERT(token_conn);
 		token_conn->wait_for_completion();
 		CPPUNIT_ASSERT(cli.is_connected());
 
 		mqtt::test::dummy_action_listener listener;
 		mqtt::itoken_ptr token_unsub { cli.unsubscribe(TOPIC, &CONTEXT, listener) };
-		CPPUNIT_ASSERT(nullptr != token_unsub);
+		CPPUNIT_ASSERT(token_unsub);
 		token_unsub->wait_for_completion(TIMEOUT);
 		CPPUNIT_ASSERT_EQUAL(CONTEXT, *static_cast<int*>(token_unsub->get_user_context()));
 
 		mqtt::itoken_ptr token_disconn { cli.disconnect() };
-		CPPUNIT_ASSERT(nullptr != token_disconn);
+		CPPUNIT_ASSERT(token_disconn);
 		token_disconn->wait_for_completion();
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 	}
@@ -820,9 +839,10 @@ public:
 		try {
 			mqtt::test::dummy_action_listener listener;
 			mqtt::itoken_ptr token_unsub { cli.unsubscribe(TOPIC, &CONTEXT, listener) };
-			CPPUNIT_ASSERT(nullptr != token_unsub);
+			CPPUNIT_ASSERT(token_unsub);
 			token_unsub->wait_for_completion(TIMEOUT);
-		} catch (mqtt::exception& ex) {
+		}
+		catch (mqtt::exception& ex) {
 			reason_code = ex.get_reason_code();
 		}
 		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_DISCONNECTED, reason_code);
@@ -833,16 +853,16 @@ public:
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::itoken_ptr token_conn { cli.connect() };
-		CPPUNIT_ASSERT(nullptr != token_conn);
+		CPPUNIT_ASSERT(token_conn);
 		token_conn->wait_for_completion();
 		CPPUNIT_ASSERT(cli.is_connected());
 
 		mqtt::itoken_ptr token_unsub { cli.unsubscribe(TOPIC_COLL) };
-		CPPUNIT_ASSERT(nullptr != token_unsub);
+		CPPUNIT_ASSERT(token_unsub);
 		token_unsub->wait_for_completion(TIMEOUT);
 
 		mqtt::itoken_ptr token_disconn { cli.disconnect() };
-		CPPUNIT_ASSERT(nullptr != token_disconn);
+		CPPUNIT_ASSERT(token_disconn);
 		token_disconn->wait_for_completion();
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 	}
@@ -854,9 +874,10 @@ public:
 		int reason_code = MQTTASYNC_SUCCESS;
 		try {
 			mqtt::itoken_ptr token_unsub { cli.unsubscribe(TOPIC_COLL) };
-			CPPUNIT_ASSERT(nullptr != token_unsub);
+			CPPUNIT_ASSERT(token_unsub);
 			token_unsub->wait_for_completion(TIMEOUT);
-		} catch (mqtt::exception& ex) {
+		}
+		catch (mqtt::exception& ex) {
 			reason_code = ex.get_reason_code();
 		}
 		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_DISCONNECTED, reason_code);
@@ -867,18 +888,18 @@ public:
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::itoken_ptr token_conn { cli.connect() };
-		CPPUNIT_ASSERT(nullptr != token_conn);
+		CPPUNIT_ASSERT(token_conn);
 		token_conn->wait_for_completion();
 		CPPUNIT_ASSERT(cli.is_connected());
 
 		mqtt::test::dummy_action_listener listener;
 		mqtt::itoken_ptr token_unsub { cli.unsubscribe(TOPIC_COLL, &CONTEXT, listener) };
-		CPPUNIT_ASSERT(nullptr != token_unsub);
+		CPPUNIT_ASSERT(token_unsub);
 		token_unsub->wait_for_completion(TIMEOUT);
 		CPPUNIT_ASSERT_EQUAL(CONTEXT, *static_cast<int*>(token_unsub->get_user_context()));
 
 		mqtt::itoken_ptr token_disconn { cli.disconnect() };
-		CPPUNIT_ASSERT(nullptr != token_disconn);
+		CPPUNIT_ASSERT(token_disconn);
 		token_disconn->wait_for_completion();
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 	}
@@ -891,9 +912,10 @@ public:
 		int reason_code = MQTTASYNC_SUCCESS;
 		try {
 			mqtt::itoken_ptr token_unsub { cli.unsubscribe(TOPIC_COLL, &CONTEXT, listener) };
-			CPPUNIT_ASSERT(nullptr != token_unsub);
+			CPPUNIT_ASSERT(token_unsub);
 			token_unsub->wait_for_completion(TIMEOUT);
-		} catch (mqtt::exception& ex) {
+		}
+		catch (mqtt::exception& ex) {
 			reason_code = ex.get_reason_code();
 		}
 		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_DISCONNECTED, reason_code);
@@ -906,3 +928,4 @@ public:
 }
 
 #endif //  __mqtt_async_client_test_h
+

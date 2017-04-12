@@ -92,8 +92,8 @@ class client_test : public CppUnit::TestFixture
 	mqtt::client::qos_collection GOOD_QOS_COLL { 0, 1, 2 };
 	mqtt::client::qos_collection BAD_QOS_COLL  { BAD_QOS };
 	const std::string PAYLOAD { "PAYLOAD" };
-	const int TIMEOUT { 1000 };
-	int CONTEXT { 4 };
+	//const int TIMEOUT { 1000 };
+	//int CONTEXT { 4 };
 	mqtt::test::dummy_action_listener listener;
 	const bool RETAINED { false };
 
