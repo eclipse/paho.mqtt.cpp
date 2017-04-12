@@ -36,6 +36,7 @@ public:
 	disconnect_options();
 	/**
 	 * Creates disconnect options tied to the specific delivery token.
+	 * @param timeout The timeout (in milliseconds).
 	 * @param tok A token to be used as the context.
 	 */
 	disconnect_options(int timeout, token* tok);
