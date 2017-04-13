@@ -12,7 +12,10 @@
 # is rather meant to be a quick test to use during development.
 #
 
-for COMPILER in g++-4.8 g++-4.9 g++-5 g++-6 clang++-3.6 clang++-3.8
+COMPILERS="g++-4.8 g++-4.9 g++-5 g++-6 clang++-3.6 clang++-3.8"
+[ -n "$1" ] && COMPILERS=$1
+
+for COMPILER in $COMPILERS
 do
     if [ -z "$(which ${COMPILER})" ]; then
         printf "Compiler not found: %s\n" "${COMPILER}"

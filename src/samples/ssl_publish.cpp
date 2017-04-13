@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2017 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,6 +13,15 @@
  * Contributors:
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
+
+// We can test this using mosquitto configured with certificates in the
+// Paho C library. The C library has an SSL/TSL test suite, and we can use
+// that to test:
+//     mosquitto -c paho.mqtt.c/test/tls-testing/mosquitto.conf
+//
+// Then use the file "test-root-ca.crt" from that directory
+// (paho.mqtt.c/test/tls-testing) for the trust store for this program.
+//
 
 #include <iostream>
 #include <cstdlib>
