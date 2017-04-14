@@ -36,6 +36,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <chrono>
 
 namespace mqtt {
 
@@ -122,11 +123,11 @@ public:
 	 */
 	connect_options& operator=(connect_options&& opt);
 	/**
-	 * Returns the "keep alive" interval.
-	 * @return int
+	 * Gets the "keep alive" interval.
+	 * @return The keep alive interval in seconds.
 	 */
-	int get_keep_alive_interval() const {
-		return opts_.keepAliveInterval;
+	std::chrono::seconds get_keep_alive_interval() const {
+		return std::chrono::seconds(opts_.keepAliveInterval);
 	}
 	/**
 	 * Gets the user name to use for the connection.
@@ -171,13 +172,20 @@ public:
 	 * @return The LWT options to use for the connection.
 	 */
 	const will_options& get_will_options() const { return will_; }
-#if defined(OPENSSL)
-	/**
-	 * Get the SSL options to use for the connection.
-	 * @return The SSL options to use for the connection.
-	 */
-	const ssl_options& get_ssl_options() const { return ssl_; }
-#endif
+
+	#if defined(OPENSSL)
+		/**
+		 * Get the SSL options to use for the connection.
+		 * @return The SSL options to use for the connection.
+		 */
+		 const ssl_options& get_ssl_options() const { return ssl_; }
+		 /**
+		  * Sets the SSL for the connection.
+		  * @param ssl The SSL options.
+		  */
+		 void set_ssl(const ssl_options& ssl);
+	#endif
+
 	/**
 	 * Returns whether the server should remember state for the client
 	 * across reconnects.
@@ -210,10 +218,24 @@ public:
 	}
 	/**
 	 * Sets the "keep alive" interval.
-	 * @param keepAliveInterval
+	 * This is the maximum time that should pass without communications
+	 * between client and server. If no massages pass in this time, the
+	 * client will ping the broker.
+	 * @param keepAliveInterval The keep alive interval in seconds.
 	 */
 	void set_keep_alive_interval(int keepAliveInterval) {
 		opts_.keepAliveInterval = keepAliveInterval;
+	}
+	/**
+	 * Sets the "keep alive" interval with a chrono duration.
+	 * This is the maximum time that should pass without communications
+	 * between client and server. If no massages pass in this time, the
+	 * client will ping the broker.
+	 * @param keepAliveInterval The keep alive interval.
+	 */
+	template <class Rep, class Period>
+	void set_keep_alive_interval(const std::chrono::duration<Rep, Period>& keepAliveInterval) {
+		set_keep_alive_interval((int) std::chrono::duration_cast<std::chrono::seconds>(keepAliveInterval).count());
 	}
 	/**
 	 * Sets the password to use for the connection.
@@ -242,13 +264,6 @@ public:
 	 * @param will The LWT options.
 	 */
 	void set_will(const will_options& will);
-#if defined(OPENSSL)
-	/**
-	 * Sets the SSL for the connection.
-	 * @param ssl The SSL options.
-	 */
-	void set_ssl(const ssl_options& ssl);
-#endif
 	/**
 	 * Sets the callback context to a delivery token.
 	 * @param tok The delivery token to be used as the callback context.
