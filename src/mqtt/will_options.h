@@ -26,6 +26,7 @@
 #define __mqtt_will_options_h
 
 #include "MQTTAsync.h"
+#include "mqtt/types.h"
 #include "mqtt/message.h"
 #include "mqtt/topic.h"
 #include <string>
@@ -47,6 +48,13 @@ class connect_options;
  */
 class will_options
 {
+	/** The default QoS for the LWT, if unspecified */
+	static constexpr int DFLT_QOS = 0;
+	/** The defalut retained flag for LWT, if unspecified */
+	static constexpr bool DFLT_RETAINED = false;
+	/** A default C struct to support re-initializing variables */
+	static constexpr MQTTAsync_willOptions DFLT_C_STRUCT MQTTAsync_willOptions_initializer;
+
 	/** The underlying C LWT options */
 	MQTTAsync_willOptions opts_;
 
@@ -54,10 +62,7 @@ class will_options
 	std::string topic_;
 
 	/** LWT message text */
-	std::string payload_;
-
-	/** A default C struct to support re-initializing variables */
-	static const MQTTAsync_willOptions DFLT_C_WILL;
+	byte_buffer payload_;
 
 	/** The connect options has special access */
 	friend class connect_options;
@@ -97,7 +102,7 @@ public:
 	 *  			   subscribers.
 	 */
 	will_options(const std::string& top, const void *payload, size_t payload_len,
-				 int qos, bool retained);
+				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED);
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
 	 * @param top The LWT message is published to the this topic.
@@ -108,7 +113,7 @@ public:
 	 *  			   subscribers.
 	 */
 	will_options(const topic& top, const void *payload, size_t payload_len,
-				 int qos, bool retained);
+				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED);
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
 	 * @param top The LWT message is published to the this topic.
@@ -118,8 +123,19 @@ public:
 	 * @param retained Tell the broker to keep the LWT message after send to
 	 *  			   subscribers.
 	 */
+	will_options(const std::string& top, byte_buffer payload,
+				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED);
+	/**
+	 * Sets the "Last Will and Testament" (LWT) for the connection.
+	 * @param top The LWT message is published to the this topic.
+	 * @param payload The message payload that is published to the Will
+	 *  			  Topic, as a string.
+	 * @param qos The message Quality of Service.
+	 * @param retained Tell the broker to keep the LWT message after send to
+	 *  			   subscribers.
+	 */
 	will_options(const std::string& top, const std::string& payload,
-				 int qos, bool retained);
+				 int qos=DFLT_QOS, bool retained=DFLT_QOS);
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
 	 * @param top The LWT message is published to the this topic.
@@ -155,7 +171,15 @@ public:
 	 * Returns the LWT message payload.
 	 * @return The LWT message payload.
 	 */
-	std::string get_payload() const { return payload_; }
+	const byte_buffer& get_payload() const { return payload_; }
+	/**
+	 * Returns the LWT message payload as a string.
+	 * @return The LWT message payload as a string.
+	 */
+	std::string get_payload_str() const {
+		return std::string(reinterpret_cast<const char*>(payload_.data()),
+						   payload_.size());
+	}
 	/**
 	 * Gets the QoS value for the LWT message.
 	 * @return The QoS value for the LWT message.
@@ -173,7 +197,10 @@ public:
 	 * @return A copy of the LWT message.
 	 */
 	const_message_ptr get_message() const {
-		return make_message(payload_, opts_.qos, opts_.retained);
+		// TODO: restore this when message gets byte_buffer
+		//return make_message(payload_,
+		return make_message(std::string(reinterpret_cast<const char*>(payload_.data()), payload_.size()),
+							opts_.qos, opts_.retained);
 	}
 	/**
 	 * Sets the LWT message topic name.
@@ -184,7 +211,14 @@ public:
 	 * Sets the LWT message text.
 	 * @param msg The LWT message
 	 */
-	void set_payload(const std::string& msg);
+	void set_payload(byte_buffer msg);
+	/**
+	 * Sets the LWT message text.
+	 * @param msg The LWT message
+	 */
+	void set_payload(const std::string& msg) {
+		set_payload(to_buffer(msg));
+	}
 	/**
 	 * Sets the QoS value.
 	 * @param qos The LWT message QoS

@@ -286,7 +286,7 @@ public:
 	 *  	   token will be passed to callback methods if set.
 	 */
 	idelivery_token_ptr publish(const std::string& topic, const void* payload,
-										size_t n, int qos, bool retained) override;
+								size_t n, int qos, bool retained) override;
 	/**
 	 * Publishes a message to a topic on the server
 	 * @param topic The topic to deliver the message to
@@ -303,9 +303,9 @@ public:
 	 *  	   token will be passed to callback methods if set.
 	 */
 	idelivery_token_ptr publish(const std::string& topic,
-										const void* payload, size_t n,
-										int qos, bool retained, void* userContext,
-										iaction_listener& cb) override;
+								const void* payload, size_t n,
+								int qos, bool retained, void* userContext,
+								iaction_listener& cb) override;
 	/**
 	 * Publishes a message to a topic on the server Takes an Message
 	 * message and delivers it to the server at the requested quality of
@@ -329,7 +329,7 @@ public:
 	 *  	   token will be passed to callback methods if set.
 	 */
 	idelivery_token_ptr publish(const std::string& topic, const_message_ptr msg,
-										void* userContext, iaction_listener& cb) override;
+								void* userContext, iaction_listener& cb) override;
 	/**
 	 * Sets a callback listener to use for events that happen
 	 * asynchronously.
@@ -348,7 +348,7 @@ public:
 	 *  	   The token will be passed to callback methods if set.
 	 */
 	itoken_ptr subscribe(const topic_filter_collection& topicFilters,
-								 const qos_collection& qos) override;
+						 const qos_collection& qos) override;
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
 	 * @param topicFilters
@@ -364,8 +364,8 @@ public:
 	 *  	   The token will be passed to callback methods if set.
 	 */
 	itoken_ptr subscribe(const topic_filter_collection& topicFilters,
-								 const qos_collection& qos,
-								 void* userContext, iaction_listener& cb) override;
+						 const qos_collection& qos,
+						 void* userContext, iaction_listener& cb) override;
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 * @param topicFilter the topic to subscribe to, which can include
@@ -392,7 +392,7 @@ public:
 	 *  	   The token will be passed to callback methods if set.
 	 */
 	itoken_ptr subscribe(const std::string& topicFilter, int qos,
-								 void* userContext, iaction_listener& cb) override;
+						 void* userContext, iaction_listener& cb) override;
 	/**
 	 * Requests the server unsubscribe the client from a topic.
 	 * @param topicFilter the topic to unsubscribe from. It must match a
@@ -421,7 +421,7 @@ public:
 	 *  	   The token will be passed to callback methods if set.
 	 */
 	itoken_ptr unsubscribe(const topic_filter_collection& topicFilters,
-								   void* userContext, iaction_listener& cb) override;
+						   void* userContext, iaction_listener& cb) override;
 	/**
 	 * Requests the server unsubscribe the client from a topics.
 	 * @param topicFilter the topic to unsubscribe from. It must match a
@@ -434,7 +434,7 @@ public:
 	 *  	   The token will be passed to callback methods if set.
 	 */
 	itoken_ptr unsubscribe(const std::string& topicFilter,
-								   void* userContext, iaction_listener& cb) override;
+						   void* userContext, iaction_listener& cb) override;
 };
 
 /** Smart/shared pointer to an asynchronous MQTT client object */

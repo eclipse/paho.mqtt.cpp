@@ -25,22 +25,19 @@
 #define __mqtt_connect_options_h
 
 #include "MQTTAsync.h"
+#include "mqtt/types.h"
 #include "mqtt/message.h"
 #include "mqtt/topic.h"
 #include "mqtt/will_options.h"
-#if defined(OPENSSL)
-#include "mqtt/ssl_options.h"
-#endif
 #include "mqtt/token.h"
+#if defined(OPENSSL)
+	#include "mqtt/ssl_options.h"
+#endif
 #include <string>
 #include <vector>
 #include <memory>
 
 namespace mqtt {
-
-class async_client;
-class connect_options_test;
-class token_test;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -56,16 +53,16 @@ class connect_options
 	/** The LWT options */
 	will_options will_;
 
-#if defined(OPENSSL)
-	/** The SSL options  */
-	ssl_options ssl_;
-#endif
+	#if defined(OPENSSL)
+		/** The SSL options  */
+		ssl_options ssl_;
+	#endif
 
 	/** The user name to use for the connection. */
 	std::string userName_;
 
 	/** The password to use for the connection. */
-	std::string password_;
+	byte_buffer password_;
 
 	/** Shared token pointer for context, if any */
 	const_token_ptr tok_;
@@ -76,13 +73,13 @@ class connect_options
 	friend class token_test;
 
 	/**
-	 * Gets a pointer to the C-language NUL-terminated strings for the 
-	 * struct. 
-	 * @note In the connect options, by default, the Paho C treats 
-	 * nullptr char arrays as unset values, so we keep that semantic and 
-	 * only set those char arrays if the string is non-empty. 
-	 * @param str The C++ string object. 
-	 * @return Pointer to a NUL terminated string. This is only valid until 
+	 * Gets a pointer to the C-language NUL-terminated strings for the
+	 * struct.
+	 * @note In the connect options, by default, the Paho C treats
+	 * nullptr char arrays as unset values, so we keep that semantic and
+	 * only set those char arrays if the string is non-empty.
+	 * @param str The C++ string object.
+	 * @return Pointer to a NUL terminated string. This is only valid until
 	 *  	   the next time the string is updated.
 	 */
 	const char* c_str(const std::string& str) {
@@ -140,7 +137,21 @@ public:
 	 * Gets the password to use for the connection.
 	 * @return The password to use for the connection.
 	 */
-	const std::string& get_password() const { return password_; }
+	const byte_buffer& get_password() const { return password_; }
+	/**
+	 * Gets the password to use for the connection.
+	 * @return The password to use for the connection.
+	 */
+	std::string get_password_str() const {
+		return std::string(reinterpret_cast<const char*>(password_.data()),
+						   password_.size());
+	}
+	/**
+	 * Gets the maximum number of messages that can be in-flight
+	 * simultaneously.
+	 * @return The maximum number of inflight messages.
+	 */
+	int get_max_inflight() const { return opts_.maxInflight; }
 	/**
 	 * Gets the topic to be used for last will and testament (LWT).
 	 * @return The topic to be used for last will and testament (LWT).
@@ -207,12 +218,25 @@ public:
 	/**
 	 * Sets the password to use for the connection.
 	 */
-	void set_password(const std::string& password);
+	void set_password(const byte_buffer& password);
+	/**
+	 * Sets the password to use for the connection.
+	 */
+	void set_password(const std::string& password) {
+		set_password(byte_buffer(reinterpret_cast<const byte*>(password.data()),
+								 password.size()));
+	}
 	/**
 	 * Sets the user name to use for the connection.
 	 * @param userName
 	 */
 	void set_user_name(const std::string& userName);
+	/**
+	 * Sets the maximum number of messages that can be in-flight
+	 * simultaneously.
+	 * @param n The maximum number of inflight messages.
+	 */
+	void set_max_inflight(int n) { opts_.maxInflight = n; }
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
 	 * @param will The LWT options.

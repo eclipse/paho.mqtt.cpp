@@ -33,6 +33,12 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
+// Note that at this time, the LWT payload has been converted to binary
+// from the previous version's use of a text string (NUL-terminated C str).
+// We now fill in the 'payload' fields of the underlying C struct,
+// MQTTAsync_willOptions. The 'message' field _must_ stay NULL for the C lib
+// to use 'payload'.
+
 class will_options_test : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE( will_options_test );
@@ -52,8 +58,8 @@ class will_options_test : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE_END();
 
 	const std::string EMPTY_STR;
-	const int DFLT_QOS = 0;
-	const bool DFLT_RETAINED = false;
+	const int DFLT_QOS = will_options::DFLT_QOS;
+	const bool DFLT_RETAINED = will_options::DFLT_RETAINED;
 
 	// C struct signature/eyecatcher
 	const char* CSIG = "MQTW";
@@ -80,16 +86,20 @@ public:
 
 	void test_dflt_constructor() {
 		mqtt::will_options opts;
-		const MQTTAsync_willOptions& c_struct = opts.opts_;
+
+		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, opts.get_topic());
+		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, opts.get_payload_str());
+		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, opts.get_qos());
+		CPPUNIT_ASSERT_EQUAL(DFLT_RETAINED, opts.is_retained());
+
+		// Test the C struct
+		const auto& c_struct = opts.opts_;
 
 		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
 		CPPUNIT_ASSERT(c_struct.topicName == nullptr);
 		CPPUNIT_ASSERT(c_struct.message == nullptr);
-
-		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, opts.get_topic());
-		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, opts.get_payload());
-		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, opts.get_qos());
-		CPPUNIT_ASSERT_EQUAL(DFLT_RETAINED, opts.is_retained());
+		CPPUNIT_ASSERT_EQUAL(0, c_struct.payload.len);
+		CPPUNIT_ASSERT(c_struct.payload.data == nullptr);
 	}
 
 // ----------------------------------------------------------------------
@@ -101,16 +111,21 @@ public:
 		mqtt::topic topic { TOPIC, cli };
 
 		mqtt::will_options opts(topic, BUF, N, QOS, true);
-		const MQTTAsync_willOptions& c_struct = opts.opts_;
+
+		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload_str());
+		CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
+		CPPUNIT_ASSERT_EQUAL(RETAINED, opts.is_retained());
+
+		// Test the C struct
+		// Remember we now fill payload fields, not message
+		const auto& c_struct = opts.opts_;
 
 		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
 		CPPUNIT_ASSERT(!strcmp(c_struct.topicName, TOPIC.c_str()));
-		CPPUNIT_ASSERT(!strcmp(c_struct.message, PAYLOAD.c_str()));
-
-		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload());
-		CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
-		CPPUNIT_ASSERT_EQUAL(RETAINED, opts.is_retained());
+		CPPUNIT_ASSERT(c_struct.message == nullptr);
+		CPPUNIT_ASSERT_EQUAL(N, size_t(c_struct.payload.len));
+		CPPUNIT_ASSERT(!memcmp(BUF, c_struct.payload.data, N));
 	}
 
 // ----------------------------------------------------------------------
@@ -119,16 +134,20 @@ public:
 
 	void test_topic_buf_constructor() {
 		mqtt::will_options opts(TOPIC, BUF, N, QOS, true);
-		MQTTAsync_willOptions& c_struct = opts.opts_;
+
+		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload_str());
+		CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
+		CPPUNIT_ASSERT_EQUAL(RETAINED, opts.is_retained());
+
+		// Test the C struct
+		const auto& c_struct = opts.opts_;
 
 		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
 		CPPUNIT_ASSERT(!strcmp(c_struct.topicName, TOPIC.c_str()));
-		CPPUNIT_ASSERT(!strcmp(c_struct.message, PAYLOAD.c_str()));
-
-		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload());
-		CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
-		CPPUNIT_ASSERT_EQUAL(RETAINED, opts.is_retained());
+		CPPUNIT_ASSERT(c_struct.message == nullptr);
+		CPPUNIT_ASSERT_EQUAL(N, size_t(c_struct.payload.len));
+		CPPUNIT_ASSERT(!memcmp(BUF, c_struct.payload.data, N));
 	}
 
 // ----------------------------------------------------------------------
@@ -137,16 +156,20 @@ public:
 
 	void test_string_string_constructor() {
 		mqtt::will_options opts(TOPIC, PAYLOAD, QOS, true);
-		MQTTAsync_willOptions& c_struct = opts.opts_;
+
+		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload_str());
+		CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
+		CPPUNIT_ASSERT_EQUAL(RETAINED, opts.is_retained());
+
+		// Test the C struct
+		const auto& c_struct = opts.opts_;
 
 		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
 		CPPUNIT_ASSERT(!strcmp(c_struct.topicName, TOPIC.c_str()));
-		CPPUNIT_ASSERT(!strcmp(c_struct.message, PAYLOAD.c_str()));
-
-		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload());
-		CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
-		CPPUNIT_ASSERT_EQUAL(RETAINED, opts.is_retained());
+		CPPUNIT_ASSERT(c_struct.message == nullptr);
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD.size(), size_t(c_struct.payload.len));
+		CPPUNIT_ASSERT(!memcmp(PAYLOAD.data(), c_struct.payload.data, PAYLOAD.size()));
 	}
 
 // ----------------------------------------------------------------------
@@ -156,16 +179,20 @@ public:
 	void test_string_message_constructor() {
 		mqtt::message msg(PAYLOAD, QOS, true);
 		mqtt::will_options opts(TOPIC, msg);
-		MQTTAsync_willOptions& c_struct = opts.opts_;
+
+		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload_str());
+		CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
+		CPPUNIT_ASSERT_EQUAL(RETAINED, opts.is_retained());
+
+		// Test the C struct
+		const auto& c_struct = opts.opts_;
 
 		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
 		CPPUNIT_ASSERT(!strcmp(c_struct.topicName, TOPIC.c_str()));
-		CPPUNIT_ASSERT(!strcmp(c_struct.message, PAYLOAD.c_str()));
-
-		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload());
-		CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
-		CPPUNIT_ASSERT_EQUAL(RETAINED, opts.is_retained());
+		CPPUNIT_ASSERT(c_struct.message == nullptr);
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD.size(), size_t(c_struct.payload.len));
+		CPPUNIT_ASSERT(!memcmp(PAYLOAD.data(), c_struct.payload.data, PAYLOAD.size()));
 	}
 
 // ----------------------------------------------------------------------
@@ -174,16 +201,20 @@ public:
 
 	void test_copy_constructor() {
 		mqtt::will_options opts(orgOpts);
-		MQTTAsync_willOptions& c_struct = opts.opts_;
+
+		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload_str());
+		CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
+		CPPUNIT_ASSERT_EQUAL(RETAINED, opts.is_retained());
+
+		// Check the C struct
+		const auto& c_struct = opts.opts_;
 
 		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
 		CPPUNIT_ASSERT(!strcmp(c_struct.topicName, TOPIC.c_str()));
-		CPPUNIT_ASSERT(!strcmp(c_struct.message, PAYLOAD.c_str()));
-
-		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload());
-		CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
-		CPPUNIT_ASSERT_EQUAL(RETAINED, opts.is_retained());
+		CPPUNIT_ASSERT(c_struct.message == nullptr);
+		CPPUNIT_ASSERT_EQUAL(N, size_t(c_struct.payload.len));
+		CPPUNIT_ASSERT(!memcmp(BUF, c_struct.payload.data, N));
 
 		// Make sure it's a true copy, not linked to the original
 		orgOpts.set_topic(EMPTY_STR);
@@ -192,7 +223,7 @@ public:
 		orgOpts.set_retained(false);
 
 		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
 		CPPUNIT_ASSERT_EQUAL(RETAINED, opts.is_retained());
 	}
@@ -203,25 +234,30 @@ public:
 
 	void test_move_constructor() {
 		mqtt::will_options opts(std::move(orgOpts));
-		MQTTAsync_willOptions& c_struct = opts.opts_;
-
-		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
-		CPPUNIT_ASSERT(!strcmp(c_struct.topicName, TOPIC.c_str()));
-		CPPUNIT_ASSERT(!strcmp(c_struct.message, PAYLOAD.c_str()));
 
 		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
 		CPPUNIT_ASSERT_EQUAL(RETAINED, opts.is_retained());
 
+		// Check the C struct
+		const auto& c_struct = opts.opts_;
+
+		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
+		CPPUNIT_ASSERT(!strcmp(c_struct.topicName, TOPIC.c_str()));
+		CPPUNIT_ASSERT(c_struct.message == nullptr);
+		CPPUNIT_ASSERT_EQUAL(N, size_t(c_struct.payload.len));
+		CPPUNIT_ASSERT(!memcmp(BUF, c_struct.payload.data, N));
+
 		// Check that the original was moved
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_topic());
-		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_payload());
+		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, orgOpts.get_qos());
 		CPPUNIT_ASSERT_EQUAL(DFLT_RETAINED, orgOpts.is_retained());
 
 		CPPUNIT_ASSERT(orgOpts.opts_.topicName == nullptr);
-		CPPUNIT_ASSERT(orgOpts.opts_.message == nullptr);
+		CPPUNIT_ASSERT_EQUAL(0, orgOpts.opts_.payload.len);
+		CPPUNIT_ASSERT(orgOpts.opts_.payload.data == nullptr);
 	}
 
 // ----------------------------------------------------------------------
@@ -233,16 +269,19 @@ public:
 
 		opts = orgOpts;
 
-		MQTTAsync_willOptions& c_struct = opts.opts_;
+		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload_str());
+		CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
+		CPPUNIT_ASSERT_EQUAL(RETAINED, opts.is_retained());
+
+		// Check the C struct
+		const auto& c_struct = opts.opts_;
 
 		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
 		CPPUNIT_ASSERT(!strcmp(c_struct.topicName, TOPIC.c_str()));
-		CPPUNIT_ASSERT(!strcmp(c_struct.message, PAYLOAD.c_str()));
-
-		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload());
-		CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
-		CPPUNIT_ASSERT_EQUAL(RETAINED, opts.is_retained());
+		CPPUNIT_ASSERT(c_struct.message == nullptr);
+		CPPUNIT_ASSERT_EQUAL(N, size_t(c_struct.payload.len));
+		CPPUNIT_ASSERT(!memcmp(BUF, c_struct.payload.data, N));
 
 		// Make sure it's a true copy, not linked to the original
 		orgOpts.set_topic(EMPTY_STR);
@@ -251,7 +290,7 @@ public:
 		orgOpts.set_retained(false);
 
 		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
 		CPPUNIT_ASSERT_EQUAL(RETAINED, opts.is_retained());
 
@@ -259,7 +298,7 @@ public:
 		opts = opts;
 
 		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
 		CPPUNIT_ASSERT_EQUAL(RETAINED, opts.is_retained());
 	}
@@ -273,80 +312,88 @@ public:
 
 		opts = std::move(orgOpts);
 
-		MQTTAsync_willOptions& c_struct = opts.opts_;
-
-		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
-		CPPUNIT_ASSERT(!strcmp(c_struct.topicName, TOPIC.c_str()));
-		CPPUNIT_ASSERT(!strcmp(c_struct.message, PAYLOAD.c_str()));
-
 		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
 		CPPUNIT_ASSERT_EQUAL(RETAINED, opts.is_retained());
 
+		// Check the C struct
+		const auto& c_struct = opts.opts_;
+
+		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
+		CPPUNIT_ASSERT(!strcmp(c_struct.topicName, TOPIC.c_str()));
+		CPPUNIT_ASSERT(c_struct.message == nullptr);
+		CPPUNIT_ASSERT_EQUAL(N, size_t(c_struct.payload.len));
+		CPPUNIT_ASSERT(!memcmp(BUF, c_struct.payload.data, N));
+
 		// Check that the original was moved
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_topic());
-		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_payload());
+		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, orgOpts.get_qos());
 		CPPUNIT_ASSERT_EQUAL(DFLT_RETAINED, orgOpts.is_retained());
 
 		CPPUNIT_ASSERT(orgOpts.opts_.topicName == nullptr);
-		CPPUNIT_ASSERT(orgOpts.opts_.message == nullptr);
+		CPPUNIT_ASSERT_EQUAL(0, orgOpts.opts_.payload.len);
+		CPPUNIT_ASSERT(orgOpts.opts_.payload.data == nullptr);
 
 		// Self assignment should cause no harm
 		// (clang++ is smart enough to warn about this)
 		#if !defined(__clang__)
 			opts = std::move(opts);
 			CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
-			CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload());
+			CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload_str());
 			CPPUNIT_ASSERT_EQUAL(QOS, opts.get_qos());
 			CPPUNIT_ASSERT_EQUAL(RETAINED, opts.is_retained());
 		#endif
 	}
 
 // ----------------------------------------------------------------------
-// Test the raw buffer (void*) constructor
+// Test setting the (text) topic
 // ----------------------------------------------------------------------
 
 	void test_set_topic_str() {
 		mqtt::will_options opts;
-		MQTTAsync_willOptions& c_struct = opts.opts_;
 
 		opts.set_topic(TOPIC);
-
-		CPPUNIT_ASSERT(!strcmp(c_struct.topicName, TOPIC.c_str()));
 		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
 
-		// Setting empty string should not create NULL pointer entry,
-		// rather zero-length strings.
+		const auto& c_struct = opts.opts_;
+		CPPUNIT_ASSERT(!strcmp(c_struct.topicName, TOPIC.c_str()));
+
+		// Setting empty string should _not_ create nullptr entry, in
+		// C struct, rather a valid zero-length string.
 		opts.set_topic(EMPTY_STR);
 
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, opts.get_topic());
 		CPPUNIT_ASSERT(opts.opts_.topicName != nullptr);
-		if (opts.opts_.topicName) {
-			CPPUNIT_ASSERT(strlen(opts.opts_.topicName) == 0);
-		}
+		CPPUNIT_ASSERT_EQUAL(size_t(0), strlen(opts.opts_.topicName));
 	}
+
+// ----------------------------------------------------------------------
+// Test setting the (binary) payload
+// ----------------------------------------------------------------------
 
 	void test_set_payload() {
 		mqtt::will_options opts;
-		MQTTAsync_willOptions& c_struct = opts.opts_;
 
 		opts.set_payload(PAYLOAD);
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload_str());
 
-		CPPUNIT_ASSERT(!strcmp(c_struct.message, PAYLOAD.c_str()));
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload());
+		const auto& c_struct = opts.opts_;
 
-		// Setting empty string should null out C struct
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD.size(), size_t(c_struct.payload.len));
+		CPPUNIT_ASSERT(!memcmp(PAYLOAD.data(), c_struct.payload.data, PAYLOAD.size()));
+
+		// Setting empty string set a valid, but zero-len payload
+		// TODO: We need to check what the C lib now accepts.
 		opts.set_payload(EMPTY_STR);
 
-		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, opts.get_payload());
-		CPPUNIT_ASSERT(opts.opts_.message != nullptr);
-		if (opts.opts_.topicName) {
-			CPPUNIT_ASSERT(strlen(opts.opts_.message) == 0);
-		}
-	}
+		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, opts.get_payload_str());
+		CPPUNIT_ASSERT_EQUAL(size_t(0), opts.get_payload().size());
 
+		CPPUNIT_ASSERT_EQUAL(0, opts.opts_.payload.len);
+		CPPUNIT_ASSERT(opts.opts_.payload.data != nullptr);
+	}
 };
 
 /////////////////////////////////////////////////////////////////////////////

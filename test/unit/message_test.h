@@ -70,7 +70,7 @@ public:
 
 	void test_dflt_constructor() {
 		mqtt::message msg;
-		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, msg.get_payload());
+		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, msg.get_payload_str());
 	}
 
 // ----------------------------------------------------------------------
@@ -80,7 +80,7 @@ public:
 	void test_buf_len_constructor() {
 		mqtt::message msg(BUF, N);
 
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, msg.get_qos());
 		CPPUNIT_ASSERT(!msg.is_retained());
 	}
@@ -92,7 +92,7 @@ public:
 	void test_buf_constructor() {
 		mqtt::message msg(BUF, N, QOS, true);
 
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
 	}
@@ -104,7 +104,7 @@ public:
 	void test_string_constructor() {
 		mqtt::message msg(PAYLOAD);
 
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, msg.get_qos());
 		CPPUNIT_ASSERT(!msg.is_retained());
 	}
@@ -116,7 +116,7 @@ public:
 	void test_string_qos_constructor() {
 		mqtt::message msg(PAYLOAD, QOS, true);
 
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
 	}
@@ -127,6 +127,7 @@ public:
 
 	void test_c_struct_constructor() {
 		MQTTAsync_message c_msg = MQTTAsync_message_initializer;
+
 		c_msg.payload = const_cast<char*>(BUF);
 		c_msg.payloadlen = N;
 		c_msg.qos = QOS;
@@ -134,7 +135,7 @@ public:
 		c_msg.dup = 1;
 		mqtt::message msg(c_msg);
 
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
 		CPPUNIT_ASSERT(msg.is_duplicate());
@@ -147,7 +148,7 @@ public:
 	void test_copy_constructor() {
 		mqtt::message msg(orgMsg);
 
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
 
@@ -156,7 +157,7 @@ public:
 		orgMsg.set_qos(DFLT_QOS);
 		orgMsg.set_retained(false);
 
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
 	}
@@ -168,12 +169,12 @@ public:
 	void test_move_constructor() {
 		mqtt::message msg(std::move(orgMsg));
 
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
 
 		// Check that the original was moved
-		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgMsg.get_payload());
+		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgMsg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, orgMsg.get_qos());
 		CPPUNIT_ASSERT(!orgMsg.is_retained());
 	}
@@ -187,7 +188,7 @@ public:
 
 		msg = orgMsg;
 
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
 
@@ -196,14 +197,14 @@ public:
 		orgMsg.set_qos(DFLT_QOS);
 		orgMsg.set_retained(false);
 
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
 
 		// Self assignment should cause no harm
 		msg = msg;
 
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
 	}
@@ -217,12 +218,12 @@ public:
 
 		msg = std::move(orgMsg);
 
-		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
 
 		// Check that the original was moved
-		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgMsg.get_payload());
+		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgMsg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, orgMsg.get_qos());
 		CPPUNIT_ASSERT(!orgMsg.is_retained());
 
@@ -230,7 +231,7 @@ public:
 		// (clang++ is smart enough to warn about this)
 		#if !defined(__clang__)
 			msg = std::move(msg);
-			CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload());
+			CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 			CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 			CPPUNIT_ASSERT(msg.is_retained());
 		#endif

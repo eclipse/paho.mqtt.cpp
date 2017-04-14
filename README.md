@@ -1,6 +1,17 @@
 # Eclipse Paho MQTT C++ client library
 
+## DEVELOPMENT Branch for the v1.0 Release
 
+**This branch is currently unstable and is tracking the Paho C library's _develop_ branch which is also unstable. Proceed with caution!**
+
+This is the _develop_ branch of the Paho C++ library, destined to be the v1.0 release of the library with the overall Paho 1.3 group, targeted for June 2017. 
+
+As such it requires the version of the Paho C library which is also currently under development, and available in the _develop_ branch of that library on GitHub:
+https://github.com/eclipse/paho.mqtt.c/tree/develop
+
+_This will not compile against the current release version of the Paho C library!_
+
+## Description
 This repository contains the source code for the [Eclipse Paho](http://eclipse.org/paho) MQTT C++ client library on memory managed operating systems such as Linux/Posix and Windows.
 
 This code builds a library which enables C++11 applications to connect to an [MQTT](http://mqtt.org) broker to publish messages, and to subscribe to topics and receive published messages.

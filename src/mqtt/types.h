@@ -27,7 +27,7 @@
 
 namespace mqtt {
 
-///////////////////////////////////////////////////////////////////////////// 
+/////////////////////////////////////////////////////////////////////////////
 
 /** A 'byte' is an 8-bit, unsigned int */
 using byte = uint8_t;
@@ -35,7 +35,15 @@ using byte = uint8_t;
 /** A collection of bytes  */
 using byte_buffer = std::basic_string<byte>;
 
-///////////////////////////////////////////////////////////////////////////// 
+inline std::string to_string(const byte_buffer& buf) {
+	return std::string(reinterpret_cast<const char*>(buf.data()), buf.size());
+}
+
+inline byte_buffer to_buffer(const std::string& str) {
+	return byte_buffer(reinterpret_cast<const byte*>(str.data()), str.size());
+}
+
+/////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
 }
 

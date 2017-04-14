@@ -21,24 +21,23 @@
 
 namespace mqtt {
 
-const MQTTAsync_willOptions will_options::DFLT_C_WILL(MQTTAsync_willOptions_initializer);
+constexpr MQTTAsync_willOptions will_options::DFLT_C_STRUCT;
 
 /////////////////////////////////////////////////////////////////////////////
 
-will_options::will_options() : opts_(DFLT_C_WILL)
+will_options::will_options() : opts_(DFLT_C_STRUCT)
 {
 }
 
 will_options::will_options(const std::string& top,
 						   const void *payload, size_t payloadlen,
 						   int qos, bool retained)
-		: opts_(DFLT_C_WILL), topic_(top),
-			payload_(static_cast<const char *>(payload), payloadlen)
+		: opts_(DFLT_C_STRUCT), topic_(top)
 {
 	opts_.topicName = c_str(topic_);
-	opts_.message = c_str(payload_);
 	opts_.qos = qos;
 	opts_.retained = retained;
+	set_payload(byte_buffer(static_cast<const byte*>(payload), payloadlen));
 }
 
 will_options::will_options(const topic& top,
@@ -49,16 +48,24 @@ will_options::will_options(const topic& top,
 }
 
 
-will_options::will_options(const std::string& top,
-						   const std::string& payload,
+will_options::will_options(const std::string& top, byte_buffer payload,
 						   int qos, bool retained)
-		: opts_(MQTTAsync_willOptions_initializer),
-			topic_(top), payload_(payload)
+		: opts_(DFLT_C_STRUCT), topic_(top)
 {
 	opts_.topicName = c_str(topic_);
-	opts_.message = c_str(payload_);
 	opts_.qos = qos;
 	opts_.retained = retained;
+	set_payload(std::move(payload));
+}
+
+will_options::will_options(const std::string& top, const std::string& payload,
+						   int qos, bool retained)
+		: opts_(DFLT_C_STRUCT), topic_(top)
+{
+	opts_.topicName = c_str(topic_);
+	opts_.qos = qos;
+	opts_.retained = retained;
+	set_payload(payload);
 }
 
 will_options::will_options(const std::string& top, const message& msg)
@@ -67,10 +74,10 @@ will_options::will_options(const std::string& top, const message& msg)
 }
 
 will_options::will_options(const will_options& opt)
-		: opts_(opt.opts_), topic_(opt.topic_), payload_(opt.payload_)
+		: opts_(opt.opts_), topic_(opt.topic_)
 {
 	opts_.topicName = c_str(topic_);
-	opts_.message = c_str(payload_);
+	set_payload(opt.payload_);
 }
 
 will_options::will_options(will_options&& other)
@@ -78,9 +85,10 @@ will_options::will_options(will_options&& other)
 			payload_(std::move(other.payload_))
 {
 	opts_.topicName = c_str(topic_);
-	opts_.message = c_str(payload_);
+	set_payload(payload_);
 	// OPTIMIZE: We probably don't need to do this, but just to be safe
-	std::memcpy(&other.opts_, &DFLT_C_WILL, sizeof(MQTTAsync_willOptions));
+	std::memcpy(&other.opts_, &DFLT_C_STRUCT, sizeof(MQTTAsync_willOptions));
+	//other.opts_ = DFLT_C_STRUCT;
 }
 
 will_options& will_options::operator=(const will_options& rhs)
@@ -89,10 +97,9 @@ will_options& will_options::operator=(const will_options& rhs)
 		std::memcpy(&opts_, &rhs.opts_, sizeof(MQTTAsync_willOptions));
 
 		topic_ = rhs.topic_;
-		payload_ = rhs.payload_;
-
 		opts_.topicName = c_str(topic_);
-		opts_.message = c_str(payload_);
+
+		set_payload(rhs.payload_);
 	}
 	return *this;
 }
@@ -103,13 +110,14 @@ will_options& will_options::operator=(will_options&& rhs)
 		std::memcpy(&opts_, &rhs.opts_, sizeof(MQTTAsync_willOptions));
 
 		topic_ = std::move(rhs.topic_);
+		opts_.topicName = c_str(topic_);
+
 		payload_ = std::move(rhs.payload_);
+		set_payload(payload_);
 
 		// OPTIMIZE: We probably don't need to do any of this, but just to
 		// be safe
-		opts_.topicName = c_str(topic_);
-		opts_.message = c_str(payload_);
-		std::memcpy(&rhs.opts_, &DFLT_C_WILL, sizeof(MQTTAsync_willOptions));
+		std::memcpy(&rhs.opts_, &DFLT_C_STRUCT, sizeof(MQTTAsync_willOptions));
 	}
 	return *this;
 }
@@ -120,10 +128,13 @@ void will_options::set_topic(const std::string& top)
 	opts_.topicName = c_str(topic_);
 }
 
-void will_options::set_payload(const std::string& msg)
+void will_options::set_payload(byte_buffer msg)
 {
-	payload_ = msg;
-	opts_.message = c_str(payload_);
+	payload_ = std::move(msg);
+
+	// The C struct payload must not be nullptr for will options
+	opts_.payload.len = (int) payload_.size();
+	opts_.payload.data = payload_.data();
 }
 
 /////////////////////////////////////////////////////////////////////////////

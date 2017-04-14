@@ -80,8 +80,12 @@ class client_test : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE_END();
 
 	// NOTE: This test case requires network access. It uses one of
-	//       the public available MQTT brokers
-	const std::string GOOD_SERVER_URI { "tcp://m2m.eclipse.org:1883" };
+	//  	 the public available MQTT brokers
+	#if defined(TEST_EXTERNAL_SERVER)
+		const std::string GOOD_SERVER_URI { "tcp://m2m.eclipse.org:1883" };
+	#else
+		const std::string GOOD_SERVER_URI { "tcp://localhost:1883" };
+	#endif
 	const std::string BAD_SERVER_URI  { "one://invalid.address" };
 	const std::string CLIENT_ID { "client_test" };
 	const std::string PERSISTENCE_DIR { "/tmp" };

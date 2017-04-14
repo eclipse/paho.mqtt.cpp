@@ -25,6 +25,7 @@
 #define __mqtt_message_h
 
 #include "MQTTAsync.h"
+#include "mqtt/types.h"
 #include <string>
 #include <memory>
 #include <stdexcept>
@@ -40,6 +41,10 @@ namespace mqtt {
  */
 class message
 {
+	static constexpr int DFLT_QOS = 0;
+	static constexpr bool DFLT_RETAINED = false;
+	static constexpr MQTTAsync_message DFLT_C_STRUCT MQTTAsync_message_initializer;
+
 	/** The underlying C message struct */
 	MQTTAsync_message msg_;
 	/**
@@ -47,7 +52,7 @@ class message
 	 * Note that this is not necessarily a printable text string, but rather
 	 * an arbitrary binary blob held in a std::string container.
 	 */
-	std::string payload_;
+	byte_buffer payload_;
 
 	/** The client has special access. */
 	friend class async_client;
@@ -74,30 +79,25 @@ public:
 	 * other values set to defaults.
 	 * @param payload the bytes to use as the message payload
 	 * @param len the number of bytes in the payload
-	 */
-	message(const void* payload, size_t len);
-	/**
-	 * Constructs a message with the specified array as a payload, and all
-	 * other values set to defaults.
-	 * @param payload the bytes to use as the message payload
-	 * @param len the number of bytes in the payload
 	 * @param qos The quality of service for the message.
 	 * @param retained Whether the message should be retained by the broker.
 	 */
-	message(const void* payload, size_t len, int qos, bool retained);
+	message(const void* payload, size_t len, int qos=DFLT_QOS, bool retained=DFLT_RETAINED);
 	/**
-	 * Constructs a message with the specified string as a payload, and
-	 * all other values set to defaults.
-	 * @param payload A string to use as the message payload.
+	 * Constructs a message from a byte buffer.
+	 * Note that the payload accepts copy or move semantics.
+	 * @param payload A byte buffer to use as the message payload.
+	 * @param qos The quality of service for the message.
+	 * @param retained Whether the message should be retained by the broker.
 	 */
-	explicit message(const std::string& payload);
+	message(byte_buffer payload, int qos=DFLT_QOS, bool retained=DFLT_RETAINED);
 	/**
 	 * Constructs a message.
 	 * @param payload A string to use as the message payload.
 	 * @param qos The quality of service for the message.
 	 * @param retained Whether the message should be retained by the broker.
 	 */
-	message(const std::string& payload, int qos, bool retained);
+	message(const std::string& payload, int qos=DFLT_QOS, bool retained=DFLT_RETAINED);
 	/**
 	 * Constructs a message as a copy of the message structure.
 	 * @param msg A "C" MQTTAsync_message structure.
@@ -116,7 +116,7 @@ public:
 	/**
 	 * Destroys a message and frees all associated resources.
 	 */
-	~message();
+	~message() {}
 	/**
 	 * Copies another message to this one.
 	 * @param rhs The other message.
@@ -136,7 +136,11 @@ public:
 	/**
 	 * Gets the payload
 	 */
-	const std::string& get_payload() const { return payload_; }
+	const byte_buffer& get_payload() const { return payload_; }
+	/**
+	 * Gets the payload as a string
+	 */
+	std::string get_payload_str() const { return to_string(payload_); }
 	/**
 	 * Returns the quality of service for this message.
 	 * @return The quality of service for this message.
@@ -157,16 +161,28 @@ public:
 	 */
 	bool is_retained() const { return msg_.retained != 0; }
 	/**
+	 * Sets the payload of this message to be the specified buffer.
+	 * Note that this accepts copy or move operations:
+	 *   set_payload(buf);
+	 *   set_payload(std::move(buf));
+	 * @param payload A buffer to use as the message payload.
+	 */
+	void set_payload(byte_buffer payload);
+	/**
 	 * Sets the payload of this message to be the specified byte array.
 	 * @param payload the bytes to use as the message payload
 	 * @param n the number of bytes in the payload
 	 */
-	void set_payload(const void* payload, size_t n);
+	void set_payload(const void* payload, size_t n) {
+		set_payload(byte_buffer(static_cast<const byte*>(payload), n));
+	}
 	/**
 	 * Sets the payload of this message to be the specified string.
 	 * @param payload A string to use as the message payload.
 	 */
-	void set_payload(const std::string& payload);
+	void set_payload(const std::string& payload) {
+		set_payload(reinterpret_cast<const byte*>(payload.data()), payload.size());
+	}
 	/**
 	 * Sets the quality of service for this message.
 	 * @param qos The integer Quality of Service for the message
@@ -185,7 +201,7 @@ public:
 	 * Returns a string representation of this messages payload.
 	 * @return std::string
 	 */
-	std::string to_str() const { return get_payload(); }
+	std::string to_str() const { return get_payload_str(); }
 	/**
 	 * Determines if the QOS value is a valid one.
 	 * @param qos The QOS value.

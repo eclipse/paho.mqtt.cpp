@@ -1,7 +1,7 @@
 // message.cpp
 
 /*******************************************************************************
- * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2017 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -25,32 +25,34 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-message::message() : msg_(MQTTAsync_message_initializer)
+constexpr int message::DFLT_QOS;
+constexpr bool message::DFLT_RETAINED;
+constexpr MQTTAsync_message message::DFLT_C_STRUCT;
+
+// --------------------------------------------------------------------------
+
+message::message() : msg_(DFLT_C_STRUCT)
 {
 }
 
-message::message(const void* payload, size_t len)
-						: msg_(MQTTAsync_message_initializer)
-{
-	set_payload(payload, len);
-}
-
-message::message(const void* payload, size_t len, int qos, bool retained)
-						: msg_(MQTTAsync_message_initializer)
+message::message(const void* payload, size_t len, int qos/*=DFLT_QOS*/, bool retained/*=DFLT_RETAINED*/)
+						: msg_(DFLT_C_STRUCT)
 {
 	set_payload(payload, len);
 	set_qos(qos);
 	set_retained(retained);
 }
 
-message::message(const std::string& payload)
-						: msg_(MQTTAsync_message_initializer)
+message::message(byte_buffer payload, int qos/*=DFLT_QOS*/, bool retained/*=DFLT_RETAINED*/)
+						: msg_(DFLT_C_STRUCT)
 {
-	set_payload(payload);
+	set_payload(std::move(payload));
+	set_qos(qos);
+	set_retained(retained);
 }
 
-message::message(const std::string& payload, int qos, bool retained)
-						: msg_(MQTTAsync_message_initializer)
+message::message(const std::string& payload, int qos/*=DFLT_QOS*/, bool retained/*=DFLT_RETAINED*/)
+						: msg_(DFLT_C_STRUCT)
 {
 	set_payload(payload);
 	set_qos(qos);
@@ -67,19 +69,12 @@ message::message(const message& other) : msg_(other.msg_)
 	set_payload(other.payload_);
 }
 
-message::message(message&& other)
-		: msg_(other.msg_), payload_(std::move(other.payload_))
+message::message(message&& other) : msg_(other.msg_)
 {
-	msg_.payload = const_cast<char*>(payload_.data());
-	msg_.payloadlen = payload_.length();
-
-	other.msg_ = MQTTAsync_message(MQTTAsync_message_initializer);
+	set_payload(std::move(other.payload_));
+	other.msg_ = DFLT_C_STRUCT;
 }
 
-message::~message()
-{
-	clear_payload();
-}
 
 message& message::operator=(const message& rhs)
 {
@@ -94,12 +89,8 @@ message& message::operator=(message&& rhs)
 {
 	if (&rhs != this) {
 		msg_ = rhs.msg_;
-		payload_ = std::move(rhs.payload_);
-
-		msg_.payload = const_cast<char*>(payload_.data());
-		msg_.payloadlen = payload_.length();
-
-		rhs.msg_ = MQTTAsync_message(MQTTAsync_message_initializer);
+		set_payload(std::move(rhs.payload_));
+		rhs.msg_ = DFLT_C_STRUCT;
 	}
 	return *this;
 }
@@ -111,18 +102,18 @@ void message::clear_payload()
 	msg_.payloadlen = 0;
 }
 
-void message::set_payload(const void* payload, size_t len)
+void message::set_payload(byte_buffer payload)
 {
-	payload_ = std::string(static_cast<const char*>(payload), len);
-	msg_.payload = const_cast<char*>(payload_.data());
-	msg_.payloadlen = len;
-}
+	payload_ = std::move(payload);
 
-void message::set_payload(const std::string& payload)
-{
-	payload_ = payload;
-	msg_.payload = const_cast<char*>(payload_.data());
-	msg_.payloadlen = payload_.length();
+	if (payload.empty()) {
+		msg_.payload = nullptr;
+		msg_.payloadlen = 0;
+	}
+	else {
+		msg_.payload = const_cast<byte*>(payload_.data());
+		msg_.payloadlen = payload_.length();
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////

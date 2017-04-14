@@ -79,7 +79,7 @@ public:
 		mqtt::const_message_ptr msg_out { token->get_message() };
 		CPPUNIT_ASSERT(msg_out);
 
-		CPPUNIT_ASSERT_EQUAL(msg_in->get_payload(), msg_out->get_payload());
+		CPPUNIT_ASSERT_EQUAL(msg_in->get_payload_str(), msg_out->get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(msg_in->get_qos(), msg_out->get_qos());
 		CPPUNIT_ASSERT_EQUAL(0, msg_out->get_qos());
 	}
@@ -100,7 +100,7 @@ public:
 		mqtt::const_message_ptr msg_out { token->get_message() };
 		CPPUNIT_ASSERT(msg_out);
 
-		CPPUNIT_ASSERT_EQUAL(payload, msg_out->get_payload());
+		CPPUNIT_ASSERT_EQUAL(payload, msg_out->get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(qos, msg_out->get_qos());
 	}
 
@@ -121,7 +121,7 @@ public:
 		mqtt::const_message_ptr msg_out = token->get_message();
 		CPPUNIT_ASSERT(msg_out);
 
-		CPPUNIT_ASSERT_EQUAL(payload, msg_out->get_payload());
+		CPPUNIT_ASSERT_EQUAL(payload, msg_out->get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(qos, msg_out->get_qos());
 	}
 

@@ -49,9 +49,9 @@ connect_options::connect_options(const connect_options& opt) : opts_(opt.opts_)
 
 connect_options::connect_options(connect_options&& opt) : opts_(opt.opts_),
 						will_(std::move(opt.will_)),
-#if defined(OPENSSL)
-						ssl_(std::move(opt.ssl_)),
-#endif
+						#if defined(OPENSSL)
+							ssl_(std::move(opt.ssl_)),
+						#endif
 						userName_(std::move(opt.userName_)),
 						password_(std::move(opt.password_))
 {
@@ -64,7 +64,7 @@ connect_options::connect_options(connect_options&& opt) : opts_(opt.opts_),
 #endif
 
 	opts_.username = c_str(userName_);
-	opts_.password = c_str(password_);
+	set_password(password_);
 }
 
 connect_options& connect_options::operator=(const connect_options& opt)
@@ -74,10 +74,10 @@ connect_options& connect_options::operator=(const connect_options& opt)
 	if (opts_.will)
 		set_will(opt.will_);
 
-#if defined(OPENSSL)
-	if (opts_.ssl)
-		set_ssl(opt.ssl_);
-#endif
+	#if defined(OPENSSL)
+		if (opts_.ssl)
+			set_ssl(opt.ssl_);
+	#endif
 
 	set_user_name(opt.userName_);
 	set_password(opt.password_);
@@ -90,29 +90,27 @@ connect_options& connect_options::operator=(connect_options&& opt)
 	std::memcpy(&opts_, &opt.opts_, sizeof(MQTTAsync_connectOptions));
 
 	will_ = std::move(opt.will_);
-	userName_ = std::move(opt.userName_);
-	password_ = std::move(opt.password_);
-
 	if (opts_.will)
 		opts_.will = &will_.opts_;
 
-#if defined(OPENSSL)
-	ssl_ = std::move(opt.ssl_);
-	if (opts_.ssl)
-		opts_.ssl = &ssl_.opts_;
-#endif
-
+	userName_ = std::move(opt.userName_);
 	opts_.username = c_str(userName_);
-	opts_.password = c_str(password_);
 
+	password_ = std::move(opt.password_);
+	set_password(password_);
+
+	#if defined(OPENSSL)
+		ssl_ = std::move(opt.ssl_);
+		if (opts_.ssl)
+			opts_.ssl = &ssl_.opts_;
+	#endif
 	return *this;
 }
 
-
-void connect_options::set_password(const std::string& password)
+void connect_options::set_will(const will_options& will)
 {
-	password_ = password;
-	opts_.password = c_str(password_);
+	will_ = will;
+	opts_.will = &will_.opts_;
 }
 
 void connect_options::set_user_name(const std::string& userName)
@@ -121,10 +119,18 @@ void connect_options::set_user_name(const std::string& userName)
 	opts_.username = c_str(userName_);
 }
 
-void connect_options::set_will(const will_options& will)
+void connect_options::set_password(const byte_buffer& password)
 {
-	will_ = will;
-	opts_.will = &will_.opts_;
+	password_ = password;
+
+	if (password_.empty()) {
+		opts_.binarypwd.len = 0;
+		opts_.binarypwd.data = nullptr;
+	}
+	else {
+		opts_.binarypwd.len = (int) password_.size();
+		opts_.binarypwd.data = password_.data();
+	}
 }
 
 #if defined(OPENSSL)

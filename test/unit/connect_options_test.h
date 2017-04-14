@@ -69,13 +69,15 @@ public:
 	void test_dflt_constructor() {
 		mqtt::connect_options opts;
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, opts.get_user_name());
-		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, opts.get_password());
+		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, opts.get_password_str());
 
 		const auto& c_struct = opts.opts_;
 		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
 
 		CPPUNIT_ASSERT(c_struct.username == nullptr);
 		CPPUNIT_ASSERT(c_struct.password == nullptr);
+		CPPUNIT_ASSERT_EQUAL(0, c_struct.binarypwd.len);
+		CPPUNIT_ASSERT(c_struct.binarypwd.data == nullptr);
 
 		// No callbacks without a context token
 		CPPUNIT_ASSERT(c_struct.context == nullptr);
@@ -98,12 +100,14 @@ public:
 		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
 
 		CPPUNIT_ASSERT_EQUAL(USER, opts.get_user_name());
-		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password());
+		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password_str());
 
 		CPPUNIT_ASSERT(!strcmp(USER.c_str(), c_struct.username));
-		CPPUNIT_ASSERT(!strcmp(PASSWD.c_str(), c_struct.password));
+		CPPUNIT_ASSERT(c_struct.password == nullptr);
+		CPPUNIT_ASSERT_EQUAL(PASSWD.size(), size_t(c_struct.binarypwd.len));
+		CPPUNIT_ASSERT(!memcmp(PASSWD.data(), c_struct.binarypwd.data, PASSWD.size()));
 
-		// Not callbacks without a context token
+		// No callbacks without a context token
 		CPPUNIT_ASSERT(c_struct.context == nullptr);
 		CPPUNIT_ASSERT(c_struct.onSuccess == nullptr);
 		CPPUNIT_ASSERT(c_struct.onFailure == nullptr);
@@ -118,21 +122,23 @@ public:
 		mqtt::connect_options opts { orgOpts };
 
 		CPPUNIT_ASSERT_EQUAL(USER, opts.get_user_name());
-		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password());
+		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password_str());
 
 		const auto& c_struct = opts.opts_;
 
 		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
 
 		CPPUNIT_ASSERT(!strcmp(USER.c_str(), c_struct.username));
-		CPPUNIT_ASSERT(!strcmp(PASSWD.c_str(), c_struct.password));
+		CPPUNIT_ASSERT(c_struct.password == nullptr);
+		CPPUNIT_ASSERT_EQUAL(PASSWD.size(), size_t(c_struct.binarypwd.len));
+		CPPUNIT_ASSERT(!memcmp(PASSWD.data(), c_struct.binarypwd.data, PASSWD.size()));
 
 		// Make sure it's a true copy, not linked to the original
 		orgOpts.set_user_name(EMPTY_STR);
 		orgOpts.set_password(EMPTY_STR);
 
 		CPPUNIT_ASSERT_EQUAL(USER, opts.get_user_name());
-		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password());
+		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password_str());
 	}
 
 // ----------------------------------------------------------------------
@@ -144,25 +150,27 @@ public:
 		mqtt::connect_options opts { std::move(orgOpts) };
 
 		CPPUNIT_ASSERT_EQUAL(USER, opts.get_user_name());
-		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password());
+		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password_str());
 
 		const auto& c_struct = opts.opts_;
 
 		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
 
 		CPPUNIT_ASSERT(!strcmp(USER.c_str(), c_struct.username));
-		CPPUNIT_ASSERT(!strcmp(PASSWD.c_str(), c_struct.password));
+		CPPUNIT_ASSERT(c_struct.password == nullptr);
+		CPPUNIT_ASSERT_EQUAL(PASSWD.size(), size_t(c_struct.binarypwd.len));
+		CPPUNIT_ASSERT(!memcmp(PASSWD.data(), c_struct.binarypwd.data, PASSWD.size()));
 
 		// Make sure it's a true copy, not linked to the original
 		orgOpts.set_user_name(EMPTY_STR);
 		orgOpts.set_password(EMPTY_STR);
 
 		CPPUNIT_ASSERT_EQUAL(USER, opts.get_user_name());
-		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password());
+		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password_str());
 
 		// Check that the original was moved
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_user_name());
-		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_password());
+		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_password_str());
 
 		CPPUNIT_ASSERT(orgOpts.opts_.username == nullptr);
 		CPPUNIT_ASSERT(orgOpts.opts_.password == nullptr);
@@ -179,27 +187,29 @@ public:
 		opts = orgOpts;
 
 		CPPUNIT_ASSERT_EQUAL(USER, opts.get_user_name());
-		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password());
+		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password_str());
 
 		const auto& c_struct = opts.opts_;
 
 		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
 
 		CPPUNIT_ASSERT(!strcmp(USER.c_str(), c_struct.username));
-		CPPUNIT_ASSERT(!strcmp(PASSWD.c_str(), c_struct.password));
+		CPPUNIT_ASSERT(c_struct.password == nullptr);
+		CPPUNIT_ASSERT_EQUAL(PASSWD.size(), size_t(c_struct.binarypwd.len));
+		CPPUNIT_ASSERT(!memcmp(PASSWD.data(), c_struct.binarypwd.data, PASSWD.size()));
 
 		// Make sure it's a true copy, not linked to the original
 		orgOpts.set_user_name(EMPTY_STR);
 		orgOpts.set_password(EMPTY_STR);
 
 		CPPUNIT_ASSERT_EQUAL(USER, opts.get_user_name());
-		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password());
+		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password_str());
 
 		// Self assignment should cause no harm
 		opts = opts;
 
 		CPPUNIT_ASSERT_EQUAL(USER, opts.get_user_name());
-		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password());
+		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password_str());
 	}
 
 // ----------------------------------------------------------------------
@@ -211,35 +221,39 @@ public:
 		mqtt::connect_options opts { std::move(orgOpts) };
 
 		CPPUNIT_ASSERT_EQUAL(USER, opts.get_user_name());
-		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password());
+		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password_str());
 
 		const auto& c_struct = opts.opts_;
 
 		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
 
 		CPPUNIT_ASSERT(!strcmp(USER.c_str(), c_struct.username));
-		CPPUNIT_ASSERT(!strcmp(PASSWD.c_str(), c_struct.password));
+		CPPUNIT_ASSERT(c_struct.password == nullptr);
+		CPPUNIT_ASSERT_EQUAL(PASSWD.size(), size_t(c_struct.binarypwd.len));
+		CPPUNIT_ASSERT(!memcmp(PASSWD.data(), c_struct.binarypwd.data, PASSWD.size()));
 
 		// Make sure it's a true copy, not linked to the original
 		orgOpts.set_user_name(EMPTY_STR);
 		orgOpts.set_password(EMPTY_STR);
 
 		CPPUNIT_ASSERT_EQUAL(USER, opts.get_user_name());
-		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password());
+		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password_str());
 
 		// Check that the original was moved
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_user_name());
-		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_password());
+		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_password_str());
 
 		CPPUNIT_ASSERT(orgOpts.opts_.username == nullptr);
 		CPPUNIT_ASSERT(orgOpts.opts_.password == nullptr);
+		CPPUNIT_ASSERT_EQUAL(0, orgOpts.opts_.binarypwd.len);
+		CPPUNIT_ASSERT(orgOpts.opts_.binarypwd.data == nullptr);
 
 		// Self assignment should cause no harm
 		// (clang++ is smart enough to warn about this)
 		#if !defined(__clang__)
 			opts = std::move(opts);
 			CPPUNIT_ASSERT_EQUAL(USER, opts.get_user_name());
-			CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password());
+			CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password_str());
 		#endif
 	}
 
@@ -256,10 +270,12 @@ public:
 		opts.set_password(PASSWD);
 
 		CPPUNIT_ASSERT_EQUAL(USER, opts.get_user_name());
-		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password());
+		CPPUNIT_ASSERT_EQUAL(PASSWD, opts.get_password_str());
 
 		CPPUNIT_ASSERT(!strcmp(USER.c_str(), c_struct.username));
-		CPPUNIT_ASSERT(!strcmp(PASSWD.c_str(), c_struct.password));
+		CPPUNIT_ASSERT(c_struct.password == nullptr);
+		CPPUNIT_ASSERT_EQUAL(PASSWD.size(), size_t(c_struct.binarypwd.len));
+		CPPUNIT_ASSERT(!memcmp(PASSWD.data(), c_struct.binarypwd.data, PASSWD.size()));
 	}
 
 // ----------------------------------------------------------------------
@@ -282,16 +298,16 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_set_ssl() {
-#if defined(OPENSSL)
-		mqtt::connect_options opts;
-		const auto& c_struct = opts.opts_;
+		#if defined(OPENSSL)
+			mqtt::connect_options opts;
+			const auto& c_struct = opts.opts_;
 
-		CPPUNIT_ASSERT(nullptr == c_struct.ssl);
-		mqtt::ssl_options sslOpts;
-		opts.set_ssl(sslOpts);
-		CPPUNIT_ASSERT(nullptr != c_struct.ssl);
-		CPPUNIT_ASSERT_EQUAL(&opts.ssl_.opts_, c_struct.ssl);
-#endif
+			CPPUNIT_ASSERT(nullptr == c_struct.ssl);
+			mqtt::ssl_options sslOpts;
+			opts.set_ssl(sslOpts);
+			CPPUNIT_ASSERT(nullptr != c_struct.ssl);
+			CPPUNIT_ASSERT_EQUAL(&opts.ssl_.opts_, c_struct.ssl);
+		#endif
 	}
 
 // ----------------------------------------------------------------------
