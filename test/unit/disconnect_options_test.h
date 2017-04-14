@@ -42,6 +42,8 @@ class disconnect_options_test : public CppUnit::TestFixture
 
 	CPPUNIT_TEST_SUITE_END();
 
+	const int DFLT_TIMEOUT = 0;
+
 	const std::string EMPTY_STR;
 	mqtt::test::dummy_async_client cli;
 
@@ -55,12 +57,13 @@ public:
 
 	void test_dflt_constructor() {
 		mqtt::disconnect_options opts{};
+		const auto& c_struct = opts.opts_;
 
-		MQTTAsync_disconnectOptions& c_struct = opts.opts_;
 		CPPUNIT_ASSERT(nullptr == c_struct.onSuccess);
 		CPPUNIT_ASSERT(nullptr == c_struct.onFailure);
 
-		CPPUNIT_ASSERT_EQUAL(0, opts.get_timeout());
+		CPPUNIT_ASSERT_EQUAL(DFLT_TIMEOUT, (int) opts.get_timeout().count());
+		CPPUNIT_ASSERT_EQUAL(DFLT_TIMEOUT, c_struct.timeout);
 	}
 
 // ----------------------------------------------------------------------
@@ -72,11 +75,12 @@ public:
 		mqtt::token CONTEXT { cli };
 		mqtt::disconnect_options opts { TIMEOUT, &CONTEXT };
 
-		MQTTAsync_disconnectOptions& c_struct = opts.opts_;
+		const auto& c_struct = opts.opts_;
+
 		CPPUNIT_ASSERT(nullptr != c_struct.onSuccess);
 		CPPUNIT_ASSERT(nullptr != c_struct.onFailure);
 
-		CPPUNIT_ASSERT_EQUAL(TIMEOUT, opts.get_timeout());
+		CPPUNIT_ASSERT_EQUAL(TIMEOUT, (int) opts.get_timeout().count());
 		CPPUNIT_ASSERT_EQUAL(&CONTEXT, opts.get_context());
 	}
 
@@ -85,11 +89,20 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_set_timeout() {
-		mqtt::disconnect_options opts{};
+		mqtt::disconnect_options opts;
+		const auto& c_struct = opts.opts_;
 
-		const int TIMEOUT { 14 };
+		const int TIMEOUT = 5000;	// ms
+
+		// Set with integer
 		opts.set_timeout(TIMEOUT);
-		CPPUNIT_ASSERT_EQUAL(TIMEOUT, opts.get_timeout());
+		CPPUNIT_ASSERT_EQUAL(TIMEOUT, (int) opts.get_timeout().count());
+		CPPUNIT_ASSERT_EQUAL(TIMEOUT, c_struct.timeout);
+
+		// Set with chrono duration
+		opts.set_timeout(std::chrono::seconds(2*TIMEOUT/1000));
+		CPPUNIT_ASSERT_EQUAL(2*TIMEOUT, (int) opts.get_timeout().count());
+		CPPUNIT_ASSERT_EQUAL(2*TIMEOUT, c_struct.timeout);
 	}
 
 // ----------------------------------------------------------------------
@@ -100,7 +113,8 @@ public:
 		mqtt::token CONTEXT { cli };
 		mqtt::disconnect_options opts{};
 
-		MQTTAsync_disconnectOptions& c_struct = opts.opts_;
+		const auto& c_struct = opts.opts_;
+
 		CPPUNIT_ASSERT(nullptr == c_struct.onSuccess);
 		CPPUNIT_ASSERT(nullptr == c_struct.onFailure);
 

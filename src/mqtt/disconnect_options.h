@@ -9,11 +9,9 @@
 
 #include "MQTTAsync.h"
 #include "mqtt/token.h"
+#include <chrono>
 
 namespace mqtt {
-
-class disconnect_options_test;
-class token_test;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -41,28 +39,39 @@ public:
 	 */
 	disconnect_options(int timeout, token* tok);
 	/**
+	 * Gets the timeout used for disconnecting.
+	 * @return The timeout for disconnecting (in milliseconds).
+	 */
+	std::chrono::milliseconds get_timeout() const {
+		return  std::chrono::milliseconds(opts_.timeout);
+	}
+	/**
 	 * Sets the timeout for disconnecting.
 	 * This allows for any remaining in-flight messages to be delivered.
 	 * @param timeout The timeout (in milliseconds).
 	 */
 	void set_timeout(int timeout) { opts_.timeout = timeout; }
 	/**
-	 * Gets the timeout used for disconnecting.
-	 * @return The timeout for disconnecting (in milliseconds).
+	 * Sets the connect timeout with a chrono duration.
+	 * This is the maximum time that the underlying library will wait for a
+	 * connection before failing.
+	 * @param to The connect timeout in seconds.
 	 */
-	int get_timeout() const { return opts_.timeout; }
+	template <class Rep, class Period>
+	void set_timeout(const std::chrono::duration<Rep, Period>& to) {
+		// TODO: check range
+		set_timeout((int) std::chrono::duration_cast<std::chrono::milliseconds>(to).count());
+	}
 	/**
 	 * Sets the callback context to a delivery token.
 	 * @param tok The delivery token to be used as the callback context.
 	 */
 	void set_context(token* tok);
-
 	/**
 	 * Gets the callback context to a delivery token.
 	 * @return The delivery token to be used as the callback context.
 	 */
 	token* get_context();
-
 };
 
 /////////////////////////////////////////////////////////////////////////////
