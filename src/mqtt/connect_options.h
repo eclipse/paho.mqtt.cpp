@@ -130,6 +130,15 @@ public:
 		return std::chrono::seconds(opts_.keepAliveInterval);
 	}
 	/**
+	 * Gets the connection timeout.
+	 * This is the amount of time the underlying library will wait for a
+	 * timeout before failing.
+	 * @return The connect timeout in seconds.
+	 */
+	std::chrono::seconds get_connect_timeout() const {
+		return std::chrono::seconds(opts_.connectTimeout);
+	}
+	/**
 	 * Gets the user name to use for the connection.
 	 * @return The user name to use for the connection.
 	 */
@@ -231,11 +240,32 @@ public:
 	 * This is the maximum time that should pass without communications
 	 * between client and server. If no massages pass in this time, the
 	 * client will ping the broker.
-	 * @param keepAliveInterval The keep alive interval.
+	 * @param interval The keep alive interval.
 	 */
 	template <class Rep, class Period>
-	void set_keep_alive_interval(const std::chrono::duration<Rep, Period>& keepAliveInterval) {
-		set_keep_alive_interval((int) std::chrono::duration_cast<std::chrono::seconds>(keepAliveInterval).count());
+	void set_keep_alive_interval(const std::chrono::duration<Rep, Period>& interval) {
+		// TODO: Check range
+		set_keep_alive_interval((int) std::chrono::duration_cast<std::chrono::seconds>(interval).count());
+	}
+	/**
+	 * Sets the connect timeout in seconds.
+	 * This is the maximum time that the underlying library will wait for a
+	 * connection before failing.
+	 * @param to The connect timeout in seconds.
+	 */
+	void set_connect_timeout(int to) {
+		opts_.connectTimeout = to;
+	}
+	/**
+	 * Sets the connect timeout with a chrono duration.
+	 * This is the maximum time that the underlying library will wait for a
+	 * connection before failing.
+	 * @param to The connect timeout in seconds.
+	 */
+	template <class Rep, class Period>
+	void set_connect_timeout(const std::chrono::duration<Rep, Period>& to) {
+		// TODO: check range
+		set_connect_timeout((int) std::chrono::duration_cast<std::chrono::seconds>(to).count());
 	}
 	/**
 	 * Sets the password to use for the connection.

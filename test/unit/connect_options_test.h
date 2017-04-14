@@ -46,6 +46,7 @@ class connect_options_test : public CppUnit::TestFixture
 	CPPUNIT_TEST( test_set_ssl );
 	CPPUNIT_TEST( test_set_token );
 	CPPUNIT_TEST( test_set_keep_alive );
+	CPPUNIT_TEST( test_set_connect_timeout );
 
 	CPPUNIT_TEST_SUITE_END();
 
@@ -53,8 +54,9 @@ class connect_options_test : public CppUnit::TestFixture
 	const char* CSIG = "MQTC";
 	const size_t CSIG_LEN = std::strlen(CSIG);
 
-	// This must match the C init struct
+	// These must match the C init struct
 	const int DFLT_KEEP_ALIVE = 60;
+	const int DFLT_CONNECT_TIMEOUT = 30;
 
 	const std::string USER { "wally" };
 	const std::string PASSWD { "xyzpdq" };
@@ -74,11 +76,13 @@ public:
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, opts.get_user_name());
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, opts.get_password_str());
 		CPPUNIT_ASSERT_EQUAL(DFLT_KEEP_ALIVE, (int) opts.get_keep_alive_interval().count());
+		CPPUNIT_ASSERT_EQUAL(DFLT_CONNECT_TIMEOUT, (int) opts.get_connect_timeout().count());
 
 		const auto& c_struct = opts.opts_;
 		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
 
 		CPPUNIT_ASSERT_EQUAL(DFLT_KEEP_ALIVE, c_struct.keepAliveInterval);
+		CPPUNIT_ASSERT_EQUAL(DFLT_CONNECT_TIMEOUT, c_struct.connectTimeout);
 
 		CPPUNIT_ASSERT(c_struct.username == nullptr);
 		CPPUNIT_ASSERT(c_struct.password == nullptr);
@@ -351,6 +355,28 @@ public:
 
 		CPPUNIT_ASSERT_EQUAL(2*KEEP_ALIVE_SEC, (int) opts.get_keep_alive_interval().count());
 		CPPUNIT_ASSERT_EQUAL(2*KEEP_ALIVE_SEC, c_struct.keepAliveInterval);
+	}
+
+// ----------------------------------------------------------------------
+// Test set/get of connect timeout
+// ----------------------------------------------------------------------
+
+	void test_set_connect_timeout() {
+		mqtt::connect_options opts;
+		const auto& c_struct = opts.opts_;
+
+		// Set as an int
+		const int TIMEOUT_SEC = 10;
+		opts.set_connect_timeout(TIMEOUT_SEC);
+
+		CPPUNIT_ASSERT_EQUAL(TIMEOUT_SEC, (int) opts.get_connect_timeout().count());
+		CPPUNIT_ASSERT_EQUAL(TIMEOUT_SEC, c_struct.connectTimeout);
+
+		// Set as an chrono
+		opts.set_connect_timeout(std::chrono::milliseconds(2*TIMEOUT_SEC*1000));
+
+		CPPUNIT_ASSERT_EQUAL(2*TIMEOUT_SEC, (int) opts.get_connect_timeout().count());
+		CPPUNIT_ASSERT_EQUAL(2*TIMEOUT_SEC, c_struct.connectTimeout);
 	}
 
 };

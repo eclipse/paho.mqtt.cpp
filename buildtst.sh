@@ -32,6 +32,7 @@ do
             printf "\nUnit test compilation failed for %s\n" "${COMPILER}"
             exit 2
         fi
+        rm -rf tmp/*
         if ! ./mqttpp-unittest ; then
             printf "\nUnit test failed for  %s\n" "${COMPILER}"
             exit 3
