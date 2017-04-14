@@ -1,15 +1,20 @@
 # Makefile for the paho-mqttpp (C++) sample applications
 
 ifdef DEVELOP
-  PAHO_C_LIB_DIR ?= $(abspath ../../../paho.mqtt.c)/build/output
-  PAHO_C_INC_DIR ?= $(abspath ../../../paho.mqtt.c)/src
+  PAHO_C_DIR ?= $(abspath ../../../paho.mqtt.c)
+  PAHO_C_LIB_DIR ?= $(PAHO_C_DIR)/build/output
+  PAHO_C_INC_DIR ?= $(PAHO_C_DIR)/src
 else
   PAHO_C_LIB_DIR ?= /usr/local/lib
   PAHO_C_INC_DIR ?= /usr/local/include
 endif
 
+all: async_publish async_subscribe sync_publish 
 
-all: async_publish async_subscribe sync_publish ssl_publish
+# SSL/TLS samples
+ifdef SSL
+  all: ssl_publish
+endif
 
 ifneq ($(CROSS_COMPILE),)
   CC  = $(CROSS_COMPILE)gcc
@@ -41,8 +46,12 @@ async_subscribe: async_subscribe.cpp
 sync_publish: sync_publish.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS)
 
+# SSL/TLS samples
+
 ssl_publish: ssl_publish.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS_SSL)
+
+# Cleanup
 
 .PHONY: clean distclean
 
@@ -50,5 +59,4 @@ clean:
 	rm -f async_publish async_subscribe sync_publish ssl_publish
 
 distclean: clean
-
 

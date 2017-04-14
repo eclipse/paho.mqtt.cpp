@@ -16,9 +16,7 @@ ifndef VERBOSE
   QUIET := @
 endif
 
-ifndef INSTALL
-INSTALL = install
-endif
+INSTALL ?= install
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA =  $(INSTALL) -m 644
 
@@ -31,9 +29,8 @@ LIB_DIR ?= $(CROSS_COMPILE)lib
 OBJ_DIR ?= $(CROSS_COMPILE)obj
 
 ifdef DEVELOP
-  PAHO_C_INC_DIR ?= $(abspath ../paho.mqtt.c)/src
-else
-  PAHO_C_INC_DIR ?= /usr/local/include
+  PAHO_C_DIR := $(abspath ../paho.mqtt.c)
+  PAHO_C_INC_DIR ?= $(PAHO_C_DIR)/src
 endif
 
 vpath %.cpp $(SRC_DIR)
@@ -43,13 +40,8 @@ INC_DIRS += $(INC_DIR) $(PAHO_C_INC_DIR)
 _MK_OBJ_DIR := $(shell mkdir -p $(OBJ_DIR))
 _MK_LIB_DIR := $(shell mkdir -p $(LIB_DIR))
 
-ifndef prefix
-	prefix = /usr/local
-endif
-
-ifndef exec_prefix
-	exec_prefix = ${prefix}
-endif
+PREFIX ?= /usr/local
+EXEC_PREFIX ?= $(PREFIX)
 
 includedir = $(prefix)/include
 libdir = $(exec_prefix)/lib
@@ -58,18 +50,23 @@ libdir = $(exec_prefix)/lib
 
 LIB_BASE  ?= $(MODULE)
 LIB_MAJOR ?= 0
-LIB_MINOR ?= 2
+LIB_MINOR ?= 5
+LIB_PATCH ?= 0
 
 LIB_LINK = lib$(LIB_BASE).so
 LIB_MAJOR_LINK = $(LIB_LINK).$(LIB_MAJOR)
 
-LIB = $(LIB_MAJOR_LINK).$(LIB_MINOR)
+LIB = $(LIB_MAJOR_LINK).$(LIB_MINOR).$(LIB_PATCH)
 
 TGT = $(LIB_DIR)/$(LIB)
 
 # ----- Sources -----
 
 SRCS += $(notdir $(wildcard $(SRC_DIR)/*.cpp))
+
+ifndef SSL
+  SRC_IGNORE += ssl_options.cpp
+endif
 
 ifdef SRC_IGNORE
   SRCS := $(filter-out $(SRC_IGNORE),$(SRCS))
@@ -98,8 +95,12 @@ else
   CPPFLAGS += -O2 -Wno-unused-result -Werror
 endif
 
-# TODO: Make this optional
-DEFS += OPENSSL
+ifdef SSL
+  DEFS += OPENSSL
+  LIB_DEPS += paho-mqtt3as
+else
+  LIB_DEPS += paho-mqtt3a
+endif
 
 CPPFLAGS += $(addprefix -D,$(DEFS)) $(addprefix -I,$(INC_DIRS))
 
@@ -108,6 +109,11 @@ LIB_DEPS += c stdc++ pthread
 LIB_DEP_FLAGS += $(addprefix -l,$(LIB_DEPS))
 
 LDFLAGS := -g -shared -Wl,-soname,$(LIB_MAJOR_LINK) -L$(LIB_DIR)
+
+ifdef DEVELOP
+  LDFLAGS += -L$(PAHO_C_DIR)/build/output
+endif
+
 
 # ----- Compiler directives -----
 

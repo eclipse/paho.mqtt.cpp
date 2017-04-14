@@ -22,13 +22,13 @@ do
     else
         printf "===== Testing: %s =====\n\n" "${COMPILER}"
         make distclean
-        if ! make CXX=${COMPILER} ; then
+        if ! make CXX=${COMPILER} SSL=1 ; then
             printf "\nCompilation failed for %s\n" "${COMPILER}"
             exit 1
         fi
         pushd test/unit &> /dev/null
         make clean
-        if ! make CXX=${COMPILER} ; then
+        if ! make CXX=${COMPILER} SSL=1 ; then
             printf "\nUnit test compilation failed for %s\n" "${COMPILER}"
             exit 2
         fi

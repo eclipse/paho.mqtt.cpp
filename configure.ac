@@ -19,7 +19,7 @@
 ###############################################################################
 
 AC_PREREQ([2.65])
-AC_INIT([paho.mqtt.cpp], [0.0.2])
+AC_INIT([paho.mqtt.cpp], [5.5.0])
 AC_CONFIG_AUX_DIR([autotools_build])
 AC_CONFIG_MACRO_DIR([m4])
 AC_LANG_CPLUSPLUS

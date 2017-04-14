@@ -288,7 +288,7 @@ public:
 
 		CPPUNIT_ASSERT(nullptr == c_struct.ssl);
 		mqtt::ssl_options sslOpts;
-		opts.set_ssl(ssOpts);
+		opts.set_ssl(sslOpts);
 		CPPUNIT_ASSERT(nullptr != c_struct.ssl);
 		CPPUNIT_ASSERT_EQUAL(&opts.ssl_.opts_, c_struct.ssl);
 #endif
