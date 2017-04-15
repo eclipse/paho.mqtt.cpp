@@ -181,7 +181,7 @@ public:
 	 * @param payload A string to use as the message payload.
 	 */
 	void set_payload(const std::string& payload) {
-		set_payload(reinterpret_cast<const byte*>(payload.data()), payload.size());
+		set_payload(to_buffer(payload));
 	}
 	/**
 	 * Sets the quality of service for this message.
@@ -240,6 +240,25 @@ inline message_ptr make_message(const void* payload, size_t len) {
 inline message_ptr make_message(const void* payload, size_t len,
 								int qos, bool retained) {
 	return std::make_shared<mqtt::message>(payload, len, qos, retained);
+}
+
+/**
+ * Constructs a message with the specified buffer as a payload, and
+ * all other values set to defaults.
+ * @param payload A string to use as the message payload.
+ */
+inline message_ptr make_message(byte_buffer payload) {
+	return std::make_shared<mqtt::message>(std::move(payload));
+}
+
+/**
+ * Constructs a message with the specified values.
+ * @param payload A buffer to use as the message payload.
+ * @param qos The quality of service for the message.
+ * @param retained Whether the message should be retained by the broker.
+ */
+inline message_ptr make_message(byte_buffer payload, int qos, bool retained) {
+	return std::make_shared<mqtt::message>(std::move(payload), qos, retained);
 }
 
 /**

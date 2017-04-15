@@ -56,11 +56,15 @@ public:
 		return mqtt::itoken_ptr{};
 	}
 
-	mqtt::itoken_ptr disconnect(long quiesceTimeout) override {
+	mqtt::itoken_ptr disconnect(disconnect_options) override {
 		return mqtt::itoken_ptr{};
 	}
 
-	mqtt::itoken_ptr disconnect(long quiesceTimeout, void* userContext, mqtt::iaction_listener& cb) override {
+	mqtt::itoken_ptr disconnect(int timeout) override {
+		return mqtt::itoken_ptr{};
+	}
+
+	mqtt::itoken_ptr disconnect(int timeout, void* userContext, mqtt::iaction_listener& cb) override {
 		return mqtt::itoken_ptr{};
 	}
 

@@ -176,10 +176,7 @@ public:
 	 * Returns the LWT message payload as a string.
 	 * @return The LWT message payload as a string.
 	 */
-	std::string get_payload_str() const {
-		return std::string(reinterpret_cast<const char*>(payload_.data()),
-						   payload_.size());
-	}
+	std::string get_payload_str() const { return to_string(payload_); }
 	/**
 	 * Gets the QoS value for the LWT message.
 	 * @return The QoS value for the LWT message.

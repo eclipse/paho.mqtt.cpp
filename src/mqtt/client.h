@@ -113,8 +113,11 @@ public:
 	virtual void disconnect();
 	/**
 	 * Disconnects from the server.
+	 * @param timeout the amount of time in milliseconds to allow for
+	 *  			  existing work to finish before disconnecting. A value
+	 *  			  of zero or less means the client will not quiesce.
 	 */
-	virtual void disconnect(long quiesceTimeout);
+	virtual void disconnect(int timeout);
 	/**
 	 * Returns a randomly generated client identifier based on the current
 	 * user's login name and the system time.

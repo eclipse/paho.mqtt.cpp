@@ -275,13 +275,13 @@ itoken_ptr async_client::connect(void* userContext, iaction_listener& cb)
 // --------------------------------------------------------------------------
 // Disconnect
 
-itoken_ptr async_client::disconnect(long timeout)
+itoken_ptr async_client::disconnect(disconnect_options opts)
 {
 	itoken_ptr tok = std::make_shared<token>(*this);
 	add_token(tok);
 
-	// TODO may truncate timeout
-	disconnect_options opts(static_cast<int>(timeout), dynamic_cast<token*>(tok.get()));
+	//opts.set_token(dynamic_pointer_cast<token>(tok).get());
+	opts.set_token(dynamic_cast<token*>(tok.get()));
 
 	int rc = MQTTAsync_disconnect(cli_, &opts.opts_);
 
@@ -293,15 +293,31 @@ itoken_ptr async_client::disconnect(long timeout)
 	return tok;
 }
 
-itoken_ptr async_client::disconnect(long timeout, void* userContext, iaction_listener& cb)
+itoken_ptr async_client::disconnect(int timeout)
+{
+	itoken_ptr tok = std::make_shared<token>(*this);
+	add_token(tok);
+
+	disconnect_options opts(timeout, dynamic_cast<token*>(tok.get()));
+
+	int rc = MQTTAsync_disconnect(cli_, &opts.opts_);
+
+	if (rc != MQTTASYNC_SUCCESS) {
+		remove_token(tok);
+		throw exception(rc);
+	}
+
+	return tok;
+}
+
+itoken_ptr async_client::disconnect(int timeout, void* userContext, iaction_listener& cb)
 {
 	itoken_ptr tok = std::make_shared<token>(*this);
 	tok->set_user_context(userContext);
 	tok->set_action_callback(cb);
 	add_token(tok);
 
-	// TODO may truncate timeout
-	disconnect_options opts(static_cast<int>(timeout), dynamic_cast<token*>(tok.get()));
+	disconnect_options opts(timeout, dynamic_cast<token*>(tok.get()));
 
 	int rc = MQTTAsync_disconnect(cli_, &opts.opts_);
 

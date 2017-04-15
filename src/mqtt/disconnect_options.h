@@ -25,7 +25,6 @@ class disconnect_options
 	/** The client has special access */
 	friend class async_client;
 	friend class disconnect_options_test;
-	friend class token_test;
 
 public:
 	/**
@@ -33,7 +32,7 @@ public:
 	 */
 	disconnect_options();
 	/**
-	 * Creates disconnect options tied to the specific delivery token.
+	 * Creates disconnect options tied to the specific token.
 	 * @param timeout The timeout (in milliseconds).
 	 * @param tok A token to be used as the context.
 	 */
@@ -43,7 +42,7 @@ public:
 	 * @return The timeout for disconnecting (in milliseconds).
 	 */
 	std::chrono::milliseconds get_timeout() const {
-		return  std::chrono::milliseconds(opts_.timeout);
+		return std::chrono::milliseconds(opts_.timeout);
 	}
 	/**
 	 * Sets the timeout for disconnecting.
@@ -60,18 +59,18 @@ public:
 	template <class Rep, class Period>
 	void set_timeout(const std::chrono::duration<Rep, Period>& to) {
 		// TODO: check range
-		set_timeout((int) std::chrono::duration_cast<std::chrono::milliseconds>(to).count());
+		set_timeout((int) to_milliseconds(to).count());
 	}
 	/**
 	 * Sets the callback context to a delivery token.
 	 * @param tok The delivery token to be used as the callback context.
 	 */
-	void set_context(token* tok);
+	void set_token(token* tok);
 	/**
 	 * Gets the callback context to a delivery token.
 	 * @return The delivery token to be used as the callback context.
 	 */
-	token* get_context();
+	token* get_token();
 };
 
 /////////////////////////////////////////////////////////////////////////////

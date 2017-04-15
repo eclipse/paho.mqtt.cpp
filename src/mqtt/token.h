@@ -27,6 +27,7 @@
 #include "MQTTAsync.h"
 #include "mqtt/iaction_listener.h"
 #include "mqtt/exception.h"
+#include "mqtt/types.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -259,7 +260,7 @@ public:
 	 */
 	int get_message_id() const override {
 		static_assert(sizeof(tok_) <= sizeof(int), "MQTTAsync_token must fit into int");
-		return static_cast<int>(tok_);
+		return int(tok_);
 	}
 	/**
 	 * Returns the topic string(s) for the action being tracked by this
@@ -315,7 +316,7 @@ public:
 	 */
 	template <class Rep, class Period>
 	bool wait_for_completion(const std::chrono::duration<Rep, Period>& relTime) {
-		wait_for_completion(static_cast<long>(std::chrono::duration_cast<std::chrono::milliseconds>(relTime).count()));
+		wait_for_completion((long) to_milliseconds(relTime).count());
 		return rc_ == 0;
 	}
 	/**

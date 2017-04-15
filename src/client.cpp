@@ -65,7 +65,7 @@ void client::disconnect()
 	cli_.disconnect()->wait_for_completion(timeout_);
 }
 
-void client::disconnect(long timeout)
+void client::disconnect(int timeout)
 {
 	cli_.disconnect(timeout)->wait_for_completion(timeout_);
 }

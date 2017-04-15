@@ -30,6 +30,7 @@
 #include "mqtt/iclient_persistence.h"
 #include "mqtt/iaction_listener.h"
 #include "mqtt/connect_options.h"
+#include "mqtt/disconnect_options.h"
 #include "mqtt/exception.h"
 #include "mqtt/message.h"
 #include "mqtt/callback.h"
@@ -122,15 +123,27 @@ public:
 	virtual itoken_ptr disconnect() =0;
 	/**
 	 * Disconnects from the server.
-	 * @param quiesceTimeout
+	 * @param opts Options for disconnecting.
 	 * @return token used to track and wait for the disconnect to complete.
 	 *  	   The token will be passed to any callback that has been set.
 	 * @throw exception for problems encountered while disconnecting
 	 */
-	virtual itoken_ptr disconnect(long quiesceTimeout) =0;
+	virtual itoken_ptr disconnect(disconnect_options opts) =0;
 	/**
 	 * Disconnects from the server.
-	 * @param quiesceTimeout
+	 * @param timeout the amount of time in milliseconds to allow for
+	 *  			  existing work to finish before disconnecting. A value
+	 *  			  of zero or less means the client will not quiesce.
+	 * @return token used to track and wait for the disconnect to complete.
+	 *  	   The token will be passed to any callback that has been set.
+	 * @throw exception for problems encountered while disconnecting
+	 */
+	virtual itoken_ptr disconnect(int timeout) =0;
+	/**
+	 * Disconnects from the server.
+	 * @param timeout the amount of time in milliseconds to allow for
+	 *  			  existing work to finish before disconnecting. A value
+	 *  			  of zero or less means the client will not quiesce.
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb listener that will be notified when the disconnect
@@ -139,7 +152,7 @@ public:
 	 *  	   The token will be passed to any callback that has been set.
 	 * @throw exception for problems encountered while disconnecting
 	 */
-	virtual itoken_ptr disconnect(long quiesceTimeout, void* userContext, iaction_listener& cb) =0;
+	virtual itoken_ptr disconnect(int timeout, void* userContext, iaction_listener& cb) =0;
 	/**
 	 * Disconnects from the server.
 	 * @param userContext optional object used to pass context to the

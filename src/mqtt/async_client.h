@@ -202,27 +202,46 @@ public:
 	 *  	   The token will be passed to any callback that has been set.
 	 * @throw exception for problems encountered while disconnecting
 	 */
-	itoken_ptr disconnect() override { return disconnect(0L); }
+	itoken_ptr disconnect() override { return disconnect(disconnect_options()); }
 	/**
 	 * Disconnects from the server.
-	 *
-	 * @param quiesceTimeout the amount of time in milliseconds to allow for
-	 *  					 existing work to finish before disconnecting. A
-	 *  					 value of zero or less means the client will not
-	 *  					 quiesce.
+	 * @param opts Options for disconnecting.
+	 * @return token used to track and wait for the disconnect to complete.
+	 *  	   The token will be passed to any callback that has been set.
+	 * @throw exception for problems encountered while disconnecting
+	 */
+	itoken_ptr disconnect(disconnect_options opts) override;
+	/**
+	 * Disconnects from the server.
+	 * @param timeout the amount of time in milliseconds to allow for
+	 *  			  existing work to finish before disconnecting. A value
+	 *  			  of zero or less means the client will not quiesce.
 	 * @return Token used to track and wait for disconnect to complete. The
 	 *  	   token will be passed to the callback methods if a callback is
 	 *  	   set.
 	 * @throw exception for problems encountered while disconnecting
 	 */
-	itoken_ptr disconnect(long quiesceTimeout) override;
+	itoken_ptr disconnect(int timeout) override;
 	/**
 	 * Disconnects from the server.
-	 *
-	 * @param quiesceTimeout the amount of time in milliseconds to allow for
-	 *  					 existing work to finish before disconnecting. A
-	 *  					 value of zero or less means the client will not
-	 *  					 quiesce.
+	 * @param timeout the amount of time in milliseconds to allow for
+	 *  			  existing work to finish before disconnecting. A value
+	 *  			  of zero or less means the client will not quiesce.
+	 * @return Token used to track and wait for disconnect to complete. The
+	 *  	   token will be passed to the callback methods if a callback is
+	 *  	   set.
+	 * @throw exception for problems encountered while disconnecting
+	 */
+	template <class Rep, class Period>
+	itoken_ptr disconnect(const std::chrono::duration<Rep, Period>& timeout) {
+		// TODO: check range
+		return disconnect((int) to_milliseconds(timeout).count());
+	}
+	/**
+	 * Disconnects from the server.
+	 * @param timeout the amount of time in milliseconds to allow for
+	 *  			  existing work to finish before disconnecting. A value
+	 *  			  of zero or less means the client will not quiesce.
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb callback listener that will be notified when the disconnect
@@ -232,8 +251,28 @@ public:
 	 *  	   a callback is set.
 	 * @throw exception for problems encountered while disconnecting
 	 */
-	itoken_ptr disconnect(long quiesceTimeout, void* userContext,
+	itoken_ptr disconnect(int timeout, void* userContext,
 						  iaction_listener& cb) override;
+	/**
+	 * Disconnects from the server.
+	 * @param timeout the amount of time in milliseconds to allow for
+	 *  			  existing work to finish before disconnecting. A value
+	 *  			  of zero or less means the client will not quiesce.
+	 * @param userContext optional object used to pass context to the
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param cb callback listener that will be notified when the disconnect
+	 *  			   completes.
+	 * @return itoken_ptr Token used to track and wait for disconnect to
+	 *  	   complete. The token will be passed to the callback methods if
+	 *  	   a callback is set.
+	 * @throw exception for problems encountered while disconnecting
+	 */
+	template <class Rep, class Period>
+	itoken_ptr disconnect(const std::chrono::duration<Rep, Period>& timeout,
+						  void* userContext, iaction_listener& cb) {
+		// TODO: check range
+		return disconnect((int) to_milliseconds(timeout).count(), userContext, cb);
+	}
 	/**
 	 * Disconnects from the server.
 	 * @param userContext optional object used to pass context to the

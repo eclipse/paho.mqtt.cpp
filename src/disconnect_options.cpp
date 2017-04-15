@@ -15,10 +15,10 @@ disconnect_options::disconnect_options(int timeout, token* tok)
 		: disconnect_options()
 {
 	set_timeout(timeout);
-	set_context(tok);
+	set_token(tok);
 }
 
-void disconnect_options::set_context(token* tok) 
+void disconnect_options::set_token(token* tok)
 {
 	opts_.context = tok;
 
@@ -32,7 +32,7 @@ void disconnect_options::set_context(token* tok)
 	}
 }
 
-token* disconnect_options::get_context()
+token* disconnect_options::get_token()
 {
 	return static_cast<token*>(opts_.context);
 }

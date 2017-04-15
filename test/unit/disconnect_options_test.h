@@ -38,7 +38,7 @@ class disconnect_options_test : public CppUnit::TestFixture
 	CPPUNIT_TEST( test_dflt_constructor );
 	CPPUNIT_TEST( test_user_constructor );
 	CPPUNIT_TEST( test_set_timeout );
-	CPPUNIT_TEST( test_set_context );
+	CPPUNIT_TEST( test_set_token );
 
 	CPPUNIT_TEST_SUITE_END();
 
@@ -72,8 +72,8 @@ public:
 
 	void test_user_constructor() {
 		const int TIMEOUT { 14 };
-		mqtt::token CONTEXT { cli };
-		mqtt::disconnect_options opts { TIMEOUT, &CONTEXT };
+		mqtt::token tok { cli };
+		mqtt::disconnect_options opts { TIMEOUT, &tok };
 
 		const auto& c_struct = opts.opts_;
 
@@ -81,7 +81,7 @@ public:
 		CPPUNIT_ASSERT(nullptr != c_struct.onFailure);
 
 		CPPUNIT_ASSERT_EQUAL(TIMEOUT, (int) opts.get_timeout().count());
-		CPPUNIT_ASSERT_EQUAL(&CONTEXT, opts.get_context());
+		CPPUNIT_ASSERT_EQUAL(&tok, opts.get_token());
 	}
 
 // ----------------------------------------------------------------------
@@ -106,11 +106,11 @@ public:
 	}
 
 // ----------------------------------------------------------------------
-// Test set context
+// Test set contect token
 // ----------------------------------------------------------------------
 
-	void test_set_context() {
-		mqtt::token CONTEXT { cli };
+	void test_set_token() {
+		mqtt::token tok { cli };
 		mqtt::disconnect_options opts{};
 
 		const auto& c_struct = opts.opts_;
@@ -118,15 +118,15 @@ public:
 		CPPUNIT_ASSERT(nullptr == c_struct.onSuccess);
 		CPPUNIT_ASSERT(nullptr == c_struct.onFailure);
 
-		opts.set_context(nullptr);
+		opts.set_token(nullptr);
 		CPPUNIT_ASSERT(nullptr == c_struct.onSuccess);
 		CPPUNIT_ASSERT(nullptr == c_struct.onFailure);
 
-		opts.set_context(&CONTEXT);
+		opts.set_token(&tok);
 		CPPUNIT_ASSERT(nullptr != c_struct.onSuccess);
 		CPPUNIT_ASSERT(nullptr != c_struct.onFailure);
 
-		CPPUNIT_ASSERT_EQUAL(&CONTEXT, opts.get_context());
+		CPPUNIT_ASSERT_EQUAL(&tok, opts.get_token());
 	}
 
 };

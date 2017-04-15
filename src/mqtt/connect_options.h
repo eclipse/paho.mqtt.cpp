@@ -245,7 +245,7 @@ public:
 	template <class Rep, class Period>
 	void set_keep_alive_interval(const std::chrono::duration<Rep, Period>& interval) {
 		// TODO: Check range
-		set_keep_alive_interval((int) std::chrono::duration_cast<std::chrono::seconds>(interval).count());
+		set_keep_alive_interval((int) to_seconds(interval).count());
 	}
 	/**
 	 * Sets the connect timeout in seconds.
@@ -265,7 +265,7 @@ public:
 	template <class Rep, class Period>
 	void set_connect_timeout(const std::chrono::duration<Rep, Period>& to) {
 		// TODO: check range
-		set_connect_timeout((int) std::chrono::duration_cast<std::chrono::seconds>(to).count());
+		set_connect_timeout((int) to_seconds(to).count());
 	}
 	/**
 	 * Sets the password to use for the connection.
