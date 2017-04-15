@@ -43,7 +43,7 @@ const char* PAYLOAD2 = "Hi there!";
 const char* LWT_PAYLOAD = "Last will and testament.";
 
 const int  QOS = 1;
-const long TIMEOUT = 10000L;
+const std::chrono::seconds TIMEOUT = 10;
 
 /////////////////////////////////////////////////////////////////////////////
 

@@ -112,7 +112,17 @@ public:
 	 * with has completed.
 	 * @param timeout
 	 */
-	virtual void wait_for_completion(long timeout) =0;
+	virtual bool wait_for_completion(long timeout) =0;
+	/**
+	 * Waits a relative amount of time for the action to complete.
+	 * @param relTime The amount of time to wait for the event.
+	 * @return @em true if the event gets signaled in the specified time,
+	 *  	   @em false on a timeout.
+	 */
+	template <class Rep, class Period>
+	bool wait_for_completion(const std::chrono::duration<Rep, Period>& relTime) {
+		return wait_for_completion((long) to_milliseconds(relTime).count());
+	}
 };
 
 using itoken_ptr = itoken::ptr_t;
@@ -306,19 +316,10 @@ public:
 	 * Blocks the current thread until the action this token is associated
 	 * with has completed.
 	 * @param timeout The timeout (in milliseconds)
+	 * @return @em true if the wait finished successfully, @em false if a
+	 *  	   timeout occurred.
 	 */
-	void wait_for_completion(long timeout) override;
-	/**
-	 * Waits a relative amount of time for the action to complete.
-	 * @param relTime The amount of time to wait for the event.
-	 * @return @em true if the event gets signaled in the specified time,
-	 *  	   @em false on a timeout.
-	 */
-	template <class Rep, class Period>
-	bool wait_for_completion(const std::chrono::duration<Rep, Period>& relTime) {
-		wait_for_completion((long) to_milliseconds(relTime).count());
-		return rc_ == 0;
-	}
+	bool wait_for_completion(long timeout) override;
 	/**
 	 * Waits until an absolute time for the action to complete.
 	 * @param absTime The absolute time to wait for the event.
@@ -347,3 +348,4 @@ using const_token_ptr = token::const_ptr_t;
 }
 
 #endif		// __mqtt_token_h
+

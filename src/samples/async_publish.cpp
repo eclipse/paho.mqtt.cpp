@@ -38,11 +38,8 @@ const char* PAYLOAD4 = "Someone is always listening.";
 const char* LWT_PAYLOAD = "Last will and testament.";
 
 const int  QOS = 1;
-const long TIMEOUT = 10000L;
 
-inline void sleep(int ms) {
-	this_thread::sleep_for(std::chrono::milliseconds(ms));
-}
+const auto TIMEOUT = std::chrono::seconds(10);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -173,7 +170,7 @@ int main(int argc, char* argv[])
 		client.publish(TOPIC, pubmsg, nullptr, deliveryListener);
 
 		while (!deliveryListener.is_done()) {
-			sleep(100);
+			this_thread::sleep_for(std::chrono::milliseconds(100));
 		}
 		cout << "OK" << endl;
 

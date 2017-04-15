@@ -82,7 +82,15 @@ public:
 	 * @param qos The quality of service for the message.
 	 * @param retained Whether the message should be retained by the broker.
 	 */
-	message(const void* payload, size_t len, int qos=DFLT_QOS, bool retained=DFLT_RETAINED);
+	message(const void* payload, size_t len, int qos, bool retained);
+	/**
+	 * Constructs a message with the specified array as a payload, and all
+	 * other values set to defaults.
+	 * @param payload the bytes to use as the message payload
+	 * @param len the number of bytes in the payload
+	 */
+	message(const void* payload, size_t len)
+		: message(payload, len, DFLT_QOS, DFLT_RETAINED) {}
 	/**
 	 * Constructs a message from a byte buffer.
 	 * Note that the payload accepts copy or move semantics.
@@ -90,14 +98,27 @@ public:
 	 * @param qos The quality of service for the message.
 	 * @param retained Whether the message should be retained by the broker.
 	 */
-	message(byte_buffer payload, int qos=DFLT_QOS, bool retained=DFLT_RETAINED);
+	message(byte_buffer payload, int qos, bool retained);
+	/**
+	 * Constructs a message from a byte buffer.
+	 * Note that the payload accepts copy or move semantics.
+	 * @param payload A byte buffer to use as the message payload.
+	 * @param qos The quality of service for the message.
+	 * @param retained Whether the message should be retained by the broker.
+	 */
+	message(byte_buffer payload) : message(payload, DFLT_QOS, DFLT_RETAINED) {}
 	/**
 	 * Constructs a message.
 	 * @param payload A string to use as the message payload.
 	 * @param qos The quality of service for the message.
 	 * @param retained Whether the message should be retained by the broker.
 	 */
-	message(const std::string& payload, int qos=DFLT_QOS, bool retained=DFLT_RETAINED);
+	message(const std::string& payload, int qos, bool retained);
+	/**
+	 * Constructs a message.
+	 * @param payload A string to use as the message payload.
+	 */
+	message(const std::string& payload) : message(payload, DFLT_QOS, DFLT_RETAINED) {}
 	/**
 	 * Constructs a message as a copy of the message structure.
 	 * @param msg A "C" MQTTAsync_message structure.

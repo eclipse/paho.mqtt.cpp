@@ -119,23 +119,24 @@ void token::wait_for_completion()
 		throw exception(rc_);
 }
 
-void token::wait_for_completion(long timeout)
+bool token::wait_for_completion(long timeout)
 {
 	guard g(lock_);
-	if (timeout == 0) {			// No wait. Are we done now?
-		if (!complete_)
-			throw exception(MQTTASYNC_FAILURE);	// TODO: Get a timout error number
-	}
-	else if (timeout < 0) {		// Wait forever
+	if (timeout == 0)			// No wait. Are we done now?
+		return complete_;
+
+	if (timeout < 0) {			// Wait forever
 		cond_.wait(g, [this]{return complete_;});
 	}
-	else {
-		if (!cond_.wait_for(g, std::chrono::milliseconds(timeout),
-							[this]{return complete_;}))
-			throw exception(MQTTASYNC_FAILURE);	// TODO: Get a timout error number
+	else if (!cond_.wait_for(g, std::chrono::milliseconds(timeout),
+							 [this]{return complete_;})) {
+		return false;
 	}
+
 	if (rc_ != MQTTASYNC_SUCCESS)
 		throw exception(rc_);
+
+	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////
