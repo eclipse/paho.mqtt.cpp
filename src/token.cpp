@@ -51,7 +51,7 @@ void token::on_success(void* context, MQTTAsync_successData* rsp)
 
 void token::on_success(MQTTAsync_successData* rsp)
 {
-	guard g(lock_);
+	unique_lock g(lock_);
 	iaction_listener* listener = listener_;
 	tok_ = (rsp) ? rsp->token : 0;
 	rc_ = MQTTASYNC_SUCCESS;
@@ -66,7 +66,7 @@ void token::on_success(MQTTAsync_successData* rsp)
 
 void token::on_failure(MQTTAsync_failureData* rsp)
 {
-	guard g(lock_);
+	unique_lock g(lock_);
 	iaction_listener* listener = listener_;
 	if (rsp) {
 		tok_ = rsp->token;
@@ -91,10 +91,15 @@ token::token(iasync_client& cli) : token(cli, MQTTAsync_token(0))
 {
 }
 
+token::token(iasync_client& cli, void* userContext, iaction_listener& cb)
+				: cli_(&cli), tok_(0), userContext_(userContext),
+					listener_(&cb), complete_(false), rc_(0)
+{
+}
+
 token::token(iasync_client& cli, MQTTAsync_token tok)
-				: tok_(tok), cli_(&cli),
-					userContext_(nullptr), listener_(nullptr),
-					complete_(false), rc_(0)
+				: cli_(&cli), tok_(tok), userContext_(nullptr),
+					listener_(nullptr), complete_(false), rc_(0)
 {
 }
 
@@ -105,7 +110,7 @@ token::token(iasync_client& cli, const std::string& top)
 }
 
 token::token(iasync_client& cli, const std::vector<std::string>& topics)
-				: tok_(MQTTAsync_token(0)), topics_(topics), cli_(&cli),
+				: cli_(&cli), tok_(MQTTAsync_token(0)), topics_(topics),
 						userContext_(nullptr), listener_(nullptr),
 						complete_(false), rc_(0)
 {
@@ -113,7 +118,7 @@ token::token(iasync_client& cli, const std::vector<std::string>& topics)
 
 void token::wait_for_completion()
 {
-	guard g(lock_);
+	unique_lock g(lock_);
 	cond_.wait(g, [this]{return complete_;});
 	if (rc_ != MQTTASYNC_SUCCESS)
 		throw exception(rc_);
@@ -121,7 +126,7 @@ void token::wait_for_completion()
 
 bool token::wait_for_completion(long timeout)
 {
-	guard g(lock_);
+	unique_lock g(lock_);
 	if (timeout == 0)			// No wait. Are we done now?
 		return complete_;
 

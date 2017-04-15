@@ -115,6 +115,39 @@ public:
 	 */
 	delivery_token(iasync_client& cli, const std::vector<std::string>& topics)
 					: token(cli, topics) {}
+
+	/**
+	 * Creates an empty delivery token connected to a particular client.
+	 * @param cli The asynchronous client object.
+	 */
+	static ptr_t create(iasync_client& cli) {
+		return std::make_shared<delivery_token>(cli);
+	}
+	/**
+	 * Creates a delivery token connected to a particular client.
+	 * @param cli The asynchronous client object.
+	 * @param topic The topic that the message is associated with.
+	 */
+	static ptr_t create(iasync_client& cli, const std::string& topic) {
+		return std::make_shared<delivery_token>(cli, topic);
+	}
+	/**
+	 * Creates a delivery token connected to a particular client.
+	 * @param cli The asynchronous client object.
+	 * @param topic The topic that the message is associated with.
+	 * @param msg The message data.
+	 */
+	static ptr_t create(iasync_client& cli, const std::string& topic, const_message_ptr msg) {
+		return std::make_shared<delivery_token>(cli, topic, msg);
+	}
+	/**
+	 * Creates a delivery token connected to a particular client.
+	 * @param cli The asynchronous client object.
+	 * @param topics The topics that the message is associated with.
+	 */
+	static ptr_t create(iasync_client& cli, const std::vector<std::string>& topics) {
+		return std::make_shared<delivery_token>(cli, topics);
+	}
 	/**
 	 * Gets the message associated with this token.
 	 * @return The message associated with this token.

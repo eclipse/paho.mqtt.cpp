@@ -229,7 +229,7 @@ itoken_ptr async_client::connect()
 
 itoken_ptr async_client::connect(connect_options opts)
 {
-	itoken_ptr tok = std::make_shared<token>(*this);
+	itoken_ptr tok = token::create(*this);
 	add_token(tok);
 
 	opts.set_token(std::dynamic_pointer_cast<token>(tok));
@@ -247,9 +247,7 @@ itoken_ptr async_client::connect(connect_options opts)
 itoken_ptr async_client::connect(connect_options opts, void* userContext,
 								 iaction_listener& cb)
 {
-	itoken_ptr tok = std::make_shared<token>(*this);
-	tok->set_user_context(userContext);
-	tok->set_action_callback(cb);
+	itoken_ptr tok = token::create(*this, userContext, cb);
 	add_token(tok);
 
 	opts.set_token(std::dynamic_pointer_cast<token>(tok));
@@ -277,7 +275,7 @@ itoken_ptr async_client::connect(void* userContext, iaction_listener& cb)
 
 itoken_ptr async_client::disconnect(disconnect_options opts)
 {
-	itoken_ptr tok = std::make_shared<token>(*this);
+	itoken_ptr tok = token::create(*this);
 	add_token(tok);
 
 	//opts.set_token(dynamic_pointer_cast<token>(tok).get());
@@ -295,7 +293,7 @@ itoken_ptr async_client::disconnect(disconnect_options opts)
 
 itoken_ptr async_client::disconnect(int timeout)
 {
-	itoken_ptr tok = std::make_shared<token>(*this);
+	itoken_ptr tok = token::create(*this);
 	add_token(tok);
 
 	disconnect_options opts(timeout, dynamic_cast<token*>(tok.get()));
@@ -312,7 +310,7 @@ itoken_ptr async_client::disconnect(int timeout)
 
 itoken_ptr async_client::disconnect(int timeout, void* userContext, iaction_listener& cb)
 {
-	itoken_ptr tok = std::make_shared<token>(*this);
+	itoken_ptr tok = token::create(*this);
 	tok->set_user_context(userContext);
 	tok->set_action_callback(cb);
 	add_token(tok);
@@ -383,7 +381,7 @@ idelivery_token_ptr async_client::publish(const std::string& topic,
 
 idelivery_token_ptr async_client::publish(const std::string& topic, const_message_ptr msg)
 {
-	idelivery_token_ptr tok = std::make_shared<delivery_token>(*this, topic, msg);
+	idelivery_token_ptr tok = delivery_token::create(*this, topic, msg);
 	add_token(tok);
 
 	auto dtok = std::dynamic_pointer_cast<delivery_token>(tok);
@@ -408,7 +406,7 @@ idelivery_token_ptr async_client::publish(const std::string& topic, const_messag
 idelivery_token_ptr async_client::publish(const std::string& topic, const_message_ptr msg,
 										  void* userContext, iaction_listener& cb)
 {
-	idelivery_token_ptr tok = std::make_shared<delivery_token>(*this, topic, msg);
+	idelivery_token_ptr tok = delivery_token::create(*this, topic, msg);
 	tok->set_user_context(userContext);
 	tok->set_action_callback(cb);
 	add_token(tok);
@@ -460,7 +458,7 @@ itoken_ptr async_client::subscribe(const topic_filter_collection& topicFilters,
 
 	std::vector<char*> filts = alloc_topic_filters(topicFilters);
 
-	itoken_ptr tok = std::make_shared<token>(*this, topicFilters);
+	itoken_ptr tok = token::create(*this, topicFilters);
 	add_token(tok);
 
 	response_options opts(std::dynamic_pointer_cast<token>(tok));
@@ -489,7 +487,7 @@ itoken_ptr async_client::subscribe(const topic_filter_collection& topicFilters,
 
 	// No exceptions till C-strings are deleted!
 
-	itoken_ptr tok = std::make_shared<token>(*this, topicFilters);
+	itoken_ptr tok = token::create(*this, topicFilters);
 	tok->set_user_context(userContext);
 	tok->set_action_callback(cb);
 	add_token(tok);
@@ -511,7 +509,7 @@ itoken_ptr async_client::subscribe(const topic_filter_collection& topicFilters,
 
 itoken_ptr async_client::subscribe(const std::string& topicFilter, int qos)
 {
-	itoken_ptr tok = std::make_shared<token>(*this, topicFilter);
+	itoken_ptr tok = token::create(*this, topicFilter);
 	add_token(tok);
 
 	response_options opts(std::dynamic_pointer_cast<token>(tok));
@@ -529,7 +527,7 @@ itoken_ptr async_client::subscribe(const std::string& topicFilter, int qos)
 itoken_ptr async_client::subscribe(const std::string& topicFilter, int qos,
 								   void* userContext, iaction_listener& cb)
 {
-	itoken_ptr tok = std::make_shared<token>(*this, topicFilter);
+	itoken_ptr tok = token::create(*this, topicFilter);
 	tok->set_user_context(userContext);
 	tok->set_action_callback(cb);
 	add_token(tok);
@@ -551,7 +549,7 @@ itoken_ptr async_client::subscribe(const std::string& topicFilter, int qos,
 
 itoken_ptr async_client::unsubscribe(const std::string& topicFilter)
 {
-	itoken_ptr tok = std::make_shared<token>(*this, topicFilter);
+	itoken_ptr tok = token::create(*this, topicFilter);
 	add_token(tok);
 
 	response_options opts(std::dynamic_pointer_cast<token>(tok));
@@ -571,7 +569,7 @@ itoken_ptr async_client::unsubscribe(const topic_filter_collection& topicFilters
 	size_t n = topicFilters.size();
 	std::vector<char*> filts = alloc_topic_filters(topicFilters);
 
-	itoken_ptr tok = std::make_shared<token>(*this, topicFilters);
+	itoken_ptr tok = token::create(*this, topicFilters);
 	add_token(tok);
 
 	response_options opts(std::dynamic_pointer_cast<token>(tok));
@@ -593,7 +591,7 @@ itoken_ptr async_client::unsubscribe(const topic_filter_collection& topicFilters
 	size_t n = topicFilters.size();
 	std::vector<char*> filts = alloc_topic_filters(topicFilters);
 
-	itoken_ptr tok = std::make_shared<token>(*this, topicFilters);
+	itoken_ptr tok = token::create(*this, topicFilters);
 	tok->set_user_context(userContext);
 	tok->set_action_callback(cb);
 	add_token(tok);
@@ -614,7 +612,7 @@ itoken_ptr async_client::unsubscribe(const topic_filter_collection& topicFilters
 itoken_ptr async_client::unsubscribe(const std::string& topicFilter,
 									 void* userContext, iaction_listener& cb)
 {
-	itoken_ptr tok = std::make_shared<token>(*this, topicFilter);
+	itoken_ptr tok = token::create(*this, topicFilter);
 	tok->set_user_context(userContext);
 	tok->set_action_callback(cb);
 	add_token(tok);

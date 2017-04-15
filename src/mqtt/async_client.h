@@ -60,6 +60,8 @@ public:
 private:
 	/** Lock guard type for this class */
 	using guard = std::unique_lock<std::mutex>;
+	/** Unique lock type for this class */
+	using unique_lock = std::unique_lock<std::mutex>;
 
 	/** Object monitor mutex */
 	mutable std::mutex lock_;

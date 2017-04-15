@@ -136,18 +136,20 @@ using itoken_ptr = itoken::ptr_t;
 class token : public virtual itoken
 {
 	/** Lock guard type for this class. */
-	using guard = std::unique_lock<std::mutex>;
+	using guard = std::lock_guard<std::mutex>;
+	/** Unique type for this class. */
+	using unique_lock = std::unique_lock<std::mutex>;
 
 	/** Object monitor mutex. */
 	mutable std::mutex lock_;
 	/** Condition variable signals when the action completes */
 	std::condition_variable cond_;
+	/** The MQTT client that is processing this action */
+	iasync_client* cli_;
 	/** The underlying C token. Note that this is just an integer */
 	MQTTAsync_token tok_;
 	/** The topic string(s) for the action being tracked by this token */
 	std::vector<std::string> topics_;
-	/** The MQTT client that is processing this action */
-	iasync_client* cli_;
 	/** User supplied context */
 	void* userContext_;
 	/**
@@ -228,27 +230,71 @@ public:
 
 	/**
 	 * Constructs a token object.
-	 * @param cli
+	 * @param cli The client that created the token.
 	 */
 	token(iasync_client& cli);
 	/**
 	 * Constructs a token object.
-	 * @param cli
-	 * @param tok
+	 * @param cli The client that created the token.
+	 * @param userContext optional object used to pass context to the
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param cb callback listener that will be notified when subscribe has
+	 *  		 completed
+	 */
+	token(iasync_client& cli, void* userContext, iaction_listener& cb);
+	/**
+	 * Constructs a token object.
+	 * @param cli The client that created the token.
+	 * @param tok The message ID
 	 */
 	token(iasync_client& cli, MQTTAsync_token tok);
 	/**
 	 * Constructs a token object.
-	 * @param cli
-	 * @param topic
+	 * @param cli The client that created the token.
+	 * @param topic The topic assiciated with the token
 	 */
 	token(iasync_client& cli, const std::string& topic);
 	/**
 	 * Constructs a token object.
-	 * @param cli
-	 * @param topics
+	 * @param cli The client that created the token.
+	 * @param topics The topics associated with the token
 	 */
 	token(iasync_client& cli, const std::vector<std::string>& topics);
+	/**
+	 * Constructs a token object.
+	 * @param cli The client that created the token.
+	 * @return A smart/shared pointer to a token.
+	 */
+	static ptr_t create(iasync_client& cli) {
+		return std::make_shared<token>(cli);
+	}
+	/**
+	 * Constructs a token object.
+	 * @param cli The client that created the token.
+	 * @param userContext optional object used to pass context to the
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param cb callback listener that will be notified when subscribe has
+	 *  		 completed
+	 */
+	static ptr_t create(iasync_client& cli, void* userContext, iaction_listener& cb) {
+		return std::make_shared<token>(cli, userContext, cb);
+	}
+	/**
+	 * Constructs a token object.
+	 * @param cli The client that created the token.
+	 * @param topic The topic assiciated with the token
+	 */
+	static ptr_t create(iasync_client& cli, const std::string& topic) {
+		return std::make_shared<token>(cli, topic);
+	}
+	/**
+	 * Constructs a token object.
+	 * @param cli The client that created the token.
+	 * @param topics The topics associated with the token
+	 */
+	static ptr_t create(iasync_client& cli, const std::vector<std::string>& topics) {
+		return std::make_shared<token>(cli, topics);
+	}
 	/**
 	 * Return the async listener for this token.
 	 * @return iaction_listener
