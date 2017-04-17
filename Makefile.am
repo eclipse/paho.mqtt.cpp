@@ -1,15 +1,15 @@
 #*******************************************************************************
 #  Copyright (c) 2016
-# 
+#
 #  All rights reserved. This program and the accompanying materials
 #  are made available under the terms of the Eclipse Public License v1.0
-#  and Eclipse Distribution License v1.0 which accompany this distribution. 
-# 
-#  The Eclipse Public License is available at 
+#  and Eclipse Distribution License v1.0 which accompany this distribution.
+#
+#  The Eclipse Public License is available at
 #     http://www.eclipse.org/legal/epl-v10.html
-#  and the Eclipse Distribution License is available at 
+#  and the Eclipse Distribution License is available at
 #    http://www.eclipse.org/org/documents/edl-v10.php.
-# 
+#
 #  Contributors:
 #     Guilherme Maciel Ferreira - initial contribuition
 #*******************************************************************************/
@@ -92,6 +92,7 @@ include_HEADERS += src/mqtt/message.h
 include_HEADERS += src/mqtt/response_options.h
 include_HEADERS += src/mqtt/token.h
 include_HEADERS += src/mqtt/topic.h
+include_HEADERS += src/mqtt/types.h
 include_HEADERS += src/mqtt/will_options.h
 if PAHO_WITH_SSL
 include_HEADERS += src/mqtt/ssl_options.h
