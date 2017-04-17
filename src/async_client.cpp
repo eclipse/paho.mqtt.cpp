@@ -37,7 +37,7 @@ async_client::async_client(const std::string& serverURI, const std::string& clie
 					persist_(nullptr), userCallback_(nullptr)
 {
 	MQTTAsync_create(&cli_, serverURI.c_str(), clientId.c_str(),
-					 MQTTCLIENT_PERSISTENCE_DEFAULT, nullptr);
+					 MQTTCLIENT_PERSISTENCE_NONE, nullptr);
 }
 
 
@@ -310,8 +310,6 @@ itoken_ptr async_client::disconnect(int timeout)
 itoken_ptr async_client::disconnect(int timeout, void* userContext, iaction_listener& cb)
 {
 	itoken_ptr tok = token::create(*this, userContext, cb);
-	//tok->set_user_context(userContext);
-	//tok->set_action_callback(cb);
 	add_token(tok);
 
 	disconnect_options opts(timeout, std::dynamic_pointer_cast<token>(tok));
