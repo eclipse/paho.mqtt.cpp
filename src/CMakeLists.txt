@@ -77,7 +77,8 @@ set_target_properties(${PAHO_MQTT_CPP} PROPERTIES
 ## install the shared library
 install(TARGETS ${PAHO_MQTT_CPP}
     ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib)
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin)
 
 ## build static version of the Paho MQTT C++ library
 if(PAHO_BUILD_STATIC)
