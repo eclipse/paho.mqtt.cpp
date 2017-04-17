@@ -106,7 +106,7 @@ void message::set_payload(byte_buffer payload)
 {
 	payload_ = std::move(payload);
 
-	if (payload.empty()) {
+	if (payload_.empty()) {
 		msg_.payload = nullptr;
 		msg_.payloadlen = 0;
 	}
