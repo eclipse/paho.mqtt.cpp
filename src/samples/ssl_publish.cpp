@@ -73,7 +73,7 @@ public:
 int main(int argc, char* argv[])
 {
 	string	address  = (argc > 1) ? string(argv[1]) : DFLT_ADDRESS,
-			clientID = (argc > 1) ? string(argv[2]) : DFLT_CLIENT_ID;
+			clientID = (argc > 2) ? string(argv[2]) : DFLT_CLIENT_ID;
 
 	cout << "Initializing for server '" << address << "'..." << endl;
 	mqtt::async_client client(address, clientID);
