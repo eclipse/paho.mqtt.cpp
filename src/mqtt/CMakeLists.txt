@@ -33,6 +33,7 @@ set(COMMON_HDR
     response_options.h
     token.h
     topic.h
+    types.h
     will_options.h)
 
 if(PAHO_WITH_SSL)
