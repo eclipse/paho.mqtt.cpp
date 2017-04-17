@@ -13,7 +13,7 @@
 #
 
 COMPILERS="g++-4.8 g++-4.9 g++-5 g++-6 clang++-3.6 clang++-3.8"
-[ "$#" -gt 1 ] && COMPILERS="$@"
+[ "$#" -gt 0 ] && COMPILERS="$@"
 
 for COMPILER in $COMPILERS
 do

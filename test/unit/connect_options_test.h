@@ -42,6 +42,7 @@ class connect_options_test : public CppUnit::TestFixture
 	CPPUNIT_TEST( test_copy_assignment );
 	CPPUNIT_TEST( test_move_assignment );
 	CPPUNIT_TEST( test_set_user );
+	CPPUNIT_TEST( test_set_long_user );
 	CPPUNIT_TEST( test_set_will );
 	CPPUNIT_TEST( test_set_ssl );
 	CPPUNIT_TEST( test_set_token );
@@ -278,6 +279,40 @@ public:
 		CPPUNIT_ASSERT(c_struct.password == nullptr);
 		CPPUNIT_ASSERT_EQUAL(PASSWD.size(), size_t(c_struct.binarypwd.len));
 		CPPUNIT_ASSERT(!memcmp(PASSWD.data(), c_struct.binarypwd.data, PASSWD.size()));
+	}
+
+// ----------------------------------------------------------------------
+// Test set/get of a long user name and password.
+// ----------------------------------------------------------------------
+
+	void test_set_long_user() {
+		std::string user;
+		byte_buffer passwd;
+		for (int i=0; i<1053; ++i) {
+			if (isprint(char(i))) user.push_back(char(i));
+			passwd.push_back(byte(i));
+		}
+
+		mqtt::connect_options orgOpts;
+
+		orgOpts.set_user_name(user);
+		orgOpts.set_password(passwd);
+
+		CPPUNIT_ASSERT_EQUAL(user, orgOpts.get_user_name());
+		CPPUNIT_ASSERT(passwd == orgOpts.get_password());
+
+		mqtt::connect_options opts;
+		opts = orgOpts;
+
+		CPPUNIT_ASSERT_EQUAL(user, opts.get_user_name());
+		CPPUNIT_ASSERT(passwd == opts.get_password());
+
+		const auto& c_struct = opts.opts_;
+
+		CPPUNIT_ASSERT(!strcmp(user.c_str(), c_struct.username));
+		CPPUNIT_ASSERT(c_struct.password == nullptr);
+		CPPUNIT_ASSERT_EQUAL(passwd.size(), size_t(c_struct.binarypwd.len));
+		CPPUNIT_ASSERT(!memcmp(passwd.data(), c_struct.binarypwd.data, PASSWD.size()));
 	}
 
 // ----------------------------------------------------------------------
