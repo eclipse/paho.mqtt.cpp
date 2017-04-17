@@ -56,13 +56,16 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_dflt_constructor() {
-		mqtt::disconnect_options opts{};
+		mqtt::disconnect_options opts;
+
+		CPPUNIT_ASSERT_EQUAL(DFLT_TIMEOUT, (int) opts.get_timeout().count());
+		CPPUNIT_ASSERT(!opts.get_token());
+
 		const auto& c_struct = opts.opts_;
 
 		CPPUNIT_ASSERT(nullptr == c_struct.onSuccess);
 		CPPUNIT_ASSERT(nullptr == c_struct.onFailure);
 
-		CPPUNIT_ASSERT_EQUAL(DFLT_TIMEOUT, (int) opts.get_timeout().count());
 		CPPUNIT_ASSERT_EQUAL(DFLT_TIMEOUT, c_struct.timeout);
 	}
 
@@ -71,9 +74,10 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_user_constructor() {
-		const int TIMEOUT { 14 };
-		mqtt::token tok { cli };
-		mqtt::disconnect_options opts { TIMEOUT, &tok };
+		const int TIMEOUT = 10;
+
+		auto tok = token::create(cli);
+		mqtt::disconnect_options opts { TIMEOUT, tok };
 
 		const auto& c_struct = opts.opts_;
 
@@ -81,7 +85,7 @@ public:
 		CPPUNIT_ASSERT(nullptr != c_struct.onFailure);
 
 		CPPUNIT_ASSERT_EQUAL(TIMEOUT, (int) opts.get_timeout().count());
-		CPPUNIT_ASSERT_EQUAL(&tok, opts.get_token());
+		CPPUNIT_ASSERT_EQUAL(tok, opts.get_token());
 	}
 
 // ----------------------------------------------------------------------
@@ -110,23 +114,23 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_set_token() {
-		mqtt::token tok { cli };
-		mqtt::disconnect_options opts{};
+		auto tok = token::create(cli);
+		mqtt::disconnect_options opts;
 
 		const auto& c_struct = opts.opts_;
 
 		CPPUNIT_ASSERT(nullptr == c_struct.onSuccess);
 		CPPUNIT_ASSERT(nullptr == c_struct.onFailure);
 
-		opts.set_token(nullptr);
+		opts.set_token(mqtt::token_ptr());
 		CPPUNIT_ASSERT(nullptr == c_struct.onSuccess);
 		CPPUNIT_ASSERT(nullptr == c_struct.onFailure);
 
-		opts.set_token(&tok);
+		opts.set_token(tok);
 		CPPUNIT_ASSERT(nullptr != c_struct.onSuccess);
 		CPPUNIT_ASSERT(nullptr != c_struct.onFailure);
 
-		CPPUNIT_ASSERT_EQUAL(&tok, opts.get_token());
+		CPPUNIT_ASSERT_EQUAL(tok, opts.get_token());
 	}
 
 };

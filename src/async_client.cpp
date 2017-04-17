@@ -278,8 +278,7 @@ itoken_ptr async_client::disconnect(disconnect_options opts)
 	itoken_ptr tok = token::create(*this);
 	add_token(tok);
 
-	//opts.set_token(dynamic_pointer_cast<token>(tok).get());
-	opts.set_token(dynamic_cast<token*>(tok.get()));
+	opts.set_token(std::dynamic_pointer_cast<token>(tok));
 
 	int rc = MQTTAsync_disconnect(cli_, &opts.opts_);
 
@@ -296,7 +295,7 @@ itoken_ptr async_client::disconnect(int timeout)
 	itoken_ptr tok = token::create(*this);
 	add_token(tok);
 
-	disconnect_options opts(timeout, dynamic_cast<token*>(tok.get()));
+	disconnect_options opts(timeout, std::dynamic_pointer_cast<token>(tok));
 
 	int rc = MQTTAsync_disconnect(cli_, &opts.opts_);
 
@@ -310,12 +309,12 @@ itoken_ptr async_client::disconnect(int timeout)
 
 itoken_ptr async_client::disconnect(int timeout, void* userContext, iaction_listener& cb)
 {
-	itoken_ptr tok = token::create(*this);
-	tok->set_user_context(userContext);
-	tok->set_action_callback(cb);
+	itoken_ptr tok = token::create(*this, userContext, cb);
+	//tok->set_user_context(userContext);
+	//tok->set_action_callback(cb);
 	add_token(tok);
 
-	disconnect_options opts(timeout, dynamic_cast<token*>(tok.get()));
+	disconnect_options opts(timeout, std::dynamic_pointer_cast<token>(tok));
 
 	int rc = MQTTAsync_disconnect(cli_, &opts.opts_);
 

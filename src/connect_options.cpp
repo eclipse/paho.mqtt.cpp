@@ -12,7 +12,7 @@
  *
  * Contributors:
  *    Guilherme M. Ferreira - initial implementation and documentation
- *    Frannk Pagliughi - Copy and move operations. Bug fixes.
+ *    Frank Pagliughi - Copy and move operations. Bug fixes.
  *******************************************************************************/
 
 #include "mqtt/connect_options.h"
@@ -22,7 +22,9 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-connect_options::connect_options() : opts_(MQTTAsync_connectOptions_initializer)
+constexpr MQTTAsync_connectOptions connect_options::DFLT_C_STRUCT;
+
+connect_options::connect_options() : opts_(DFLT_C_STRUCT)
 {
 }
 
@@ -38,10 +40,10 @@ connect_options::connect_options(const connect_options& opt) : opts_(opt.opts_)
 	if (opts_.will)
 		set_will(opt.will_);
 
-#if defined(OPENSSL)
-	if (opts_.ssl)
-		set_ssl(opt.ssl_);
-#endif
+	#if defined(OPENSSL)
+		if (opts_.ssl)
+			set_ssl(opt.ssl_);
+	#endif
 
 	set_user_name(opt.userName_);
 	set_password(opt.password_);
@@ -58,10 +60,10 @@ connect_options::connect_options(connect_options&& opt) : opts_(opt.opts_),
 	if (opts_.will)
 		opts_.will = &will_.opts_;
 
-#if defined(OPENSSL)
-	if (opts_.ssl)
-		opts_.ssl = &ssl_.opts_;
-#endif
+	#if defined(OPENSSL)
+		if (opts_.ssl)
+			opts_.ssl = &ssl_.opts_;
+	#endif
 
 	opts_.username = c_str(userName_);
 	set_password(password_);
@@ -104,6 +106,7 @@ connect_options& connect_options::operator=(connect_options&& opt)
 		if (opts_.ssl)
 			opts_.ssl = &ssl_.opts_;
 	#endif
+
 	return *this;
 }
 
@@ -141,10 +144,10 @@ void connect_options::set_ssl(const ssl_options& ssl)
 }
 #endif
 
-void connect_options::set_token(const_token_ptr tok)
+void connect_options::set_token(const token_ptr& tok)
 {
 	tok_ = tok;
-	opts_.context = const_cast<token*>(tok.get());
+	opts_.context = tok_.get();
 
 	if (tok) {
 		opts_.onSuccess = &token::on_success;

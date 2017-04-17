@@ -181,9 +181,6 @@ public:
 		// Check that the original was moved
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_user_name());
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_password_str());
-
-		CPPUNIT_ASSERT(orgOpts.opts_.username == nullptr);
-		CPPUNIT_ASSERT(orgOpts.opts_.password == nullptr);
 	}
 
 // ----------------------------------------------------------------------
@@ -252,11 +249,6 @@ public:
 		// Check that the original was moved
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_user_name());
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_password_str());
-
-		CPPUNIT_ASSERT(orgOpts.opts_.username == nullptr);
-		CPPUNIT_ASSERT(orgOpts.opts_.password == nullptr);
-		CPPUNIT_ASSERT_EQUAL(0, orgOpts.opts_.binarypwd.len);
-		CPPUNIT_ASSERT(orgOpts.opts_.binarypwd.data == nullptr);
 
 		// Self assignment should cause no harm
 		// (clang++ is smart enough to warn about this)
@@ -330,9 +322,10 @@ public:
 
 		CPPUNIT_ASSERT(nullptr == c_struct.context);
 		mqtt::test::dummy_async_client ac;
-		mqtt::token_ptr tok = std::make_shared<token>(ac);
+		auto tok = token::create(ac);
 		opts.set_token(tok);
-		CPPUNIT_ASSERT(c_struct.context == tok.get());
+		CPPUNIT_ASSERT_EQUAL(tok, opts.get_token());
+		CPPUNIT_ASSERT(tok.get() == c_struct.context);
 	}
 
 // ----------------------------------------------------------------------

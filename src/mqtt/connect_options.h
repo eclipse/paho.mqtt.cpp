@@ -48,6 +48,10 @@ namespace mqtt {
  */
 class connect_options
 {
+	/** The default C struct */
+	static constexpr MQTTAsync_connectOptions
+				DFLT_C_STRUCT MQTTAsync_connectOptions_initializer;
+
 	/** The underlying C connection options */
 	MQTTAsync_connectOptions opts_;
 
@@ -66,7 +70,7 @@ class connect_options
 	byte_buffer password_;
 
 	/** Shared token pointer for context, if any */
-	const_token_ptr tok_;
+	token_ptr tok_;
 
 	/** The client has special access */
 	friend class async_client;
@@ -202,6 +206,11 @@ public:
 	 */
 	bool is_clean_session() const { return opts_.cleansession != 0; }
 	/**
+	 * Gets the token used as the callback context.
+	 * @return The delivery token used as the callback context.
+	 */
+	token_ptr get_token() const { return tok_; }
+	/**
       * Gets the version of MQTT to be used on the connect.
 	  * @return
 	  * @li MQTTVERSION_DEFAULT (0) = default: start with 3.1.1, and if that
@@ -298,7 +307,7 @@ public:
 	 * Sets the callback context to a delivery token.
 	 * @param tok The delivery token to be used as the callback context.
 	 */
-	void set_token(const_token_ptr tok);
+	void set_token(const token_ptr& tok);
 	/**
       * Sets the version of MQTT to be used on the connect.
 	  * @param mqttVersion The MQTT version to use for the connection:

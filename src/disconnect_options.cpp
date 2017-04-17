@@ -1,26 +1,54 @@
 // disconnect_options.cpp
 
 #include "mqtt/disconnect_options.h"
+#include <utility>
+#include <cstring>
 
 namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-disconnect_options::disconnect_options() 
-		: opts_(MQTTAsync_disconnectOptions_initializer) 
+constexpr MQTTAsync_disconnectOptions disconnect_options::DFLT_C_STRUCT;
+
+disconnect_options::disconnect_options() : opts_(DFLT_C_STRUCT)
 {
 }
 
-disconnect_options::disconnect_options(int timeout, token* tok)
+disconnect_options::disconnect_options(int timeout, const token_ptr& tok)
 		: disconnect_options()
 {
 	set_timeout(timeout);
 	set_token(tok);
 }
 
-void disconnect_options::set_token(token* tok)
+disconnect_options::disconnect_options(const disconnect_options& opt)
+			: opts_(opt.opts_), tok_(opt.tok_)
 {
-	opts_.context = tok;
+}
+
+disconnect_options::disconnect_options(disconnect_options&& opt)
+			: opts_(opt.opts_), tok_(std::move(opt.tok_))
+{
+}
+
+disconnect_options& disconnect_options::operator=(const disconnect_options& opt)
+{
+	std::memcpy(&opts_, &opt.opts_, sizeof(MQTTAsync_disconnectOptions));
+	tok_ = opt.tok_;
+	return *this;
+}
+
+disconnect_options& disconnect_options::operator=(disconnect_options&& opt)
+{
+	tok_ = std::move(opt.tok_);
+	std::memcpy(&opts_, &opt.opts_, sizeof(MQTTAsync_disconnectOptions));
+	return *this;
+}
+
+void disconnect_options::set_token(const token_ptr& tok)
+{
+	tok_ = tok;
+	opts_.context = tok_.get();
 
 	if (tok) {
 		opts_.onSuccess = &token::on_success;
@@ -30,11 +58,6 @@ void disconnect_options::set_token(token* tok)
 		opts_.onSuccess = nullptr;
 		opts_.onFailure = nullptr;
 	}
-}
-
-token* disconnect_options::get_token()
-{
-	return static_cast<token*>(opts_.context);
 }
 
 /////////////////////////////////////////////////////////////////////////////

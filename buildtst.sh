@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # buildtst.sh for the Paho C++ library.
 #
@@ -8,12 +8,12 @@
 # of the compilers in the list. If a particular compiler is not installed on
 # the system, it is just skipped.
 #
-# This is not meant to replace Travis or other CI on the repo server, but 
+# This is not meant to replace Travis or other CI on the repo server, but
 # is rather meant to be a quick test to use during development.
 #
 
 COMPILERS="g++-4.8 g++-4.9 g++-5 g++-6 clang++-3.6 clang++-3.8"
-[ -n "$1" ] && COMPILERS=$1
+[ "$#" -gt 1 ] && COMPILERS="$@"
 
 for COMPILER in $COMPILERS
 do
@@ -33,6 +33,7 @@ do
             exit 2
         fi
         rm -rf tmp/*
+	printf "Running unit tests:\n"
         if ! ./mqttpp-unittest ; then
             printf "\nUnit test failed for  %s\n" "${COMPILER}"
             exit 3
