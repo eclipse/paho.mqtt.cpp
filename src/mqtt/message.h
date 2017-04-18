@@ -56,6 +56,7 @@ class message
 
 	/** The client has special access. */
 	friend class async_client;
+	friend class message_test;
 
 	/**
 	 * Set the dup flag in the underlying message

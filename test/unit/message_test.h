@@ -50,6 +50,8 @@ class message_test : public CppUnit::TestFixture
 
 	const std::string EMPTY_STR;
 	const int DFLT_QOS = 0;
+	const bool DFLT_RETAINED = false;
+	const bool DFLT_DUP = false;
 
 	const char* BUF = "Hello there";
 	const size_t N = std::strlen(BUF);
@@ -71,6 +73,17 @@ public:
 	void test_dflt_constructor() {
 		mqtt::message msg;
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, msg.get_payload_str());
+		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, msg.get_qos());
+		CPPUNIT_ASSERT_EQUAL(DFLT_RETAINED, msg.is_retained());
+		CPPUNIT_ASSERT_EQUAL(DFLT_DUP, msg.is_duplicate());
+
+		const auto& c_struct = msg.msg_;
+
+		CPPUNIT_ASSERT_EQUAL(0, c_struct.payloadlen);
+		CPPUNIT_ASSERT(nullptr == c_struct.payload);
+		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, c_struct.qos);
+		CPPUNIT_ASSERT_EQUAL(DFLT_RETAINED, c_struct.retained != 0);
+		CPPUNIT_ASSERT_EQUAL(DFLT_DUP, c_struct.dup != 0);
 	}
 
 // ----------------------------------------------------------------------
@@ -82,7 +95,16 @@ public:
 
 		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, msg.get_qos());
-		CPPUNIT_ASSERT(!msg.is_retained());
+		CPPUNIT_ASSERT_EQUAL(DFLT_RETAINED, msg.is_retained());
+		CPPUNIT_ASSERT_EQUAL(DFLT_DUP, msg.is_duplicate());
+
+		const auto& c_struct = msg.msg_;
+
+		CPPUNIT_ASSERT_EQUAL(int(N), c_struct.payloadlen);
+		CPPUNIT_ASSERT(!memcmp(BUF, c_struct.payload, N));
+		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, c_struct.qos);
+		CPPUNIT_ASSERT_EQUAL(DFLT_RETAINED, c_struct.retained != 0);
+		CPPUNIT_ASSERT_EQUAL(DFLT_DUP, c_struct.dup != 0);
 	}
 
 // ----------------------------------------------------------------------
@@ -95,6 +117,15 @@ public:
 		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
+		CPPUNIT_ASSERT_EQUAL(DFLT_DUP, msg.is_duplicate());
+
+		const auto& c_struct = msg.msg_;
+
+		CPPUNIT_ASSERT_EQUAL(int(N), c_struct.payloadlen);
+		CPPUNIT_ASSERT(!memcmp(BUF, c_struct.payload, N));
+		CPPUNIT_ASSERT_EQUAL(QOS, c_struct.qos);
+		CPPUNIT_ASSERT(c_struct.retained != 0);
+		CPPUNIT_ASSERT_EQUAL(DFLT_DUP, c_struct.dup != 0);
 	}
 
 // ----------------------------------------------------------------------
@@ -107,6 +138,15 @@ public:
 		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, msg.get_qos());
 		CPPUNIT_ASSERT(!msg.is_retained());
+		CPPUNIT_ASSERT_EQUAL(DFLT_DUP, msg.is_duplicate());
+
+		const auto& c_struct = msg.msg_;
+
+		CPPUNIT_ASSERT_EQUAL(int(PAYLOAD.size()), c_struct.payloadlen);
+		CPPUNIT_ASSERT(!memcmp(PAYLOAD.data(), c_struct.payload, PAYLOAD.size()));
+		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, c_struct.qos);
+		CPPUNIT_ASSERT_EQUAL(DFLT_RETAINED, c_struct.retained != 0);
+		CPPUNIT_ASSERT_EQUAL(DFLT_DUP, c_struct.dup != 0);
 	}
 
 // ----------------------------------------------------------------------
@@ -119,6 +159,15 @@ public:
 		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
+		CPPUNIT_ASSERT_EQUAL(DFLT_DUP, msg.is_duplicate());
+
+		const auto& c_struct = msg.msg_;
+
+		CPPUNIT_ASSERT_EQUAL(int(PAYLOAD.size()), c_struct.payloadlen);
+		CPPUNIT_ASSERT(!memcmp(PAYLOAD.data(), c_struct.payload, PAYLOAD.size()));
+		CPPUNIT_ASSERT_EQUAL(QOS, c_struct.qos);
+		CPPUNIT_ASSERT(c_struct.retained != 0);
+		CPPUNIT_ASSERT_EQUAL(DFLT_DUP, c_struct.dup != 0);
 	}
 
 // ----------------------------------------------------------------------
@@ -139,6 +188,14 @@ public:
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
 		CPPUNIT_ASSERT(msg.is_duplicate());
+
+		const auto& c_struct = msg.msg_;
+
+		CPPUNIT_ASSERT_EQUAL(int(N), c_struct.payloadlen);
+		CPPUNIT_ASSERT(!memcmp(BUF, c_struct.payload, N));
+		CPPUNIT_ASSERT_EQUAL(QOS, c_struct.qos);
+		CPPUNIT_ASSERT(c_struct.retained != 0);
+		CPPUNIT_ASSERT(c_struct.dup != 0);
 	}
 
 // ----------------------------------------------------------------------
@@ -151,6 +208,14 @@ public:
 		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
+
+		const auto& c_struct = msg.msg_;
+
+		CPPUNIT_ASSERT_EQUAL(int(PAYLOAD.size()), c_struct.payloadlen);
+		CPPUNIT_ASSERT(!memcmp(PAYLOAD.data(), c_struct.payload, PAYLOAD.size()));
+		CPPUNIT_ASSERT_EQUAL(QOS, c_struct.qos);
+		CPPUNIT_ASSERT(c_struct.retained != 0);
+		CPPUNIT_ASSERT_EQUAL(DFLT_DUP, c_struct.dup != 0);
 
 		// Make sure it's a true copy, not linked to the original
 		orgMsg.set_payload(EMPTY_STR);
@@ -173,10 +238,16 @@ public:
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
 
+		const auto& c_struct = msg.msg_;
+
+		CPPUNIT_ASSERT_EQUAL(int(PAYLOAD.size()), c_struct.payloadlen);
+		CPPUNIT_ASSERT(!memcmp(PAYLOAD.data(), c_struct.payload, PAYLOAD.size()));
+		CPPUNIT_ASSERT_EQUAL(QOS, c_struct.qos);
+		CPPUNIT_ASSERT(c_struct.retained != 0);
+		CPPUNIT_ASSERT_EQUAL(DFLT_DUP, c_struct.dup != 0);
+
 		// Check that the original was moved
-		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgMsg.get_payload_str());
-		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, orgMsg.get_qos());
-		CPPUNIT_ASSERT(!orgMsg.is_retained());
+		CPPUNIT_ASSERT_EQUAL(size_t(0), orgMsg.get_payload().size());
 	}
 
 // ----------------------------------------------------------------------
@@ -191,6 +262,14 @@ public:
 		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
+
+		const auto& c_struct = msg.msg_;
+
+		CPPUNIT_ASSERT_EQUAL(int(PAYLOAD.size()), c_struct.payloadlen);
+		CPPUNIT_ASSERT(!memcmp(PAYLOAD.data(), c_struct.payload, PAYLOAD.size()));
+		CPPUNIT_ASSERT_EQUAL(QOS, c_struct.qos);
+		CPPUNIT_ASSERT(c_struct.retained != 0);
+		CPPUNIT_ASSERT_EQUAL(DFLT_DUP, c_struct.dup != 0);
 
 		// Make sure it's a true copy, not linked to the original
 		orgMsg.set_payload(EMPTY_STR);
@@ -215,17 +294,22 @@ public:
 
 	void test_move_assignment() {
 		mqtt::message msg;
-
 		msg = std::move(orgMsg);
 
 		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
 
+		const auto& c_struct = msg.msg_;
+
+		CPPUNIT_ASSERT_EQUAL(int(PAYLOAD.size()), c_struct.payloadlen);
+		CPPUNIT_ASSERT(!memcmp(PAYLOAD.data(), c_struct.payload, PAYLOAD.size()));
+		CPPUNIT_ASSERT_EQUAL(QOS, c_struct.qos);
+		CPPUNIT_ASSERT(c_struct.retained != 0);
+		CPPUNIT_ASSERT_EQUAL(DFLT_DUP, c_struct.dup != 0);
+
 		// Check that the original was moved
-		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgMsg.get_payload_str());
-		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, orgMsg.get_qos());
-		CPPUNIT_ASSERT(!orgMsg.is_retained());
+		CPPUNIT_ASSERT_EQUAL(size_t(0), orgMsg.get_payload().size());
 
 		// Self assignment should cause no harm
 		// (clang++ is smart enough to warn about this)
