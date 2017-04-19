@@ -66,7 +66,7 @@ public:
 	 * acknowledgments have been received.
 	 * @param tok The token tracking the message delivery.
 	 */
-	virtual void delivery_complete(idelivery_token_ptr tok) =0;
+	virtual void delivery_complete(delivery_token_ptr tok) =0;
 };
 
 /** Smart/shared pointer to a callback object */

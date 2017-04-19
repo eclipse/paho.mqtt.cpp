@@ -33,11 +33,11 @@ public:
 	bool on_success_called { false };
 	bool on_failure_called { false };
 
-	void on_success(const mqtt::itoken& token) override {
+	void on_success(const mqtt::token& token) override {
 		on_success_called = true;
 	}
 
-	void on_failure(const mqtt::itoken& token) override {
+	void on_failure(const mqtt::token& token) override {
 		on_failure_called = true;
 	}
 

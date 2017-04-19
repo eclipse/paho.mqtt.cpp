@@ -42,7 +42,7 @@ public:
 		message_arrived_called = true;
 	}
 
-	void delivery_complete(mqtt::idelivery_token_ptr tok) override {
+	void delivery_complete(mqtt::delivery_token_ptr tok) override {
 		delivery_complete_called = true;
 	}
 

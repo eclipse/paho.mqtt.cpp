@@ -73,7 +73,7 @@ public:
 
 		mqtt::const_message_ptr msg_in { new mqtt::message { "message" } };
 
-		mqtt::idelivery_token_ptr token { topic.publish(msg_in) };
+		mqtt::delivery_token_ptr token { topic.publish(msg_in) };
 		CPPUNIT_ASSERT(token);
 
 		mqtt::const_message_ptr msg_out { token->get_message() };
@@ -94,7 +94,7 @@ public:
 		std::string payload { "message" };
 		int qos { 1 };
 
-		mqtt::idelivery_token_ptr token { topic.publish(payload, qos, false) };
+		mqtt::delivery_token_ptr token { topic.publish(payload, qos, false) };
 		CPPUNIT_ASSERT(token);
 
 		mqtt::const_message_ptr msg_out { token->get_message() };
@@ -115,7 +115,7 @@ public:
 		std::size_t payload_size { payload.size() };
 		int qos { 2 };
 
-		mqtt::idelivery_token_ptr token = topic.publish(payload.c_str(), payload_size, qos, false);
+		mqtt::delivery_token_ptr token = topic.publish(payload.c_str(), payload_size, qos, false);
 		CPPUNIT_ASSERT(token);
 
 		mqtt::const_message_ptr msg_out = token->get_message();

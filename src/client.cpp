@@ -87,7 +87,7 @@ std::string client::get_server_uri() const
 //Debug 	getDebug()
 //Return a debug object that can be used to help solve problems.
 
-std::vector<idelivery_token_ptr> client::get_pending_delivery_tokens() const
+std::vector<delivery_token_ptr> client::get_pending_delivery_tokens() const
 {
 	return cli_.get_pending_delivery_tokens();
 }

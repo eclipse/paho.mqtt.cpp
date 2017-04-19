@@ -35,14 +35,14 @@ class action_listener : public virtual mqtt::iaction_listener
 {
 	std::string name_;
 
-	void on_failure(const mqtt::itoken& tok) override {
+	void on_failure(const mqtt::token& tok) override {
 		std::cout << name_ << " failure";
 		if (tok.get_message_id() != 0)
 			std::cout << " for token: [" << tok.get_message_id() << "]" << std::endl;
 		std::cout << std::endl;
 	}
 
-	void on_success(const mqtt::itoken& tok) override {
+	void on_success(const mqtt::token& tok) override {
 		std::cout << name_ << " success";
 		if (tok.get_message_id() != 0)
 			std::cout << " for token: [" << tok.get_message_id() << "]" << std::endl;
@@ -84,7 +84,7 @@ class callback : public virtual mqtt::callback,
 	}
 
 	// Re-connection failure
-	void on_failure(const mqtt::itoken& tok) override {
+	void on_failure(const mqtt::token& tok) override {
 		std::cout << "Connection failed" << std::endl;
 		if (++nretry_ > 5)
 			exit(1);
@@ -92,7 +92,7 @@ class callback : public virtual mqtt::callback,
 	}
 
 	// Re-connection success
-	void on_success(const mqtt::itoken& tok) override {
+	void on_success(const mqtt::token& tok) override {
 		std::cout << "\nConnection success" << std::endl;
 		std::cout << "\nSubscribing to topic '" << TOPIC << "'\n"
 			<< "\tfor client " << CLIENTID
@@ -118,7 +118,7 @@ class callback : public virtual mqtt::callback,
 		std::cout << "\t'" << msg->to_str() << "'\n" << std::endl;
 	}
 
-	void delivery_complete(mqtt::idelivery_token_ptr token) override {}
+	void delivery_complete(mqtt::delivery_token_ptr token) override {}
 
 public:
 	callback(mqtt::async_client& cli, mqtt::connect_options& connOpts)

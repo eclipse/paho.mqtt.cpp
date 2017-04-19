@@ -58,7 +58,7 @@ public:
 	// We're not subscribed to anything, so this should never be called.
 	void message_arrived(const string& topic, mqtt::const_message_ptr msg) override {}
 
-	void delivery_complete(mqtt::idelivery_token_ptr tok) override {
+	void delivery_complete(mqtt::delivery_token_ptr tok) override {
 		cout << "\tDelivery complete for token: "
 			<< (tok ? tok->get_message_id() : -1) << endl;
 	}
@@ -72,12 +72,12 @@ public:
 class action_listener : public virtual mqtt::iaction_listener
 {
 protected:
-	void on_failure(const mqtt::itoken& tok) override {
+	void on_failure(const mqtt::token& tok) override {
 		cout << "\tListener failure for token: "
 			<< tok.get_message_id() << endl;
 	}
 
-	void on_success(const mqtt::itoken& tok) override {
+	void on_success(const mqtt::token& tok) override {
 		cout << "\tListener success for token: "
 			<< tok.get_message_id() << endl;
 	}
@@ -92,12 +92,12 @@ class delivery_action_listener : public action_listener
 {
 	atomic<bool> done_;
 
-	void on_failure(const mqtt::itoken& tok) override {
+	void on_failure(const mqtt::token& tok) override {
 		action_listener::on_failure(tok);
 		done_ = true;
 	}
 
-	void on_success(const mqtt::itoken& tok) override {
+	void on_success(const mqtt::token& tok) override {
 		action_listener::on_success(tok);
 		done_ = true;
 	}
@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
 
 	try {
 		cout << "\nConnecting..." << endl;
-		mqtt::itoken_ptr conntok = client.connect(conopts);
+		mqtt::token_ptr conntok = client.connect(conopts);
 		cout << "Waiting for the connection..." << endl;
 		conntok->wait_for_completion();
 		cout << "  ...OK" << endl;
@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
 		// Now try with itemized publish.
 
 		cout << "\nSending next message..." << endl;
-		mqtt::idelivery_token_ptr pubtok;
+		mqtt::delivery_token_ptr pubtok;
 		pubtok = client.publish(TOPIC, PAYLOAD2, strlen(PAYLOAD2), QOS, false);
 		cout << "  ...with token: " << pubtok->get_message_id() << endl;
 		cout << "  ...for message with " << pubtok->get_message()->get_payload().size()
@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
 
 		// Double check that there are no pending tokens
 
-		vector<mqtt::idelivery_token_ptr> toks = client.get_pending_delivery_tokens();
+		vector<mqtt::delivery_token_ptr> toks = client.get_pending_delivery_tokens();
 		if (!toks.empty())
 			cout << "Error: There are pending delivery tokens!" << endl;
 

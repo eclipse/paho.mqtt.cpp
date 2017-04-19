@@ -31,7 +31,7 @@
 
 namespace mqtt {
 
-class itoken;
+class token;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -62,12 +62,12 @@ public:
 	 * This method is invoked when an action fails.
 	 * @param asyncActionToken
 	 */
-	virtual void on_failure(const itoken& asyncActionToken) =0;
+	virtual void on_failure(const token& asyncActionToken) =0;
 	/**
 	 * This method is invoked when an action has completed successfully.
 	 * @param asyncActionToken
 	 */
-	virtual void on_success(const itoken& asyncActionToken) =0;
+	virtual void on_success(const token& asyncActionToken) =0;
 };
 
 /** Smart/shared pointer to an action listener */

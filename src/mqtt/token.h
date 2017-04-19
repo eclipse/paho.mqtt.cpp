@@ -43,97 +43,10 @@ class iasync_client;
 /////////////////////////////////////////////////////////////////////////////
 
 /**
- * Provides a mechanism for tracking the completion of an asynchronous task.
- */
-class itoken
-{
-public:
-	/** Smart/shared pointer to an object of this class */
-	using ptr_t = std::shared_ptr<itoken>;
-	/** Smart/shared pointer to a const object of this class */
-	using const_ptr_t = std::shared_ptr<itoken>;
-	/** Weak pointer to an object of this class */
-	using weak_ptr_t = std::weak_ptr<itoken>;
-
-	/**
-	 * Virtual base destructor.
-	 */
-	virtual ~itoken() {}
-	/**
-	 * Return the async listener for this token.
-	 * @return iaction_listener
-	 */
-	virtual iaction_listener* get_action_callback() const =0;
-	/**
-	 * Returns the MQTT client that is responsible for processing the
-	 * asynchronous action.
-	 * @return iasync_client
-	 */
-	virtual iasync_client* get_client() const =0;
-	/**
-	 * Returns the message ID of the message that is associated with the
-	 * token.
-	 * @return int
-	 */
-	virtual int get_message_id() const =0;
-	/**
-	 * Returns the topic string(s) for the action being tracked by this
-	 * token.
-	 * @return std::vector<std::string>
-	 */
-	virtual const std::vector<std::string>& get_topics() const =0;
-	/**
-	 * Retrieve the context associated with an action.
-	 * @return void*
-	 */
-	virtual void* get_user_context() const =0;
-	/**
-	 * Returns whether or not the action has finished.
-	 * @return bool
-	 */
-	virtual bool is_complete() const =0;
-	/**
-	 * Register a listener to be notified when an action completes.
-	 * @param listener
-	 */
-	virtual void set_action_callback(iaction_listener& listener) =0;
-	/**
-	 * Store some context associated with an action.
-	 * @param userContext
-	 */
-	virtual void set_user_context(void* userContext) =0;
-	/**
-	 * Blocks the current thread until the action this token is associated
-	 * with has completed.
-	 */
-	virtual void wait_for_completion() =0;
-	/**
-	 * Blocks the current thread until the action this token is associated
-	 * with has completed.
-	 * @param timeout
-	 */
-	virtual bool wait_for_completion(long timeout) =0;
-	/**
-	 * Waits a relative amount of time for the action to complete.
-	 * @param relTime The amount of time to wait for the event.
-	 * @return @em true if the event gets signaled in the specified time,
-	 *  	   @em false on a timeout.
-	 */
-	template <class Rep, class Period>
-	bool wait_for_completion(const std::chrono::duration<Rep, Period>& relTime) {
-		return wait_for_completion((long) to_milliseconds(relTime).count());
-	}
-};
-
-using itoken_ptr = itoken::ptr_t;
-
-/////////////////////////////////////////////////////////////////////////////
-
-/**
  * Provides a mechanism for tracking the completion of an asynchronous
  * action.
  */
-class token : public virtual itoken
+class token
 {
 	/** Lock guard type for this class. */
 	using guard = std::lock_guard<std::mutex>;
@@ -261,6 +174,10 @@ public:
 	 */
 	token(iasync_client& cli, const std::vector<std::string>& topics);
 	/**
+	 * Virtual destructor.
+	 */
+	virtual ~token() {}
+	/**
 	 * Constructs a token object.
 	 * @param cli The client that created the token.
 	 * @return A smart/shared pointer to a token.
@@ -299,7 +216,7 @@ public:
 	 * Return the async listener for this token.
 	 * @return iaction_listener
 	 */
-	iaction_listener* get_action_callback() const override {
+	virtual iaction_listener* get_action_callback() const {
 		// TODO: Guard?
 		return listener_;
 	}
@@ -308,13 +225,13 @@ public:
 	 * asynchronous action.
 	 * @return iasync_client
 	 */
-	iasync_client* get_client() const override { return cli_; }
+	virtual iasync_client* get_client() const { return cli_; }
 	/**
 	 * Returns the message ID of the message that is associated with the
 	 * token.
 	 * @return int
 	 */
-	int get_message_id() const override {
+	virtual int get_message_id() const {
 		static_assert(sizeof(tok_) <= sizeof(int), "MQTTAsync_token must fit into int");
 		return int(tok_);
 	}
@@ -322,13 +239,13 @@ public:
 	 * Returns the topic string(s) for the action being tracked by this
 	 * token.
 	 */
-	const std::vector<std::string>& get_topics() const override {
+	virtual const std::vector<std::string>& get_topics() const {
 		return topics_;
 	}
 	/**
 	 * Retrieve the context associated with an action.
 	 */
-	void* get_user_context() const override {
+	virtual void* get_user_context() const {
 		guard g(lock_);
 		return userContext_;
 	}
@@ -336,12 +253,12 @@ public:
 	 * Returns whether or not the action has finished.
 	 * @return bool
 	 */
-	bool is_complete() const override { return complete_; }
+	virtual bool is_complete() const { return complete_; }
 	/**
 	 * Register a listener to be notified when an action completes.
 	 * @param listener
 	 */
-	void set_action_callback(iaction_listener& listener) override {
+	virtual void set_action_callback(iaction_listener& listener) {
 		guard g(lock_);
 		listener_ = &listener;
 	}
@@ -349,7 +266,7 @@ public:
 	 * Store some context associated with an action.
 	 * @param userContext
 	 */
-	void set_user_context(void* userContext) override {
+	virtual void set_user_context(void* userContext) {
 		guard g(lock_);
 		userContext_ = userContext;
 	}
@@ -357,7 +274,7 @@ public:
 	 * Blocks the current thread until the action this token is associated
 	 * with has completed.
 	 */
-	void wait_for_completion() override;
+	virtual void wait_for_completion();
 	/**
 	 * Blocks the current thread until the action this token is associated
 	 * with has completed.
@@ -365,7 +282,17 @@ public:
 	 * @return @em true if the wait finished successfully, @em false if a
 	 *  	   timeout occurred.
 	 */
-	bool wait_for_completion(long timeout) override;
+	virtual bool wait_for_completion(long timeout);
+	/**
+	 * Waits a relative amount of time for the action to complete.
+	 * @param relTime The amount of time to wait for the event.
+	 * @return @em true if the event gets signaled in the specified time,
+	 *  	   @em false on a timeout.
+	 */
+	template <class Rep, class Period>
+	bool wait_for_completion(const std::chrono::duration<Rep, Period>& relTime) {
+		return wait_for_completion((long) to_milliseconds(relTime).count());
+	}
 	/**
 	 * Waits until an absolute time for the action to complete.
 	 * @param absTime The absolute time to wait for the event.

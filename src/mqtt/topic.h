@@ -74,7 +74,7 @@ public:
 	 *
 	 * @return delivery_token
 	 */
-	idelivery_token_ptr publish(const void* payload, size_t n, int qos, bool retained);
+	delivery_token_ptr publish(const void* payload, size_t n, int qos, bool retained);
 	/**
 	 * Publishes a message on the topic.
 	 * @param payload
@@ -83,14 +83,14 @@ public:
 	 *
 	 * @return delivery_token
 	 */
-	idelivery_token_ptr publish(const std::string& payload, int qos, bool retained);
+	delivery_token_ptr publish(const std::string& payload, int qos, bool retained);
 	/**
 	 * Publishes the specified message to this topic, but does not wait for
 	 * delivery of the message to complete.
 	 * @param msg
 	 * @return delivery_token
 	 */
-	idelivery_token_ptr publish(const_message_ptr msg);
+	delivery_token_ptr publish(const_message_ptr msg);
 	/**
 	 * Returns a string representation of this topic.
 	 * @return std::string

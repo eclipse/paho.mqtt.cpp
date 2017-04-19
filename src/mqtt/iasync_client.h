@@ -57,7 +57,7 @@ namespace mqtt {
 class iasync_client
 {
 	friend class token;
-	virtual void remove_token(itoken* tok) =0;
+	virtual void remove_token(token* tok) =0;
 
 public:
 	/** Type for a collection of filters */
@@ -76,7 +76,7 @@ public:
 	 * @throw exception for non security related problems
 	 * @throw security_exception for security related problems
 	 */
-	virtual itoken_ptr connect() =0;
+	virtual token_ptr connect() =0;
 	/**
 	 * Connects to an MQTT server using the provided connect options.
 	 * @param options a set of connection parameters that override the
@@ -86,7 +86,7 @@ public:
 	 * @throw exception for non security related problems
 	 * @throw security_exception for security related problems
 	 */
-	virtual itoken_ptr connect(connect_options options) =0;
+	virtual token_ptr connect(connect_options options) =0;
 	/**
 	 * Connects to an MQTT server using the specified options.
 	 *
@@ -101,7 +101,7 @@ public:
 	 * @throw exception for non security related problems
 	 * @throw security_exception for security related problems
 	 */
-	virtual itoken_ptr connect(connect_options options, void* userContext,
+	virtual token_ptr connect(connect_options options, void* userContext,
 							   iaction_listener& cb) =0;
 	/**
 	 *
@@ -113,14 +113,14 @@ public:
 	 * @throw exception for non security related problems
 	 * @throw security_exception for security related problems
 	 */
-	virtual itoken_ptr connect(void* userContext, iaction_listener& cb) =0;
+	virtual token_ptr connect(void* userContext, iaction_listener& cb) =0;
 	/**
 	 * Disconnects from the server.
 	 * @return token used to track and wait for the disconnect to complete.
 	 *  	   The token will be passed to any callback that has been set.
 	 * @throw exception for problems encountered while disconnecting
 	 */
-	virtual itoken_ptr disconnect() =0;
+	virtual token_ptr disconnect() =0;
 	/**
 	 * Disconnects from the server.
 	 * @param opts Options for disconnecting.
@@ -128,7 +128,7 @@ public:
 	 *  	   The token will be passed to any callback that has been set.
 	 * @throw exception for problems encountered while disconnecting
 	 */
-	virtual itoken_ptr disconnect(disconnect_options opts) =0;
+	virtual token_ptr disconnect(disconnect_options opts) =0;
 	/**
 	 * Disconnects from the server.
 	 * @param timeout the amount of time in milliseconds to allow for
@@ -138,7 +138,7 @@ public:
 	 *  	   The token will be passed to any callback that has been set.
 	 * @throw exception for problems encountered while disconnecting
 	 */
-	virtual itoken_ptr disconnect(int timeout) =0;
+	virtual token_ptr disconnect(int timeout) =0;
 	/**
 	 * Disconnects from the server.
 	 * @param timeout the amount of time in milliseconds to allow for
@@ -152,7 +152,7 @@ public:
 	 *  	   The token will be passed to any callback that has been set.
 	 * @throw exception for problems encountered while disconnecting
 	 */
-	virtual itoken_ptr disconnect(int timeout, void* userContext, iaction_listener& cb) =0;
+	virtual token_ptr disconnect(int timeout, void* userContext, iaction_listener& cb) =0;
 	/**
 	 * Disconnects from the server.
 	 * @param userContext optional object used to pass context to the
@@ -163,17 +163,17 @@ public:
 	 *  	   The token will be passed to any callback that has been set.
 	 * @throw exception for problems encountered while disconnecting
 	 */
-	virtual itoken_ptr disconnect(void* userContext, iaction_listener& cb) =0;
+	virtual token_ptr disconnect(void* userContext, iaction_listener& cb) =0;
 	/**
 	 * Returns the delivery token for the specified message ID.
-	 * @return idelivery_token
+	 * @return delivery_token
 	 */
-	virtual idelivery_token_ptr get_pending_delivery_token(int msgID) const =0;
+	virtual delivery_token_ptr get_pending_delivery_token(int msgID) const =0;
 	/**
 	 * Returns the delivery tokens for any outstanding publish operations.
-	 * @return idelivery_token[]
+	 * @return delivery_token[]
 	 */
-	virtual std::vector<idelivery_token_ptr> get_pending_delivery_tokens() const =0;
+	virtual std::vector<delivery_token_ptr> get_pending_delivery_tokens() const =0;
 	/**
 	 * Returns the client ID used by this client.
 	 * @return std::string
@@ -198,7 +198,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	virtual idelivery_token_ptr publish(const std::string& topic, const void* payload,
+	virtual delivery_token_ptr publish(const std::string& topic, const void* payload,
 										size_t n, int qos, bool retained) =0;
 	/**
 	 * Publishes a message to a topic on the server
@@ -214,7 +214,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	virtual idelivery_token_ptr publish(const std::string& topic,
+	virtual delivery_token_ptr publish(const std::string& topic,
 										const void* payload, size_t n,
 										int qos, bool retained, void* userContext,
 										iaction_listener& cb) =0;
@@ -227,7 +227,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	virtual idelivery_token_ptr publish(const std::string& topic, const_message_ptr msg) =0;
+	virtual delivery_token_ptr publish(const std::string& topic, const_message_ptr msg) =0;
 	/**
 	 * Publishes a message to a topic on the server.
 	 * @param topic the topic to deliver the message to
@@ -239,7 +239,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	virtual idelivery_token_ptr publish(const std::string& topic, const_message_ptr msg,
+	virtual delivery_token_ptr publish(const std::string& topic, const_message_ptr msg,
 										void* userContext, iaction_listener& cb) =0;
 	/**
 	 * Sets a callback listener to use for events that happen
@@ -262,7 +262,7 @@ public:
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	virtual itoken_ptr subscribe(const topic_filter_collection& topicFilters,
+	virtual token_ptr subscribe(const topic_filter_collection& topicFilters,
 								 const qos_collection& qos) =0;
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
@@ -280,7 +280,7 @@ public:
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	virtual itoken_ptr subscribe(const topic_filter_collection& topicFilters,
+	virtual token_ptr subscribe(const topic_filter_collection& topicFilters,
 								 const qos_collection& qos,
 								 void* userContext, iaction_listener& callback) =0;
 	/**
@@ -295,7 +295,7 @@ public:
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	virtual itoken_ptr subscribe(const std::string& topicFilter, int qos) =0;
+	virtual token_ptr subscribe(const std::string& topicFilter, int qos) =0;
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 * @param topicFilter the topic to subscribe to, which can include
@@ -312,7 +312,7 @@ public:
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	virtual itoken_ptr subscribe(const std::string& topicFilter, int qos,
+	virtual token_ptr subscribe(const std::string& topicFilter, int qos,
 								 void* userContext, iaction_listener& callback) =0;
 	/**
 	 * Requests the server unsubscribe the client from a topic.
@@ -321,7 +321,7 @@ public:
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	virtual itoken_ptr unsubscribe(const std::string& topicFilter) =0;
+	virtual token_ptr unsubscribe(const std::string& topicFilter) =0;
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
 	 * @param topicFilters one or more topics to unsubscribe from. Each
@@ -330,7 +330,7 @@ public:
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	virtual itoken_ptr unsubscribe(const topic_filter_collection& topicFilters) =0;
+	virtual token_ptr unsubscribe(const topic_filter_collection& topicFilters) =0;
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
 	 * @param topicFilters one or more topics to unsubscribe from. Each
@@ -343,7 +343,7 @@ public:
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	virtual itoken_ptr unsubscribe(const topic_filter_collection& topicFilters,
+	virtual token_ptr unsubscribe(const topic_filter_collection& topicFilters,
 								   void* userContext, iaction_listener& cb) =0;
 	/**
 	 * Requests the server unsubscribe the client from a topics.
@@ -356,7 +356,7 @@ public:
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	virtual itoken_ptr unsubscribe(const std::string& topicFilter,
+	virtual token_ptr unsubscribe(const std::string& topicFilter,
 								   void* userContext, iaction_listener& cb) =0;
 };
 

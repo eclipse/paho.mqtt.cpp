@@ -131,7 +131,7 @@ public:
 	/**
 	 * Returns the delivery tokens for any outstanding publish operations.
 	 */
-	virtual std::vector<idelivery_token_ptr> get_pending_delivery_tokens() const;
+	virtual std::vector<delivery_token_ptr> get_pending_delivery_tokens() const;
 	/**
 	 * Returns the address of the server used by this client, as a URI.
 	 * @return std::string

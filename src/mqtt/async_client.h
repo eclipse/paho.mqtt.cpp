@@ -76,9 +76,9 @@ private:
 	/** Callback supplied by the user (if any) */
 	callback* userCallback_;
 	/** A list of tokens that are in play */
-	std::list<itoken_ptr> pendingTokens_;
+	std::list<token_ptr> pendingTokens_;
 	/** A list of delivery tokens that are in play */
-	std::list<idelivery_token_ptr> pendingDeliveryTokens_;
+	std::list<delivery_token_ptr> pendingDeliveryTokens_;
 
 	static void on_connection_lost(void *context, char *cause);
 	static int on_message_arrived(void* context, char* topicName, int topicLen,
@@ -87,11 +87,11 @@ private:
 
 	/** Manage internal list of active tokens */
 	friend class token;
-	virtual void add_token(itoken_ptr tok);
-	virtual void add_token(idelivery_token_ptr tok);
-	virtual void remove_token(itoken* tok) override;
-	virtual void remove_token(itoken_ptr tok) { remove_token(tok.get()); }
-	void remove_token(idelivery_token_ptr tok) { remove_token(tok.get()); }
+	virtual void add_token(token_ptr tok);
+	virtual void add_token(delivery_token_ptr tok);
+	virtual void remove_token(token* tok) override;
+	virtual void remove_token(token_ptr tok) { remove_token(tok.get()); }
+	void remove_token(delivery_token_ptr tok) { remove_token(tok.get()); }
 
 	/** Memory management for C-style filter collections */
 	std::vector<char*> alloc_topic_filters(
@@ -160,7 +160,7 @@ public:
 	 * @throw exception for non security related problems
 	 * @throw security_exception for security related problems
 	 */
-	itoken_ptr connect() override;
+	token_ptr connect() override;
 	/**
 	 * Connects to an MQTT server using the provided connect options.
 	 * @param options a set of connection parameters that override the
@@ -170,7 +170,7 @@ public:
 	 * @throw exception for non security related problems
 	 * @throw security_exception for security related problems
 	 */
-	itoken_ptr connect(connect_options options) override;
+	token_ptr connect(connect_options options) override;
 	/**
 	 * Connects to an MQTT server using the specified options.
 	 * @param options a set of connection parameters that override the
@@ -184,7 +184,7 @@ public:
 	 * @throw exception for non security related problems
 	 * @throw security_exception for security related problems
 	 */
-	itoken_ptr connect(connect_options options, void* userContext,
+	token_ptr connect(connect_options options, void* userContext,
 					   iaction_listener& cb) override;
 	/**
 	 *
@@ -197,14 +197,14 @@ public:
 	 * @throw exception for non security related problems
 	 * @throw security_exception for security related problems
 	 */
-	itoken_ptr connect(void* userContext, iaction_listener& cb) override;
+	token_ptr connect(void* userContext, iaction_listener& cb) override;
 	/**
 	 * Disconnects from the server.
 	 * @return token used to track and wait for the disconnect to complete.
 	 *  	   The token will be passed to any callback that has been set.
 	 * @throw exception for problems encountered while disconnecting
 	 */
-	itoken_ptr disconnect() override { return disconnect(disconnect_options()); }
+	token_ptr disconnect() override { return disconnect(disconnect_options()); }
 	/**
 	 * Disconnects from the server.
 	 * @param opts Options for disconnecting.
@@ -212,7 +212,7 @@ public:
 	 *  	   The token will be passed to any callback that has been set.
 	 * @throw exception for problems encountered while disconnecting
 	 */
-	itoken_ptr disconnect(disconnect_options opts) override;
+	token_ptr disconnect(disconnect_options opts) override;
 	/**
 	 * Disconnects from the server.
 	 * @param timeout the amount of time in milliseconds to allow for
@@ -223,7 +223,7 @@ public:
 	 *  	   set.
 	 * @throw exception for problems encountered while disconnecting
 	 */
-	itoken_ptr disconnect(int timeout) override;
+	token_ptr disconnect(int timeout) override;
 	/**
 	 * Disconnects from the server.
 	 * @param timeout the amount of time in milliseconds to allow for
@@ -235,7 +235,7 @@ public:
 	 * @throw exception for problems encountered while disconnecting
 	 */
 	template <class Rep, class Period>
-	itoken_ptr disconnect(const std::chrono::duration<Rep, Period>& timeout) {
+	token_ptr disconnect(const std::chrono::duration<Rep, Period>& timeout) {
 		// TODO: check range
 		return disconnect((int) to_milliseconds(timeout).count());
 	}
@@ -248,12 +248,12 @@ public:
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb callback listener that will be notified when the disconnect
 	 *  			   completes.
-	 * @return itoken_ptr Token used to track and wait for disconnect to
+	 * @return token_ptr Token used to track and wait for disconnect to
 	 *  	   complete. The token will be passed to the callback methods if
 	 *  	   a callback is set.
 	 * @throw exception for problems encountered while disconnecting
 	 */
-	itoken_ptr disconnect(int timeout, void* userContext,
+	token_ptr disconnect(int timeout, void* userContext,
 						  iaction_listener& cb) override;
 	/**
 	 * Disconnects from the server.
@@ -264,13 +264,13 @@ public:
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb callback listener that will be notified when the disconnect
 	 *  			   completes.
-	 * @return itoken_ptr Token used to track and wait for disconnect to
+	 * @return token_ptr Token used to track and wait for disconnect to
 	 *  	   complete. The token will be passed to the callback methods if
 	 *  	   a callback is set.
 	 * @throw exception for problems encountered while disconnecting
 	 */
 	template <class Rep, class Period>
-	itoken_ptr disconnect(const std::chrono::duration<Rep, Period>& timeout,
+	token_ptr disconnect(const std::chrono::duration<Rep, Period>& timeout,
 						  void* userContext, iaction_listener& cb) {
 		// TODO: check range
 		return disconnect((int) to_milliseconds(timeout).count(), userContext, cb);
@@ -281,24 +281,24 @@ public:
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb callback listener that will be notified when the disconnect
 	 *  			   completes.
-	 * @return itoken_ptr Token used to track and wait for disconnect to
+	 * @return token_ptr Token used to track and wait for disconnect to
 	 *  	   complete. The token will be passed to the callback methods if
 	 *  	   a callback is set.
 	 * @throw exception for problems encountered while disconnecting
 	 */
-	itoken_ptr disconnect(void* userContext, iaction_listener& cb) override {
+	token_ptr disconnect(void* userContext, iaction_listener& cb) override {
 		return disconnect(0L, userContext, cb);
 	}
 	/**
 	 * Returns the delivery token for the specified message ID.
-	 * @return idelivery_token
+	 * @return delivery_token
 	 */
-	idelivery_token_ptr get_pending_delivery_token(int msgID) const override;
+	delivery_token_ptr get_pending_delivery_token(int msgID) const override;
 	/**
 	 * Returns the delivery tokens for any outstanding publish operations.
-	 * @return idelivery_token[]
+	 * @return delivery_token[]
 	 */
-	std::vector<idelivery_token_ptr> get_pending_delivery_tokens() const override;
+	std::vector<delivery_token_ptr> get_pending_delivery_tokens() const override;
 	/**
 	 * Returns the client ID used by this client.
 	 * @return The client ID used by this client.
@@ -326,7 +326,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	idelivery_token_ptr publish(const std::string& topic, const void* payload,
+	delivery_token_ptr publish(const std::string& topic, const void* payload,
 								size_t n, int qos, bool retained) override;
 	/**
 	 * Publishes a message to a topic on the server
@@ -343,7 +343,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	idelivery_token_ptr publish(const std::string& topic,
+	delivery_token_ptr publish(const std::string& topic,
 								const void* payload, size_t n,
 								int qos, bool retained, void* userContext,
 								iaction_listener& cb) override;
@@ -356,7 +356,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	idelivery_token_ptr publish(const std::string& topic, const_message_ptr msg) override;
+	delivery_token_ptr publish(const std::string& topic, const_message_ptr msg) override;
 	/**
 	 * Publishes a message to a topic on the server.
 	 * @param topic the topic to deliver the message to
@@ -369,7 +369,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	idelivery_token_ptr publish(const std::string& topic, const_message_ptr msg,
+	delivery_token_ptr publish(const std::string& topic, const_message_ptr msg,
 								void* userContext, iaction_listener& cb) override;
 	/**
 	 * Sets a callback listener to use for events that happen
@@ -388,7 +388,7 @@ public:
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	itoken_ptr subscribe(const topic_filter_collection& topicFilters,
+	token_ptr subscribe(const topic_filter_collection& topicFilters,
 						 const qos_collection& qos) override;
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
@@ -404,7 +404,7 @@ public:
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	itoken_ptr subscribe(const topic_filter_collection& topicFilters,
+	token_ptr subscribe(const topic_filter_collection& topicFilters,
 						 const qos_collection& qos,
 						 void* userContext, iaction_listener& cb) override;
 	/**
@@ -416,7 +416,7 @@ public:
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	itoken_ptr subscribe(const std::string& topicFilter, int qos) override;
+	token_ptr subscribe(const std::string& topicFilter, int qos) override;
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 * @param topicFilter the topic to subscribe to, which can include
@@ -432,7 +432,7 @@ public:
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	itoken_ptr subscribe(const std::string& topicFilter, int qos,
+	token_ptr subscribe(const std::string& topicFilter, int qos,
 						 void* userContext, iaction_listener& cb) override;
 	/**
 	 * Requests the server unsubscribe the client from a topic.
@@ -441,7 +441,7 @@ public:
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	itoken_ptr unsubscribe(const std::string& topicFilter) override;
+	token_ptr unsubscribe(const std::string& topicFilter) override;
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
 	 * @param topicFilters one or more topics to unsubscribe from. Each
@@ -450,7 +450,7 @@ public:
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	itoken_ptr unsubscribe(const topic_filter_collection& topicFilters) override;
+	token_ptr unsubscribe(const topic_filter_collection& topicFilters) override;
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
 	 * @param topicFilters
@@ -461,7 +461,7 @@ public:
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	itoken_ptr unsubscribe(const topic_filter_collection& topicFilters,
+	token_ptr unsubscribe(const topic_filter_collection& topicFilters,
 						   void* userContext, iaction_listener& cb) override;
 	/**
 	 * Requests the server unsubscribe the client from a topics.
@@ -474,7 +474,7 @@ public:
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	itoken_ptr unsubscribe(const std::string& topicFilter,
+	token_ptr unsubscribe(const std::string& topicFilter,
 						   void* userContext, iaction_listener& cb) override;
 };
 
