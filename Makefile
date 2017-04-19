@@ -137,7 +137,7 @@ all: $(TGT) $(LIB_DIR)/$(LIB_LINK) $(LIB_DIR)/$(LIB_MAJOR_LINK)
 
 $(TGT): $(OBJS)
 	@echo Creating library: $@
-	$(QUIET) $(CC) $(LDFLAGS) -o $@ $^ $(LIB_DEP_FLAGS)
+	$(QUIET) $(CXX) $(LDFLAGS) -o $@ $^ $(LIB_DEP_FLAGS)
 
 $(LIB_DIR)/$(LIB_MAJOR_LINK): $(TGT)
 	$(QUIET) cd $(LIB_DIR) ; $(RM) $(LIB_MAJOR_LINK) ; ln -s $(LIB) $(LIB_MAJOR_LINK)
