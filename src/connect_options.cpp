@@ -28,7 +28,7 @@ connect_options::connect_options() : opts_(DFLT_C_STRUCT)
 {
 }
 
-connect_options::connect_options(const std::string& userName, const std::string& password)
+connect_options::connect_options(string_ref userName, binary_ref password)
 		: connect_options()
 {
 	set_user_name(userName);
@@ -116,15 +116,15 @@ void connect_options::set_will(const will_options& will)
 	opts_.will = &will_.opts_;
 }
 
-void connect_options::set_user_name(const std::string& userName)
+void connect_options::set_user_name(string_ref userName)
 {
-	userName_ = userName;
+	userName_ = std::move(userName);
 	opts_.username = c_str(userName_);
 }
 
-void connect_options::set_password(const byte_buffer& password)
+void connect_options::set_password(binary_ref password)
 {
-	password_ = password;
+	password_ = std::move(password);
 
 	if (password_.empty()) {
 		opts_.binarypwd.len = 0;

@@ -20,13 +20,10 @@
 #ifndef __mqtt_will_options_test_h
 #define __mqtt_will_options_test_h
 
+#include "mqtt/will_options.h"
+#include "dummy_async_client.h"
 #include <cppunit/ui/text/TestRunner.h>
 #include <cppunit/extensions/HelperMacros.h>
-
-#include "mqtt/will_options.h"
-
-#include "dummy_async_client.h"
-
 #include <cstring>
 
 namespace mqtt {
@@ -96,7 +93,8 @@ public:
 		const auto& c_struct = opts.opts_;
 
 		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
-		CPPUNIT_ASSERT(c_struct.topicName == nullptr);
+		CPPUNIT_ASSERT(c_struct.topicName != nullptr);
+		CPPUNIT_ASSERT_EQUAL(size_t(0), strlen(c_struct.topicName));
 		CPPUNIT_ASSERT(c_struct.message == nullptr);
 		CPPUNIT_ASSERT_EQUAL(0, c_struct.payload.len);
 		CPPUNIT_ASSERT(c_struct.payload.data == nullptr);
@@ -252,12 +250,6 @@ public:
 		// Check that the original was moved
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_topic());
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_payload_str());
-		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, orgOpts.get_qos());
-		CPPUNIT_ASSERT_EQUAL(DFLT_RETAINED, orgOpts.is_retained());
-
-		CPPUNIT_ASSERT(orgOpts.opts_.topicName == nullptr);
-		CPPUNIT_ASSERT_EQUAL(0, orgOpts.opts_.payload.len);
-		CPPUNIT_ASSERT(orgOpts.opts_.payload.data == nullptr);
 	}
 
 // ----------------------------------------------------------------------
@@ -329,12 +321,6 @@ public:
 		// Check that the original was moved
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_topic());
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_payload_str());
-		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, orgOpts.get_qos());
-		CPPUNIT_ASSERT_EQUAL(DFLT_RETAINED, orgOpts.is_retained());
-
-		CPPUNIT_ASSERT(orgOpts.opts_.topicName == nullptr);
-		CPPUNIT_ASSERT_EQUAL(0, orgOpts.opts_.payload.len);
-		CPPUNIT_ASSERT(orgOpts.opts_.payload.data == nullptr);
 
 		// Self assignment should cause no harm
 		// (clang++ is smart enough to warn about this)

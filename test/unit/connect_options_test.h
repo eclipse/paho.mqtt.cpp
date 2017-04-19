@@ -287,7 +287,7 @@ public:
 
 	void test_set_long_user() {
 		std::string user;
-		byte_buffer passwd;
+		std::string passwd;
 		for (int i=0; i<1053; ++i) {
 			if (isprint(char(i))) user.push_back(char(i));
 			passwd.push_back(byte(i));
@@ -299,13 +299,13 @@ public:
 		orgOpts.set_password(passwd);
 
 		CPPUNIT_ASSERT_EQUAL(user, orgOpts.get_user_name());
-		CPPUNIT_ASSERT(passwd == orgOpts.get_password());
+		CPPUNIT_ASSERT(passwd == orgOpts.get_password_str());
 
 		mqtt::connect_options opts;
 		opts = orgOpts;
 
 		CPPUNIT_ASSERT_EQUAL(user, opts.get_user_name());
-		CPPUNIT_ASSERT(passwd == opts.get_password());
+		CPPUNIT_ASSERT(passwd == opts.get_password_str());
 
 		const auto& c_struct = opts.opts_;
 

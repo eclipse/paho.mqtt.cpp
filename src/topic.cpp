@@ -30,7 +30,7 @@ delivery_token_ptr topic::publish(const void* payload, size_t n,
 	return cli_->publish(name_, payload, n, qos, retained);
 }
 
-delivery_token_ptr topic::publish(const std::string& payload, int qos, bool retained)
+delivery_token_ptr topic::publish(const string& payload, int qos, bool retained)
 {
 	return publish(payload.data(), payload.length(), qos, retained);
 }

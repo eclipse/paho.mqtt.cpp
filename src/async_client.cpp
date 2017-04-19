@@ -32,7 +32,7 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-async_client::async_client(const std::string& serverURI, const std::string& clientId)
+async_client::async_client(const string& serverURI, const string& clientId)
 				: serverURI_(serverURI), clientId_(clientId),
 					persist_(nullptr), userCallback_(nullptr)
 {
@@ -41,8 +41,8 @@ async_client::async_client(const std::string& serverURI, const std::string& clie
 }
 
 
-async_client::async_client(const std::string& serverURI, const std::string& clientId,
-						   const std::string& persistDir)
+async_client::async_client(const string& serverURI, const string& clientId,
+						   const string& persistDir)
 				: serverURI_(serverURI), clientId_(clientId),
 					persist_(nullptr), userCallback_(nullptr)
 {
@@ -50,7 +50,7 @@ async_client::async_client(const std::string& serverURI, const std::string& clie
 					 MQTTCLIENT_PERSISTENCE_DEFAULT, const_cast<char*>(persistDir.c_str()));
 }
 
-async_client::async_client(const std::string& serverURI, const std::string& clientId,
+async_client::async_client(const string& serverURI, const string& clientId,
 						   iclient_persistence* persistence)
 				: serverURI_(serverURI), clientId_(clientId),
 					persist_(nullptr), userCallback_(nullptr)
@@ -95,7 +95,7 @@ void async_client::on_connection_lost(void *context, char *cause)
 		async_client* cli = static_cast<async_client*>(context);
 		callback* cb = cli->get_callback();
 		if (cb)
-			cb->connection_lost(cause ? std::string(cause) : std::string());
+			cb->connection_lost(cause ? string(cause) : string());
 	}
 }
 
@@ -106,7 +106,7 @@ int async_client::on_message_arrived(void* context, char* topicName, int topicLe
 		async_client* cli = static_cast<async_client*>(context);
 		callback* cb = cli->get_callback();
 		if (cb) {
-			std::string topic(topicName, topicName+topicLen);
+			string topic(topicName, topicName+topicLen);
 			const_message_ptr m = std::make_shared<message>(*msg);
 			cb->message_arrived(topic, m);
 		}
@@ -245,7 +245,7 @@ token_ptr async_client::connect(connect_options opts)
 }
 
 token_ptr async_client::connect(connect_options opts, void* userContext,
-								 iaction_listener& cb)
+								iaction_listener& cb)
 {
 	auto tok = token::create(*this, userContext, cb);
 	add_token(tok);
@@ -360,23 +360,23 @@ std::vector<delivery_token_ptr> async_client::get_pending_delivery_tokens() cons
 // --------------------------------------------------------------------------
 // Publish
 
-delivery_token_ptr async_client::publish(const std::string& topic, const void* payload,
-										  size_t n, int qos, bool retained)
+delivery_token_ptr async_client::publish(const string& topic, const void* payload,
+										 size_t n, int qos, bool retained)
 {
 	auto msg = make_message(payload, n, qos, retained);
 	return publish(topic, msg);
 }
 
-delivery_token_ptr async_client::publish(const std::string& topic,
-										  const void* payload, size_t n,
-										  int qos, bool retained, void* userContext,
-										  iaction_listener& cb)
+delivery_token_ptr async_client::publish(const string& topic,
+										 const void* payload, size_t n,
+										 int qos, bool retained, void* userContext,
+										 iaction_listener& cb)
 {
 	auto msg = make_message(payload, n, qos, retained);
 	return publish(topic, msg, userContext, cb);
 }
 
-delivery_token_ptr async_client::publish(const std::string& topic, const_message_ptr msg)
+delivery_token_ptr async_client::publish(const string& topic, const_message_ptr msg)
 {
 	auto tok = delivery_token::create(*this, topic, msg);
 	//tok->set_message(msg);
@@ -397,8 +397,8 @@ delivery_token_ptr async_client::publish(const std::string& topic, const_message
 	return tok;
 }
 
-delivery_token_ptr async_client::publish(const std::string& topic, const_message_ptr msg,
-										  void* userContext, iaction_listener& cb)
+delivery_token_ptr async_client::publish(const string& topic, const_message_ptr msg,
+										 void* userContext, iaction_listener& cb)
 {
 	delivery_token_ptr tok = delivery_token::create(*this, topic, msg);
 	tok->set_user_context(userContext);
@@ -498,7 +498,7 @@ token_ptr async_client::subscribe(const topic_filter_collection& topicFilters,
 	return tok;
 }
 
-token_ptr async_client::subscribe(const std::string& topicFilter, int qos)
+token_ptr async_client::subscribe(const string& topicFilter, int qos)
 {
 	auto tok = token::create(*this, topicFilter);
 	add_token(tok);
@@ -515,8 +515,8 @@ token_ptr async_client::subscribe(const std::string& topicFilter, int qos)
 	return tok;
 }
 
-token_ptr async_client::subscribe(const std::string& topicFilter, int qos,
-								  void* userContext, iaction_listener& cb)
+token_ptr async_client::subscribe(const string& topicFilter, int qos,
+								   void* userContext, iaction_listener& cb)
 {
 	auto tok = token::create(*this, topicFilter);
 	tok->set_user_context(userContext);
@@ -538,7 +538,7 @@ token_ptr async_client::subscribe(const std::string& topicFilter, int qos,
 // --------------------------------------------------------------------------
 // Unsubscribe
 
-token_ptr async_client::unsubscribe(const std::string& topicFilter)
+token_ptr async_client::unsubscribe(const string& topicFilter)
 {
 	auto tok = token::create(*this, topicFilter);
 	add_token(tok);
@@ -602,8 +602,8 @@ token_ptr async_client::unsubscribe(const topic_filter_collection& topicFilters,
 	return tok;
 }
 
-token_ptr async_client::unsubscribe(const std::string& topicFilter,
-									 void* userContext, iaction_listener& cb)
+token_ptr async_client::unsubscribe(const string& topicFilter,
+									void* userContext, iaction_listener& cb)
 {
 	auto tok = token::create(*this, topicFilter);
 	tok->set_user_context(userContext);

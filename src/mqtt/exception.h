@@ -25,7 +25,7 @@
 #define __mqtt_exception_h
 
 #include "MQTTAsync.h"
-#include <string>
+#include "mqtt/types.h"
 #include <vector>
 #include <memory>
 #include <exception>
@@ -43,7 +43,7 @@ class exception : public std::runtime_error
 {
 	/** The error code from the C library */
 	int code_;
-	std::string msg_;
+	string msg_;
 
 public:
 	explicit exception(int reasonCode) : std::runtime_error("mqtt::exception"),
@@ -55,7 +55,7 @@ public:
 	/**
 	 * Returns the detail message for this exception.
 	 */
-	std::string get_message() const { return std::string(what()); }
+	string get_message() const { return string(what()); }
 	/**
 	 * Returns the reason code for this exception.
 	 */
@@ -64,7 +64,7 @@ public:
 	 * Gets a string representation of this exception.
 	 * @return A string representation of this exception.
 	 */
-	std::string to_str() const { return get_message(); }
+	string to_str() const { return get_message(); }
 	/**
 	 * Returns an explanatory string for the exception.
 	 * @return const char*

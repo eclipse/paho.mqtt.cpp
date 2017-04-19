@@ -114,7 +114,7 @@ int iclient_persistence::persistence_put(void* handle, char* key, int bufcount,
 				p = std::make_shared<persistence_wrapper>(buffers[0], buflens[0],
 														  buffers[1], buflens[1]);
 			else {
-				std::string buf;
+				string buf;
 				for (int i=0; i<bufcount; ++i) {
 					if (buffers[i] && buflens[i] > 0)
 						buf.append(buffers[i], buflens[i]);
@@ -176,7 +176,7 @@ int iclient_persistence::persistence_keys(void* handle, char*** keys, int* nkeys
 {
 	try {
 		if (handle && keys && nkeys) {
-			std::vector<std::string> k(
+			std::vector<string> k(
 				static_cast<iclient_persistence*>(handle)->keys());
 			size_t n = k.size();
 			*nkeys = n;		// TODO: Check range

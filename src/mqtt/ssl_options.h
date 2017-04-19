@@ -28,9 +28,8 @@
 #include "MQTTAsync.h"
 #include "mqtt/message.h"
 #include "mqtt/topic.h"
-#include <string>
+#include "mqtt/types.h"
 #include <vector>
-#include <memory>
 
 namespace mqtt {
 
@@ -48,22 +47,22 @@ class ssl_options
 	 * The file containing the public digital certificates trusted by
 	 * the client.
 	 */
-	std::string trustStore_;
+	string trustStore_;
 
 	/** The file containing the public certificate chain of the client. */
-	std::string keyStore_;
+	string keyStore_;
 
 	/** The file containing the client's private key. */
-	std::string privateKey_;
+	string privateKey_;
 
 	/** The password to load the client's privateKey if encrypted. */
-	std::string privateKeyPassword_;
+	string privateKeyPassword_;
 
 	/**
 	 * The list of cipher suites that the client will present to the
 	 * server during the SSL handshake.
 	 */
-	std::string enabledCipherSuites_;
+	string enabledCipherSuites_;
 
 	/** The connect options has special access */
 	friend class connect_options;
@@ -80,7 +79,7 @@ class ssl_options
 	 * @return Pointer to a NUL terminated string. This is only valid until
 	 *  	   the next time the string is updated.
 	 */
-	const char* c_str(const std::string& str) {
+	const char* c_str(const string& str) {
 		return str.empty() ? nullptr : str.c_str();
 	}
 	/**
@@ -113,11 +112,11 @@ public:
 	 * the server certificate
 	 */
 	ssl_options(
-			const std::string& trustStore,
-			const std::string& keyStore,
-			const std::string& privateKey,
-			const std::string& privateKeyPassword,
-			const std::string& enabledCipherSuites,
+			const string& trustStore,
+			const string& keyStore,
+			const string& privateKey,
+			const string& privateKeyPassword,
+			const string& enabledCipherSuites,
 			bool enableServerCertAuth);
 	/**
 	 * Copy constructor.
@@ -144,30 +143,30 @@ public:
 	/**
 	 * Returns the file containing the public digital certificates trusted by
 	 * the client.
-	 * @return std::string
+	 * @return string
 	 */
-	std::string get_trust_store() const { return trustStore_; }
+	string get_trust_store() const { return trustStore_; }
 	/**
 	 * Returns the file containing the public certificate chain of the client.
-	 * @return std::string
+	 * @return string
 	 */
-	std::string get_key_store() const { return keyStore_; }
+	string get_key_store() const { return keyStore_; }
 	/**
 	 * Returns the file containing the client's private key.
-	 * @return std::string
+	 * @return string
 	 */
-	std::string get_private_key() const { return privateKey_; }
+	string get_private_key() const { return privateKey_; }
 	/**
 	 * Returns the password to load the client's privateKey if encrypted.
-	 * @return std::string
+	 * @return string
 	 */
-	std::string get_private_key_password() const { return privateKeyPassword_; }
+	string get_private_key_password() const { return privateKeyPassword_; }
 	/**
 	 * Returns the list of cipher suites that the client will present to the
 	 * server during the SSL handshake.
-	 * @return std::string
+	 * @return string
 	 */
-	std::string get_enabled_cipher_suites() const { return enabledCipherSuites_; }
+	string get_enabled_cipher_suites() const { return enabledCipherSuites_; }
 	/**
 	 * Returns the true/false to enable verification of the server certificate .
 	 * @return bool
@@ -180,32 +179,32 @@ public:
 	 * the client.
 	 * @param trustStore
 	 */
-	void set_trust_store(const std::string& trustStore);
+	void set_trust_store(const string& trustStore);
 
 	/**
 	 * Sets the file containing the public certificate chain of the client.
 	 * @param keyStore
 	 */
-	void set_key_store(const std::string& keyStore);
+	void set_key_store(const string& keyStore);
 
 	/**
 	 * Sets the file containing the client's private key.
 	 * @param privateKey
 	 */
-	void set_private_key(const std::string& privateKey);
+	void set_private_key(const string& privateKey);
 
 	/**
 	 * Sets the password to load the client's privateKey if encrypted.
 	 * @param privateKeyPassword
 	 */
-	void set_private_key_password(const std::string& privateKeyPassword);
+	void set_private_key_password(const string& privateKeyPassword);
 
 	/**
 	 * Sets the list of cipher suites that the client will present to the server
 	 * during the SSL handshake.
 	 * @param enabledCipherSuites
 	 */
-	void set_enabled_cipher_suites(const std::string& enabledCipherSuites);
+	void set_enabled_cipher_suites(const string& enabledCipherSuites);
 
 	/**
 	 * Sets the if it's to enable verification of the server certificate.
