@@ -24,6 +24,7 @@
 #define __mqtt_types_h
 
 #include <string>
+#include <memory>
 #include <chrono>
 
 namespace mqtt {
@@ -36,14 +37,20 @@ using byte = uint8_t;
 /** A collection of bytes  */
 using byte_buffer = std::basic_string<byte>;
 
+using string = std::string;
+using binary = std::basic_string<byte>;
+
+using string_ptr = std::shared_ptr<const string>;
+using binary_ptr = std::shared_ptr<const binary>;
+
 /**
  * Convert (cast) a byte_buffer to a string.
  * This creates a string that's a binary equivalent to the buffer.
  * @param buf A binary byte_buffer
  * @return A string that's a binary copy of the buffer.
  */
-inline std::string to_string(const byte_buffer& buf) {
-	return std::string(reinterpret_cast<const char*>(buf.data()), buf.size());
+inline string to_string(const byte_buffer& buf) {
+	return string(reinterpret_cast<const char*>(buf.data()), buf.size());
 }
 
 /**
@@ -52,17 +59,29 @@ inline std::string to_string(const byte_buffer& buf) {
  * @param str A string
  * @return A byte_buffer that's a binary copy of the string.
  */
-inline byte_buffer to_buffer(const std::string& str) {
+inline byte_buffer to_buffer(const string& str) {
 	return byte_buffer(reinterpret_cast<const byte*>(str.data()), str.size());
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Convert a chrono duration to seconds.
+ * This casts away precision to get integer seconds.
+ * @param dur A chrono duration type
+ * @return The duration as a chrono seconds value
+ */
 template <class Rep, class Period>
 std::chrono::seconds to_seconds(const std::chrono::duration<Rep, Period>& dur) {
 	return std::chrono::duration_cast<std::chrono::seconds>(dur);
 }
 
+/**
+ * Convert a chrono duration to milliseconds.
+ * This casts away precision to get integer milliseconds.
+ * @param dur A chrono duration type
+ * @return The duration as a chrono milliseconds value
+ */
 template <class Rep, class Period>
 std::chrono::milliseconds to_milliseconds(const std::chrono::duration<Rep, Period>& dur) {
 	return std::chrono::duration_cast<std::chrono::milliseconds>(dur);

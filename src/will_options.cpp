@@ -27,9 +27,11 @@ constexpr MQTTAsync_willOptions will_options::DFLT_C_STRUCT;
 
 will_options::will_options() : opts_(DFLT_C_STRUCT)
 {
+	set_topic(string());
+//	set_payload(binary_ref());
 }
 
-will_options::will_options(const std::string& top,
+will_options::will_options(const string& top,
 						   const void *payload, size_t payloadlen,
 						   int qos, bool retained)
 		: opts_(DFLT_C_STRUCT), topic_(top)
@@ -37,7 +39,7 @@ will_options::will_options(const std::string& top,
 	opts_.topicName = c_str(topic_);
 	opts_.qos = qos;
 	opts_.retained = retained;
-	set_payload(byte_buffer(static_cast<const byte*>(payload), payloadlen));
+	set_payload(binary_ref(static_cast<const binary_ref::value_type*>(payload), payloadlen));
 }
 
 will_options::will_options(const topic& top,
@@ -48,7 +50,7 @@ will_options::will_options(const topic& top,
 }
 
 
-will_options::will_options(const std::string& top, byte_buffer payload,
+will_options::will_options(const string& top, binary_ref payload,
 						   int qos, bool retained)
 		: opts_(DFLT_C_STRUCT), topic_(top)
 {
@@ -58,7 +60,7 @@ will_options::will_options(const std::string& top, byte_buffer payload,
 	set_payload(std::move(payload));
 }
 
-will_options::will_options(const std::string& top, const std::string& payload,
+will_options::will_options(const string& top, const string& payload,
 						   int qos, bool retained)
 		: opts_(DFLT_C_STRUCT), topic_(top)
 {
@@ -68,37 +70,28 @@ will_options::will_options(const std::string& top, const std::string& payload,
 	set_payload(payload);
 }
 
-will_options::will_options(const std::string& top, const message& msg)
+will_options::will_options(const string& top, const message& msg)
 	: will_options(top, msg.get_payload(), msg.get_qos(), msg.is_retained())
 {
 }
 
-will_options::will_options(const will_options& opt)
-		: opts_(opt.opts_), topic_(opt.topic_)
+will_options::will_options(const will_options& opt) : opts_(opt.opts_)
 {
-	opts_.topicName = c_str(topic_);
+	set_topic(opt.topic_);
 	set_payload(opt.payload_);
 }
 
-will_options::will_options(will_options&& other)
-		: opts_(other.opts_), topic_(std::move(other.topic_)),
-			payload_(std::move(other.payload_))
+will_options::will_options(will_options&& other) : opts_(other.opts_)
 {
-	opts_.topicName = c_str(topic_);
-	set_payload(payload_);
-	// OPTIMIZE: We probably don't need to do this, but just to be safe
-	std::memcpy(&other.opts_, &DFLT_C_STRUCT, sizeof(MQTTAsync_willOptions));
-	//other.opts_ = DFLT_C_STRUCT;
+	set_topic(std::move(other.topic_));
+	set_payload(std::move(other.payload_));
 }
 
 will_options& will_options::operator=(const will_options& rhs)
 {
 	if (&rhs != this) {
 		std::memcpy(&opts_, &rhs.opts_, sizeof(MQTTAsync_willOptions));
-
-		topic_ = rhs.topic_;
-		opts_.topicName = c_str(topic_);
-
+		set_topic(rhs.topic_);
 		set_payload(rhs.payload_);
 	}
 	return *this;
@@ -108,31 +101,23 @@ will_options& will_options::operator=(will_options&& rhs)
 {
 	if (&rhs != this) {
 		std::memcpy(&opts_, &rhs.opts_, sizeof(MQTTAsync_willOptions));
-
-		topic_ = std::move(rhs.topic_);
-		opts_.topicName = c_str(topic_);
-
-		payload_ = std::move(rhs.payload_);
-		set_payload(payload_);
-
-		// OPTIMIZE: We probably don't need to do any of this, but just to
-		// be safe
-		std::memcpy(&rhs.opts_, &DFLT_C_STRUCT, sizeof(MQTTAsync_willOptions));
+		set_topic(std::move(rhs.topic_));
+		set_payload(std::move(rhs.payload_));
 	}
 	return *this;
 }
 
-void will_options::set_topic(const std::string& top)
+void will_options::set_topic(string_ref top)
 {
-	topic_ = top;
+	topic_ = top ? std::move(top) : string_ref(string());
 	opts_.topicName = c_str(topic_);
 }
 
-void will_options::set_payload(byte_buffer msg)
+void will_options::set_payload(binary_ref msg)
 {
-	payload_ = std::move(msg);
-
 	// The C struct payload must not be nullptr for will options
+	payload_ = msg ? std::move(msg) : binary_ref(string());
+
 	opts_.payload.len = (int) payload_.size();
 	opts_.payload.data = payload_.data();
 }

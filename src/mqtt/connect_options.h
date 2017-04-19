@@ -33,9 +33,7 @@
 #if defined(OPENSSL)
 	#include "mqtt/ssl_options.h"
 #endif
-#include <string>
 #include <vector>
-#include <memory>
 #include <chrono>
 
 namespace mqtt {
@@ -64,10 +62,10 @@ class connect_options
 	#endif
 
 	/** The user name to use for the connection. */
-	std::string userName_;
+	string_ref userName_;
 
 	/** The password to use for the connection. */
-	byte_buffer password_;
+	binary_ref password_;
 
 	/** Shared token pointer for context, if any */
 	token_ptr tok_;
@@ -87,8 +85,8 @@ class connect_options
 	 * @return Pointer to a NUL terminated string. This is only valid until
 	 *  	   the next time the string is updated.
 	 */
-	const char* c_str(const std::string& str) {
-		return str.empty() ? nullptr : str.c_str();
+	const char* c_str(const string_ref& sr) {
+		return sr.empty() ? nullptr : sr.c_str();
 	}
 
 public:
@@ -102,10 +100,11 @@ public:
 	 */
 	connect_options();
 	/**
-	 * Constructs a new object using the specified values.
+	 * Constructs a new object using the specified user name and password.
+	 * @param userName The name of the user for connecting to the server
+	 * @param password The password for connecting to the server
 	 */
-	connect_options(const std::string& userName,
-					const std::string& password);
+	connect_options(string_ref userName, binary_ref password);
 	/**
 	 * Copy constructor.
 	 * @param opt Another object to copy.
@@ -146,19 +145,18 @@ public:
 	 * Gets the user name to use for the connection.
 	 * @return The user name to use for the connection.
 	 */
-	const std::string& get_user_name() const { return userName_; }
+	string get_user_name() const { return userName_ ? userName_.to_string() : string(); }
 	/**
 	 * Gets the password to use for the connection.
 	 * @return The password to use for the connection.
 	 */
-	const byte_buffer& get_password() const { return password_; }
+	binary_ref get_password() const { return password_; }
 	/**
 	 * Gets the password to use for the connection.
 	 * @return The password to use for the connection.
 	 */
-	std::string get_password_str() const {
-		return std::string(reinterpret_cast<const char*>(password_.data()),
-						   password_.size());
+	string get_password_str() const {
+		return password_ ? password_.to_string() : string();
 	}
 	/**
 	 * Gets the maximum number of messages that can be in-flight
@@ -170,7 +168,7 @@ public:
 	 * Gets the topic to be used for last will and testament (LWT).
 	 * @return The topic to be used for last will and testament (LWT).
 	 */
-	std::string get_will_topic() const {
+	string get_will_topic() const {
 		return will_.get_topic();
 	}
 	/**
@@ -277,21 +275,14 @@ public:
 		set_connect_timeout((int) to_seconds(to).count());
 	}
 	/**
-	 * Sets the password to use for the connection.
-	 */
-	void set_password(const byte_buffer& password);
-	/**
-	 * Sets the password to use for the connection.
-	 */
-	void set_password(const std::string& password) {
-		set_password(byte_buffer(reinterpret_cast<const byte*>(password.data()),
-								 password.size()));
-	}
-	/**
 	 * Sets the user name to use for the connection.
 	 * @param userName
 	 */
-	void set_user_name(const std::string& userName);
+	void set_user_name(string_ref userName);
+	/**
+	 * Sets the password to use for the connection.
+	 */
+	void set_password(binary_ref password);
 	/**
 	 * Sets the maximum number of messages that can be in-flight
 	 * simultaneously.
@@ -321,7 +312,7 @@ public:
 	 * Gets a string representation of the object.
 	 * @return
 	 */
-	std::string to_str() const;
+	string to_str() const;
 };
 
 /** Smart/shared pointer to a connection options object. */

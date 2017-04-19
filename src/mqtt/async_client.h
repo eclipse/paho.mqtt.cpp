@@ -25,6 +25,7 @@
 #define __mqtt_async_client_h
 
 #include "MQTTAsync.h"
+#include "mqtt/types.h"
 #include "mqtt/token.h"
 #include "mqtt/delivery_token.h"
 #include "mqtt/iclient_persistence.h"
@@ -33,7 +34,6 @@
 #include "mqtt/message.h"
 #include "mqtt/callback.h"
 #include "mqtt/iasync_client.h"
-#include <string>
 #include <vector>
 #include <list>
 #include <memory>
@@ -42,7 +42,7 @@
 namespace mqtt {
 
 const uint32_t		VERSION = 0x00050000;
-const std::string	VERSION_STR("mqttpp v. 0.5"),
+const string	VERSION_STR("mqttpp v. 0.5"),
 					COPYRIGHT("Copyright (c) 2013-2016 Frank Pagliughi");
 
 /////////////////////////////////////////////////////////////////////////////
@@ -68,9 +68,9 @@ private:
 	/** The underlying C-lib client. */
 	MQTTAsync cli_;
 	/** The server URI string. */
-	std::string serverURI_;
+	string serverURI_;
 	/** The client ID string that we provided to the server. */
-	std::string clientId_;
+	string clientId_;
 	/** A user persistence wrapper (if any) */
 	MQTTClient_persistence* persist_;
 	/** Callback supplied by the user (if any) */
@@ -122,7 +122,7 @@ public:
 	 * @param clientId a client identifier that is unique on the server
 	 *  			   being connected to.
 	 */
-	async_client(const std::string& serverURI, const std::string& clientId);
+	async_client(const string& serverURI, const string& clientId);
 	/**
 	 * Create an async_client that can be used to communicate with an MQTT
 	 * server.
@@ -133,8 +133,8 @@ public:
 	 *  			   being connected to
 	 * @param persistDir
 	 */
-	async_client(const std::string& serverURI, const std::string& clientId,
-				 const std::string& persistDir);
+	async_client(const string& serverURI, const string& clientId,
+				 const string& persistDir);
 	/**
 	 * Create an async_client that can be used to communicate with an MQTT
 	 * server.
@@ -147,7 +147,7 @@ public:
 	 * @param persistence The user persistence structure. If this is null,
 	 *  				  then no persistence is used.
 	 */
-	async_client(const std::string& serverURI, const std::string& clientId,
+	async_client(const string& serverURI, const string& clientId,
 				 iclient_persistence* persistence);
 	/**
 	 * Destructor
@@ -303,12 +303,12 @@ public:
 	 * Returns the client ID used by this client.
 	 * @return The client ID used by this client.
 	 */
-	std::string get_client_id() const override { return clientId_; }
+	string get_client_id() const override { return clientId_; }
 	/**
 	 * Returns the address of the server used by this client.
 	 * @return The server's address, as a URI String.
 	 */
-	std::string get_server_uri() const override { return serverURI_; }
+	string get_server_uri() const override { return serverURI_; }
 	/**
 	 * Determines if this client is currently connected to the server.
 	 * @return true if connected, false otherwise.
@@ -326,7 +326,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	idelivery_token_ptr publish(const std::string& topic, const void* payload,
+	idelivery_token_ptr publish(const string& topic, const void* payload,
 								size_t n, int qos, bool retained) override;
 	/**
 	 * Publishes a message to a topic on the server
@@ -343,7 +343,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	idelivery_token_ptr publish(const std::string& topic,
+	idelivery_token_ptr publish(const string& topic,
 								const void* payload, size_t n,
 								int qos, bool retained, void* userContext,
 								iaction_listener& cb) override;
@@ -356,7 +356,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	idelivery_token_ptr publish(const std::string& topic, const_message_ptr msg) override;
+	idelivery_token_ptr publish(const string& topic, const_message_ptr msg) override;
 	/**
 	 * Publishes a message to a topic on the server.
 	 * @param topic the topic to deliver the message to
@@ -369,7 +369,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	idelivery_token_ptr publish(const std::string& topic, const_message_ptr msg,
+	idelivery_token_ptr publish(const string& topic, const_message_ptr msg,
 								void* userContext, iaction_listener& cb) override;
 	/**
 	 * Sets a callback listener to use for events that happen
@@ -416,7 +416,7 @@ public:
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	itoken_ptr subscribe(const std::string& topicFilter, int qos) override;
+	itoken_ptr subscribe(const string& topicFilter, int qos) override;
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 * @param topicFilter the topic to subscribe to, which can include
@@ -432,7 +432,7 @@ public:
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	itoken_ptr subscribe(const std::string& topicFilter, int qos,
+	itoken_ptr subscribe(const string& topicFilter, int qos,
 						 void* userContext, iaction_listener& cb) override;
 	/**
 	 * Requests the server unsubscribe the client from a topic.
@@ -441,7 +441,7 @@ public:
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	itoken_ptr unsubscribe(const std::string& topicFilter) override;
+	itoken_ptr unsubscribe(const string& topicFilter) override;
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
 	 * @param topicFilters one or more topics to unsubscribe from. Each
@@ -474,7 +474,7 @@ public:
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	itoken_ptr unsubscribe(const std::string& topicFilter,
+	itoken_ptr unsubscribe(const string& topicFilter,
 						   void* userContext, iaction_listener& cb) override;
 };
 

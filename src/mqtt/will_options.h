@@ -29,8 +29,10 @@
 #include "mqtt/types.h"
 #include "mqtt/message.h"
 #include "mqtt/topic.h"
-#include <string>
-#include <memory>
+
+// TODO: Remove this when C lib fixed
+#undef MQTTAsync_willOptions_initializer
+#define MQTTAsync_willOptions_initializer { {'M', 'Q', 'T', 'W'}, 1, NULL, NULL, 0, 0, { 0, NULL } }
 
 namespace mqtt {
 
@@ -59,10 +61,10 @@ class will_options
 	MQTTAsync_willOptions opts_;
 
 	/** LWT message topic **/
-	std::string topic_;
+	string_ref topic_;
 
 	/** LWT message text */
-	byte_buffer payload_;
+	binary_ref payload_;
 
 	/** The connect options has special access */
 	friend class connect_options;
@@ -80,7 +82,9 @@ class will_options
 	 * @return Pointer to a NUL terminated string. This is only valid until
 	 *  	   the next time the string is updated. This is never nullptr.
 	 */
-	const char* c_str(const std::string& str) { return str.c_str(); }
+	const char* c_str(const string_ref& sr) {
+		return sr ? sr.to_string().c_str() : nullptr;
+	}
 
 public:
 	/** Smart/shared pointer to this class. */
@@ -101,7 +105,7 @@ public:
 	 * @param retained Tell the broker to keep the LWT message after send to
 	 *  			   subscribers.
 	 */
-	will_options(const std::string& top, const void *payload, size_t payload_len,
+	will_options(const string& top, const void *payload, size_t payload_len,
 				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED);
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
@@ -123,7 +127,7 @@ public:
 	 * @param retained Tell the broker to keep the LWT message after send to
 	 *  			   subscribers.
 	 */
-	will_options(const std::string& top, byte_buffer payload,
+	will_options(const string& top, binary_ref payload,
 				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED);
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
@@ -134,14 +138,14 @@ public:
 	 * @param retained Tell the broker to keep the LWT message after send to
 	 *  			   subscribers.
 	 */
-	will_options(const std::string& top, const std::string& payload,
+	will_options(const string& top, const string& payload,
 				 int qos=DFLT_QOS, bool retained=DFLT_QOS);
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
 	 * @param top The LWT message is published to the this topic.
 	 * @param msg The message that is published to the Will Topic.
 	 */
-	will_options(const std::string& top, const message& msg);
+	will_options(const string& top, const message& msg);
 	/**
 	 * Copy constructor for the LWT options.
 	 * @param opt The other options.
@@ -164,19 +168,19 @@ public:
 	will_options& operator=(will_options&& opt);
 	/**
 	 * Returns the LWT message topic name.
-	 * @return std::string
+	 * @return string
 	 */
-	std::string get_topic() const { return topic_; }
+	string get_topic() const { return topic_ ? topic_.to_string() : string(); }
 	/**
 	 * Returns the LWT message payload.
 	 * @return The LWT message payload.
 	 */
-	const byte_buffer& get_payload() const { return payload_; }
+	const binary_ref& get_payload() const { return payload_; }
 	/**
 	 * Returns the LWT message payload as a string.
 	 * @return The LWT message payload as a string.
 	 */
-	std::string get_payload_str() const { return to_string(payload_); }
+	string get_payload_str() const { return payload_ ? payload_.to_string() : string(); }
 	/**
 	 * Gets the QoS value for the LWT message.
 	 * @return The QoS value for the LWT message.
@@ -194,28 +198,23 @@ public:
 	 * @return A copy of the LWT message.
 	 */
 	const_message_ptr get_message() const {
-		// TODO: restore this when message gets byte_buffer
-		//return make_message(payload_,
-		return make_message(std::string(reinterpret_cast<const char*>(payload_.data()), payload_.size()),
-							opts_.qos, opts_.retained);
+		return make_message(payload_, opts_.qos, opts_.retained);
 	}
 	/**
 	 * Sets the LWT message topic name.
 	 * @param top The topic where to sent the message
 	 */
-	void set_topic(const std::string& top);
+	void set_topic(string_ref top);
 	/**
 	 * Sets the LWT message text.
 	 * @param msg The LWT message
 	 */
-	void set_payload(byte_buffer msg);
+	void set_payload(binary_ref msg);
 	/**
 	 * Sets the LWT message text.
 	 * @param msg The LWT message
 	 */
-	void set_payload(const std::string& msg) {
-		set_payload(to_buffer(msg));
-	}
+	void set_payload(string msg) { set_payload(binary_ref(std::move(msg))); }
 	/**
 	 * Sets the QoS value.
 	 * @param qos The LWT message QoS

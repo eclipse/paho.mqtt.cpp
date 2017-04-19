@@ -28,11 +28,11 @@ ssl_options::ssl_options() : opts_(MQTTAsync_SSLOptions_initializer)
 }
 
 ssl_options::ssl_options(
-		const std::string& trustStore,
-		const std::string& keyStore,
-		const std::string& privateKey,
-		const std::string& privateKeyPassword,
-		const std::string& enabledCipherSuites,
+		const string& trustStore,
+		const string& keyStore,
+		const string& privateKey,
+		const string& privateKeyPassword,
+		const string& enabledCipherSuites,
 		bool enableServerCertAuth)
 		: opts_(MQTTAsync_SSLOptions_initializer),
 		  trustStore_(trustStore),
@@ -114,31 +114,31 @@ ssl_options& ssl_options::operator=(ssl_options&& rhs)
 	return *this;
 }
 
-void ssl_options::set_trust_store(const std::string& trustStore)
+void ssl_options::set_trust_store(const string& trustStore)
 {
 	trustStore_ = trustStore;
 	opts_.trustStore = c_str(trustStore_);
 }
 
-void ssl_options::set_key_store(const std::string& keyStore)
+void ssl_options::set_key_store(const string& keyStore)
 {
 	keyStore_ = keyStore;
 	opts_.keyStore = c_str(keyStore_);
 }
 
-void ssl_options::set_private_key(const std::string& privateKey)
+void ssl_options::set_private_key(const string& privateKey)
 {
 	privateKey_ = privateKey;
 	opts_.privateKey = c_str(privateKey_);
 }
 
-void ssl_options::set_private_key_password(const std::string& privateKeyPassword)
+void ssl_options::set_private_key_password(const string& privateKeyPassword)
 {
 	privateKeyPassword_ = privateKeyPassword;
 	opts_.privateKeyPassword = c_str(privateKeyPassword_);
 }
 
-void ssl_options::set_enabled_cipher_suites(const std::string& enabledCipherSuites)
+void ssl_options::set_enabled_cipher_suites(const string& enabledCipherSuites)
 {
 	enabledCipherSuites_ = enabledCipherSuites;
 	opts_.enabledCipherSuites = c_str(enabledCipherSuites_);

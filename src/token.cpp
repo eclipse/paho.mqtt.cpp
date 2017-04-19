@@ -18,7 +18,6 @@
 
 #include "mqtt/token.h"
 #include "mqtt/async_client.h"
-#include <string>
 #include <cstring>
 
 namespace mqtt {
@@ -103,13 +102,13 @@ token::token(iasync_client& cli, MQTTAsync_token tok)
 {
 }
 
-token::token(iasync_client& cli, const std::string& top)
+token::token(iasync_client& cli, const string& top)
 				: token(cli, MQTTAsync_token(0))
 {
 	topics_.push_back(top);
 }
 
-token::token(iasync_client& cli, const std::vector<std::string>& topics)
+token::token(iasync_client& cli, const std::vector<string>& topics)
 				: cli_(&cli), tok_(MQTTAsync_token(0)), topics_(topics),
 						userContext_(nullptr), listener_(nullptr),
 						complete_(false), rc_(0)

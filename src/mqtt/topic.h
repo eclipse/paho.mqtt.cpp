@@ -27,9 +27,8 @@
 #include "MQTTAsync.h"
 #include "mqtt/delivery_token.h"
 #include "mqtt/message.h"
-#include <string>
+#include "mqtt/types.h"
 #include <vector>
-#include <memory>
 
 namespace mqtt {
 
@@ -43,7 +42,7 @@ class async_client;
 class topic
 {
 	/** The topic name */
-	std::string name_;
+	string name_;
 
 	/** The client to which this topic is connected */
 	// TODO: Make this a smart pointer
@@ -59,12 +58,12 @@ public:
 	 * @param name
 	 * @param cli
 	 */
-	topic(const std::string& name, iasync_client& cli) : name_{name}, cli_{&cli} {}
+	topic(const string& name, iasync_client& cli) : name_{name}, cli_{&cli} {}
 	/**
 	 * Returns the name of the queue or topic.
-	 * @return std::string
+	 * @return string
 	 */
-	std::string get_name() const { return name_; }
+	string get_name() const { return name_; }
 	/**
 	 * Publishes a message on the topic.
 	 * @param payload
@@ -83,7 +82,7 @@ public:
 	 *
 	 * @return delivery_token
 	 */
-	idelivery_token_ptr publish(const std::string& payload, int qos, bool retained);
+	idelivery_token_ptr publish(const string& payload, int qos, bool retained);
 	/**
 	 * Publishes the specified message to this topic, but does not wait for
 	 * delivery of the message to complete.
@@ -93,9 +92,9 @@ public:
 	idelivery_token_ptr publish(const_message_ptr msg);
 	/**
 	 * Returns a string representation of this topic.
-	 * @return std::string
+	 * @return string
 	 */
-	std::string to_str() const { return name_; }
+	string to_str() const { return name_; }
 };
 
 /**

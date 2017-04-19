@@ -30,12 +30,10 @@
 #include <cstring>
 #include "mqtt/async_client.h"
 
-using namespace std;
+const std::string DFLT_ADDRESS {"ssl://localhost:18885"};
+const std::string DFLT_CLIENT_ID {"CppAsyncPublisherSSL"};
 
-const string DFLT_ADDRESS {"ssl://localhost:18885"};
-const string DFLT_CLIENT_ID {"CppAsyncPublisherSSL"};
-
-const string TOPIC {"hello"};
+const std::string TOPIC {"hello"};
 
 const char* PAYLOAD1 = "Hello World!";
 const char* PAYLOAD2 = "Hi there!";
@@ -53,22 +51,24 @@ const auto TIMEOUT = std::chrono::seconds(10);
 class callback : public virtual mqtt::callback
 {
 public:
-	void connection_lost(const string& cause) override {
-		cout << "\nConnection lost" << endl;
+	void connection_lost(const std::string& cause) override {
+		std::cout << "\nConnection lost" << std::endl;
 		if (!cause.empty())
-			cout << "\tcause: " << cause << endl;
+			std::cout << "\tcause: " << cause << std::endl;
 	}
 
 	// We're not subscribed to anything, so this should never be called.
-	void message_arrived(const string& topic, mqtt::const_message_ptr msg) override {}
+	void message_arrived(const std::string& topic, mqtt::const_message_ptr msg) override {}
 
 	void delivery_complete(mqtt::idelivery_token_ptr tok) override {
-		cout << "\tDelivery complete for token: "
-			<< (tok ? tok->get_message_id() : -1) << endl;
+		std::cout << "\tDelivery complete for token: "
+			<< (tok ? tok->get_message_id() : -1) << std::endl;
 	}
 };
 
 /////////////////////////////////////////////////////////////////////////////
+
+using namespace std;
 
 int main(int argc, char* argv[])
 {

@@ -33,9 +33,10 @@ constexpr MQTTAsync_message message::DFLT_C_STRUCT;
 
 message::message() : msg_(DFLT_C_STRUCT)
 {
+	set_payload(string());
 }
 
-message::message(const void* payload, size_t len, int qos/*=DFLT_QOS*/, bool retained/*=DFLT_RETAINED*/)
+message::message(const void* payload, size_t len, int qos, bool retained)
 						: msg_(DFLT_C_STRUCT)
 {
 	set_payload(payload, len);
@@ -43,22 +44,22 @@ message::message(const void* payload, size_t len, int qos/*=DFLT_QOS*/, bool ret
 	set_retained(retained);
 }
 
-message::message(byte_buffer payload, int qos/*=DFLT_QOS*/, bool retained/*=DFLT_RETAINED*/)
+message::message(binary_ref payload, int qos, bool retained)
 						: msg_(DFLT_C_STRUCT)
 {
 	set_payload(std::move(payload));
 	set_qos(qos);
 	set_retained(retained);
 }
-
-message::message(const std::string& payload, int qos/*=DFLT_QOS*/, bool retained/*=DFLT_RETAINED*/)
+#if 0
+message::message(const string& payload, int qos, bool retained)
 						: msg_(DFLT_C_STRUCT)
 {
 	set_payload(payload);
 	set_qos(qos);
 	set_retained(retained);
 }
-
+#endif
 message::message(const MQTTAsync_message& msg) : msg_(msg)
 {
 	set_payload(msg.payload, msg.payloadlen);
@@ -97,21 +98,21 @@ message& message::operator=(message&& rhs)
 
 void message::clear_payload()
 {
-	payload_.clear();
+	payload_ = string();	//.reset();
 	msg_.payload = nullptr;
 	msg_.payloadlen = 0;
 }
 
-void message::set_payload(byte_buffer payload)
+void message::set_payload(binary_ref payload)
 {
 	payload_ = std::move(payload);
 
-	if (payload_.empty()) {
+	if (!payload_ || payload_.empty()) {
 		msg_.payload = nullptr;
 		msg_.payloadlen = 0;
 	}
 	else {
-		msg_.payload = const_cast<byte*>(payload_.data());
+		msg_.payload = const_cast<binary_ref::value_type*>(payload_.data());
 		msg_.payloadlen = payload_.length();
 	}
 }

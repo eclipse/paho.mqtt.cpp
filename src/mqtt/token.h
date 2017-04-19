@@ -28,9 +28,7 @@
 #include "mqtt/iaction_listener.h"
 #include "mqtt/exception.h"
 #include "mqtt/types.h"
-#include <string>
 #include <vector>
-#include <memory>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -79,9 +77,9 @@ public:
 	/**
 	 * Returns the topic string(s) for the action being tracked by this
 	 * token.
-	 * @return std::vector<std::string>
+	 * @return std::vector<string>
 	 */
-	virtual const std::vector<std::string>& get_topics() const =0;
+	virtual const std::vector<string>& get_topics() const =0;
 	/**
 	 * Retrieve the context associated with an action.
 	 * @return void*
@@ -149,7 +147,7 @@ class token : public virtual itoken
 	/** The underlying C token. Note that this is just an integer */
 	MQTTAsync_token tok_;
 	/** The topic string(s) for the action being tracked by this token */
-	std::vector<std::string> topics_;
+	std::vector<string> topics_;
 	/** User supplied context */
 	void* userContext_;
 	/**
@@ -172,11 +170,11 @@ class token : public virtual itoken
 	friend class delivery_response_options;
 	friend class disconnect_options;
 
-	void set_topics(const std::string& top) {
+	void set_topics(const string& top) {
 		topics_.clear();
 		topics_.push_back(top);
 	}
-	void set_topics(const std::vector<std::string>& top) {
+	void set_topics(const std::vector<string>& top) {
 		topics_ = top;
 	}
 
@@ -253,13 +251,13 @@ public:
 	 * @param cli The client that created the token.
 	 * @param topic The topic assiciated with the token
 	 */
-	token(iasync_client& cli, const std::string& topic);
+	token(iasync_client& cli, const string& topic);
 	/**
 	 * Constructs a token object.
 	 * @param cli The client that created the token.
 	 * @param topics The topics associated with the token
 	 */
-	token(iasync_client& cli, const std::vector<std::string>& topics);
+	token(iasync_client& cli, const std::vector<string>& topics);
 	/**
 	 * Constructs a token object.
 	 * @param cli The client that created the token.
@@ -284,7 +282,7 @@ public:
 	 * @param cli The client that created the token.
 	 * @param topic The topic assiciated with the token
 	 */
-	static ptr_t create(iasync_client& cli, const std::string& topic) {
+	static ptr_t create(iasync_client& cli, const string& topic) {
 		return std::make_shared<token>(cli, topic);
 	}
 	/**
@@ -292,7 +290,7 @@ public:
 	 * @param cli The client that created the token.
 	 * @param topics The topics associated with the token
 	 */
-	static ptr_t create(iasync_client& cli, const std::vector<std::string>& topics) {
+	static ptr_t create(iasync_client& cli, const std::vector<string>& topics) {
 		return std::make_shared<token>(cli, topics);
 	}
 	/**
@@ -322,7 +320,7 @@ public:
 	 * Returns the topic string(s) for the action being tracked by this
 	 * token.
 	 */
-	const std::vector<std::string>& get_topics() const override {
+	const std::vector<string>& get_topics() const override {
 		return topics_;
 	}
 	/**

@@ -25,9 +25,8 @@
 #define __mqtt_iclient_persistence_h
 
 #include "MQTTAsync.h"
+#include "mqtt/types.h"
 #include "mqtt/ipersistable.h"
-#include <string>
-#include <memory>
 #include <vector>
 
 namespace mqtt {
@@ -80,7 +79,7 @@ public:
 	/**
 	 * Initialize the persistent store.
 	 */
-	virtual void open(const std::string& clientId, const std::string& serverURI) =0;
+	virtual void open(const string& clientId, const string& serverURI) =0;
 	/**
 	 * Close the persistent store that was previously opened.
 	 */
@@ -94,28 +93,28 @@ public:
 	 * @param key
 	 * @return bool
 	 */
-	virtual bool contains_key(const std::string& key) =0;
+	virtual bool contains_key(const string& key) =0;
 	/**
 	 * Gets the specified data out of the persistent store.
 	 * @param key
 	 * @return persistable
 	 */
-	virtual ipersistable_ptr get(const std::string& key) const =0;
+	virtual ipersistable_ptr get(const string& key) const =0;
 	/**
 	 * Returns an Enumeration over the keys in this persistent data store.
 	 */
-	virtual std::vector<std::string> keys() const =0;
+	virtual std::vector<string> keys() const =0;
 	/**
 	 * Puts the specified data into the persistent store.
 	 * @param key
 	 * @param persistable
 	 */
-	virtual void put(const std::string& key, ipersistable_ptr persistable) =0;
+	virtual void put(const string& key, ipersistable_ptr persistable) =0;
 	/**
 	 * Remove the data for the specified key.
 	 * @param key
 	 */
-	virtual void remove(const std::string& key) =0;
+	virtual void remove(const string& key) =0;
 };
 
 /** Smart/shared pointer to a persistence client */

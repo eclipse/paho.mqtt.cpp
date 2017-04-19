@@ -24,10 +24,8 @@
 #ifndef __mqtt_client_h
 #define __mqtt_client_h
 
-#include "async_client.h"
-
-#include <string>
-#include <memory>
+#include "mqtt/async_client.h"
+#include "mqtt/types.h"
 
 namespace mqtt {
 
@@ -67,7 +65,7 @@ public:
 	 * @param serverURI
 	 * @param clientId
 	 */
-	client(const std::string& serverURI, const std::string& clientId);
+	client(const string& serverURI, const string& clientId);
 	/**
 	 * Create a client that can be used to communicate with an MQTT server.
 	 * This uses file-based persistence in the specified directory.
@@ -75,8 +73,8 @@ public:
 	 * @param clientId
 	 * @param persistDir
 	 */
-	client(const std::string& serverURI, const std::string& clientId,
-		   const std::string& persistDir);
+	client(const string& serverURI, const string& clientId,
+		   const string& persistDir);
 	/**
 	 * Create a client that can be used to communicate with an MQTT server.
 	 * This allows the caller to specify a user-defined persistence object,
@@ -86,7 +84,7 @@ public:
 	 * @param persistence The user persistence structure. If this is null,
 	 *  				  then no persistence is used.
 	 */
-	client(const std::string& serverURI, const std::string& clientId,
+	client(const string& serverURI, const string& clientId,
 		   iclient_persistence* persistence);
 
 	/**
@@ -122,21 +120,21 @@ public:
 	 * Returns a randomly generated client identifier based on the current
 	 * user's login name and the system time.
 	 */
-	//static std::string generate_client_id();
+	//static string generate_client_id();
 	/**
 	 * Returns the client ID used by this client.
-	 * @return std::string
+	 * @return string
 	 */
-	virtual std::string get_client_id() const;
+	virtual string get_client_id() const;
 	/**
 	 * Returns the delivery tokens for any outstanding publish operations.
 	 */
 	virtual std::vector<idelivery_token_ptr> get_pending_delivery_tokens() const;
 	/**
 	 * Returns the address of the server used by this client, as a URI.
-	 * @return std::string
+	 * @return string
 	 */
-	virtual std::string get_server_uri() const;
+	virtual string get_server_uri() const;
 	/**
 	 * Return the maximum time to wait for an action to complete.
 	 * @return int
@@ -147,7 +145,7 @@ public:
 	 * @param tpc
 	 * @return topic
 	 */
-	virtual topic get_topic(const std::string& tpc);
+	virtual topic get_topic(const string& tpc);
 	/**
 	 * Determines if this client is currently connected to the server.
 	 * @return bool
@@ -162,20 +160,20 @@ public:
 	 * @param qos
 	 * @param retained
 	 */
-	virtual void publish(const std::string& top, const void* payload, size_t n,
+	virtual void publish(const string& top, const void* payload, size_t n,
 						 int qos, bool retained);
 	/**
 	 * Publishes a message to a topic on the server.
 	 * @param top The topic to publish on
 	 * @param msg The message
 	 */
-	virtual void publish(const std::string& top, const_message_ptr msg);
+	virtual void publish(const string& top, const_message_ptr msg);
 	/**
 	 * Publishes a message to a topic on the server.
 	 * @param top The topic to publish on
 	 * @param msg The message
 	 */
-	virtual void publish(const std::string& top, const message& msg);
+	virtual void publish(const string& top, const message& msg);
 	/**
 	 * Sets the callback listener to use for events that happen
 	 * asynchronously.
@@ -191,7 +189,7 @@ public:
 	 * Subscribe to a topic, which may include wildcards using a QoS of 1.
 	 * @param topicFilter
 	 */
-	virtual void subscribe(const std::string& topicFilter);
+	virtual void subscribe(const string& topicFilter);
 	/**
 	 * Subscribes to a one or more topics, which may include wildcards using
 	 * a QoS of 1.
@@ -210,12 +208,12 @@ public:
 	 * @param topicFilter A single topic to subscribe
 	 * @param qos The QoS of the subscription
 	 */
-	virtual void subscribe(const std::string& topicFilter, int qos);
+	virtual void subscribe(const string& topicFilter, int qos);
 	/**
 	 * Requests the server unsubscribe the client from a topic.
 	 * @param topicFilter A single topic to unsubscribe.
 	 */
-	virtual void unsubscribe(const std::string& topicFilter);
+	virtual void unsubscribe(const string& topicFilter);
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
 	 * @param topicFilters A collection of topics to unsubscribe.

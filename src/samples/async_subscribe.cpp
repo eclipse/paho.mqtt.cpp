@@ -33,6 +33,7 @@ const int  QOS = 1;
 
 class action_listener : public virtual mqtt::iaction_listener
 {
+
 	std::string name_;
 
 	void on_failure(const mqtt::itoken& tok) override {

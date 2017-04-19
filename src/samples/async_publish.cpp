@@ -25,8 +25,8 @@
 
 using namespace std;
 
-const string DFLT_ADDRESS {"tcp://localhost:1883"};
-const string DFLT_CLIENT_ID {"AsyncPublisher"};
+const std::string DFLT_ADDRESS {"tcp://localhost:1883"};
+const std::string DFLT_CLIENT_ID {"AsyncPublisher"};
 
 const string TOPIC {"hello"};
 

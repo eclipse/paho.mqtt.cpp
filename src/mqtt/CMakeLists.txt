@@ -19,6 +19,7 @@
 ## install headers
 set(COMMON_HDR
     async_client.h
+    buffer_ref.h
     callback.h
     client.h
     connect_options.h

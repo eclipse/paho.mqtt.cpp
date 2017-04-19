@@ -78,6 +78,7 @@ libpaho_mqttpp3_la_LDFLAGS += $(LIBS)
 ###############################################################################
 
 include_HEADERS  = src/mqtt/async_client.h
+include_HEADERS += src/mqtt/buffer_ref.h
 include_HEADERS += src/mqtt/callback.h
 include_HEADERS += src/mqtt/client.h
 include_HEADERS += src/mqtt/connect_options.h
