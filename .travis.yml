@@ -8,7 +8,15 @@ os: linux
 
 install:
   # Install Paho MQTT C (Need only paho-mqtt3a and paho-mqtt3as)
-  - git clone https://github.com/eclipse/paho.mqtt.c.git && cd paho.mqtt.c/build && cmake -DCMAKE_INSTALL_PREFIX=/tmp/paho-c -DPAHO_WITH_SSL=ON .. && make && make install && cd ../..
+  - git clone https://github.com/eclipse/paho.mqtt.c.git
+  - cd paho.mqtt.c
+  - git checkout -t origin/develop
+  - mkdir build_cmake
+  - cd build_cmake
+  - cmake -DCMAKE_INSTALL_PREFIX=/tmp/paho-c -DPAHO_WITH_SSL=ON ..
+  - make
+  - sudo make install
+  - cd ../..
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/tmp/paho-c/lib
 
 addons:
