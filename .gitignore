@@ -1,6 +1,7 @@
 lib/
 \.hg/
 \.hgignore
+\.hgtags
 .deps/
 .libs/
 *.vp*
