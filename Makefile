@@ -24,13 +24,20 @@ INSTALL_DATA =  $(INSTALL) -m 644
 
 SRC_DIR ?= src
 INC_DIR ?= src
+TEST_DIR ?= test
 
 LIB_DIR ?= $(CROSS_COMPILE)lib
 OBJ_DIR ?= $(CROSS_COMPILE)obj
 
+COV_DIR ?= $(CROSS_COMPILE)cov
+
 ifdef DEVELOP
   PAHO_C_DIR := $(abspath ../paho.mqtt.c)
+  PAHO_C_LIB_DIR ?= $(PAHO_C_DIR)/build/output
   PAHO_C_INC_DIR ?= $(PAHO_C_DIR)/src
+else
+  PAHO_C_LIB_DIR ?= /usr/local/lib
+  PAHO_C_INC_DIR ?= /usr/local/include
 endif
 
 vpath %.cpp $(SRC_DIR)
@@ -110,10 +117,12 @@ LIB_DEP_FLAGS += $(addprefix -l,$(LIB_DEPS))
 
 LDFLAGS := -g -shared -Wl,-soname,$(LIB_MAJOR_LINK) -L$(LIB_DIR)
 
-ifdef DEVELOP
-  LDFLAGS += -L$(PAHO_C_DIR)/build/output
-endif
+LDFLAGS += -L$(PAHO_C_LIB_DIR)
 
+ifdef COVERAGE
+  CXXFLAGS += -fprofile-arcs -ftest-coverage
+  LDFLAGS += -fprofile-arcs -pg -lgcov
+endif
 
 # ----- Compiler directives -----
 
@@ -128,13 +137,13 @@ all: $(TGT) $(LIB_DIR)/$(LIB_LINK) $(LIB_DIR)/$(LIB_MAJOR_LINK)
 
 $(TGT): $(OBJS)
 	@echo Creating library: $@
-	$(QUIET) $(CC) $(LDFLAGS) -o $@ $^ $(LIB_DEP_FLAGS)
-
-$(LIB_DIR)/$(LIB_LINK): $(LIB_DIR)/$(LIB_MAJOR_LINK)
-	$(QUIET) cd $(LIB_DIR) ; $(RM) $(LIB_LINK) ; ln -s $(LIB_MAJOR_LINK) $(LIB_LINK)
+	$(QUIET) $(CXX) $(LDFLAGS) -o $@ $^ $(LIB_DEP_FLAGS)
 
 $(LIB_DIR)/$(LIB_MAJOR_LINK): $(TGT)
 	$(QUIET) cd $(LIB_DIR) ; $(RM) $(LIB_MAJOR_LINK) ; ln -s $(LIB) $(LIB_MAJOR_LINK)
+
+$(LIB_DIR)/$(LIB_LINK): $(LIB_DIR)/$(LIB_MAJOR_LINK)
+	$(QUIET) cd $(LIB_DIR) ; $(RM) $(LIB_LINK) ; ln -s $(LIB_MAJOR_LINK) $(LIB_LINK)
 
 .PHONY: dump
 dump:
@@ -162,8 +171,19 @@ distclean: clean
 	$(QUIET) rm -rf $(OBJ_DIR) $(LIB_DIR)
 
 .PHONY: samples
-samples: $(SRC_DIR)/samples
+samples: $(SRC_DIR)/samples $(LIB_DIR)/$(LIB_LINK)
 	$(MAKE) -C $<
+
+.PHONY: check
+check: $(TEST_DIR)/unit $(LIB_DIR)/$(LIB_LINK)
+	$(MAKE) -C $<
+
+.PHONY: coverage
+coverage:
+	$(MAKE) COVERAGE=1 test
+	lcov --directory $(OBJ_DIR) --base-directory ./ --capture --output-file coverage.info
+	genhtml coverage.info -o $(COV_DIR)
+	firefox $(COV_DIR)/index.html
 
 # ----- Installation targets -----
 
@@ -194,4 +214,3 @@ $(OBJ_DIR)/%.dep: %.cpp
 	$(QUIET) $(CXX) -M $(CPPFLAGS) $(CXXFLAGS) $< > $@.$$$$; \
 	sed 's,\($*\)\.o[ :]*,$$(OBJ_DIR)/\1.o $@ : ,g' < $@.$$$$ > $@; \
 	$(RM) $@.$$$$
-

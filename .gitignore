@@ -2,6 +2,7 @@ lib/
 \.hg/
 \.hgignore
 \.hgtags
+\test/unit/mqttpp-unittest
 .deps/
 .libs/
 *.vp*

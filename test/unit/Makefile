@@ -1,18 +1,22 @@
 # Makefile for the paho-mqttpp (C++) unit tests
 
 ifdef DEVELOP
+  PAHO_CPP_LIB_DIR ?= $(abspath ../..)/lib
   PAHO_C_DIR ?= $(abspath ../../../paho.mqtt.c)
   PAHO_C_LIB_DIR ?= $(PAHO_C_DIR)/build/output
   PAHO_C_INC_DIR ?= $(PAHO_C_DIR)/src
 else
+  PAHO_CPP_LIB_DIR ?= /usr/local/lib
   PAHO_C_LIB_DIR ?= /usr/local/lib
   PAHO_C_INC_DIR ?= /usr/local/include
 endif
 
+PAHO_CPP_INC_DIR ?= $(abspath ../..)/src
+
 TGT = mqttpp-unittest
 
 .PHONY: all
-all: $(TGT)
+all: $(TGT) run
 
 ifneq ($(CROSS_COMPILE),)
   CC  = $(CROSS_COMPILE)gcc
@@ -24,7 +28,7 @@ endif
 HDR_TESTS = $(wildcard *.h)
 
 CXXFLAGS += -Wall -std=c++11
-CPPFLAGS += -I../../src -I$(PAHO_C_INC_DIR)
+CPPFLAGS += -I$(PAHO_CPP_INC_DIR) -I$(PAHO_C_INC_DIR)
 
 ifdef DEBUG
   CPPFLAGS += -DDEBUG
@@ -41,11 +45,21 @@ else
   PAHO_C_LIB ?= paho-mqtt3a
 endif
 
-LDLIBS += -L../../lib -L$(PAHO_C_LIB_DIR) -lpaho-mqttpp3 -l$(PAHO_C_LIB) -lcppunit -ldl
+ifdef COVERAGE
+  CXXFLAGS += -fprofile-arcs -ftest-coverage
+  LDFLAGS += -fprofile-arcs -pg -lgcov
+endif
+
+LDLIBS += -L$(PAHO_CPP_LIB_DIR) -lpaho-mqttpp3
+LDLIBS += -L$(PAHO_C_LIB_DIR) -l$(PAHO_C_LIB)
+LDLIBS += -lcppunit
+LDLIBS += -ldl
 
 $(TGT): test.cpp $(HDR_TESTS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS) $(LDFLAGS)
 
+run: $(TGT)
+	LD_LIBRARY_PATH=$(PAHO_C_LIB_DIR):$(PAHO_CPP_LIB_DIR) ./$(TGT)
 
 .PHONY: clean distclean dump
 
@@ -57,6 +71,3 @@ distclean: clean
 dump:
 	@echo CXX: $(CXX)
 	@echo Tests: $(HDR_TESTS)
-
-
-
