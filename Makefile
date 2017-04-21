@@ -20,6 +20,7 @@ INSTALL ?= install
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA =  $(INSTALL) -m 644
 
+
 # ----- Directories -----
 
 SRC_DIR ?= src
@@ -124,11 +125,20 @@ ifdef COVERAGE
   LDFLAGS += -fprofile-arcs -pg -lgcov
 endif
 
+# ----- C++ Dependencies -----
+
+DEPFLAGS = -MT $@ -MMD -MP -MF $(OBJ_DIR)/$*.Tdep
+POST_COMPILE = mv -f $(OBJ_DIR)/$*.Tdep $(OBJ_DIR)/$*.dep
+
+COMPILE.cpp = $(CXX) $(DEPFLAGS) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
+
 # ----- Compiler directives -----
 
 $(OBJ_DIR)/%.o: %.cpp
+$(OBJ_DIR)/%.o: %.cpp $(OBJ_DIR)/%.dep
 	@echo $(CXX) $<
 	$(QUIET) $(COMPILE.cpp) $(OUTPUT_OPTION) $<
+	$(QUIET) $(POST_COMPILE)
 
 # ----- Build targets -----
 
@@ -178,6 +188,10 @@ samples: $(SRC_DIR)/samples $(LIB_DIR)/$(LIB_LINK)
 check: $(TEST_DIR)/unit $(LIB_DIR)/$(LIB_LINK)
 	$(MAKE) -C $<
 
+.PHONY: cppcheck
+cppcheck:
+	$(QUIET) cppcheck --enable=all --std=c++11 --force --quiet -Isrc src/*.cpp
+
 .PHONY: coverage
 coverage:
 	$(MAKE) COVERAGE=1 test
@@ -204,13 +218,12 @@ uninstall:
 
 # ----- Header dependencies -----
 
+$(OBJ_DIR)/%.dep: ;
+.PRECIOUS: $(OBJ_DIR)/%.dep
+
 MKG := $(findstring $(MAKECMDGOALS),"clean distclean dump")
+
 ifeq "$(MKG)" ""
   -include $(DEPS)
 endif
 
-$(OBJ_DIR)/%.dep: %.cpp
-	@echo DEP $<
-	$(QUIET) $(CXX) -M $(CPPFLAGS) $(CXXFLAGS) $< > $@.$$$$; \
-	sed 's,\($*\)\.o[ :]*,$$(OBJ_DIR)/\1.o $@ : ,g' < $@.$$$$ > $@; \
-	$(RM) $@.$$$$

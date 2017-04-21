@@ -60,7 +60,7 @@ public:
 	// We're not subscribed to anything, so this should never be called.
 	void message_arrived(const std::string& topic, mqtt::const_message_ptr msg) override {}
 
-	void delivery_complete(mqtt::idelivery_token_ptr tok) override {
+	void delivery_complete(mqtt::delivery_token_ptr tok) override {
 		std::cout << "\tDelivery complete for token: "
 			<< (tok ? tok->get_message_id() : -1) << std::endl;
 	}
