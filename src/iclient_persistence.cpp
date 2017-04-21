@@ -33,14 +33,14 @@ namespace mqtt {
 
 class persistence_wrapper : virtual public ipersistable
 {
-	const byte_buffer hdr_;
-	const byte_buffer payload_;
+	const binary hdr_;
+	const binary payload_;
 
 public:
 	persistence_wrapper(const void* payload, size_t payloadlen) 
 			: payload_(static_cast<const byte*>(payload), 
 					   static_cast<const byte*>(payload) + payloadlen) {}
-	persistence_wrapper(const byte_buffer& payload)
+	persistence_wrapper(const binary& payload)
 			: payload_(payload) {}
 	persistence_wrapper(const void* hdr, size_t hdrlen,
 						const void* payload, size_t payloadlen)
@@ -48,14 +48,18 @@ public:
 				   static_cast<const byte*>(hdr) + hdrlen),
 				payload_(static_cast<const byte*>(payload), 
 						 static_cast<const byte*>(payload) + payloadlen) {}
-	persistence_wrapper(const byte_buffer& hdr, const byte_buffer& payload)
+	persistence_wrapper(const binary& hdr, const binary& payload)
 			: hdr_(hdr), payload_(payload) {}
 
-	const byte* get_header_bytes() const override { return hdr_.data(); }
+	const byte* get_header_bytes() const override {
+		return reinterpret_cast<const byte*>(hdr_.data());
+	}
 	size_t get_header_length() const override { return hdr_.size(); }
 	size_t get_header_offset() const override { return 0; }
 
-	const byte* get_payload_bytes() const override { return payload_.data(); }
+	const byte* get_payload_bytes() const override {
+		return reinterpret_cast<const byte *>(payload_.data());
+	}
 	size_t get_payload_length() const override { return payload_.size(); }
 	size_t get_payload_offset() const override { return 0; }
 

@@ -30,40 +30,24 @@
 namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
+// Basic data types
 
 /** A 'byte' is an 8-bit, unsigned int */
 using byte = uint8_t;
 
-/** A collection of bytes  */
-using byte_buffer = std::basic_string<byte>;
-
+/** An mqtt string is just a std::string */
 using string = std::string;
-using binary = std::basic_string<byte>;
+/** A binary blob of data */
+using binary = std::string;		//std::basic_string<byte>;
 
+/** Smart/shared pointer to a const string */
 using string_ptr = std::shared_ptr<const string>;
+/** Smart/shared pointer to a const binary blob */
 using binary_ptr = std::shared_ptr<const binary>;
 
-/**
- * Convert (cast) a byte_buffer to a string.
- * This creates a string that's a binary equivalent to the buffer.
- * @param buf A binary byte_buffer
- * @return A string that's a binary copy of the buffer.
- */
-inline string to_string(const byte_buffer& buf) {
-	return string(reinterpret_cast<const char*>(buf.data()), buf.size());
-}
-
-/**
- * Convert (cast) a string to a byte buffer.
- * This creates a byte_buffer which is a binary equivalent to the string.
- * @param str A string
- * @return A byte_buffer that's a binary copy of the string.
- */
-inline byte_buffer to_buffer(const string& str) {
-	return byte_buffer(reinterpret_cast<const byte*>(str.data()), str.size());
-}
 
 /////////////////////////////////////////////////////////////////////////////
+// Time functions
 
 /**
  * Convert a chrono duration to seconds.
