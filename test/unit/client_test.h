@@ -15,6 +15,7 @@
  *
  * Contributors:
  *    Guilherme M. Ferreira - initial implementation and documentation
+ *    Frank Pagliughi - updated tests for modified v1.0 client API
  *******************************************************************************/
 
 #ifndef __mqtt_client_test_h
@@ -35,7 +36,6 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-
 class client_test : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE( client_test );
@@ -52,7 +52,8 @@ class client_test : public CppUnit::TestFixture
 	CPPUNIT_TEST( test_disconnect_1_arg );
 	CPPUNIT_TEST( test_disconnect_1_arg_failure );
 
-	CPPUNIT_TEST( test_time_to_wait );
+	CPPUNIT_TEST( test_timeout_int );
+	CPPUNIT_TEST( test_timeout_duration );
 
 	CPPUNIT_TEST( test_get_topic );
 
@@ -216,24 +217,38 @@ public:
 	}
 
 //----------------------------------------------------------------------
-// Test client::get_time_to_wait() and client::set_time_to_wait()
+// Test client::get_timeout() and client::set_timeout() using ints
 //----------------------------------------------------------------------
 
-	void test_time_to_wait() {
+	void test_timeout_int() {
 		mqtt::client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		int timeout { std::numeric_limits<int>::min() };
-		cli.set_time_to_wait( timeout );
-		CPPUNIT_ASSERT_EQUAL(timeout, cli.get_time_to_wait());
+		cli.set_timeout(timeout);
+		CPPUNIT_ASSERT_EQUAL(timeout, (int) cli.get_timeout().count());
 
 		timeout = 0;
-		cli.set_time_to_wait( timeout );
-		CPPUNIT_ASSERT_EQUAL(timeout, cli.get_time_to_wait());
+		cli.set_timeout(timeout);
+		CPPUNIT_ASSERT_EQUAL(timeout, (int) cli.get_timeout().count());
 
 		timeout = std::numeric_limits<int>::max();
-		cli.set_time_to_wait( timeout );
-		CPPUNIT_ASSERT_EQUAL(timeout, cli.get_time_to_wait());
+		cli.set_timeout(timeout);
+		CPPUNIT_ASSERT_EQUAL(timeout, (int) cli.get_timeout().count());
+	}
+
+//----------------------------------------------------------------------
+// Test client::get_timeout() and client::set_timeout() using durations
+//----------------------------------------------------------------------
+
+	void test_timeout_duration() {
+		const int TIMEOUT_SEC = 120;
+		mqtt::client cli { GOOD_SERVER_URI, CLIENT_ID };
+
+		std::chrono::seconds timeout{ TIMEOUT_SEC };
+		cli.set_timeout(timeout);
+		CPPUNIT_ASSERT(timeout == cli.get_timeout());
+		CPPUNIT_ASSERT_EQUAL(TIMEOUT_SEC*1000, (int) cli.get_timeout().count());
 	}
 
 //----------------------------------------------------------------------

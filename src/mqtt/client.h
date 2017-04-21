@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2017 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -42,9 +42,9 @@ class client
 	/** The actual client */
 	async_client cli_;
 	/**
-	 * The longest amount of time to wait for an operation (in milliseconds)
+	 * The longest amount of time to wait for an operation to complete.
 	 */
-	int timeout_;
+	std::chrono::milliseconds timeout_;
 
 	/** Non-copyable */
 	client() =delete;
@@ -99,23 +99,39 @@ public:
 	/**
 	 * Connects to an MQTT server using the default options.
 	 */
-	virtual void connect();
+	virtual void connect() {
+		cli_.connect()->wait_for_completion(timeout_);
+	}
 	/**
 	 * Connects to an MQTT server using the specified options.
-	 * @param options
+	 * @param opts
 	 */
-	virtual void connect(connect_options options);
+	virtual void connect(connect_options opts) {
+		cli_.connect(std::move(opts))->wait_for_completion(timeout_);
+	}
 	/**
 	 * Disconnects from the server.
 	 */
-	virtual void disconnect();
+	virtual void disconnect() {
+		cli_.disconnect()->wait_for_completion(timeout_);
+	}
 	/**
 	 * Disconnects from the server.
-	 * @param timeout the amount of time in milliseconds to allow for
+	 * @param timeoutMS the amount of time in milliseconds to allow for
 	 *  			  existing work to finish before disconnecting. A value
 	 *  			  of zero or less means the client will not quiesce.
 	 */
-	virtual void disconnect(int timeout);
+	virtual void disconnect(int timeoutMS);
+	/**
+	 * Disconnects from the server.
+	 * @param timeoutMS the amount of time in milliseconds to allow for
+	 *  			  existing work to finish before disconnecting. A value
+	 *  			  of zero or less means the client will not quiesce.
+	 */
+	template <class Rep, class Period>
+	void disconnect(const std::chrono::duration<Rep, Period>& to) {
+		disconnect((int) to_milliseconds(to).count());
+	}
 	/**
 	 * Returns a randomly generated client identifier based on the current
 	 * user's login name and the system time.
@@ -125,7 +141,7 @@ public:
 	 * Returns the client ID used by this client.
 	 * @return string
 	 */
-	virtual string get_client_id() const;
+	virtual string get_client_id() const { return cli_.get_client_id(); }
 	/**
 	 * Returns the delivery tokens for any outstanding publish operations.
 	 */
@@ -134,23 +150,24 @@ public:
 	 * Returns the address of the server used by this client, as a URI.
 	 * @return string
 	 */
-	virtual string get_server_uri() const;
+	virtual string get_server_uri() const { return cli_.get_server_uri(); }
 	/**
 	 * Return the maximum time to wait for an action to complete.
 	 * @return int
 	 */
-	virtual int get_time_to_wait() const;
+	virtual std::chrono::milliseconds get_timeout() const { return timeout_; }
 	/**
 	 * Get a topic object which can be used to publish messages.
-	 * @param tpc
+	 * @param top
 	 * @return topic
 	 */
-	virtual topic get_topic(const string& tpc);
+	virtual topic get_topic(const string& top) { return topic(top, cli_); }
 	/**
 	 * Determines if this client is currently connected to the server.
 	 * @return bool
 	 */
-	virtual bool is_connected() const;
+	virtual bool is_connected() const { return cli_.is_connected(); }
+
 	/**
 	 * Publishes a message to a topic on the server and return once it is
 	 * delivered.
@@ -181,10 +198,20 @@ public:
 	 */
 	virtual void set_callback(callback& cb);
 	/**
-	 * Set the maximum time to wait for an action to complete
-	 * @param timeToWaitInMillis
+	 * Set the maximum time to wait for an action to complete.
+	 * @param timeoutMS
 	 */
-	virtual void set_time_to_wait(int timeToWaitInMillis);
+	virtual void set_timeout(int timeoutMS) {
+		timeout_ = std::chrono::milliseconds(timeoutMS);
+	}
+	/**
+	 * Set the maximum time to wait for an action to complete.
+	 * @param to The timeout as a std::chrono duration.
+	 */
+	template <class Rep, class Period>
+	void set_timeout(const std::chrono::duration<Rep, Period>& to) {
+		timeout_ = to_milliseconds(to);
+	}
 	/**
 	 * Subscribe to a topic, which may include wildcards using a QoS of 1.
 	 * @param topicFilter

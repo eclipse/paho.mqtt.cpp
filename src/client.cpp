@@ -50,61 +50,19 @@ void client::close()
 	// TODO: What?
 }
 
-void client::connect()
-{
-	cli_.connect()->wait_for_completion(timeout_);
-}
-
-void client::connect(connect_options opts)
-{
-	cli_.connect(opts)->wait_for_completion(timeout_);
-}
-
-void client::disconnect()
-{
-	cli_.disconnect()->wait_for_completion(timeout_);
-}
-
 void client::disconnect(int timeout)
 {
 	cli_.disconnect(timeout)->wait_for_completion(timeout_);
 }
 
+
 //string client::generate_client_id()
 //{
 //}
 
-string client::get_client_id() const
-{
-	return cli_.get_client_id();
-}
-
-string client::get_server_uri() const
-{
-	return cli_.get_server_uri();
-}
-
-//Debug 	getDebug()
-//Return a debug object that can be used to help solve problems.
-
 std::vector<delivery_token_ptr> client::get_pending_delivery_tokens() const
 {
 	return cli_.get_pending_delivery_tokens();
-}
-
-int client::get_time_to_wait() const
-{
-	return timeout_;
-}
-
-topic client::get_topic(const string& top)
-{
-	return topic(top, cli_);
-}
-
-bool client::is_connected() const
-{
-	return cli_.is_connected();
 }
 
 void client::publish(const string& top, const void* payload, size_t n,
@@ -128,11 +86,6 @@ void client::publish(const string& top, const message& msg)
 void client::set_callback(callback& cb)
 {
 	cli_.set_callback(cb);
-}
-
-void client::set_time_to_wait(int timeout)
-{
-	timeout_ = timeout;
 }
 
 void client::subscribe(const string& topicFilter)
