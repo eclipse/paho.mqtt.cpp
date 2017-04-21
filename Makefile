@@ -186,7 +186,8 @@ samples: $(SRC_DIR)/samples $(LIB_DIR)/$(LIB_LINK)
 
 .PHONY: check
 check: $(TEST_DIR)/unit $(LIB_DIR)/$(LIB_LINK)
-	$(MAKE) -C $<
+	$(QUIET) $(MAKE) -C $< clean
+	$(QUIET) $(MAKE) -C $< run
 
 .PHONY: cppcheck
 cppcheck:
