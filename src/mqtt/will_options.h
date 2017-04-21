@@ -30,10 +30,6 @@
 #include "mqtt/message.h"
 #include "mqtt/topic.h"
 
-// TODO: Remove this when C lib fixed
-#undef MQTTAsync_willOptions_initializer
-#define MQTTAsync_willOptions_initializer { {'M', 'Q', 'T', 'W'}, 1, NULL, NULL, 0, 0, { 0, NULL } }
-
 namespace mqtt {
 
 class connect_options;
@@ -44,9 +40,9 @@ class connect_options;
  * Holds the set of options that govern the Last Will and Testament feature.
  *
  * @note
- * This wraps struct v0 of the C library's MQTTAsync_willOptions structure.
- * For the C library v1.1.0 (Paho 1.2), the topic and payload pointers are
- * required to be valid (non-NULL), even if empty.
+ * This wraps struct v1 of the C library's MQTTAsync_willOptions structure.
+ * It sets the LWT binary payload, via the 'payload' struct field, and
+   leaves the 'message' field as a nullptr.
  */
 class will_options
 {

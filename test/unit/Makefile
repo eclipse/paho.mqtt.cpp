@@ -1,22 +1,32 @@
 # Makefile for the paho-mqttpp (C++) unit tests
 
+ifndef VERBOSE
+  QUIET := @
+endif
+
 ifdef DEVELOP
-  PAHO_CPP_LIB_DIR ?= $(abspath ../..)/lib
+  PAHO_CPP_DIR ?= $(abspath ../..)
+  PAHO_CPP_INC_DIR ?= $(PAHO_CPP_DIR)/src
+  PAHO_CPP_LIB_DIR ?= $(PAHO_CPP_DIR)/lib
+
   PAHO_C_DIR ?= $(abspath ../../../paho.mqtt.c)
   PAHO_C_LIB_DIR ?= $(PAHO_C_DIR)/build/output
   PAHO_C_INC_DIR ?= $(PAHO_C_DIR)/src
 else
-  PAHO_CPP_LIB_DIR ?= /usr/local/lib
-  PAHO_C_LIB_DIR ?= /usr/local/lib
-  PAHO_C_INC_DIR ?= /usr/local/include
+  PAHO_CPP_DIR ?= /usr/local
+  PAHO_CPP_INC_DIR ?= $(PAHO_CPP_DIR)/include
+  PAHO_CPP_LIB_DIR ?= $(PAHO_CPP_DIR)/lib
+
+  PAHO_C_DIR ?= /usr/local
+  PAHO_C_INC_DIR ?= $(PAHO_C_DIR)/include
+  PAHO_C_LIB_DIR ?= $(PAHO_C_DIR)/lib
 endif
 
-PAHO_CPP_INC_DIR ?= $(abspath ../..)/src
 
 TGT = mqttpp-unittest
 
-.PHONY: all
-all: $(TGT) run
+.PHONY: all tests
+all: $(TGT)
 
 ifneq ($(CROSS_COMPILE),)
   CC  = $(CROSS_COMPILE)gcc
@@ -26,6 +36,7 @@ ifneq ($(CROSS_COMPILE),)
 endif
 
 HDR_TESTS = $(wildcard *.h)
+HDRS = $(wildcard $(PAHO_CPP_INC_DIR)/mqtt/*.h)
 
 CXXFLAGS += -Wall -std=c++11
 CPPFLAGS += -I$(PAHO_CPP_INC_DIR) -I$(PAHO_C_INC_DIR)
@@ -52,14 +63,15 @@ endif
 
 LDLIBS += -L$(PAHO_CPP_LIB_DIR) -lpaho-mqttpp3
 LDLIBS += -L$(PAHO_C_LIB_DIR) -l$(PAHO_C_LIB)
-LDLIBS += -lcppunit
-LDLIBS += -ldl
+LDLIBS += -lcppunit -ldl
 
-$(TGT): test.cpp $(HDR_TESTS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS) $(LDFLAGS)
+$(TGT): test.cpp $(HDR_TESTS) $(HDRS)
+	@echo "Building unit tests."
+	$(QUIET) $(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS) $(LDFLAGS)
 
 run: $(TGT)
-	LD_LIBRARY_PATH=$(PAHO_C_LIB_DIR):$(PAHO_CPP_LIB_DIR) ./$(TGT)
+	@echo "Running unit tests..."
+	$(QUIET) LD_LIBRARY_PATH=$(PAHO_C_LIB_DIR):$(PAHO_CPP_LIB_DIR) ./$(TGT)
 
 .PHONY: clean distclean dump
 
@@ -71,3 +83,5 @@ distclean: clean
 dump:
 	@echo CXX: $(CXX)
 	@echo Tests: $(HDR_TESTS)
+	@echo Headers: $(HDRS)
+
