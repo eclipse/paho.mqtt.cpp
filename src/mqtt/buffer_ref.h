@@ -229,6 +229,11 @@ public:
 	 */
 	blob to_string() const { return data_ ? (*data_) : blob(); }
 	/**
+	 * Get the data buffer as a string.
+	 * @return The data buffer as a string.
+	 */
+	blob str() const { return data_ ? (*data_) : blob(); }
+	/**
 	 * Get the data buffer as NUL-terminated C string.
 	 * Note that the reference must be set to call this function.
 	 * @return The data buffer as a string.
