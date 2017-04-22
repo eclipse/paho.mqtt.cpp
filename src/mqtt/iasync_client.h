@@ -60,8 +60,6 @@ class iasync_client
 	virtual void remove_token(token* tok) =0;
 
 public:
-	/** Type for a collection of filters */
-	using topic_filter_collection = std::vector<string>;
 	/** Type for a collection of QOS values */
 	using qos_collection = std::vector<int>;
 

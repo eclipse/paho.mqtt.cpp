@@ -379,7 +379,6 @@ delivery_token_ptr async_client::publish(const string& topic,
 delivery_token_ptr async_client::publish(const string& topic, const_message_ptr msg)
 {
 	auto tok = delivery_token::create(*this, topic, msg);
-	//tok->set_message(msg);
 	add_token(tok);
 
 	delivery_response_options opts(tok);
@@ -400,10 +399,7 @@ delivery_token_ptr async_client::publish(const string& topic, const_message_ptr 
 delivery_token_ptr async_client::publish(const string& topic, const_message_ptr msg,
 										 void* userContext, iaction_listener& cb)
 {
-	delivery_token_ptr tok = delivery_token::create(*this, topic, msg);
-	tok->set_user_context(userContext);
-	tok->set_action_callback(cb);
-	//tok->set_message(msg);
+	delivery_token_ptr tok = delivery_token::create(*this, topic, msg, userContext, cb);
 	add_token(tok);
 
 	delivery_response_options opts(tok);
@@ -478,9 +474,7 @@ token_ptr async_client::subscribe(const topic_filter_collection& topicFilters,
 
 	// No exceptions till C-strings are deleted!
 
-	auto tok = token::create(*this, topicFilters);
-	tok->set_user_context(userContext);
-	tok->set_action_callback(cb);
+	auto tok = token::create(*this, topicFilters, userContext, cb);
 	add_token(tok);
 
 	response_options opts(tok);
@@ -518,9 +512,7 @@ token_ptr async_client::subscribe(const string& topicFilter, int qos)
 token_ptr async_client::subscribe(const string& topicFilter, int qos,
 								   void* userContext, iaction_listener& cb)
 {
-	auto tok = token::create(*this, topicFilter);
-	tok->set_user_context(userContext);
-	tok->set_action_callback(cb);
+	auto tok = token::create(*this, topicFilter, userContext, cb);
 	add_token(tok);
 
 	response_options opts(tok);
@@ -583,9 +575,7 @@ token_ptr async_client::unsubscribe(const topic_filter_collection& topicFilters,
 	size_t n = topicFilters.size();
 	std::vector<char*> filts = alloc_topic_filters(topicFilters);
 
-	auto tok = token::create(*this, topicFilters);
-	tok->set_user_context(userContext);
-	tok->set_action_callback(cb);
+	auto tok = token::create(*this, topicFilters, userContext, cb);
 	add_token(tok);
 
 	response_options opts(tok);
@@ -605,9 +595,7 @@ token_ptr async_client::unsubscribe(const topic_filter_collection& topicFilters,
 token_ptr async_client::unsubscribe(const string& topicFilter,
 									void* userContext, iaction_listener& cb)
 {
-	auto tok = token::create(*this, topicFilter);
-	tok->set_user_context(userContext);
-	tok->set_action_callback(cb);
+	auto tok = token::create(*this, topicFilter, userContext, cb);
 	add_token(tok);
 
 	response_options opts(tok);

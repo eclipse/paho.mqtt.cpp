@@ -54,8 +54,6 @@ class client
 public:
 	/** Smart pointer type for this object */
 	using ptr_t = std::shared_ptr<client>;
-	/** Type for a collection of filters */
-	using topic_filter_collection = async_client::topic_filter_collection;
 	/** Type for a collection of QOS values */
 	using qos_collection = async_client::qos_collection;
 

@@ -93,7 +93,7 @@ class client_test : public CppUnit::TestFixture
 	const std::string TOPIC { "TOPIC" };
 	const int GOOD_QOS { 0 };
 	const int BAD_QOS  { 3 };
-	mqtt::client::topic_filter_collection TOPIC_COLL { "TOPIC0", "TOPIC1", "TOPIC2" };
+	mqtt::topic_filter_collection TOPIC_COLL { "TOPIC0", "TOPIC1", "TOPIC2" };
 	mqtt::client::qos_collection GOOD_QOS_COLL { 0, 1, 2 };
 	mqtt::client::qos_collection BAD_QOS_COLL  { BAD_QOS };
 	const std::string PAYLOAD { "PAYLOAD" };

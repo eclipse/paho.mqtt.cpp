@@ -24,6 +24,7 @@
 #define __mqtt_types_h
 
 #include <string>
+#include <vector>
 #include <memory>
 #include <chrono>
 
@@ -45,6 +46,11 @@ using string_ptr = std::shared_ptr<const string>;
 /** Smart/shared pointer to a const binary blob */
 using binary_ptr = std::shared_ptr<const binary>;
 
+/** Type for a collection of topics */
+using topic_collection = std::vector<string>;
+
+/** Type for a collection of filters */
+using topic_filter_collection = std::vector<string>;
 
 /////////////////////////////////////////////////////////////////////////////
 // Time functions
