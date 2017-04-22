@@ -8,7 +8,15 @@ os: linux
 
 install:
   # Install Paho MQTT C (Need only paho-mqtt3a and paho-mqtt3as)
-  - git clone https://github.com/eclipse/paho.mqtt.c.git && cd paho.mqtt.c/build && cmake -DCMAKE_INSTALL_PREFIX=/tmp/paho-c -DPAHO_WITH_SSL=ON .. && make && make install && cd ../..
+  - git clone https://github.com/eclipse/paho.mqtt.c.git
+  - cd paho.mqtt.c
+  - git checkout -t origin/develop
+  - mkdir build_cmake
+  - cd build_cmake
+  - cmake -DCMAKE_INSTALL_PREFIX=/tmp/paho-c -DPAHO_WITH_SSL=ON ..
+  - make
+  - sudo make install
+  - cd ../..
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/tmp/paho-c/lib
 
 addons:
@@ -128,8 +136,8 @@ matrix:
 
 script:
   # Test Makefile building
-  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && make clean && make CXX=$COMPILER PAHO_C_INC_DIR=/tmp/paho-c/include/ PAHO_C_LIB_DIR=/tmp/paho-c/lib
-  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && make clean && make CXX=$COMPILER PAHO_C_INC_DIR=/tmp/paho-c/include/ PAHO_C_LIB_DIR=/tmp/paho-c/lib PAHO_CPP_LIB_DIR=../../lib check
+  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && make clean && make CXX=$COMPILER PAHO_C_INC_DIR=/tmp/paho-c/include/ PAHO_C_LIB_DIR=/tmp/paho-c/lib PAHO_CPP_INC_DIR=../../src PAHO_CPP_LIB_DIR=../../lib check
+  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && make clean && make CXX=$COMPILER PAHO_C_INC_DIR=/tmp/paho-c/include/ PAHO_C_LIB_DIR=/tmp/paho-c/lib PAHO_CPP_INC_DIR=../../src PAHO_CPP_LIB_DIR=../../lib SSL=1 check
   # Test CMake building
   - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && rm -rf build_cmake && mkdir build_cmake && cd build_cmake && cmake -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_INSTALL_PREFIX=/tmp/paho-cpp -DPAHO_MQTT_C_PATH=/tmp/paho-c -DPAHO_BUILD_SAMPLES=ON -DPAHO_BUILD_STATIC=ON -DPAHO_BUILD_DOCUMENTATION=OFF -DPAHO_WITH_SSL=OFF .. && make && make install; cd ..
   - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && rm -rf build_cmake && mkdir build_cmake && cd build_cmake && cmake -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_INSTALL_PREFIX=/tmp/paho-cpp -DPAHO_MQTT_C_PATH=/tmp/paho-c -DPAHO_BUILD_SAMPLES=ON -DPAHO_BUILD_STATIC=ON -DPAHO_BUILD_DOCUMENTATION=ON  -DPAHO_WITH_SSL=ON  .. && make && make install; cd ..

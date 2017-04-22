@@ -69,6 +69,7 @@ $(TGT): test.cpp $(HDR_TESTS) $(HDRS)
 	@echo "Building unit tests."
 	$(QUIET) $(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS) $(LDFLAGS)
 
+.PHONY: run
 run: $(TGT)
 	@echo "Running unit tests..."
 	$(QUIET) LD_LIBRARY_PATH=$(PAHO_C_LIB_DIR):$(PAHO_CPP_LIB_DIR) ./$(TGT)
