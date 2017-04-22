@@ -63,7 +63,7 @@ public:
 	disconnect_options(int timeout, const token_ptr& tok);
 	/**
 	 * Creates disconnect options tied to the specific token.
-	 * @param timeout The timeout.
+	 * @param to The timeout.
 	 * @param tok A token to be used as the context.
 	 */
 	template <class Rep, class Period>

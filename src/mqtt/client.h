@@ -124,7 +124,7 @@ public:
 	virtual void disconnect(int timeoutMS);
 	/**
 	 * Disconnects from the server.
-	 * @param timeoutMS the amount of time in milliseconds to allow for
+	 * @param to the amount of time in milliseconds to allow for
 	 *  			  existing work to finish before disconnecting. A value
 	 *  			  of zero or less means the client will not quiesce.
 	 */
