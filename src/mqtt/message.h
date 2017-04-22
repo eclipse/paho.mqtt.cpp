@@ -147,8 +147,7 @@ public:
 	/**
 	 * Gets the payload as a string
 	 */
-	//const string& get_payload_str() const { return payload_.to_string(); }
-	string get_payload_str() const { return payload_ ?  payload_.to_string() : string(); }
+	string get_payload_str() const { return payload_ ? payload_.str() : string(); }
 	/**
 	 * Returns the quality of service for this message.
 	 * @return The quality of service for this message.
@@ -183,13 +182,6 @@ public:
 	 */
 	void set_payload(const void* payload, size_t n) {
 		set_payload(binary_ref(static_cast<const binary_ref::value_type*>(payload), n));
-	}
-	/**
-	 * Sets the payload of this message to be the specified string.
-	 * @param payload A string to use as the message payload.
-	 */
-	void set_payload(string payload) {
-		set_payload(binary_ref(std::move(payload)));
 	}
 	/**
 	 * Sets the quality of service for this message.
@@ -268,34 +260,6 @@ inline message_ptr make_message(binary_ref payload) {
 inline message_ptr make_message(binary_ref payload, int qos, bool retained) {
 	return std::make_shared<mqtt::message>(std::move(payload), qos, retained);
 }
-
-#if 0
-/**
- * Constructs a message with the specified string as a payload, and
- * all other values set to defaults.
- * @param payload A string to use as the message payload.
- */
-inline message_ptr make_message(string payload) {
-	return std::make_shared<mqtt::message>(std::move(payload));
-}
-inline message_ptr make_message(const char* payload) {
-	return std::make_shared<mqtt::message>(string(payload));
-}
-
-/**
- * Constructs a message with the specified string as a payload, and
- * all other values set to defaults.
- * @param payload A string to use as the message payload.
- * @param qos The quality of service for the message.
- * @param retained Whether the message should be retained by the broker.
- */
-inline message_ptr make_message(const string& payload, int qos, bool retained) {
-	return std::make_shared<mqtt::message>(payload, qos, retained);
-}
-inline message_ptr make_message(const char* payload, int qos, bool retained) {
-	return std::make_shared<mqtt::message>(string(payload), qos, retained);
-}
-#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt

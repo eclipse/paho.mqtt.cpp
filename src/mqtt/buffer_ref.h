@@ -69,6 +69,10 @@ private:
 
 public:
 	/**
+	 * Default constructor created a null reference.
+	 */
+	buffer_ref() =default;
+	/**
 	 * Copy constructor only copies a shared pointer.
 	 * @param buf Another buffer reference.
 	 */
@@ -82,13 +86,13 @@ public:
 	 * Creates a reference to a new buffer by copying data.
 	 * @param b A string from which to create a new buffer.
 	 */
-	buffer_ref(const blob& b) : data_{new blob(b)} {}
+	buffer_ref(const blob& b) : data_{std::make_shared<blob>(b)} {}
 	/**
 	 * Creates a reference to a new buffer by moving a string into the
 	 * buffer.
 	 * @param b A string from which to create a new buffer.
 	 */
-	buffer_ref(blob&& b) : data_{new blob(std::move(b))} {}
+	buffer_ref(blob&& b) : data_{std::make_shared<blob>(std::move(b))} {}
 	/**
 	 * Creates a reference to an existing buffer by copying the shared
 	 * pointer.
@@ -110,7 +114,7 @@ public:
 	 * @param buf The memory to copy
 	 * @param n The number of bytes to copy.
 	 */
-	buffer_ref(const value_type* buf, size_t n) : data_{new blob(buf,n)} {}
+	buffer_ref(const value_type* buf, size_t n) : data_{std::make_shared<blob>(buf,n)} {}
 	/**
 	 * Creates a reference to a new buffer containing a copy of the
 	 * NUL-terminated char array.
@@ -119,29 +123,6 @@ public:
 	buffer_ref(const char* buf) : buffer_ref(reinterpret_cast<const value_type*>(buf), std::strlen(buf)) {
 		static_assert(sizeof(char) == sizeof(T), "can only use C arr with char or byte buffers");
 	}
-
-	/*
-	  There are two ways we can handle default construction. One is that we
-	  allow the data_ pointer to use its default and get a null value. That
-	  would be quick and efficient, but leave us with several unsafe
-	  operations that would require null/empty checks for us and/or the
-	  user.
-	  The other option is for the default constructor to create and point to
-	  an empty string. Then all operations are safe and valid, at the
-	  expense of some default construction performance.
-	  It's a tough choice. The first sounds dangerous, but is analagous to
-	  reference types in other languages that default to a "nil" of "null"
-	  value. But the latter creates something closer to a drop-in
-	  replacement for a C++ string
-	*/
-	#if 1
-		buffer_ref() =default;
-		explicit operator bool() const { return bool(data_); }
-		bool empty() const { return !data_ || data_->empty(); }
-	#else
-		buffer_ref() : data_{new blob()} {}
-		bool empty() const { return data_->empty(); }
-	#endif
 
 	/**
 	 * Copy the reference to the buffer.
@@ -209,6 +190,18 @@ public:
 	 */
 	void reset() { data_.reset(); }
 	/**
+	 * Determines if the reference is valid.
+	 * @return @em true if referring to a valid buffer, @em false if the
+	 *  	   reference (pointer) is null.
+	 */
+	explicit operator bool() const { return bool(data_); }
+	/**
+	 * Determines if the buffer is empty.
+	 * @return @em true if the buffer is empty or thr reference is null, @em
+	 *  	   false if the buffer contains data.
+	 */
+	bool empty() const { return !data_ || data_->empty(); }
+	/**
 	 * Get a const pointer to the data buffer.
 	 * @return A pointer to the data buffer.
 	 */
@@ -222,17 +215,17 @@ public:
 	 * Get the size of the data buffer.
 	 * @return The size of the data buffer.
 	 */
-	size_t length() const { return data_ ? data_->length() : 0; }
-	/**
-	 * Get the data buffer as a string.
-	 * @return The data buffer as a string.
-	 */
-	blob to_string() const { return data_ ? (*data_) : blob(); }
+	size_t length() const { return size(); }
 	/**
 	 * Get the data buffer as a string.
 	 * @return The data buffer as a string.
 	 */
 	blob str() const { return data_ ? (*data_) : blob(); }
+	/**
+	 * Get the data buffer as a string.
+	 * @return The data buffer as a string.
+	 */
+	blob to_string() const { return str(); }
 	/**
 	 * Get the data buffer as NUL-terminated C string.
 	 * Note that the reference must be set to call this function.
@@ -252,6 +245,13 @@ public:
 	const value_type& operator[](size_t i) const { return (*data_)[i]; }
 };
 
+/**
+ * Stream inserter for a buffer reference.
+ * This does a binary write of the data in the buffer.
+ * @param os The output stream.
+ * @param buf The buffer reference to write.
+ * @return A reference to the output stream.
+ */
 template <typename T>
 std::ostream& operator<<(std::ostream& os, const buffer_ref<T>& buf) {
 	if (!buf.empty())
