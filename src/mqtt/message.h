@@ -103,8 +103,6 @@ public:
 	 * Constructs a message from a byte buffer.
 	 * Note that the payload accepts copy or move semantics.
 	 * @param payload A byte buffer to use as the message payload.
-	 * @param qos The quality of service for the message.
-	 * @param retained Whether the message should be retained by the broker.
 	 */
 	message(binary_ref payload) : message(std::move(payload), DFLT_QOS, DFLT_RETAINED) {}
 	/**
