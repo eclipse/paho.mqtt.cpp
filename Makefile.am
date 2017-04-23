@@ -91,6 +91,7 @@ include_HEADERS += src/mqtt/iclient_persistence.h
 include_HEADERS += src/mqtt/ipersistable.h
 include_HEADERS += src/mqtt/message.h
 include_HEADERS += src/mqtt/response_options.h
+include_HEADERS += src/mqtt/thread_queue.h
 include_HEADERS += src/mqtt/token.h
 include_HEADERS += src/mqtt/topic.h
 include_HEADERS += src/mqtt/types.h
@@ -113,6 +114,7 @@ if PAHO_BUILD_SAMPLES
 bin_PROGRAMS  = async_publish
 bin_PROGRAMS += async_subscribe
 bin_PROGRAMS += sync_publish
+bin_PROGRAMS += pub_speed_test
 
 if PAHO_WITH_SSL
 bin_PROGRAMS += ssl_publish
@@ -127,6 +129,8 @@ async_publish_SOURCES = src/samples/async_publish.cpp
 async_subscribe_SOURCES = src/samples/async_subscribe.cpp
 
 sync_publish_SOURCES = src/samples/sync_publish.cpp
+
+pub_speed_test_SOURCES = src/samples/pub_speed_test.cpp
 
 if PAHO_WITH_SSL
 ssl_publish_SOURCES = src/samples/ssl_publish.cpp
@@ -150,6 +154,8 @@ async_subscribe_CPPFLAGS = $(COMMONCPPFLAGS)
 
 sync_publish_CPPFLAGS = $(COMMONCPPFLAGS)
 
+pub_speed_test_CPPFLAGS = $(COMMONCPPFLAGS)
+
 ###############################################################################
 # Samples: compiler flags
 ###############################################################################
@@ -162,6 +168,8 @@ async_publish_CXXFLAGS = $(COMMONCXXFLAGS)
 async_subscribe_CXXFLAGS = $(COMMONCXXFLAGS)
 
 sync_publish_CXXFLAGS = $(COMMONCXXFLAGS)
+
+pub_speed_test_CXXFLAGS = $(COMMONCXXFLAGS)
 
 if PAHO_WITH_SSL
 ssl_publish_CXXFLAGS = $(COMMONCXXFLAGS)
@@ -180,6 +188,8 @@ async_publish_LDADD = $(COMMONLDFLAGS)
 async_subscribe_LDADD = $(COMMONLDFLAGS)
 
 sync_publish_LDADD = $(COMMONLDFLAGS)
+
+pub_speed_test_LDADD = $(COMMONLDFLAGS)
 
 if PAHO_WITH_SSL
 ssl_publish_LDADD = $(COMMONLDFLAGS)

@@ -32,6 +32,7 @@ set(COMMON_HDR
     ipersistable.h
     message.h
     response_options.h
+    thread_queue.h
     token.h
     topic.h
     types.h
