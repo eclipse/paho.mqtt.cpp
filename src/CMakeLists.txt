@@ -44,6 +44,7 @@ set(COMMON_SRC
     response_options.cpp
     token.cpp
     topic.cpp
+    topic_collection.cpp
     connect_options.cpp
     will_options.cpp)
 

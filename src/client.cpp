@@ -93,7 +93,7 @@ void client::subscribe(const string& topicFilter)
 	cli_.subscribe(topicFilter, DFLT_QOS)->wait_for_completion(timeout_);
 }
 
-void client::subscribe(const topic_filter_collection& topicFilters)
+void client::subscribe(const topic_collection& topicFilters)
 {
 	qos_collection qos;
 	for (size_t i=0; i<topicFilters.size(); ++i)
@@ -102,7 +102,7 @@ void client::subscribe(const topic_filter_collection& topicFilters)
 	cli_.subscribe(topicFilters, qos)->wait_for_completion(timeout_);
 }
 
-void client::subscribe(const topic_filter_collection& topicFilters,
+void client::subscribe(const topic_collection& topicFilters,
 					   const qos_collection& qos)
 {
 	cli_.subscribe(topicFilters, qos)->wait_for_completion(timeout_);
@@ -118,7 +118,7 @@ void client::unsubscribe(const string& topicFilter)
 	cli_.unsubscribe(topicFilter)->wait_for_completion(timeout_);
 }
 
-void client::unsubscribe(const topic_filter_collection& topicFilters)
+void client::unsubscribe(const topic_collection& topicFilters)
 {
 	cli_.unsubscribe(topicFilters)->wait_for_completion(timeout_);
 }

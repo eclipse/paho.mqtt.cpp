@@ -201,24 +201,6 @@ void async_client::remove_token(token* tok)
 	}
 }
 
-std::vector<char*> async_client::alloc_topic_filters(
-							const topic_filter_collection& topicFilters)
-{
-	std::vector<char*> filts;
-	for (const auto& t : topicFilters) {
-		char* filt = new char[t.size()+1];
-		std::strcpy(filt, t.c_str());
-		filts.push_back(filt);
-	}
-	return filts;
-}
-
-void async_client::free_topic_filters(std::vector<char*>& filts)
-{
-	for (const auto& f : filts)
-		delete[] f;
-}
-
 // --------------------------------------------------------------------------
 // Connect
 
@@ -436,25 +418,25 @@ void async_client::set_callback(callback& cb)
 // --------------------------------------------------------------------------
 // Subscribe
 
-token_ptr async_client::subscribe(const topic_filter_collection& topicFilters,
+token_ptr async_client::subscribe(const topic_collection& topicFilters,
 								   const qos_collection& qos)
 
 {
-	if (topicFilters.size() != qos.size())
-		throw std::invalid_argument("Collection sizes don't match");
+	size_t n = topicFilters.size();
 
-	std::vector<char*> filts = alloc_topic_filters(topicFilters);
+	if (n != qos.size())
+		throw std::invalid_argument("Collection sizes don't match");
 
 	auto tok = token::create(*this, topicFilters);
 	add_token(tok);
 
 	response_options opts(tok);
 
-	int rc = MQTTAsync_subscribeMany(cli_, static_cast<int>(topicFilters.size()),
-									 static_cast<char**>(&filts[0]),
-									 const_cast<int*>(&qos[0]), &opts.opts_);
+	int rc = MQTTAsync_subscribeMany(cli_, int(n),
+									 topicFilters.c_arr(),
+									 const_cast<int*>(&qos[0]),
+									 &opts.opts_);
 
-	free_topic_filters(filts);
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(tok);
 		throw exception(rc);
@@ -463,27 +445,25 @@ token_ptr async_client::subscribe(const topic_filter_collection& topicFilters,
 	return tok;
 }
 
-token_ptr async_client::subscribe(const topic_filter_collection& topicFilters,
+token_ptr async_client::subscribe(const topic_collection& topicFilters,
 								   const qos_collection& qos,
 								   void* userContext, iaction_listener& cb)
 {
-	if (topicFilters.size() != qos.size())
+	size_t n = topicFilters.size();
+
+	if (n != qos.size())
 		throw std::invalid_argument("Collection sizes don't match");
-
-	std::vector<char*> filts = alloc_topic_filters(topicFilters);
-
-	// No exceptions till C-strings are deleted!
 
 	auto tok = token::create(*this, topicFilters, userContext, cb);
 	add_token(tok);
 
 	response_options opts(tok);
 
-	int rc = MQTTAsync_subscribeMany(cli_, static_cast<int>(topicFilters.size()),
-									 static_cast<char**>(&filts[0]),
-									 const_cast<int*>(&qos[0]), &opts.opts_);
+	int rc = MQTTAsync_subscribeMany(cli_, int(n),
+									 topicFilters.c_arr(),
+									 const_cast<int*>(&qos[0]),
+									 &opts.opts_);
 
-	free_topic_filters(filts);
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(tok);
 		throw exception(rc);
@@ -547,20 +527,18 @@ token_ptr async_client::unsubscribe(const string& topicFilter)
 	return tok;
 }
 
-token_ptr async_client::unsubscribe(const topic_filter_collection& topicFilters)
+token_ptr async_client::unsubscribe(const topic_collection& topicFilters)
 {
 	size_t n = topicFilters.size();
-	std::vector<char*> filts = alloc_topic_filters(topicFilters);
 
 	auto tok = token::create(*this, topicFilters);
 	add_token(tok);
 
 	response_options opts(tok);
 
-	int rc = MQTTAsync_unsubscribeMany(cli_, static_cast<int>(n),
-									   static_cast<char**>(&filts[0]), &opts.opts_);
+	int rc = MQTTAsync_unsubscribeMany(cli_, int(n),
+									   topicFilters.c_arr(), &opts.opts_);
 
-	free_topic_filters(filts);
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(tok);
 		throw exception(rc);
@@ -569,21 +547,18 @@ token_ptr async_client::unsubscribe(const topic_filter_collection& topicFilters)
 	return tok;
 }
 
-token_ptr async_client::unsubscribe(const topic_filter_collection& topicFilters,
+token_ptr async_client::unsubscribe(const topic_collection& topicFilters,
 									 void* userContext, iaction_listener& cb)
 {
 	size_t n = topicFilters.size();
-	std::vector<char*> filts = alloc_topic_filters(topicFilters);
 
 	auto tok = token::create(*this, topicFilters, userContext, cb);
 	add_token(tok);
 
 	response_options opts(tok);
 
-	int rc = MQTTAsync_unsubscribeMany(cli_, static_cast<int>(n),
-									   static_cast<char**>(&filts[0]), &opts.opts_);
+	int rc = MQTTAsync_unsubscribeMany(cli_, int(n), topicFilters.c_arr(), &opts.opts_);
 
-	free_topic_filters(filts);
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(tok);
 		throw exception(rc);

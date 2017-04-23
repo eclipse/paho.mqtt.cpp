@@ -28,6 +28,7 @@
 #include "mqtt/iaction_listener.h"
 #include "mqtt/exception.h"
 #include "mqtt/types.h"
+#include "mqtt/topic_collection.h"
 #include <vector>
 #include <thread>
 #include <mutex>

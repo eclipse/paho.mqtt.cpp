@@ -15,6 +15,8 @@
 COMPILERS="g++-4.8 g++-4.9 g++-5 g++-6 clang++-3.6 clang++-3.8"
 [ "$#" -gt 0 ] && COMPILERS="$@"
 
+[ -z "${BUILD_JOBS}" ] && BUILD_JOBS=4
+
 for COMPILER in $COMPILERS
 do
     if [ -z "$(which ${COMPILER})" ]; then
@@ -22,7 +24,7 @@ do
     else
         printf "===== Testing: %s =====\n\n" "${COMPILER}"
         make distclean
-        if ! make CXX=${COMPILER} SSL=1 ; then
+        if ! make CXX=${COMPILER} SSL=1 -j${BUILD_JOBS} ; then
             printf "\nCompilation failed for %s\n" "${COMPILER}"
             exit 1
         fi

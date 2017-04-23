@@ -35,6 +35,7 @@ libpaho_mqttpp3_la_SOURCES += src/message.cpp
 libpaho_mqttpp3_la_SOURCES += src/response_options.cpp
 libpaho_mqttpp3_la_SOURCES += src/token.cpp
 libpaho_mqttpp3_la_SOURCES += src/topic.cpp
+libpaho_mqttpp3_la_SOURCES += src/topic_collection.cpp
 libpaho_mqttpp3_la_SOURCES += src/connect_options.cpp
 libpaho_mqttpp3_la_SOURCES += src/will_options.cpp
 if PAHO_WITH_SSL
@@ -94,6 +95,7 @@ include_HEADERS += src/mqtt/response_options.h
 include_HEADERS += src/mqtt/thread_queue.h
 include_HEADERS += src/mqtt/token.h
 include_HEADERS += src/mqtt/topic.h
+include_HEADERS += src/mqtt/topic_collection.h
 include_HEADERS += src/mqtt/types.h
 include_HEADERS += src/mqtt/will_options.h
 if PAHO_WITH_SSL

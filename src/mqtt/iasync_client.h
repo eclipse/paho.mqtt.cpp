@@ -260,7 +260,7 @@ public:
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	virtual token_ptr subscribe(const topic_filter_collection& topicFilters,
+	virtual token_ptr subscribe(const topic_collection& topicFilters,
 								 const qos_collection& qos) =0;
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
@@ -278,7 +278,7 @@ public:
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	virtual token_ptr subscribe(const topic_filter_collection& topicFilters,
+	virtual token_ptr subscribe(const topic_collection& topicFilters,
 								 const qos_collection& qos,
 								 void* userContext, iaction_listener& callback) =0;
 	/**
@@ -328,7 +328,7 @@ public:
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	virtual token_ptr unsubscribe(const topic_filter_collection& topicFilters) =0;
+	virtual token_ptr unsubscribe(const topic_collection& topicFilters) =0;
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
 	 * @param topicFilters one or more topics to unsubscribe from. Each
@@ -341,7 +341,7 @@ public:
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	virtual token_ptr unsubscribe(const topic_filter_collection& topicFilters,
+	virtual token_ptr unsubscribe(const topic_collection& topicFilters,
 								   void* userContext, iaction_listener& cb) =0;
 	/**
 	 * Requests the server unsubscribe the client from a topics.
