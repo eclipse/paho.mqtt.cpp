@@ -61,6 +61,10 @@ ifdef COVERAGE
   LDFLAGS += -fprofile-arcs -pg -lgcov
 endif
 
+ifdef TEST_EXTERNAL_SERVER
+  CPPFLAGS += -DTEST_EXTERNAL_SERVER
+endif
+
 LDLIBS += -L$(PAHO_CPP_LIB_DIR) -lpaho-mqttpp3
 LDLIBS += -L$(PAHO_C_LIB_DIR) -l$(PAHO_C_LIB)
 LDLIBS += -lcppunit -ldl
