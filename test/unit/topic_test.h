@@ -61,7 +61,7 @@ public:
 		mqtt::topic topic{ TOPIC_NAME, cli };
 
 		CPPUNIT_ASSERT_EQUAL(TOPIC_NAME, topic.get_name());
-		CPPUNIT_ASSERT_EQUAL(TOPIC_NAME, topic.to_str());
+		CPPUNIT_ASSERT_EQUAL(TOPIC_NAME, topic.to_string());
 	}
 
 // ----------------------------------------------------------------------
@@ -142,7 +142,7 @@ public:
 	void test_to_str() {
 		mqtt::topic topic { TOPIC_NAME, cli };
 
-		CPPUNIT_ASSERT_EQUAL(TOPIC_NAME, topic.to_str());
+		CPPUNIT_ASSERT_EQUAL(TOPIC_NAME, topic.to_string());
 	}
 
 };

@@ -56,6 +56,7 @@ class token
 	mutable std::mutex lock_;
 	/** Condition variable signals when the action completes */
 	std::condition_variable cond_;
+
 	/** The MQTT client that is processing this action */
 	iasync_client* cli_;
 	/** The underlying C token. Note that this is just an integer */

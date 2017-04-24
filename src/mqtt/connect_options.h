@@ -312,7 +312,7 @@ public:
 	 * Gets a string representation of the object.
 	 * @return
 	 */
-	string to_str() const;
+	string to_string() const;
 };
 
 /** Smart/shared pointer to a connection options object. */

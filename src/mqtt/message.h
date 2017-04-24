@@ -201,7 +201,7 @@ public:
 	 * Returns a string representation of this messages payload.
 	 * @return string
 	 */
-	string to_str() const { return get_payload_str(); }
+	string to_string() const { return get_payload_str(); }
 	/**
 	 * Determines if the QOS value is a valid one.
 	 * @param qos The QOS value.

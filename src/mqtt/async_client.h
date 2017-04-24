@@ -322,8 +322,21 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	delivery_token_ptr publish(const string& topic, const void* payload,
-							   size_t n, int qos, bool retained) override;
+	delivery_token_ptr publish(const string& topic, const void* payload, size_t n,
+							   int qos, bool retained) override;
+	/**
+	 * Publishes a message to a topic on the server
+	 * @param topic The topic to deliver the message to
+	 * @param payload the bytes to use as the message payload
+	 * @param qos the Quality of Service to deliver the message at. Valid
+	 *  		  values are 0, 1 or 2.
+	 * @param retained whether or not this message should be retained by the
+	 *  			   server.
+	 * @return token used to track and wait for the publish to complete. The
+	 *  	   token will be passed to callback methods if set.
+	 */
+	delivery_token_ptr publish(const string& topic, binary_ref payload,
+							   int qos, bool retained) override;
 	/**
 	 * Publishes a message to a topic on the server
 	 * @param topic The topic to deliver the message to

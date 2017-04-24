@@ -64,7 +64,7 @@ public:
 	 * Gets a string representation of this exception.
 	 * @return A string representation of this exception.
 	 */
-	string to_str() const { return get_message(); }
+	string to_string() const { return get_message(); }
 	/**
 	 * Returns an explanatory string for the exception.
 	 * @return const char*

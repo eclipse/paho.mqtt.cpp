@@ -89,7 +89,7 @@ public:
 		mqtt::exception ex1(MQTTASYNC_FAILURE);
 		std::string msg1 { "MQTT exception -1" };
 
-		CPPUNIT_ASSERT_EQUAL(msg1, ex1.to_str());
+		CPPUNIT_ASSERT_EQUAL(msg1, ex1.to_string());
 	}
 
 // ----------------------------------------------------------------------

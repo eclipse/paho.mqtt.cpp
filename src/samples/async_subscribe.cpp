@@ -116,7 +116,7 @@ class callback : public virtual mqtt::callback,
 	void message_arrived(const std::string& topic, mqtt::const_message_ptr msg) override {
 		std::cout << "Message arrived" << std::endl;
 		std::cout << "\ttopic: '" << topic << "'" << std::endl;
-		std::cout << "\t'" << msg->to_str() << "'\n" << std::endl;
+		std::cout << "\t'" << msg->to_string() << "'\n" << std::endl;
 	}
 
 	void delivery_complete(mqtt::delivery_token_ptr token) override {}

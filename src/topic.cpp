@@ -27,17 +27,17 @@ namespace mqtt {
 delivery_token_ptr topic::publish(const void* payload, size_t n,
 								   int qos, bool retained)
 {
-	return cli_->publish(name_, payload, n, qos, retained);
+	return cli_.publish(name_, payload, n, qos, retained);
 }
 
-delivery_token_ptr topic::publish(const string& payload, int qos, bool retained)
+delivery_token_ptr topic::publish(binary_ref payload, int qos, bool retained)
 {
-	return publish(payload.data(), payload.length(), qos, retained);
+	return cli_.publish(name_, std::move(payload), qos, retained);
 }
 
 delivery_token_ptr topic::publish(const_message_ptr msg)
 {
-	return cli_->publish(name_, msg);
+	return cli_.publish(name_, msg);
 }
 
 /////////////////////////////////////////////////////////////////////////////

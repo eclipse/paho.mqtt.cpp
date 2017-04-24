@@ -346,7 +346,14 @@ delivery_token_ptr async_client::publish(const string& topic, const void* payloa
 										 size_t n, int qos, bool retained)
 {
 	auto msg = make_message(payload, n, qos, retained);
-	return publish(topic, msg);
+	return publish(topic, std::move(msg));
+}
+
+delivery_token_ptr async_client::publish(const string& topic, binary_ref payload,
+										 int qos, bool retained)
+{
+	auto msg = make_message(payload, qos, retained);
+	return publish(topic, std::move(msg));
 }
 
 delivery_token_ptr async_client::publish(const string& topic,

@@ -45,44 +45,49 @@ class topic
 	string name_;
 
 	/** The client to which this topic is connected */
-	// TODO: Make this a smart pointer
-	iasync_client* cli_;
+	iasync_client& cli_;
 
 public:
-	/**
-	 * A smart/shared pointer to this class.
-	 */
+	/** A smart/shared pointer to this class. */
 	using ptr_t = std::shared_ptr<topic>;
+	/** A smart/shared pointer to this class. */
+	using const_ptr_t = std::shared_ptr<const topic>;
+
 	/**
 	 * Construct an MQTT topic destination for messages.
-	 * @param name
-	 * @param cli
+	 * @param name The topic string
+	 * @param cli Client to which the topic should be attached
 	 */
-	topic(const string& name, iasync_client& cli) : name_{name}, cli_{&cli} {}
+	topic(const string& name, iasync_client& cli) : name_{name}, cli_{cli} {}
 	/**
-	 * Returns the name of the queue or topic.
-	 * @return string
+	 * Returns the name of the topic.
+	 * @return The name of the topic.
 	 */
-	string get_name() const { return name_; }
+	const string& get_name() const { return name_; }
 	/**
 	 * Publishes a message on the topic.
-	 * @param payload
-	 * @param n
-	 * @param qos
-	 * @param retained
-	 *
-	 * @return delivery_token
+	 * @param payload the bytes to use as the message payload
+	 * @param n the number of bytes in the payload
+	 * @param qos the Quality of Service to deliver the message at. Valid
+	 *  		  values are 0, 1 or 2.
+	 * @param retained whether or not this message should be retained by the
+	 *  			   server.
+	 * @return The delivery token used to track and wait for the publish to
+	 *  	   complete.
 	 */
 	delivery_token_ptr publish(const void* payload, size_t n, int qos, bool retained);
 	/**
 	 * Publishes a message on the topic.
-	 * @param payload
-	 * @param qos
-	 * @param retained
-	 *
-	 * @return delivery_token
+	 * @param payload the bytes to use as the message payload
+	 * @param n the number of bytes in the payload
+	 * @param qos the Quality of Service to deliver the message at. Valid
+	 *  		  values are 0, 1 or 2.
+	 * @param retained whether or not this message should be retained by the
+	 *  			   server.
+	 * @return The delivery token used to track and wait for the publish to
+	 *  	   complete.
 	 */
-	delivery_token_ptr publish(const string& payload, int qos, bool retained);
+	delivery_token_ptr publish(binary_ref payload, int qos, bool retained);
 	/**
 	 * Publishes the specified message to this topic, but does not wait for
 	 * delivery of the message to complete.
@@ -92,15 +97,16 @@ public:
 	delivery_token_ptr publish(const_message_ptr msg);
 	/**
 	 * Returns a string representation of this topic.
-	 * @return string
+	 * @return The name of the topic
 	 */
-	string to_str() const { return name_; }
+	string to_string() const { return name_; }
 };
 
-/**
- * A shared pointer to the topic class.
- */
+/** A smart/shared pointer to a topic object. */
 using topic_ptr = topic::ptr_t ;
+
+/** A smart/shared pointer to a const topic object. */
+using const_topic_ptr = topic::const_ptr_t ;
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
