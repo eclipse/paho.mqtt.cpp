@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 {
 	string	address  = (argc > 1) ? string(argv[1]) : DFLT_ADDRESS;
 	int		nMsg = (argc > 2) ? atoi(argv[2]) : DFLT_N_MSG;
-	size_t	msgSz = (size_t) ((argc > 3) ? atol(argv[3]) : DFLT_N_MSG);
+	size_t	msgSz = (size_t) ((argc > 3) ? atol(argv[3]) : DFLT_PAYLOAD_SIZE);
 	int		qos = (argc > 4) ? atoi(argv[4]) : DFLT_QOS;
 
 	cout << "Initializing for server '" << address << "'..." << flush;

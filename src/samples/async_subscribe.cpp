@@ -47,8 +47,9 @@ class action_listener : public virtual mqtt::iaction_listener
 		std::cout << name_ << " success";
 		if (tok.get_message_id() != 0)
 			std::cout << " for token: [" << tok.get_message_id() << "]" << std::endl;
-		if (!tok.get_topics().empty())
-			std::cout << "\ttoken topic: '" << tok.get_topics()[0] << "', ..." << std::endl;
+		auto top = tok.get_topics();
+		if (top && !top->empty())
+			std::cout << "\ttoken topic: '" << (*top)[0] << "', ..." << std::endl;
 		std::cout << std::endl;
 	}
 

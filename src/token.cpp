@@ -91,33 +91,32 @@ token::token(iasync_client& cli) : token(cli, MQTTAsync_token(0))
 }
 
 token::token(iasync_client& cli, void* userContext, iaction_listener& cb)
-				: token(cli, topic_collection{}, userContext, cb)
+				: token(cli, const_topic_collection_ptr(), userContext, cb)
 {
 }
 
-token::token(iasync_client& cli, const string& top)
-				: token(cli, MQTTAsync_token(0))
+token::token(iasync_client& cli, string_ref top)
+				: token(cli, topic_collection::create(top.str()))
 {
-	topics_.push_back(top);
 }
 
-token::token(iasync_client& cli, const string& top,
+token::token(iasync_client& cli, string_ref top,
 			 void* userContext, iaction_listener& cb)
-				: token(cli, topic_collection{ top }, userContext, cb)
+				: token(cli, topic_collection::create(top.str()), userContext, cb)
 {
 }
 
-token::token(iasync_client& cli, const topic_collection& topics,
-			 void* userContext, iaction_listener& cb)
+token::token(iasync_client& cli, const_topic_collection_ptr topics)
 				: cli_(&cli), tok_(MQTTAsync_token(0)), topics_(topics),
-						userContext_(userContext), listener_(&cb),
+						userContext_(nullptr), listener_(nullptr),
 						complete_(false), rc_(0)
 {
 }
 
-token::token(iasync_client& cli, const topic_collection& topics)
+token::token(iasync_client& cli, const_topic_collection_ptr topics,
+			 void* userContext, iaction_listener& cb)
 				: cli_(&cli), tok_(MQTTAsync_token(0)), topics_(topics),
-						userContext_(nullptr), listener_(nullptr),
+						userContext_(userContext), listener_(&cb),
 						complete_(false), rc_(0)
 {
 }

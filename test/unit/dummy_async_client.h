@@ -92,65 +92,72 @@ public:
 		return true;
 	};
 
-	mqtt::delivery_token_ptr publish(const std::string& topic, const void* payload,
-			size_t n, int qos, bool retained) override {
+	mqtt::delivery_token_ptr publish(string_ref topic,
+									 const void* payload, size_t n,
+									 int qos, bool retained) override {
 		auto msg = mqtt::make_message(payload, n, qos, retained);
 		return publish(topic, msg);
 	};
 
-	mqtt::delivery_token_ptr publish(const std::string& topic,
-			const void* payload, size_t n,
-			int qos, bool retained, void* userContext,
-			mqtt::iaction_listener& cb) override {
+	mqtt::delivery_token_ptr publish(string_ref topic, binary_ref payload,
+									 int qos, bool retained) override {
+		auto msg = mqtt::make_message(payload, qos, retained);
+		return publish(topic, msg);
+	};
+
+	mqtt::delivery_token_ptr publish(string_ref topic,
+									 const void* payload, size_t n,
+									 int qos, bool retained, void* userContext,
+									 mqtt::iaction_listener& cb) override {
 		return mqtt::delivery_token_ptr{};
 	}
 
-	mqtt::delivery_token_ptr publish(const std::string& topic, mqtt::const_message_ptr msg) override {
+	mqtt::delivery_token_ptr publish(string_ref topic, mqtt::const_message_ptr msg) override {
 		return std::make_shared<mqtt::delivery_token>(*this, topic, msg);
 	}
 
-	mqtt::delivery_token_ptr publish(const std::string& topic, mqtt::const_message_ptr msg,
-			void* userContext, mqtt::iaction_listener& cb) override {
+	mqtt::delivery_token_ptr publish(string_ref topic, mqtt::const_message_ptr msg,
+									 void* userContext, mqtt::iaction_listener& cb) override {
 		return mqtt::delivery_token_ptr{};
 	}
 
 	void set_callback(mqtt::callback& cb) override {}
 
-	mqtt::token_ptr subscribe(const topic_collection& topicFilters,
-			const qos_collection& qos) override {
+	mqtt::token_ptr subscribe(const_topic_collection_ptr topicFilters,
+							  const qos_collection& qos) override {
 		return mqtt::token_ptr{};
 	}
 
-	mqtt::token_ptr subscribe(const topic_collection& topicFilters,
-			const qos_collection& qos,
+	mqtt::token_ptr subscribe(const_topic_collection_ptr topicFilters,
+							  const qos_collection& qos,
+							  void* userContext, mqtt::iaction_listener& callback) override {
+		return mqtt::token_ptr{};
+	}
+
+	mqtt::token_ptr subscribe(string_ref topicFilter, int qos) override {
+		return mqtt::token_ptr{};
+	}
+
+	mqtt::token_ptr subscribe(string_ref topicFilter, int qos,
 			void* userContext, mqtt::iaction_listener& callback) override {
 		return mqtt::token_ptr{};
 	}
 
-	mqtt::token_ptr subscribe(const std::string& topicFilter, int qos) override {
+	mqtt::token_ptr unsubscribe(string_ref topicFilter) override {
 		return mqtt::token_ptr{};
 	}
 
-	mqtt::token_ptr subscribe(const std::string& topicFilter, int qos,
-			void* userContext, mqtt::iaction_listener& callback) override {
+	mqtt::token_ptr unsubscribe(const_topic_collection_ptr topicFilters) override {
 		return mqtt::token_ptr{};
 	}
 
-	mqtt::token_ptr unsubscribe(const std::string& topicFilter) override {
+	mqtt::token_ptr unsubscribe(const_topic_collection_ptr topicFilters,
+								void* userContext, mqtt::iaction_listener& cb) override {
 		return mqtt::token_ptr{};
 	}
 
-	mqtt::token_ptr unsubscribe(const topic_collection& topicFilters) override {
-		return mqtt::token_ptr{};
-	}
-
-	mqtt::token_ptr unsubscribe(const topic_collection& topicFilters,
-			void* userContext, mqtt::iaction_listener& cb) override {
-		return mqtt::token_ptr{};
-	}
-
-	mqtt::token_ptr unsubscribe(const std::string& topicFilter,
-			void* userContext, mqtt::iaction_listener& cb) override {
+	mqtt::token_ptr unsubscribe(string_ref topicFilter,
+								void* userContext, mqtt::iaction_listener& cb) override {
 		return mqtt::token_ptr{};
 	}
 };

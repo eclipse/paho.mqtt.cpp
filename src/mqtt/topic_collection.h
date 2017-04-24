@@ -75,6 +75,30 @@ public:
 	topic_collection(std::initializer_list<string> sl);
 	topic_collection(std::initializer_list<const char*> sl);
 
+	static ptr_t create(const string& str) {
+		return std::make_shared<topic_collection>(str);
+	}
+
+	static ptr_t create(string&& str) {
+		return std::make_shared<topic_collection>(str);
+	}
+
+	static ptr_t create(const collection_type& vec) {
+		return std::make_shared<topic_collection>(vec);
+	}
+
+	static ptr_t create(collection_type&& vec) {
+		return std::make_shared<topic_collection>(vec);
+	}
+
+	static ptr_t create(std::initializer_list<string> sl) {
+		return std::make_shared<topic_collection>(sl);
+	}
+
+	ptr_t create(std::initializer_list<const char*> sl) {
+		return std::make_shared<topic_collection>(sl);
+	}
+
 	topic_collection& operator=(const topic_collection& coll);
 	topic_collection& operator=(topic_collection&& coll) = default;
 

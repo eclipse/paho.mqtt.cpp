@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2017 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -28,6 +28,7 @@
 #include "mqtt/iaction_listener.h"
 #include "mqtt/exception.h"
 #include "mqtt/types.h"
+#include "mqtt/buffer_ref.h"
 #include "mqtt/topic_collection.h"
 #include <vector>
 #include <thread>
@@ -62,7 +63,7 @@ class token
 	/** The underlying C token. Note that this is just an integer */
 	MQTTAsync_token tok_;
 	/** The topic string(s) for the action being tracked by this token */
-	topic_collection topics_;
+	const_topic_collection_ptr topics_;
 	/** User supplied context */
 	void* userContext_;
 	/**
@@ -84,14 +85,6 @@ class token
 	friend class response_options;
 	friend class delivery_response_options;
 	friend class disconnect_options;
-
-	void set_topics(const string& top) {
-		topics_.clear();
-		topics_.push_back(top);
-	}
-	void set_topics(const topic_collection& top) {
-		topics_ = top;
-	}
 
 	/**
 	 * Sets the ID for the message.
@@ -160,26 +153,26 @@ public:
 	 * @param cli The client that created the token.
 	 * @param topic The topic assiciated with the token
 	 */
-	token(iasync_client& cli, const string& topic);
+	token(iasync_client& cli, string_ref topic);
 	/**
 	 * Constructs a token object.
 	 * @param cli The client that created the token.
 	 * @param topic The topic assiciated with the token
 	 */
-	token(iasync_client& cli, const string& topic,
+	token(iasync_client& cli, string_ref topic,
 		  void* userContext, iaction_listener& cb);
 	/**
 	 * Constructs a token object.
 	 * @param cli The client that created the token.
 	 * @param topics The topics associated with the token
 	 */
-	token(iasync_client& cli, const topic_collection& topics);
+	token(iasync_client& cli, const_topic_collection_ptr topics);
 	/**
 	 * Constructs a token object.
 	 * @param cli The client that created the token.
 	 * @param topics The topics associated with the token
 	 */
-	token(iasync_client& cli, const topic_collection& topics,
+	token(iasync_client& cli, const_topic_collection_ptr topics,
 		  void* userContext, iaction_listener& cb);
 	/**
 	 * Constructs a token object.
@@ -215,7 +208,7 @@ public:
 	 * @param cli The client that created the token.
 	 * @param topic The topic assiciated with the token
 	 */
-	static ptr_t create(iasync_client& cli, const string& topic) {
+	static ptr_t create(iasync_client& cli, string_ref topic) {
 		return std::make_shared<token>(cli, topic);
 	}
 	/**
@@ -223,7 +216,7 @@ public:
 	 * @param cli The client that created the token.
 	 * @param topic The topic assiciated with the token
 	 */
-	static ptr_t create(iasync_client& cli, const string& topic,
+	static ptr_t create(iasync_client& cli, string_ref topic,
 						void* userContext, iaction_listener& cb) {
 		return std::make_shared<token>(cli, topic, userContext, cb);
 	}
@@ -232,7 +225,7 @@ public:
 	 * @param cli The client that created the token.
 	 * @param topics The topics associated with the token
 	 */
-	static ptr_t create(iasync_client& cli, const topic_collection& topics) {
+	static ptr_t create(iasync_client& cli, const_topic_collection_ptr topics) {
 		return std::make_shared<token>(cli, topics);
 	}
 	/**
@@ -240,7 +233,7 @@ public:
 	 * @param cli The client that created the token.
 	 * @param topics The topics associated with the token
 	 */
-	static ptr_t create(iasync_client& cli, const topic_collection& topics,
+	static ptr_t create(iasync_client& cli, const_topic_collection_ptr topics,
 						void* userContext, iaction_listener& cb) {
 		return std::make_shared<token>(cli, topics, userContext, cb);
 	}
@@ -271,7 +264,7 @@ public:
 	 * Returns the topic string(s) for the action being tracked by this
 	 * token.
 	 */
-	virtual const topic_collection& get_topics() const {
+	virtual const_topic_collection_ptr get_topics() const {
 		return topics_;
 	}
 	/**

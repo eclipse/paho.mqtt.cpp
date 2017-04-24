@@ -70,10 +70,10 @@ public:
 		mqtt::token tok{ cli };
 		CPPUNIT_ASSERT_EQUAL(0, tok.get_message_id());
 		CPPUNIT_ASSERT_EQUAL(dynamic_cast<mqtt::iasync_client*>(&cli), tok.get_client());
-		CPPUNIT_ASSERT_EQUAL(static_cast<void*>(nullptr), tok.get_user_context());
-		CPPUNIT_ASSERT_EQUAL(static_cast<mqtt::iaction_listener*>(nullptr), tok.get_action_callback());
+		CPPUNIT_ASSERT(nullptr == tok.get_user_context());
+		CPPUNIT_ASSERT(nullptr == tok.get_action_callback());
 		CPPUNIT_ASSERT_EQUAL(false, tok.is_complete());
-		CPPUNIT_ASSERT_EQUAL(0, static_cast<int>(tok.get_topics().size()));
+		CPPUNIT_ASSERT(nullptr == tok.get_topics());
 	}
 
 // ----------------------------------------------------------------------
@@ -85,10 +85,10 @@ public:
 		mqtt::token tok{ cli, id };
 		CPPUNIT_ASSERT_EQUAL(id, tok.get_message_id());
 		CPPUNIT_ASSERT_EQUAL(dynamic_cast<mqtt::iasync_client*>(&cli), tok.get_client());
-		CPPUNIT_ASSERT_EQUAL(static_cast<void*>(nullptr), tok.get_user_context());
-		CPPUNIT_ASSERT_EQUAL(static_cast<mqtt::iaction_listener*>(nullptr), tok.get_action_callback());
+		CPPUNIT_ASSERT(nullptr == tok.get_user_context());
+		CPPUNIT_ASSERT(nullptr == tok.get_action_callback());
 		CPPUNIT_ASSERT_EQUAL(false, tok.is_complete());
-		CPPUNIT_ASSERT_EQUAL(0, static_cast<int>(tok.get_topics().size()));
+		CPPUNIT_ASSERT(nullptr == tok.get_topics());
 	}
 
 // ----------------------------------------------------------------------
@@ -100,11 +100,12 @@ public:
 		mqtt::token tok{ cli, topic };
 		CPPUNIT_ASSERT_EQUAL(0, tok.get_message_id());
 		CPPUNIT_ASSERT_EQUAL(dynamic_cast<mqtt::iasync_client*>(&cli), tok.get_client());
-		CPPUNIT_ASSERT_EQUAL(static_cast<void*>(nullptr), tok.get_user_context());
-		CPPUNIT_ASSERT_EQUAL(static_cast<mqtt::iaction_listener*>(nullptr), tok.get_action_callback());
+		CPPUNIT_ASSERT(nullptr == tok.get_user_context());
+		CPPUNIT_ASSERT(nullptr == tok.get_action_callback());
 		CPPUNIT_ASSERT_EQUAL(false, tok.is_complete());
-		CPPUNIT_ASSERT_EQUAL(1, static_cast<int>(tok.get_topics().size()));
-		CPPUNIT_ASSERT_EQUAL(topic, tok.get_topics()[0]);
+		CPPUNIT_ASSERT(nullptr != tok.get_topics());
+		CPPUNIT_ASSERT_EQUAL(size_t(1), tok.get_topics()->size());
+		CPPUNIT_ASSERT_EQUAL(topic, (*tok.get_topics())[0]);
 	}
 
 // ----------------------------------------------------------------------
@@ -112,16 +113,17 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_user_constructor_client_vector() {
-		std::vector<std::string> topics { "topic1", "topic2" };
+		auto topics = topic_collection::create({ "topic1", "topic2" });
 		mqtt::token tok{ cli, topics };
 		CPPUNIT_ASSERT_EQUAL(0, tok.get_message_id());
 		CPPUNIT_ASSERT_EQUAL(dynamic_cast<mqtt::iasync_client*>(&cli), tok.get_client());
 		CPPUNIT_ASSERT_EQUAL(static_cast<void*>(nullptr), tok.get_user_context());
 		CPPUNIT_ASSERT_EQUAL(static_cast<mqtt::iaction_listener*>(nullptr), tok.get_action_callback());
 		CPPUNIT_ASSERT_EQUAL(false, tok.is_complete());
-		CPPUNIT_ASSERT_EQUAL(2, static_cast<int>(tok.get_topics().size()));
-		CPPUNIT_ASSERT_EQUAL(topics[0], tok.get_topics()[0]);
-		CPPUNIT_ASSERT_EQUAL(topics[1], tok.get_topics()[1]);
+		CPPUNIT_ASSERT(nullptr != tok.get_topics());
+		CPPUNIT_ASSERT_EQUAL(size_t(2), tok.get_topics()->size());
+		CPPUNIT_ASSERT_EQUAL((*topics)[0], (*tok.get_topics())[0]);
+		CPPUNIT_ASSERT_EQUAL((*topics)[1], (*tok.get_topics())[1]);
 	}
 
 // ----------------------------------------------------------------------

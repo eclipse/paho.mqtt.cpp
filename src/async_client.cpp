@@ -342,30 +342,30 @@ std::vector<delivery_token_ptr> async_client::get_pending_delivery_tokens() cons
 // --------------------------------------------------------------------------
 // Publish
 
-delivery_token_ptr async_client::publish(const string& topic, const void* payload,
+delivery_token_ptr async_client::publish(string_ref topic, const void* payload,
 										 size_t n, int qos, bool retained)
 {
 	auto msg = make_message(payload, n, qos, retained);
-	return publish(topic, std::move(msg));
+	return publish(std::move(topic), std::move(msg));
 }
 
-delivery_token_ptr async_client::publish(const string& topic, binary_ref payload,
+delivery_token_ptr async_client::publish(string_ref topic, binary_ref payload,
 										 int qos, bool retained)
 {
 	auto msg = make_message(payload, qos, retained);
-	return publish(topic, std::move(msg));
+	return publish(std::move(topic), std::move(msg));
 }
 
-delivery_token_ptr async_client::publish(const string& topic,
+delivery_token_ptr async_client::publish(string_ref topic,
 										 const void* payload, size_t n,
 										 int qos, bool retained, void* userContext,
 										 iaction_listener& cb)
 {
 	auto msg = make_message(payload, n, qos, retained);
-	return publish(topic, msg, userContext, cb);
+	return publish(std::move(topic), std::move(msg), userContext, cb);
 }
 
-delivery_token_ptr async_client::publish(const string& topic, const_message_ptr msg)
+delivery_token_ptr async_client::publish(string_ref topic, const_message_ptr msg)
 {
 	auto tok = delivery_token::create(*this, topic, msg);
 	add_token(tok);
@@ -385,7 +385,7 @@ delivery_token_ptr async_client::publish(const string& topic, const_message_ptr 
 	return tok;
 }
 
-delivery_token_ptr async_client::publish(const string& topic, const_message_ptr msg,
+delivery_token_ptr async_client::publish(string_ref topic, const_message_ptr msg,
 										 void* userContext, iaction_listener& cb)
 {
 	delivery_token_ptr tok = delivery_token::create(*this, topic, msg, userContext, cb);
@@ -425,11 +425,11 @@ void async_client::set_callback(callback& cb)
 // --------------------------------------------------------------------------
 // Subscribe
 
-token_ptr async_client::subscribe(const topic_collection& topicFilters,
+token_ptr async_client::subscribe(const_topic_collection_ptr topicFilters,
 								   const qos_collection& qos)
 
 {
-	size_t n = topicFilters.size();
+	size_t n = topicFilters->size();
 
 	if (n != qos.size())
 		throw std::invalid_argument("Collection sizes don't match");
@@ -439,10 +439,8 @@ token_ptr async_client::subscribe(const topic_collection& topicFilters,
 
 	response_options opts(tok);
 
-	int rc = MQTTAsync_subscribeMany(cli_, int(n),
-									 topicFilters.c_arr(),
-									 const_cast<int*>(&qos[0]),
-									 &opts.opts_);
+	int rc = MQTTAsync_subscribeMany(cli_, int(n), topicFilters->c_arr(),
+									 const_cast<int*>(&qos[0]), &opts.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(tok);
@@ -452,11 +450,11 @@ token_ptr async_client::subscribe(const topic_collection& topicFilters,
 	return tok;
 }
 
-token_ptr async_client::subscribe(const topic_collection& topicFilters,
-								   const qos_collection& qos,
-								   void* userContext, iaction_listener& cb)
+token_ptr async_client::subscribe(const_topic_collection_ptr topicFilters,
+								  const qos_collection& qos,
+								  void* userContext, iaction_listener& cb)
 {
-	size_t n = topicFilters.size();
+	size_t n = topicFilters->size();
 
 	if (n != qos.size())
 		throw std::invalid_argument("Collection sizes don't match");
@@ -466,10 +464,8 @@ token_ptr async_client::subscribe(const topic_collection& topicFilters,
 
 	response_options opts(tok);
 
-	int rc = MQTTAsync_subscribeMany(cli_, int(n),
-									 topicFilters.c_arr(),
-									 const_cast<int*>(&qos[0]),
-									 &opts.opts_);
+	int rc = MQTTAsync_subscribeMany(cli_, int(n), topicFilters->c_arr(),
+									 const_cast<int*>(&qos[0]), &opts.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(tok);
@@ -479,7 +475,7 @@ token_ptr async_client::subscribe(const topic_collection& topicFilters,
 	return tok;
 }
 
-token_ptr async_client::subscribe(const string& topicFilter, int qos)
+token_ptr async_client::subscribe(string_ref topicFilter, int qos)
 {
 	auto tok = token::create(*this, topicFilter);
 	add_token(tok);
@@ -496,7 +492,7 @@ token_ptr async_client::subscribe(const string& topicFilter, int qos)
 	return tok;
 }
 
-token_ptr async_client::subscribe(const string& topicFilter, int qos,
+token_ptr async_client::subscribe(string_ref topicFilter, int qos,
 								   void* userContext, iaction_listener& cb)
 {
 	auto tok = token::create(*this, topicFilter, userContext, cb);
@@ -517,7 +513,7 @@ token_ptr async_client::subscribe(const string& topicFilter, int qos,
 // --------------------------------------------------------------------------
 // Unsubscribe
 
-token_ptr async_client::unsubscribe(const string& topicFilter)
+token_ptr async_client::unsubscribe(string_ref topicFilter)
 {
 	auto tok = token::create(*this, topicFilter);
 	add_token(tok);
@@ -534,9 +530,9 @@ token_ptr async_client::unsubscribe(const string& topicFilter)
 	return tok;
 }
 
-token_ptr async_client::unsubscribe(const topic_collection& topicFilters)
+token_ptr async_client::unsubscribe(const_topic_collection_ptr topicFilters)
 {
-	size_t n = topicFilters.size();
+	size_t n = topicFilters->size();
 
 	auto tok = token::create(*this, topicFilters);
 	add_token(tok);
@@ -544,7 +540,7 @@ token_ptr async_client::unsubscribe(const topic_collection& topicFilters)
 	response_options opts(tok);
 
 	int rc = MQTTAsync_unsubscribeMany(cli_, int(n),
-									   topicFilters.c_arr(), &opts.opts_);
+									   topicFilters->c_arr(), &opts.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(tok);
@@ -554,17 +550,17 @@ token_ptr async_client::unsubscribe(const topic_collection& topicFilters)
 	return tok;
 }
 
-token_ptr async_client::unsubscribe(const topic_collection& topicFilters,
+token_ptr async_client::unsubscribe(const_topic_collection_ptr topicFilters,
 									 void* userContext, iaction_listener& cb)
 {
-	size_t n = topicFilters.size();
+	size_t n = topicFilters->size();
 
 	auto tok = token::create(*this, topicFilters, userContext, cb);
 	add_token(tok);
 
 	response_options opts(tok);
 
-	int rc = MQTTAsync_unsubscribeMany(cli_, int(n), topicFilters.c_arr(), &opts.opts_);
+	int rc = MQTTAsync_unsubscribeMany(cli_, int(n), topicFilters->c_arr(), &opts.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(tok);
@@ -574,7 +570,7 @@ token_ptr async_client::unsubscribe(const topic_collection& topicFilters,
 	return tok;
 }
 
-token_ptr async_client::unsubscribe(const string& topicFilter,
+token_ptr async_client::unsubscribe(string_ref topicFilter,
 									void* userContext, iaction_listener& cb)
 {
 	auto tok = token::create(*this, topicFilter, userContext, cb);

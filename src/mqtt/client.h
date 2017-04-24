@@ -45,6 +45,20 @@ class client
 	 */
 	std::chrono::milliseconds timeout_;
 
+	/**
+	 * Creates a shared pointer to a non-heap object. This creates a shared
+	 * pointer to an existing object. The pointer is given a no-op deleter,
+	 * so it will not try to destroy the object when it goes out of scope.
+	 * It is up to the caller to ensure that the object remains in scope for
+	 * as long as there may be pointers to it.
+	 * @param val A value which may live anywherte in memory.
+	 * @return A shared pointer to a non-heap object.
+	 */
+	template <typename T>
+	std::shared_ptr<T> ptr(const T& val) {
+		return std::shared_ptr<T>(const_cast<T*>(&val), [](T*){});
+	}
+
 	/** Non-copyable */
 	client() =delete;
 	client(const async_client&) =delete;
@@ -174,20 +188,20 @@ public:
 	 * @param qos
 	 * @param retained
 	 */
-	virtual void publish(const string& top, const void* payload, size_t n,
+	virtual void publish(string_ref top, const void* payload, size_t n,
 						 int qos, bool retained);
 	/**
 	 * Publishes a message to a topic on the server.
 	 * @param top The topic to publish on
 	 * @param msg The message
 	 */
-	virtual void publish(const string& top, const_message_ptr msg);
+	virtual void publish(string_ref top, const_message_ptr msg);
 	/**
 	 * Publishes a message to a topic on the server.
 	 * @param top The topic to publish on
 	 * @param msg The message
 	 */
-	virtual void publish(const string& top, const message& msg);
+	virtual void publish(string_ref top, const message& msg);
 	/**
 	 * Sets the callback listener to use for events that happen
 	 * asynchronously.

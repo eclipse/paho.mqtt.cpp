@@ -65,22 +65,20 @@ std::vector<delivery_token_ptr> client::get_pending_delivery_tokens() const
 	return cli_.get_pending_delivery_tokens();
 }
 
-void client::publish(const string& top, const void* payload, size_t n,
+void client::publish(string_ref top, const void* payload, size_t n,
 					 int qos, bool retained)
 {
-	cli_.publish(top, payload, n, qos, retained)->wait_for_completion(timeout_);
+	cli_.publish(std::move(top), payload, n, qos, retained)->wait_for_completion(timeout_);
 }
 
-void client::publish(const string& top, const_message_ptr msg)
+void client::publish(string_ref top, const_message_ptr msg)
 {
-	cli_.publish(top, msg)->wait_for_completion(timeout_);
+	cli_.publish(std::move(top), msg)->wait_for_completion(timeout_);
 }
 
-void client::publish(const string& top, const message& msg)
+void client::publish(string_ref top, const message& msg)
 {
-	// Don't destroy non-heap message.
-	std::shared_ptr<message> msgp(const_cast<message*>(&msg), [](message*){});
-	cli_.publish(top, msgp)->wait_for_completion(timeout_);
+	cli_.publish(top, ptr(msg))->wait_for_completion(timeout_);
 }
 
 void client::set_callback(callback& cb)
@@ -99,13 +97,13 @@ void client::subscribe(const topic_collection& topicFilters)
 	for (size_t i=0; i<topicFilters.size(); ++i)
 		qos.push_back(DFLT_QOS);
 
-	cli_.subscribe(topicFilters, qos)->wait_for_completion(timeout_);
+	cli_.subscribe(ptr(topicFilters), qos)->wait_for_completion(timeout_);
 }
 
 void client::subscribe(const topic_collection& topicFilters,
 					   const qos_collection& qos)
 {
-	cli_.subscribe(topicFilters, qos)->wait_for_completion(timeout_);
+	cli_.subscribe(ptr(topicFilters), qos)->wait_for_completion(timeout_);
 }
 
 void client::subscribe(const string& topicFilter, int qos)
@@ -120,7 +118,7 @@ void client::unsubscribe(const string& topicFilter)
 
 void client::unsubscribe(const topic_collection& topicFilters)
 {
-	cli_.unsubscribe(topicFilters)->wait_for_completion(timeout_);
+	cli_.unsubscribe(ptr(topicFilters))->wait_for_completion(timeout_);
 }
 
 /////////////////////////////////////////////////////////////////////////////
