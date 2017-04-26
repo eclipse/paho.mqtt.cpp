@@ -65,7 +65,7 @@ void token_wait_func()
 	while (true) {
 		mqtt::delivery_token_ptr tok = que.get();
 		if (!tok) break;
-		cout.put('x');
+		//cout.put('x');
 		tok->wait_for_completion();
 	}
 }

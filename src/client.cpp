@@ -65,18 +65,18 @@ std::vector<delivery_token_ptr> client::get_pending_delivery_tokens() const
 	return cli_.get_pending_delivery_tokens();
 }
 
-void client::publish(string_ref top, const void* payload, size_t n,
+void client::publish(const string& top, const void* payload, size_t n,
 					 int qos, bool retained)
 {
 	cli_.publish(std::move(top), payload, n, qos, retained)->wait_for_completion(timeout_);
 }
 
-void client::publish(string_ref top, const_message_ptr msg)
+void client::publish(const string& top, const_message_ptr msg)
 {
 	cli_.publish(std::move(top), msg)->wait_for_completion(timeout_);
 }
 
-void client::publish(string_ref top, const message& msg)
+void client::publish(const string& top, const message& msg)
 {
 	cli_.publish(top, ptr(msg))->wait_for_completion(timeout_);
 }

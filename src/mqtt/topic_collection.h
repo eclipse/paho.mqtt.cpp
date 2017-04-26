@@ -95,7 +95,7 @@ public:
 		return std::make_shared<topic_collection>(sl);
 	}
 
-	ptr_t create(std::initializer_list<const char*> sl) {
+	static ptr_t create(std::initializer_list<const char*> sl) {
 		return std::make_shared<topic_collection>(sl);
 	}
 

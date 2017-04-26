@@ -70,14 +70,14 @@ public:
 	 * @param cli The asynchronous client object.
 	 * @param topic The topic that the message is associated with.
 	 */
-	delivery_token(iasync_client& cli, string_ref topic) : token(cli, topic) {}
+	delivery_token(iasync_client& cli, const string& topic) : token(cli, topic) {}
 	/**
 	 * Creates a delivery token connected to a particular client.
 	 * @param cli The asynchronous client object.
 	 * @param topic The topic that the message is associated with.
 	 * @param msg The message data.
 	 */
-	delivery_token(iasync_client& cli, string_ref topic, const_message_ptr msg)
+	delivery_token(iasync_client& cli, const string& topic, const_message_ptr msg)
 			: token(cli, topic), msg_(msg) {}
 	/**
 	 * Creates a delivery token connected to a particular client.
@@ -90,7 +90,7 @@ public:
 	 *  			   delivery has completed to the requested quality of
 	 *  			   service
 	 */
-	delivery_token(iasync_client& cli, string_ref topic, const_message_ptr msg,
+	delivery_token(iasync_client& cli, const string& topic, const_message_ptr msg,
 				   void* userContext, iaction_listener& cb)
 			: token(cli, topic, userContext, cb), msg_(msg) {}
 	/**
@@ -131,7 +131,7 @@ public:
 	 * @param cli The asynchronous client object.
 	 * @param topic The topic that the message is associated with.
 	 */
-	static ptr_t create(iasync_client& cli, string_ref topic) {
+	static ptr_t create(iasync_client& cli, const string& topic) {
 		return std::make_shared<delivery_token>(cli, topic);
 	}
 	/**
@@ -140,7 +140,7 @@ public:
 	 * @param topic The topic that the message is associated with.
 	 * @param msg The message data.
 	 */
-	static ptr_t create(iasync_client& cli, string_ref topic, const_message_ptr msg) {
+	static ptr_t create(iasync_client& cli, const string& topic, const_message_ptr msg) {
 		return std::make_shared<delivery_token>(cli, topic, msg);
 	}
 	/**
@@ -154,7 +154,7 @@ public:
 	 *  			   delivery has completed to the requested quality of
 	 *  			   service
 	 */
-	static ptr_t create(iasync_client& cli, string_ref topic, const_message_ptr msg,
+	static ptr_t create(iasync_client& cli, const string& topic, const_message_ptr msg,
 						void* userContext, iaction_listener& cb) {
 		return std::make_shared<delivery_token>(cli, topic, msg, userContext, cb);
 	}

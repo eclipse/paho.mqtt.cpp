@@ -95,14 +95,14 @@ token::token(iasync_client& cli, void* userContext, iaction_listener& cb)
 {
 }
 
-token::token(iasync_client& cli, string_ref top)
-				: token(cli, topic_collection::create(top.str()))
+token::token(iasync_client& cli, const string& top)
+				: token(cli, topic_collection::create(top))
 {
 }
 
-token::token(iasync_client& cli, string_ref top,
+token::token(iasync_client& cli, const string& top,
 			 void* userContext, iaction_listener& cb)
-				: token(cli, topic_collection::create(top.str()), userContext, cb)
+				: token(cli, topic_collection::create(top), userContext, cb)
 {
 }
 

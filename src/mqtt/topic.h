@@ -58,7 +58,7 @@ public:
 	 * @param name The topic string
 	 * @param cli Client to which the topic should be attached
 	 */
-	topic(const string& name, iasync_client& cli) : name_{name}, cli_{cli} {}
+	topic(const string& name, iasync_client& cli) : name_(name), cli_(cli) {}
 	/**
 	 * Returns the name of the topic.
 	 * @return The name of the topic.

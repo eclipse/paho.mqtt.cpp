@@ -322,7 +322,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	delivery_token_ptr publish(string_ref topic, const void* payload, size_t n,
+	delivery_token_ptr publish(const string& topic, const void* payload, size_t n,
 							   int qos, bool retained) override;
 	/**
 	 * Publishes a message to a topic on the server
@@ -335,7 +335,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	delivery_token_ptr publish(string_ref topic, binary_ref payload,
+	delivery_token_ptr publish(const string& topic, binary_ref payload,
 							   int qos, bool retained) override;
 	/**
 	 * Publishes a message to a topic on the server
@@ -352,7 +352,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	delivery_token_ptr publish(string_ref topic,
+	delivery_token_ptr publish(const string& topic,
 							   const void* payload, size_t n,
 							   int qos, bool retained, void* userContext,
 							   iaction_listener& cb) override;
@@ -365,7 +365,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	delivery_token_ptr publish(string_ref topic, const_message_ptr msg) override;
+	delivery_token_ptr publish(const string& topic, const_message_ptr msg) override;
 	/**
 	 * Publishes a message to a topic on the server.
 	 * @param topic the topic to deliver the message to
@@ -378,7 +378,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	delivery_token_ptr publish(string_ref topic, const_message_ptr msg,
+	delivery_token_ptr publish(const string& topic, const_message_ptr msg,
 							   void* userContext, iaction_listener& cb) override;
 	/**
 	 * Sets a callback listener to use for events that happen
@@ -425,7 +425,7 @@ public:
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	token_ptr subscribe(string_ref topicFilter, int qos) override;
+	token_ptr subscribe(const string& topicFilter, int qos) override;
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 * @param topicFilter the topic to subscribe to, which can include
@@ -441,7 +441,7 @@ public:
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	token_ptr subscribe(string_ref topicFilter, int qos,
+	token_ptr subscribe(const string& topicFilter, int qos,
 						void* userContext, iaction_listener& cb) override;
 	/**
 	 * Requests the server unsubscribe the client from a topic.
@@ -450,7 +450,7 @@ public:
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	token_ptr unsubscribe(string_ref topicFilter) override;
+	token_ptr unsubscribe(const string& topicFilter) override;
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
 	 * @param topicFilters one or more topics to unsubscribe from. Each
@@ -483,7 +483,7 @@ public:
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	token_ptr unsubscribe(string_ref topicFilter,
+	token_ptr unsubscribe(const string& topicFilter,
 						  void* userContext, iaction_listener& cb) override;
 };
 

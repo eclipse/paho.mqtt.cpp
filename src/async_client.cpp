@@ -342,30 +342,30 @@ std::vector<delivery_token_ptr> async_client::get_pending_delivery_tokens() cons
 // --------------------------------------------------------------------------
 // Publish
 
-delivery_token_ptr async_client::publish(string_ref topic, const void* payload,
+delivery_token_ptr async_client::publish(const string& topic, const void* payload,
 										 size_t n, int qos, bool retained)
 {
 	auto msg = make_message(payload, n, qos, retained);
-	return publish(std::move(topic), std::move(msg));
+	return publish(topic, std::move(msg));
 }
 
-delivery_token_ptr async_client::publish(string_ref topic, binary_ref payload,
+delivery_token_ptr async_client::publish(const string& topic, binary_ref payload,
 										 int qos, bool retained)
 {
 	auto msg = make_message(payload, qos, retained);
-	return publish(std::move(topic), std::move(msg));
+	return publish(topic, std::move(msg));
 }
 
-delivery_token_ptr async_client::publish(string_ref topic,
+delivery_token_ptr async_client::publish(const string& topic,
 										 const void* payload, size_t n,
 										 int qos, bool retained, void* userContext,
 										 iaction_listener& cb)
 {
 	auto msg = make_message(payload, n, qos, retained);
-	return publish(std::move(topic), std::move(msg), userContext, cb);
+	return publish(topic, std::move(msg), userContext, cb);
 }
 
-delivery_token_ptr async_client::publish(string_ref topic, const_message_ptr msg)
+delivery_token_ptr async_client::publish(const string& topic, const_message_ptr msg)
 {
 	auto tok = delivery_token::create(*this, topic, msg);
 	add_token(tok);
@@ -385,7 +385,7 @@ delivery_token_ptr async_client::publish(string_ref topic, const_message_ptr msg
 	return tok;
 }
 
-delivery_token_ptr async_client::publish(string_ref topic, const_message_ptr msg,
+delivery_token_ptr async_client::publish(const string& topic, const_message_ptr msg,
 										 void* userContext, iaction_listener& cb)
 {
 	delivery_token_ptr tok = delivery_token::create(*this, topic, msg, userContext, cb);
@@ -475,7 +475,7 @@ token_ptr async_client::subscribe(const_topic_collection_ptr topicFilters,
 	return tok;
 }
 
-token_ptr async_client::subscribe(string_ref topicFilter, int qos)
+token_ptr async_client::subscribe(const string& topicFilter, int qos)
 {
 	auto tok = token::create(*this, topicFilter);
 	add_token(tok);
@@ -492,7 +492,7 @@ token_ptr async_client::subscribe(string_ref topicFilter, int qos)
 	return tok;
 }
 
-token_ptr async_client::subscribe(string_ref topicFilter, int qos,
+token_ptr async_client::subscribe(const string& topicFilter, int qos,
 								   void* userContext, iaction_listener& cb)
 {
 	auto tok = token::create(*this, topicFilter, userContext, cb);
@@ -513,7 +513,7 @@ token_ptr async_client::subscribe(string_ref topicFilter, int qos,
 // --------------------------------------------------------------------------
 // Unsubscribe
 
-token_ptr async_client::unsubscribe(string_ref topicFilter)
+token_ptr async_client::unsubscribe(const string& topicFilter)
 {
 	auto tok = token::create(*this, topicFilter);
 	add_token(tok);
@@ -570,7 +570,7 @@ token_ptr async_client::unsubscribe(const_topic_collection_ptr topicFilters,
 	return tok;
 }
 
-token_ptr async_client::unsubscribe(string_ref topicFilter,
+token_ptr async_client::unsubscribe(const string& topicFilter,
 									void* userContext, iaction_listener& cb)
 {
 	auto tok = token::create(*this, topicFilter, userContext, cb);

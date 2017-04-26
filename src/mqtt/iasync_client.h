@@ -196,7 +196,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	virtual delivery_token_ptr publish(string_ref topic,
+	virtual delivery_token_ptr publish(const string& topic,
 									   const void* payload, size_t n,
 									   int qos, bool retained) =0;
 	/**
@@ -213,7 +213,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	virtual delivery_token_ptr publish(string_ref topic,
+	virtual delivery_token_ptr publish(const string& topic,
 									   const void* payload, size_t n,
 									   int qos, bool retained,
 									   void* userContext, iaction_listener& cb) =0;
@@ -228,7 +228,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	virtual delivery_token_ptr publish(string_ref topic, binary_ref payload,
+	virtual delivery_token_ptr publish(const string& topic, binary_ref payload,
 									   int qos, bool retained) =0;
 	/**
 	 * Publishes a message to a topic on the server Takes an Message
@@ -239,7 +239,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	virtual delivery_token_ptr publish(string_ref topic, const_message_ptr msg) =0;
+	virtual delivery_token_ptr publish(const string& topic, const_message_ptr msg) =0;
 	/**
 	 * Publishes a message to a topic on the server.
 	 * @param topic the topic to deliver the message to
@@ -251,7 +251,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	virtual delivery_token_ptr publish(string_ref topic, const_message_ptr msg,
+	virtual delivery_token_ptr publish(const string& topic, const_message_ptr msg,
 									   void* userContext, iaction_listener& cb) =0;
 	/**
 	 * Sets a callback listener to use for events that happen
@@ -307,7 +307,7 @@ public:
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	virtual token_ptr subscribe(string_ref topicFilter, int qos) =0;
+	virtual token_ptr subscribe(const string& topicFilter, int qos) =0;
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 * @param topicFilter the topic to subscribe to, which can include
@@ -324,7 +324,7 @@ public:
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	virtual token_ptr subscribe(string_ref topicFilter, int qos,
+	virtual token_ptr subscribe(const string& topicFilter, int qos,
 								void* userContext, iaction_listener& callback) =0;
 	/**
 	 * Requests the server unsubscribe the client from a topic.
@@ -333,7 +333,7 @@ public:
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	virtual token_ptr unsubscribe(string_ref topicFilter) =0;
+	virtual token_ptr unsubscribe(const string& topicFilter) =0;
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
 	 * @param topicFilters one or more topics to unsubscribe from. Each
@@ -368,7 +368,7 @@ public:
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	virtual token_ptr unsubscribe(string_ref topicFilter,
+	virtual token_ptr unsubscribe(const string& topicFilter,
 								  void* userContext, iaction_listener& cb) =0;
 };
 

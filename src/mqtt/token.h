@@ -153,13 +153,13 @@ public:
 	 * @param cli The client that created the token.
 	 * @param topic The topic assiciated with the token
 	 */
-	token(iasync_client& cli, string_ref topic);
+	token(iasync_client& cli, const string& topic);
 	/**
 	 * Constructs a token object.
 	 * @param cli The client that created the token.
 	 * @param topic The topic assiciated with the token
 	 */
-	token(iasync_client& cli, string_ref topic,
+	token(iasync_client& cli, const string& topic,
 		  void* userContext, iaction_listener& cb);
 	/**
 	 * Constructs a token object.
@@ -208,7 +208,7 @@ public:
 	 * @param cli The client that created the token.
 	 * @param topic The topic assiciated with the token
 	 */
-	static ptr_t create(iasync_client& cli, string_ref topic) {
+	static ptr_t create(iasync_client& cli, const string& topic) {
 		return std::make_shared<token>(cli, topic);
 	}
 	/**
@@ -216,7 +216,7 @@ public:
 	 * @param cli The client that created the token.
 	 * @param topic The topic assiciated with the token
 	 */
-	static ptr_t create(iasync_client& cli, string_ref topic,
+	static ptr_t create(iasync_client& cli, const string& topic,
 						void* userContext, iaction_listener& cb) {
 		return std::make_shared<token>(cli, topic, userContext, cb);
 	}

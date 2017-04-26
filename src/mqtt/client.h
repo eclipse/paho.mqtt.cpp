@@ -188,20 +188,20 @@ public:
 	 * @param qos
 	 * @param retained
 	 */
-	virtual void publish(string_ref top, const void* payload, size_t n,
+	virtual void publish(const string& top, const void* payload, size_t n,
 						 int qos, bool retained);
 	/**
 	 * Publishes a message to a topic on the server.
 	 * @param top The topic to publish on
 	 * @param msg The message
 	 */
-	virtual void publish(string_ref top, const_message_ptr msg);
+	virtual void publish(const string& top, const_message_ptr msg);
 	/**
 	 * Publishes a message to a topic on the server.
 	 * @param top The topic to publish on
 	 * @param msg The message
 	 */
-	virtual void publish(string_ref top, const message& msg);
+	virtual void publish(const string& top, const message& msg);
 	/**
 	 * Sets the callback listener to use for events that happen
 	 * asynchronously.
