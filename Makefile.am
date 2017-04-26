@@ -29,14 +29,14 @@ lib_LTLIBRARIES  = libpaho-mqttpp3.la
 
 libpaho_mqttpp3_la_SOURCES  = src/async_client.cpp
 libpaho_mqttpp3_la_SOURCES += src/client.cpp
+libpaho_mqttpp3_la_SOURCES += src/connect_options.cpp
 libpaho_mqttpp3_la_SOURCES += src/disconnect_options.cpp
 libpaho_mqttpp3_la_SOURCES += src/iclient_persistence.cpp
 libpaho_mqttpp3_la_SOURCES += src/message.cpp
 libpaho_mqttpp3_la_SOURCES += src/response_options.cpp
+libpaho_mqttpp3_la_SOURCES += src/string_collection.cpp
 libpaho_mqttpp3_la_SOURCES += src/token.cpp
 libpaho_mqttpp3_la_SOURCES += src/topic.cpp
-libpaho_mqttpp3_la_SOURCES += src/topic_collection.cpp
-libpaho_mqttpp3_la_SOURCES += src/connect_options.cpp
 libpaho_mqttpp3_la_SOURCES += src/will_options.cpp
 if PAHO_WITH_SSL
 libpaho_mqttpp3_la_SOURCES += src/ssl_options.cpp
@@ -95,7 +95,7 @@ include_HEADERS += src/mqtt/response_options.h
 include_HEADERS += src/mqtt/thread_queue.h
 include_HEADERS += src/mqtt/token.h
 include_HEADERS += src/mqtt/topic.h
-include_HEADERS += src/mqtt/topic_collection.h
+include_HEADERS += src/mqtt/string_collection.h
 include_HEADERS += src/mqtt/types.h
 include_HEADERS += src/mqtt/will_options.h
 if PAHO_WITH_SSL

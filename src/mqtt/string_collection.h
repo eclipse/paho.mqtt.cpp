@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
-/// @file topic_collection.h
-/// Definition of the topic_collection class for the Paho MQTT C++ library.
+/// @file string_collection.h
+/// Definition of the string_collection class for the Paho MQTT C++ library.
 /// @date April 23, 2017
 /// @author Frank Pagliughi
 /////////////////////////////////////////////////////////////////////////////
@@ -21,8 +21,8 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
-#ifndef __mqtt_topic_collection_h
-#define __mqtt_topic_collection_h
+#ifndef __mqtt_string_collection_h
+#define __mqtt_string_collection_h
 
 #include "mqtt/types.h"
 #include <vector>
@@ -37,7 +37,7 @@ namespace mqtt {
  * This acts like a collection of strings but carries an array of pointers
  * to the C strings for easy interactions with the Paho C library.
  */
-class topic_collection
+class string_collection
 {
 	using collection_type = std::vector<string>;
 	using c_arr_type = std::vector<char*>;
@@ -61,46 +61,46 @@ class topic_collection
 
 public:
 	/** Smart/shared pointer to an object of this type */
-	using ptr_t = std::shared_ptr<topic_collection>;
+	using ptr_t = std::shared_ptr<string_collection>;
 	/** Smart/shared pointer to a const object of this type */
-	using const_ptr_t = std::shared_ptr<const topic_collection>;
+	using const_ptr_t = std::shared_ptr<const string_collection>;
 
-	topic_collection() =default;
-	topic_collection(const string& str);
-	topic_collection(string&& str);
-	topic_collection(const collection_type& vec);
-	topic_collection(collection_type&& vec);
-	topic_collection(const topic_collection& coll);
-	topic_collection(topic_collection&& coll) = default;
-	topic_collection(std::initializer_list<string> sl);
-	topic_collection(std::initializer_list<const char*> sl);
+	string_collection() =default;
+	string_collection(const string& str);
+	string_collection(string&& str);
+	string_collection(const collection_type& vec);
+	string_collection(collection_type&& vec);
+	string_collection(const string_collection& coll);
+	string_collection(string_collection&& coll) = default;
+	string_collection(std::initializer_list<string> sl);
+	string_collection(std::initializer_list<const char*> sl);
 
 	static ptr_t create(const string& str) {
-		return std::make_shared<topic_collection>(str);
+		return std::make_shared<string_collection>(str);
 	}
 
 	static ptr_t create(string&& str) {
-		return std::make_shared<topic_collection>(str);
+		return std::make_shared<string_collection>(str);
 	}
 
 	static ptr_t create(const collection_type& vec) {
-		return std::make_shared<topic_collection>(vec);
+		return std::make_shared<string_collection>(vec);
 	}
 
 	static ptr_t create(collection_type&& vec) {
-		return std::make_shared<topic_collection>(vec);
+		return std::make_shared<string_collection>(vec);
 	}
 
 	static ptr_t create(std::initializer_list<string> sl) {
-		return std::make_shared<topic_collection>(sl);
+		return std::make_shared<string_collection>(sl);
 	}
 
 	static ptr_t create(std::initializer_list<const char*> sl) {
-		return std::make_shared<topic_collection>(sl);
+		return std::make_shared<string_collection>(sl);
 	}
 
-	topic_collection& operator=(const topic_collection& coll);
-	topic_collection& operator=(topic_collection&& coll) = default;
+	string_collection& operator=(const string_collection& coll);
+	string_collection& operator=(string_collection&& coll) = default;
 
 	size_t empty() const { return coll_.empty(); }
 	size_t size() const { return coll_.size(); }
@@ -130,14 +130,14 @@ public:
 /////////////////////////////////////////////////////////////////////////////
 
 /** Smart/shared pointer to a topic collection */
-using topic_collection_ptr = topic_collection::ptr_t;
+using string_collection_ptr = string_collection::ptr_t;
 
-/** Smart/shared pointer to a const topic_collection */
-using const_topic_collection_ptr = topic_collection::const_ptr_t;
+/** Smart/shared pointer to a const string_collection */
+using const_string_collection_ptr = string_collection::const_ptr_t;
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
 }
 
-#endif		// __mqtt_topic_collection_h
+#endif		// __mqtt_string_collection_h
 

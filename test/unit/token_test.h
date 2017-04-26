@@ -113,7 +113,7 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_user_constructor_client_vector() {
-		auto topics = topic_collection::create({ "topic1", "topic2" });
+		auto topics = string_collection::create({ "topic1", "topic2" });
 		mqtt::token tok{ cli, topics };
 		CPPUNIT_ASSERT_EQUAL(0, tok.get_message_id());
 		CPPUNIT_ASSERT_EQUAL(dynamic_cast<mqtt::iasync_client*>(&cli), tok.get_client());

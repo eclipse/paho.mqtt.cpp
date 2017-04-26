@@ -103,7 +103,7 @@ public:
 	 *  			   delivery has completed to the requested quality of
 	 *  			   service
 	 */
-	delivery_token(iasync_client& cli, const_topic_collection_ptr topics, const_message_ptr msg)
+	delivery_token(iasync_client& cli, const_string_collection_ptr topics, const_message_ptr msg)
 			: token(cli, topics), msg_(msg) {}
 	/**
 	 * Creates a delivery token connected to a particular client.
@@ -115,7 +115,7 @@ public:
 	 *  			   delivery has completed to the requested quality of
 	 *  			   service
 	 */
-	delivery_token(iasync_client& cli, const_topic_collection_ptr topics, const_message_ptr msg,
+	delivery_token(iasync_client& cli, const_string_collection_ptr topics, const_message_ptr msg,
 				   void* userContext, iaction_listener& cb)
 			: token(cli, topics, userContext, cb), msg_(msg) {}
 
@@ -164,7 +164,7 @@ public:
 	 * @param topic The topic that the message is associated with.
 	 * @param msg The message data.
 	 */
-	static ptr_t create(iasync_client& cli, const_topic_collection_ptr topics,
+	static ptr_t create(iasync_client& cli, const_string_collection_ptr topics,
 						const_message_ptr msg) {
 		return std::make_shared<delivery_token>(cli, topics, msg);
 	}
@@ -179,7 +179,7 @@ public:
 	 *  			   delivery has completed to the requested quality of
 	 *  			   service
 	 */
-	static ptr_t create(iasync_client& cli, const_topic_collection_ptr topics,
+	static ptr_t create(iasync_client& cli, const_string_collection_ptr topics,
 						const_message_ptr msg,
 						void* userContext, iaction_listener& cb) {
 		return std::make_shared<delivery_token>(cli, topics, msg, userContext, cb);

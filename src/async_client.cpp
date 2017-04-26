@@ -425,7 +425,7 @@ void async_client::set_callback(callback& cb)
 // --------------------------------------------------------------------------
 // Subscribe
 
-token_ptr async_client::subscribe(const_topic_collection_ptr topicFilters,
+token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 								   const qos_collection& qos)
 
 {
@@ -450,7 +450,7 @@ token_ptr async_client::subscribe(const_topic_collection_ptr topicFilters,
 	return tok;
 }
 
-token_ptr async_client::subscribe(const_topic_collection_ptr topicFilters,
+token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 								  const qos_collection& qos,
 								  void* userContext, iaction_listener& cb)
 {
@@ -530,7 +530,7 @@ token_ptr async_client::unsubscribe(const string& topicFilter)
 	return tok;
 }
 
-token_ptr async_client::unsubscribe(const_topic_collection_ptr topicFilters)
+token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters)
 {
 	size_t n = topicFilters->size();
 
@@ -550,7 +550,7 @@ token_ptr async_client::unsubscribe(const_topic_collection_ptr topicFilters)
 	return tok;
 }
 
-token_ptr async_client::unsubscribe(const_topic_collection_ptr topicFilters,
+token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters,
 									 void* userContext, iaction_listener& cb)
 {
 	size_t n = topicFilters->size();

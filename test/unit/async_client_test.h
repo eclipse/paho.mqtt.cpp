@@ -104,7 +104,7 @@ class async_client_test : public CppUnit::TestFixture
 	const std::string TOPIC { "TOPIC" };
 	const int GOOD_QOS { 0 };
 	const int BAD_QOS  { 3 };
-	const_topic_collection_ptr TOPIC_COLL { topic_collection::create({ "TOPIC0", "TOPIC1", "TOPIC2" }) };
+	const_string_collection_ptr TOPIC_COLL { string_collection::create({ "TOPIC0", "TOPIC1", "TOPIC2" }) };
 	mqtt::iasync_client::qos_collection GOOD_QOS_COLL { 0, 1, 2 };
 	mqtt::iasync_client::qos_collection BAD_QOS_COLL  { BAD_QOS };
 	const std::string PAYLOAD { "PAYLOAD" };

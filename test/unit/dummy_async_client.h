@@ -123,12 +123,12 @@ public:
 
 	void set_callback(mqtt::callback& cb) override {}
 
-	mqtt::token_ptr subscribe(const_topic_collection_ptr topicFilters,
+	mqtt::token_ptr subscribe(const_string_collection_ptr topicFilters,
 							  const qos_collection& qos) override {
 		return mqtt::token_ptr{};
 	}
 
-	mqtt::token_ptr subscribe(const_topic_collection_ptr topicFilters,
+	mqtt::token_ptr subscribe(const_string_collection_ptr topicFilters,
 							  const qos_collection& qos,
 							  void* userContext, mqtt::iaction_listener& callback) override {
 		return mqtt::token_ptr{};
@@ -147,11 +147,11 @@ public:
 		return mqtt::token_ptr{};
 	}
 
-	mqtt::token_ptr unsubscribe(const_topic_collection_ptr topicFilters) override {
+	mqtt::token_ptr unsubscribe(const_string_collection_ptr topicFilters) override {
 		return mqtt::token_ptr{};
 	}
 
-	mqtt::token_ptr unsubscribe(const_topic_collection_ptr topicFilters,
+	mqtt::token_ptr unsubscribe(const_string_collection_ptr topicFilters,
 								void* userContext, mqtt::iaction_listener& cb) override {
 		return mqtt::token_ptr{};
 	}

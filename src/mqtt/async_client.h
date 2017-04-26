@@ -27,7 +27,7 @@
 #include "MQTTAsync.h"
 #include "mqtt/types.h"
 #include "mqtt/token.h"
-#include "mqtt/topic_collection.h"
+#include "mqtt/string_collection.h"
 #include "mqtt/delivery_token.h"
 #include "mqtt/iclient_persistence.h"
 #include "mqtt/iaction_listener.h"
@@ -397,7 +397,7 @@ public:
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	token_ptr subscribe(const_topic_collection_ptr topicFilters,
+	token_ptr subscribe(const_string_collection_ptr topicFilters,
 						 const qos_collection& qos) override;
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
@@ -413,7 +413,7 @@ public:
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	token_ptr subscribe(const_topic_collection_ptr topicFilters,
+	token_ptr subscribe(const_string_collection_ptr topicFilters,
 						 const qos_collection& qos,
 						 void* userContext, iaction_listener& cb) override;
 	/**
@@ -459,7 +459,7 @@ public:
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	token_ptr unsubscribe(const_topic_collection_ptr topicFilters) override;
+	token_ptr unsubscribe(const_string_collection_ptr topicFilters) override;
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
 	 * @param topicFilters
@@ -470,7 +470,7 @@ public:
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	token_ptr unsubscribe(const_topic_collection_ptr topicFilters,
+	token_ptr unsubscribe(const_string_collection_ptr topicFilters,
 						   void* userContext, iaction_listener& cb) override;
 	/**
 	 * Requests the server unsubscribe the client from a topics.

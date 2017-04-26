@@ -29,7 +29,7 @@
 #include "mqtt/exception.h"
 #include "mqtt/types.h"
 #include "mqtt/buffer_ref.h"
-#include "mqtt/topic_collection.h"
+#include "mqtt/string_collection.h"
 #include <vector>
 #include <thread>
 #include <mutex>
@@ -63,7 +63,7 @@ class token
 	/** The underlying C token. Note that this is just an integer */
 	MQTTAsync_token tok_;
 	/** The topic string(s) for the action being tracked by this token */
-	const_topic_collection_ptr topics_;
+	const_string_collection_ptr topics_;
 	/** User supplied context */
 	void* userContext_;
 	/**
@@ -166,13 +166,13 @@ public:
 	 * @param cli The client that created the token.
 	 * @param topics The topics associated with the token
 	 */
-	token(iasync_client& cli, const_topic_collection_ptr topics);
+	token(iasync_client& cli, const_string_collection_ptr topics);
 	/**
 	 * Constructs a token object.
 	 * @param cli The client that created the token.
 	 * @param topics The topics associated with the token
 	 */
-	token(iasync_client& cli, const_topic_collection_ptr topics,
+	token(iasync_client& cli, const_string_collection_ptr topics,
 		  void* userContext, iaction_listener& cb);
 	/**
 	 * Constructs a token object.
@@ -225,7 +225,7 @@ public:
 	 * @param cli The client that created the token.
 	 * @param topics The topics associated with the token
 	 */
-	static ptr_t create(iasync_client& cli, const_topic_collection_ptr topics) {
+	static ptr_t create(iasync_client& cli, const_string_collection_ptr topics) {
 		return std::make_shared<token>(cli, topics);
 	}
 	/**
@@ -233,7 +233,7 @@ public:
 	 * @param cli The client that created the token.
 	 * @param topics The topics associated with the token
 	 */
-	static ptr_t create(iasync_client& cli, const_topic_collection_ptr topics,
+	static ptr_t create(iasync_client& cli, const_string_collection_ptr topics,
 						void* userContext, iaction_listener& cb) {
 		return std::make_shared<token>(cli, topics, userContext, cb);
 	}
@@ -264,7 +264,7 @@ public:
 	 * Returns the topic string(s) for the action being tracked by this
 	 * token.
 	 */
-	virtual const_topic_collection_ptr get_topics() const {
+	virtual const_string_collection_ptr get_topics() const {
 		return topics_;
 	}
 	/**

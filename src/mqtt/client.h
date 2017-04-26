@@ -233,13 +233,13 @@ public:
 	 * a QoS of 1.
 	 * @param topicFilters A set of topics to subscribe
 	 */
-	virtual void subscribe(const topic_collection& topicFilters);
+	virtual void subscribe(const string_collection& topicFilters);
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
 	 * @param topicFilters A collection of topics to subscribe
 	 * @param qos A collection of QoS for each topic
 	 */
-	virtual void subscribe(const topic_collection& topicFilters,
+	virtual void subscribe(const string_collection& topicFilters,
 						   const qos_collection& qos);
 	/**
 	 * Subscribe to a topic, which may include wildcards.
@@ -256,7 +256,7 @@ public:
 	 * Requests the server unsubscribe the client from one or more topics.
 	 * @param topicFilters A collection of topics to unsubscribe.
 	 */
-	virtual void unsubscribe(const topic_collection& topicFilters);
+	virtual void unsubscribe(const string_collection& topicFilters);
 };
 
 /** Smart/shared pointer to an MQTT synchronous client object */
