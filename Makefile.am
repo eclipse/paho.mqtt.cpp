@@ -115,7 +115,9 @@ if PAHO_BUILD_SAMPLES
 
 bin_PROGRAMS  = async_publish
 bin_PROGRAMS += async_subscribe
+bin_PROGRAMS += async_consume
 bin_PROGRAMS += sync_publish
+bin_PROGRAMS += sync_consume
 bin_PROGRAMS += pub_speed_test
 
 if PAHO_WITH_SSL
@@ -130,7 +132,11 @@ async_publish_SOURCES = src/samples/async_publish.cpp
 
 async_subscribe_SOURCES = src/samples/async_subscribe.cpp
 
+async_consume_SOURCES = src/samples/async_consume.cpp
+
 sync_publish_SOURCES = src/samples/sync_publish.cpp
+
+sync_consume_SOURCES = src/samples/sync_consume.cpp
 
 pub_speed_test_SOURCES = src/samples/pub_speed_test.cpp
 
@@ -154,7 +160,11 @@ async_publish_CPPFLAGS = $(COMMONCPPFLAGS)
 
 async_subscribe_CPPFLAGS = $(COMMONCPPFLAGS)
 
+async_consume_CPPFLAGS = $(COMMONCPPFLAGS)
+
 sync_publish_CPPFLAGS = $(COMMONCPPFLAGS)
+
+sync_consume_CPPFLAGS = $(COMMONCPPFLAGS)
 
 pub_speed_test_CPPFLAGS = $(COMMONCPPFLAGS)
 
@@ -169,7 +179,11 @@ async_publish_CXXFLAGS = $(COMMONCXXFLAGS)
 
 async_subscribe_CXXFLAGS = $(COMMONCXXFLAGS)
 
+async_consume_CXXFLAGS = $(COMMONCXXFLAGS)
+
 sync_publish_CXXFLAGS = $(COMMONCXXFLAGS)
+
+sync_consume_CXXFLAGS = $(COMMONCXXFLAGS)
 
 pub_speed_test_CXXFLAGS = $(COMMONCXXFLAGS)
 
@@ -189,7 +203,11 @@ async_publish_LDADD = $(COMMONLDFLAGS)
 
 async_subscribe_LDADD = $(COMMONLDFLAGS)
 
+async_consume_LDADD = $(COMMONLDFLAGS)
+
 sync_publish_LDADD = $(COMMONLDFLAGS)
+
+sync_consume_LDADD = $(COMMONLDFLAGS)
 
 pub_speed_test_LDADD = $(COMMONLDFLAGS)
 
@@ -252,3 +270,4 @@ all-local: doxyfile.stamp
 clean-local:
 	rm -rf $(top_srcdir)/docs/man
 endif
+

@@ -9,7 +9,7 @@ else
   PAHO_C_INC_DIR ?= /usr/local/include
 endif
 
-all: async_publish async_subscribe sync_publish pub_speed_test 
+all: async_publish async_subscribe async_consume sync_publish sync_consume pub_speed_test 
 
 # SSL/TLS samples
 ifdef SSL
@@ -43,7 +43,13 @@ async_publish: async_publish.cpp
 async_subscribe: async_subscribe.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS)
 
+async_consume: async_consume.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS)
+
 sync_publish: sync_publish.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS)
+
+sync_consume: sync_consume.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS)
 
 pub_speed_test: pub_speed_test.cpp

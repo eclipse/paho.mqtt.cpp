@@ -34,10 +34,12 @@
 #include "mqtt/exception.h"
 #include "mqtt/message.h"
 #include "mqtt/callback.h"
+#include "mqtt/thread_queue.h"
 #include "mqtt/iasync_client.h"
 #include <vector>
 #include <list>
 #include <memory>
+#include <tuple>
 #include <stdexcept>
 
 namespace mqtt {
@@ -57,6 +59,9 @@ class async_client : public virtual iasync_client
 public:
 	/** Smart/shared pointer for an object of this class */
 	using ptr_t = std::shared_ptr<async_client>;
+
+	using consumer_message_type = std::tuple<string, const_message_ptr>;
+	using consumer_queue_type = std::unique_ptr< thread_queue<consumer_message_type> >;
 
 private:
 	/** Lock guard type for this class */
@@ -81,6 +86,8 @@ private:
 	/** A list of delivery tokens that are in play */
 	std::list<delivery_token_ptr> pendingDeliveryTokens_;
 
+	consumer_queue_type que_;
+
 	static void on_connection_lost(void *context, char *cause);
 	static int on_message_arrived(void* context, char* topicName, int topicLen,
 								  MQTTAsync_message* msg);
@@ -93,15 +100,6 @@ private:
 	virtual void remove_token(token* tok) override;
 	virtual void remove_token(token_ptr tok) { remove_token(tok.get()); }
 	void remove_token(delivery_token_ptr tok) { remove_token(tok.get()); }
-
-	/**
-	 * Convenience function to get user callback safely.
-	 * @return callback*
-	 */
-	callback* get_callback() const {
-		guard g(lock_);
-		return userCallback_;
-	}
 
 	/** Non-copyable */
 	async_client() =delete;
@@ -485,6 +483,59 @@ public:
 	 */
 	token_ptr unsubscribe(const string& topicFilter,
 						  void* userContext, iaction_listener& cb) override;
+
+	/**
+	 * Start consuming messages.
+	 * This initializes the client to receive messages through a queue that
+	 * can be read synchronously.
+	 */
+	void start_consuming();
+	/**
+	 * Stop consuming messages.
+	 * This shuts down the internal callback and discards any unread
+	 * messages.
+	 */
+	void stop_consuming();
+	/**
+	 * Read the next message from the queue.
+	 * This blocks until a new message arrives.
+	 * @return The message and topic.
+	 */
+	consumer_message_type consume_message() { return que_->get(); }
+	/**
+	 * Try to read the next message from the queue without blocking.
+	 * @param val Pointer to the value to receive the message
+	 * @return @em true is a message was read, @em false if no message was
+	 *  	   available.
+	 */
+	bool try_consume_message(consumer_message_type* val) {
+		return que_->try_get(val);
+	}
+	/**
+	 * Waits a limited time for a message to arrive.
+	 * @param val Pointer to the value to receive the message
+	 * @param relTime The maximum amount of time to wait for a message.
+	 * @return @em true if a message was read, @em false if a timeout
+	 *  	   occurred.
+	 */
+	template <typename Rep, class Period>
+	bool try_consume_message_for(consumer_message_type* val,
+								 const std::chrono::duration<Rep, Period>& relTime) {
+		return que_->try_get_for(val, relTime);
+	}
+	/**
+	 * Waits until a specific time for a message to occur.
+	 * @param val Pointer to the value to receive the message
+	 * @param absTime The time point to wait until, before timing out.
+	 * @return @em true if a message was read, @em false if a timeout
+	 *  	   occurred.
+	 */
+	template <class Clock, class Duration>
+	bool try_consume_message_until(consumer_message_type* val,
+								   const std::chrono::time_point<Clock,Duration>& absTime) {
+		return que_->try_get_until(val, absTime);
+	}
+
 };
 
 /** Smart/shared pointer to an asynchronous MQTT client object */

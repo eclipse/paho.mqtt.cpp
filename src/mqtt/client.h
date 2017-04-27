@@ -36,6 +36,10 @@ namespace mqtt {
  */
 class client
 {
+public:
+	using consumer_message_type = async_client::consumer_message_type;
+
+private:
 	/** The default quality of service */
 	static const int DFLT_QOS;
 	/** The actual client */
@@ -257,6 +261,57 @@ public:
 	 * @param topicFilters A collection of topics to unsubscribe.
 	 */
 	virtual void unsubscribe(const string_collection& topicFilters);
+	/**
+	 * Start consuming messages.
+	 * This initializes the client to receive messages through a queue that
+	 * can be read synchronously.
+	 */
+	void start_consuming() { cli_.start_consuming(); }
+	/**
+	 * Stop consuming messages.
+	 * This shuts down the internal callback and discards any unread
+	 * messages.
+	 */
+	void stop_consuming() { cli_.stop_consuming(); }
+	/**
+	 * Read the next message from the queue.
+	 * This blocks until a new message arrives.
+	 * @return The message and topic.
+	 */
+	consumer_message_type consume_message() { return cli_.consume_message(); }
+	/**
+	 * Try to read the next message from the queue without blocking.
+	 * @param val Pointer to the value to receive the message
+	 * @return @em true is a message was read, @em false if no message was
+	 *  	   available.
+	 */
+	bool try_consume_message(consumer_message_type* val) {
+		return cli_.try_consume_message(val);
+	}
+	/**
+	 * Waits a limited time for a message to arrive.
+	 * @param val Pointer to the value to receive the message
+	 * @param relTime The maximum amount of time to wait for a message.
+	 * @return @em true if a message was read, @em false if a timeout
+	 *  	   occurred.
+	 */
+	template <typename Rep, class Period>
+	bool try_consume_message_for(consumer_message_type* val,
+								 const std::chrono::duration<Rep, Period>& relTime) {
+		return cli_.try_consume_message_for(val, relTime);
+	}
+	/**
+	 * Waits until a specific time for a message to occur.
+	 * @param val Pointer to the value to receive the message
+	 * @param absTime The time point to wait until, before timing out.
+	 * @return @em true if a message was read, @em false if a timeout
+	 *  	   occurred.
+	 */
+	template <class Clock, class Duration>
+	bool try_consume_message_until(consumer_message_type* val,
+								   const std::chrono::time_point<Clock,Duration>& absTime) {
+		return cli_.try_consume_message_until(val, absTime);
+	}
 };
 
 /** Smart/shared pointer to an MQTT synchronous client object */

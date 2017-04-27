@@ -93,7 +93,8 @@ void async_client::on_connection_lost(void *context, char *cause)
 {
 	if (context) {
 		async_client* cli = static_cast<async_client*>(context);
-		callback* cb = cli->get_callback();
+		callback* cb = cli->userCallback_;
+
 		if (cb)
 			cb->connection_lost(cause ? string(cause) : string());
 	}
@@ -104,11 +105,17 @@ int async_client::on_message_arrived(void* context, char* topicName, int topicLe
 {
 	if (context) {
 		async_client* cli = static_cast<async_client*>(context);
-		callback* cb = cli->get_callback();
-		if (cb) {
+		callback* cb = cli->userCallback_;
+		consumer_queue_type& que = cli->que_;
+
+		if (cb || que) {
 			string topic(topicName, topicName+topicLen);
-			const_message_ptr m = std::make_shared<message>(*msg);
-			cb->message_arrived(topic, m);
+			auto m = std::make_shared<message>(*msg);
+
+			if (cb)
+				cb->message_arrived(topic, m);
+			if (que)
+				que->put(std::make_tuple(topic, m));
 		}
 	}
 
@@ -586,6 +593,35 @@ token_ptr async_client::unsubscribe(const string& topicFilter,
 	}
 
 	return tok;
+}
+
+// --------------------------------------------------------------------------
+
+void async_client::start_consuming()
+{
+	// TODO: Should we replace user callback?
+	//userCallback_ = nullptr;
+
+	// TODO: Check if callbacks already set/running, otherwise we have race
+	// conditions and/or stomping other callbacks
+	que_.reset(new thread_queue<consumer_message_type>);
+
+	int rc = MQTTAsync_setCallbacks(cli_, this,
+									&async_client::on_connection_lost,
+									&async_client::on_message_arrived,
+									nullptr);
+
+	if (rc != MQTTASYNC_SUCCESS)
+		throw exception(rc);
+}
+
+void async_client::stop_consuming()
+{
+	int rc = MQTTAsync_setCallbacks(cli_, this, nullptr, nullptr, nullptr);
+	que_.reset(new thread_queue<consumer_message_type>);
+
+	if (rc != MQTTASYNC_SUCCESS)
+		throw exception(rc);
 }
 
 /////////////////////////////////////////////////////////////////////////////

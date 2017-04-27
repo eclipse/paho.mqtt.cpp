@@ -44,7 +44,9 @@ link_directories(${PAHO_MQTT_CPP_LIB_DIR})
 ## binary files
 add_executable(async_publish async_publish.cpp)
 add_executable(async_subscribe async_subscribe.cpp)
+add_executable(async_consume async_consume.cpp)
 add_executable(sync_publish sync_publish.cpp)
+add_executable(sync_consume sync_consume.cpp)
 add_executable(pub_speed_test pub_speed_test.cpp)
 
 ## link binaries
@@ -54,7 +56,13 @@ target_link_libraries(async_publish
 target_link_libraries(async_subscribe
     ${PAHO_MQTT_C}
     ${PAHO_MQTT_CPP})
+target_link_libraries(async_consume
+    ${PAHO_MQTT_C}
+    ${PAHO_MQTT_CPP})
 target_link_libraries(sync_publish
+    ${PAHO_MQTT_C}
+    ${PAHO_MQTT_CPP})
+target_link_libraries(sync_consume
     ${PAHO_MQTT_C}
     ${PAHO_MQTT_CPP})
 target_link_libraries(pub_speed_test
@@ -65,7 +73,9 @@ target_link_libraries(pub_speed_test
 set(INSTALL_TARGETS
     async_publish
     async_subscribe
+    async_consume
     sync_publish
+    sync_consume
     pub_speed_test)
 
 if(PAHO_WITH_SSL)
