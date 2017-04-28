@@ -32,35 +32,54 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-async_client::async_client(const string& serverURI, const string& clientId)
-				: serverURI_(serverURI), clientId_(clientId),
-					persist_(nullptr), userCallback_(nullptr)
-{
-	MQTTAsync_create(&cli_, serverURI.c_str(), clientId.c_str(),
-					 MQTTCLIENT_PERSISTENCE_NONE, nullptr);
-}
-
-
 async_client::async_client(const string& serverURI, const string& clientId,
 						   const string& persistDir)
-				: serverURI_(serverURI), clientId_(clientId),
-					persist_(nullptr), userCallback_(nullptr)
+				: async_client(serverURI, clientId, 0, persistDir)
 {
-	MQTTAsync_create(&cli_, serverURI.c_str(), clientId.c_str(),
-					 MQTTCLIENT_PERSISTENCE_DEFAULT, const_cast<char*>(persistDir.c_str()));
 }
 
 async_client::async_client(const string& serverURI, const string& clientId,
-						   iclient_persistence* persistence)
+						   iclient_persistence* persistence /*=nullptr*/)
+				: async_client(serverURI, clientId, 0, persistence)
+{
+}
+
+async_client::async_client(const string& serverURI, const string& clientId,
+						   int maxBufferedMessages, const string& persistDir)
 				: serverURI_(serverURI), clientId_(clientId),
 					persist_(nullptr), userCallback_(nullptr)
 {
+	std::unique_ptr<MQTTAsync_createOptions> opts;
+	if (maxBufferedMessages != 0) {
+		opts.reset(new MQTTAsync_createOptions MQTTAsync_createOptions_initializer);
+		opts->sendWhileDisconnected = !0;
+		opts->maxBufferedMessages = maxBufferedMessages;
+	}
+
+	MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
+								MQTTCLIENT_PERSISTENCE_DEFAULT,
+								const_cast<char*>(persistDir.c_str()),
+								opts.get());
+}
+
+async_client::async_client(const string& serverURI, const string& clientId,
+						   int maxBufferedMessages, iclient_persistence* persistence /*=nullptr*/)
+				: serverURI_(serverURI), clientId_(clientId),
+					persist_(nullptr), userCallback_(nullptr)
+{
+	std::unique_ptr<MQTTAsync_createOptions> opts;
+	if (maxBufferedMessages != 0) {
+		opts.reset(new MQTTAsync_createOptions MQTTAsync_createOptions_initializer);
+		opts->sendWhileDisconnected = !0;
+		opts->maxBufferedMessages = maxBufferedMessages;
+	}
+
 	if (!persistence) {
-		MQTTAsync_create(&cli_, serverURI.c_str(), clientId.c_str(),
-						 MQTTCLIENT_PERSISTENCE_NONE, nullptr);
+		MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
+									MQTTCLIENT_PERSISTENCE_NONE, nullptr, opts.get());
 	}
 	else {
-		persist_ = new MQTTClient_persistence {
+		persist_.reset(new MQTTClient_persistence {
 			persistence,
 			&iclient_persistence::persistence_open,
 			&iclient_persistence::persistence_close,
@@ -70,17 +89,17 @@ async_client::async_client(const string& serverURI, const string& clientId,
 			&iclient_persistence::persistence_keys,
 			&iclient_persistence::persistence_clear,
 			&iclient_persistence::persistence_containskey
-		};
+		});
 
-		MQTTAsync_create(&cli_, serverURI.c_str(), clientId.c_str(),
-						 MQTTCLIENT_PERSISTENCE_USER, persist_);
+		MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
+									MQTTCLIENT_PERSISTENCE_USER, persist_.get(),
+									opts.get());
 	}
 }
 
 async_client::~async_client()
 {
 	MQTTAsync_destroy(&cli_);
-	delete persist_;
 }
 
 // --------------------------------------------------------------------------

@@ -78,7 +78,7 @@ private:
 	/** The client ID string that we provided to the server. */
 	string clientId_;
 	/** A user persistence wrapper (if any) */
-	MQTTClient_persistence* persist_;
+	std::unique_ptr<MQTTClient_persistence> persist_;
 	/** Callback supplied by the user (if any) */
 	callback* userCallback_;
 	/** A list of tokens that are in play */
@@ -110,22 +110,12 @@ public:
 	/**
 	 * Create an async_client that can be used to communicate with an MQTT
 	 * server.
-	 * This uses file-based persistence in the current working directory.
-	 * @param serverURI the address of the server to connect to, specified
-	 *  				as a URI.
-	 * @param clientId a client identifier that is unique on the server
-	 *  			   being connected to.
-	 */
-	async_client(const string& serverURI, const string& clientId);
-	/**
-	 * Create an async_client that can be used to communicate with an MQTT
-	 * server.
 	 * This uses file-based persistence in the specified directory.
 	 * @param serverURI the address of the server to connect to, specified
 	 *  				as a URI.
 	 * @param clientId a client identifier that is unique on the server
 	 *  			   being connected to
-	 * @param persistDir
+	 * @param persistDir The directory to use for persistence data
 	 */
 	async_client(const string& serverURI, const string& clientId,
 				 const string& persistDir);
@@ -142,7 +132,35 @@ public:
 	 *  				  then no persistence is used.
 	 */
 	async_client(const string& serverURI, const string& clientId,
-				 iclient_persistence* persistence);
+				 iclient_persistence* persistence=nullptr);
+	/**
+	 * Create an async_client that can be used to communicate with an MQTT
+	 * server, which allows for off-line message buffering.
+	 * This uses file-based persistence in the specified directory.
+	 * @param serverURI the address of the server to connect to, specified
+	 *  				as a URI.
+	 * @param clientId a client identifier that is unique on the server
+	 *  			   being connected to
+	 * @param maxBufferedMessages the maximum number of messages allowed to
+	 *  						  be buffered while not connected
+	 * @param persistDir The directory to use for persistence data
+	 */
+	async_client(const string& serverURI, const string& clientId,
+				 int maxBufferedMessages, const string& persistDir);
+	/**
+	 * Create an async_client that can be used to communicate with an MQTT
+	 * server, which allows for off-line message buffering.
+	 * This allows the caller to specify a user-defined persistence object,
+	 * or use no persistence.
+	 * @param serverURI the address of the server to connect to, specified
+	 *  				as a URI.
+	 * @param clientId a client identifier that is unique on the server
+	 *  			   being connected to
+	 * @param persistence The user persistence structure. If this is null,
+	 *  				  then no persistence is used.
+	 */
+	async_client(const string& serverURI, const string& clientId,
+				 int maxBufferedMessages, iclient_persistence* persistence=nullptr);
 	/**
 	 * Destructor
 	 */
