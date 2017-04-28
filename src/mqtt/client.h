@@ -76,32 +76,57 @@ public:
 
 	/**
 	 * Create a client that can be used to communicate with an MQTT server.
-	 * This uses file-based persistence in the current working directory.
-	 * @param serverURI
-	 * @param clientId
-	 */
-	client(const string& serverURI, const string& clientId);
-	/**
-	 * Create a client that can be used to communicate with an MQTT server.
-	 * This uses file-based persistence in the specified directory.
-	 * @param serverURI
-	 * @param clientId
-	 * @param persistDir
-	 */
-	client(const string& serverURI, const string& clientId,
-		   const string& persistDir);
-	/**
-	 * Create a client that can be used to communicate with an MQTT server.
 	 * This allows the caller to specify a user-defined persistence object,
 	 * or use no persistence.
-	 * @param serverURI
-	 * @param clientId
+	 * @param serverURI the address of the server to connect to, specified
+	 *  				as a URI.
+	 * @param clientId a client identifier that is unique on the server
+	 *  			   being connected to
 	 * @param persistence The user persistence structure. If this is null,
 	 *  				  then no persistence is used.
 	 */
 	client(const string& serverURI, const string& clientId,
-		   iclient_persistence* persistence);
-
+		   iclient_persistence* persistence=nullptr);
+	/**
+	 * Create an async_client that can be used to communicate with an MQTT
+	 * server.
+	 * This uses file-based persistence in the specified directory.
+	 * @param serverURI the address of the server to connect to, specified
+	 *  				as a URI.
+	 * @param clientId a client identifier that is unique on the server
+	 *  			   being connected to
+	 * @param persistDir The directory to use for persistence data
+	 */
+	client(const string& serverURI, const string& clientId,
+		   const string& persistDir);
+	/**
+	 * Create a client that can be used to communicate with an MQTT server,
+	 * which allows for off-line message buffering.
+	 * This allows the caller to specify a user-defined persistence object,
+	 * or use no persistence.
+	 * @param serverURI the address of the server to connect to, specified
+	 *  				as a URI.
+	 * @param clientId a client identifier that is unique on the server
+	 *  			   being connected to
+	 * @param persistence The user persistence structure. If this is null,
+	 *  				  then no persistence is used.
+	 */
+	client(const string& serverURI, const string& clientId,
+		   int maxBufferedMessages, iclient_persistence* persistence=nullptr);
+	/**
+	 * Create a client that can be used to communicate with an MQTT server,
+	 * which allows for off-line message buffering.
+	 * This uses file-based persistence in the specified directory.
+	 * @param serverURI the address of the server to connect to, specified
+	 *  				as a URI.
+	 * @param clientId a client identifier that is unique on the server
+	 *  			   being connected to
+	 * @param maxBufferedMessages the maximum number of messages allowed to
+	 *  						  be buffered while not connected
+	 * @param persistDir The directory to use for persistence data
+	 */
+	client(const string& serverURI, const string& clientId,
+		   int maxBufferedMessages, const string& persistDir);
 	/**
 	 * Virtual destructor
 	 */

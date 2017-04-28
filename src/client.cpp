@@ -2,7 +2,7 @@
 // Implementation of the client class for the mqtt C++ client library.
 
 /*******************************************************************************
- * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2017 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -28,20 +28,28 @@ const int client::DFLT_QOS = 1;
 
 /////////////////////////////////////////////////////////////////////////////
 
-client::client(const string& serverURI, const string& clientId)
-			: cli_(serverURI, clientId), timeout_(-1)
+
+client::client(const string& serverURI, const string& clientId,
+			   iclient_persistence* persistence /*=nullptr*/)
+		: cli_(serverURI, clientId, persistence), timeout_(-1)
 {
 }
 
 client::client(const string& serverURI, const string& clientId,
 			   const string& persistDir)
-			: cli_(serverURI, clientId, persistDir), timeout_(-1)
+		: cli_(serverURI, clientId, persistDir), timeout_(-1)
 {
 }
 
 client::client(const string& serverURI, const string& clientId,
-			   iclient_persistence* persistence)
-			: cli_(serverURI, clientId, persistence), timeout_(-1)
+			   int maxBufferedMessages, iclient_persistence* persistence /*=nullptr*/)
+		: cli_(serverURI, clientId, maxBufferedMessages, persistence), timeout_(-1)
+{
+}
+
+client::client(const string& serverURI, const string& clientId,
+			   int maxBufferedMessages, const string& persistDir)
+		: cli_(serverURI, clientId, maxBufferedMessages, persistDir), timeout_(-1)
 {
 }
 
