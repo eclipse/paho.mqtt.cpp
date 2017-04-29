@@ -279,6 +279,28 @@ token_ptr async_client::connect(void* userContext, iaction_listener& cb)
 }
 
 // --------------------------------------------------------------------------
+// Re-connect
+
+token_ptr async_client::reconnect()
+{
+	auto tok = token::create(*this);
+	add_token(tok);
+
+	int rc = MQTTAsync_setConnected(cli_, tok.get(), &token::on_connected);
+
+	if (rc == MQTTASYNC_SUCCESS)
+		rc = MQTTAsync_reconnect(cli_);
+
+	if (rc != MQTTASYNC_SUCCESS) {
+		MQTTAsync_setConnected(cli_, nullptr, nullptr);
+		remove_token(tok);
+		throw exception(rc);
+	}
+
+	return tok;
+}
+
+// --------------------------------------------------------------------------
 // Disconnect
 
 token_ptr async_client::disconnect(disconnect_options opts)

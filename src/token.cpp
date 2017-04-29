@@ -27,21 +27,25 @@ namespace mqtt {
 // These are the callbacks directly from the C library.
 // The 'context' is a raw pointer to the token object.
 
-void token::on_failure(void* context, MQTTAsync_failureData* rsp)
-{
-	if (context) {
-		token* tok = static_cast<token*>(context);
-		tok->on_failure(rsp);
-		tok->get_client()->remove_token(tok);
-	}
-}
-
 void token::on_success(void* context, MQTTAsync_successData* rsp)
 {
+	if (context)
+		static_cast<token*>(context)->on_success(rsp);
+}
+
+void token::on_failure(void* context, MQTTAsync_failureData* rsp)
+{
+	if (context)
+		static_cast<token*>(context)->on_failure(rsp);
+}
+
+void token::on_connected(void* context, char* /*cause*/)
+{
 	if (context) {
 		token* tok = static_cast<token*>(context);
-		tok->on_success(rsp);
-		tok->get_client()->remove_token(tok);
+		tok->on_success(nullptr);
+		// No more callback (till client sets up another token)
+		MQTTAsync_setConnected(tok->get_client(), nullptr, nullptr);
 	}
 }
 
@@ -61,6 +65,8 @@ void token::on_success(MQTTAsync_successData* rsp)
 	if (listener)
 		listener->on_success(*this);
 	cond_.notify_all();
+
+	cli_->remove_token(this);
 }
 
 void token::on_failure(MQTTAsync_failureData* rsp)
@@ -82,6 +88,8 @@ void token::on_failure(MQTTAsync_failureData* rsp)
 	if (listener)
 		listener->on_failure(*this);
 	cond_.notify_all();
+
+	cli_->remove_token(this);
 }
 
 // --------------------------------------------------------------------------

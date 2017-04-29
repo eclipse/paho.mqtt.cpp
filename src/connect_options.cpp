@@ -159,6 +159,33 @@ void connect_options::set_token(const token_ptr& tok)
 	}
 }
 
+void connect_options::set_servers(const_string_collection_ptr serverURIs)
+{
+	if (serverURIs) {
+		serverURIs_ = std::move(serverURIs);
+		opts_. serverURIcount = (int) serverURIs_->size();
+		opts_.serverURIs = serverURIs_->c_arr();
+	}
+	else {
+		serverURIs_.reset();
+		opts_.serverURIcount = 0;
+		opts_.serverURIs = nullptr;
+	}
+}
+
+void connect_options::set_automatic_reconnect(bool on, int minRetryInterval,
+											  int maxRetryInterval)
+{
+	if (on) {
+		opts_.automaticReconnect = !0;
+		opts_.minRetryInterval = minRetryInterval;
+		opts_.maxRetryInterval = maxRetryInterval;
+	}
+	else
+		opts_.automaticReconnect = 0;
+}
+
+
 /////////////////////////////////////////////////////////////////////////////
 
 } // end namespace mqtt

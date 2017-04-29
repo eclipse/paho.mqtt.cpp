@@ -28,8 +28,9 @@
 #include "mqtt/types.h"
 #include "mqtt/message.h"
 #include "mqtt/topic.h"
-#include "mqtt/will_options.h"
 #include "mqtt/token.h"
+#include "mqtt/string_collection.h"
+#include "mqtt/will_options.h"
 #if defined(OPENSSL)
 	#include "mqtt/ssl_options.h"
 #endif
@@ -69,6 +70,9 @@ class connect_options
 
 	/** Shared token pointer for context, if any */
 	token_ptr tok_;
+
+	/** Collection of server URIs, if any */
+	const_string_collection_ptr serverURIs_;
 
 	/** The client has special access */
 	friend class async_client;
@@ -209,6 +213,15 @@ public:
 	 */
 	token_ptr get_token() const { return tok_; }
 	/**
+	 * Sets the list of servers to which the client will connect.
+	 * @param serverURIs A pointer to a collection of server URI's. Each
+	 *  				 entry should be of the form @em
+	 *  				 protocol://host:port where @em protocol must be
+	 *  				 @em tcp or @em ssl. For @emhost, you can specify
+	 *  				 either an IP address or a domain name.
+	 */
+	const_string_collection_ptr get_servers() const { return serverURIs_; }
+	/**
       * Gets the version of MQTT to be used on the connect.
 	  * @return
 	  * @li MQTTVERSION_DEFAULT (0) = default: start with 3.1.1, and if that
@@ -218,12 +231,36 @@ public:
 	  */
 	int get_mqtt_version() const { return opts_.MQTTVersion; }
 	/**
+	 * Determines if the options have been configured for automatic
+	 * reconnect.
+	 * @return @em true if configured for automatic reconnect, @em false if
+	 *  	   not.
+	 */
+	bool get_automatic_reconnect() const { return opts_.automaticReconnect != 0; }
+	/**
+	 * Gets the minimum retry interval for automatic reconnect.
+	 * @return The minimum retry interval for automatic reconnect, in
+	 *  	   seconds.
+	 */
+	std::chrono::seconds get_min_retry_interval() const {
+		return std::chrono::seconds(opts_.minRetryInterval);
+	}
+	/**
+	 * Gets the maximum retry interval for automatic reconnect.
+	 * @return The maximum retry interval for automatic reconnect, in
+	 *  	   seconds.
+	 */
+	std::chrono::seconds get_max_retry_interval() const {
+		return std::chrono::seconds(opts_.maxRetryInterval);
+	}
+
+	/**
 	 * Sets whether the server should remember state for the client across
 	 * reconnects.
 	 * @param cleanSession
 	 */
 	void set_clean_session(bool cleanSession) {
-		opts_.cleansession = (cleanSession) ? (!0) : 0;
+		opts_.cleansession = cleanSession ? (!0) : 0;
 	}
 	/**
 	 * Sets the connection timeout value.
@@ -300,6 +337,15 @@ public:
 	 */
 	void set_token(const token_ptr& tok);
 	/**
+	 * Sets the list of servers to which the client will connect.
+	 * @param serverURIs A pointer to a collection of server URI's. Each
+	 *  				 entry should be of the form @em
+	 *  				 protocol://host:port where @em protocol must be
+	 *  				 @em tcp or @em ssl. For @emhost, you can specify
+	 *  				 either an IP address or a domain name.
+	 */
+	void set_servers(const_string_collection_ptr serverURIs);
+	/**
       * Sets the version of MQTT to be used on the connect.
 	  * @param mqttVersion The MQTT version to use for the connection:
 	  *   @li MQTTVERSION_DEFAULT (0) = default: start with 3.1.1, and if
@@ -309,8 +355,40 @@ public:
 	  */
 	void set_mqtt_version(int mqttVersion) { opts_.MQTTVersion = mqttVersion; }
 	/**
+	 * Enable or disable automatic reconnects.
+	 * The retry intervals are not affected.
+	 * @param on Whether to turn reconnects on or off
+	 */
+	void set_automatic_reconnect(bool on) {
+		opts_.automaticReconnect = on ? !0 : 0;
+	}
+	/**
+	 * Enable or disable automatic reconnects.
+	 * @param on Whether to turn reconnects on or off
+	 * @param minRetryInterval Minimum retry interval in seconds.  Doubled
+	 *  					   on each failed retry.
+	 * @param maxRetryInterval Maximum retry interval in seconds.  The
+	 *  					   doubling stops here on failed retries.
+	 */
+	void set_automatic_reconnect(bool on, int minRetryInterval, int maxRetryInterval);
+	/**
+	 * Enable or disable automatic reconnects.
+	 * @param on Whether to turn reconnects on or off
+	 * @param minRetryInterval Minimum retry interval. Doubled on each
+	 *  					   failed retry.
+	 * @param maxRetryInterval Maximum retry interval. The doubling stops
+	 *  					   here on failed retries.
+	 */
+	template <class Rep1, class Period1, class Rep2, class Period2>
+	void set_automatic_reconnect(bool on,
+								 const std::chrono::duration<Rep1, Period1>& minRetryInterval,
+								 const std::chrono::duration<Rep2, Period2>& maxRetryInterval) {
+		set_automatic_reconnect(on, (int) to_seconds_count(minRetryInterval),
+								(int) to_seconds_count(maxRetryInterval));
+	}
+	/**
 	 * Gets a string representation of the object.
-	 * @return
+	 * @return A string representation of the object.
 	 */
 	string to_string() const;
 };

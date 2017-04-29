@@ -113,6 +113,12 @@ public:
 	 */
 	virtual token_ptr connect(void* userContext, iaction_listener& cb) =0;
 	/**
+	 * Reconnects the client using options from the previous connect.
+	 * The client must have previously called connect() for this to work.
+	 * @return token used to track the progress of the reconnect.
+	 */
+	virtual token_ptr reconnect() =0;
+	/**
 	 * Disconnects from the server.
 	 * @return token used to track and wait for the disconnect to complete.
 	 *  	   The token will be passed to any callback that has been set.

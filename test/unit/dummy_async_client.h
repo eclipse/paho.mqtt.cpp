@@ -52,6 +52,10 @@ public:
 		return mqtt::token_ptr{};
 	}
 
+	mqtt::token_ptr reconnect() override {
+		return mqtt::token_ptr{};
+	}
+
 	mqtt::token_ptr disconnect() override {
 		return mqtt::token_ptr{};
 	}

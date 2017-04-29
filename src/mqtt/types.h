@@ -61,6 +61,17 @@ std::chrono::seconds to_seconds(const std::chrono::duration<Rep, Period>& dur) {
 }
 
 /**
+ * Convert a chrono duration to a number of seconds.
+ * This casts away precision to get integer seconds.
+ * @param dur A chrono duration type
+ * @return The duration as a number of seconds
+ */
+template <class Rep, class Period>
+long to_seconds_count(const std::chrono::duration<Rep, Period>& dur) {
+	return (long) to_seconds(dur).count();
+}
+
+/**
  * Convert a chrono duration to milliseconds.
  * This casts away precision to get integer milliseconds.
  * @param dur A chrono duration type
@@ -69,6 +80,17 @@ std::chrono::seconds to_seconds(const std::chrono::duration<Rep, Period>& dur) {
 template <class Rep, class Period>
 std::chrono::milliseconds to_milliseconds(const std::chrono::duration<Rep, Period>& dur) {
 	return std::chrono::duration_cast<std::chrono::milliseconds>(dur);
+}
+
+/**
+ * Convert a chrono duration to a number of milliseconds.
+ * This casts away precision to get integer milliseconds.
+ * @param dur A chrono duration type
+ * @return The duration as a number of milliseconds
+ */
+template <class Rep, class Period>
+long to_milliseconds_count(const std::chrono::duration<Rep, Period>& dur) {
+	return (long) to_milliseconds(dur).count();
 }
 
 /////////////////////////////////////////////////////////////////////////////

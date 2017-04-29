@@ -150,6 +150,11 @@ public:
 		cli_.connect(std::move(opts))->wait_for_completion(timeout_);
 	}
 	/**
+	 * Reconnects the client using options from the previous connect.
+	 * The client must have previously called connect() for this to work.
+	 */
+	virtual void reconnect() { cli_.reconnect(); }
+	/**
 	 * Disconnects from the server.
 	 */
 	virtual void disconnect() {

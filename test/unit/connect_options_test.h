@@ -48,6 +48,8 @@ class connect_options_test : public CppUnit::TestFixture
 	CPPUNIT_TEST( test_set_token );
 	CPPUNIT_TEST( test_set_keep_alive );
 	CPPUNIT_TEST( test_set_connect_timeout );
+	CPPUNIT_TEST( test_set_servers );
+	CPPUNIT_TEST( test_set_auto_reconnect );
 
 	CPPUNIT_TEST_SUITE_END();
 
@@ -58,11 +60,19 @@ class connect_options_test : public CppUnit::TestFixture
 	// These must match the C init struct
 	const int DFLT_KEEP_ALIVE = 60;
 	const int DFLT_CONNECT_TIMEOUT = 30;
+	const bool DFLT_AUTO_RECONNECT = false;
 
 	const std::string USER { "wally" };
 	const std::string PASSWD { "xyzpdq" };
 
 	const std::string EMPTY_STR;
+
+	const std::vector<string> URIsVec = {
+		"tcp://server1:1883",
+		"tcp://server2:1883",
+		"ssl://server3:8883"
+	};
+	const const_string_collection_ptr URIs = std::make_shared<const string_collection>(URIsVec);
 
 public:
 	void setUp() {}
@@ -78,6 +88,8 @@ public:
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, opts.get_password_str());
 		CPPUNIT_ASSERT_EQUAL(DFLT_KEEP_ALIVE, (int) opts.get_keep_alive_interval().count());
 		CPPUNIT_ASSERT_EQUAL(DFLT_CONNECT_TIMEOUT, (int) opts.get_connect_timeout().count());
+		CPPUNIT_ASSERT(!opts.get_servers());
+		CPPUNIT_ASSERT_EQUAL(DFLT_AUTO_RECONNECT, opts.get_automatic_reconnect());
 
 		const auto& c_struct = opts.opts_;
 		CPPUNIT_ASSERT(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
@@ -98,6 +110,9 @@ public:
 		// No will or SSL, for default
 		CPPUNIT_ASSERT(c_struct.will == nullptr);
 		CPPUNIT_ASSERT(c_struct.ssl == nullptr);
+
+		CPPUNIT_ASSERT_EQUAL(0, c_struct.serverURIcount);
+		CPPUNIT_ASSERT(nullptr == c_struct.serverURIs);
 	}
 
 // ----------------------------------------------------------------------
@@ -405,6 +420,56 @@ public:
 
 		CPPUNIT_ASSERT_EQUAL(2*TIMEOUT_SEC, (int) opts.get_connect_timeout().count());
 		CPPUNIT_ASSERT_EQUAL(2*TIMEOUT_SEC, c_struct.connectTimeout);
+	}
+
+// ----------------------------------------------------------------------
+// Test set/get of server URIs
+// ----------------------------------------------------------------------
+
+	void test_set_servers() {
+		mqtt::connect_options opts;
+		const auto& c_struct = opts.opts_;
+
+		opts.set_servers(URIs);
+
+		CPPUNIT_ASSERT_EQUAL(URIs.get(), opts.get_servers().get());
+
+		// Check the C struct
+		CPPUNIT_ASSERT_EQUAL((int) URIsVec.size(), c_struct.serverURIcount);
+		CPPUNIT_ASSERT(!strcmp(URIsVec[0].c_str(), c_struct.serverURIs[0]));
+		CPPUNIT_ASSERT(!strcmp(URIsVec[1].c_str(), c_struct.serverURIs[1]));
+		CPPUNIT_ASSERT(!strcmp(URIsVec[2].c_str(), c_struct.serverURIs[2]));
+	}
+
+// ----------------------------------------------------------------------
+// Test set/get of the auto reconnect values
+// ----------------------------------------------------------------------
+
+	void test_set_auto_reconnect() {
+		mqtt::connect_options opts;
+		const auto& c_struct = opts.opts_;
+
+		// Set as an int
+		const int TIMEOUT_SEC = 10;
+		opts.set_automatic_reconnect(true, TIMEOUT_SEC, 2*TIMEOUT_SEC);
+
+		CPPUNIT_ASSERT_EQUAL(true, opts.get_automatic_reconnect());
+		CPPUNIT_ASSERT_EQUAL(TIMEOUT_SEC, (int) opts.get_min_retry_interval().count());
+		CPPUNIT_ASSERT_EQUAL(2*TIMEOUT_SEC, (int) opts.get_max_retry_interval().count());
+
+		CPPUNIT_ASSERT_EQUAL(TIMEOUT_SEC, c_struct.minRetryInterval);
+		CPPUNIT_ASSERT_EQUAL(2*TIMEOUT_SEC, c_struct.maxRetryInterval);
+
+		// Set as an chrono
+		opts.set_automatic_reconnect(true, std::chrono::milliseconds(2000*TIMEOUT_SEC),
+									 std::chrono::milliseconds(4000*TIMEOUT_SEC));
+
+		CPPUNIT_ASSERT_EQUAL(true, opts.get_automatic_reconnect());
+		CPPUNIT_ASSERT_EQUAL(2*TIMEOUT_SEC, (int) opts.get_min_retry_interval().count());
+		CPPUNIT_ASSERT_EQUAL(4*TIMEOUT_SEC, (int) opts.get_max_retry_interval().count());
+
+		CPPUNIT_ASSERT_EQUAL(2*TIMEOUT_SEC, c_struct.minRetryInterval);
+		CPPUNIT_ASSERT_EQUAL(4*TIMEOUT_SEC, c_struct.maxRetryInterval);
 	}
 
 };

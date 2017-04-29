@@ -116,6 +116,13 @@ class token
 	 */
 	static void on_failure(void* tokObj, MQTTAsync_failureData* rsp);
 	/**
+	 * C-style callback for client (re)connection.
+	 * This is normally only used to process a reconnect completion message.
+	 * The initial connect() is processed via on_success/failure.
+	 * @param tokObj Pointer to the token object used to process the call.
+	 */
+	static void on_connected(void* tokObj, char* /*cause*/);
+	/**
 	 * Internal handler for the success callback.
 	 * @param rsp The success response.
 	 */
@@ -316,7 +323,7 @@ public:
 	 */
 	template <class Rep, class Period>
 	bool wait_for_completion(const std::chrono::duration<Rep, Period>& relTime) {
-		return wait_for_completion((long) to_milliseconds(relTime).count());
+		return wait_for_completion(to_milliseconds_count(relTime));
 	}
 	/**
 	 * Waits until an absolute time for the action to complete.
