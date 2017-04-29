@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
 		cout << "\nConnecting..." << endl;
 		mqtt::token_ptr conntok = client.connect(conopts);
 		cout << "Waiting for the connection..." << endl;
-		conntok->wait_for_completion();
+		conntok->wait();
 		cout << "  ...OK" << endl;
 
 		// First use a message pointer.
@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
 		cout << "\nSending message..." << endl;
 		mqtt::message_ptr pubmsg = mqtt::make_message(PAYLOAD1);
 		pubmsg->set_qos(QOS);
-		client.publish(TOPIC, pubmsg)->wait_for_completion(TIMEOUT);
+		client.publish(TOPIC, pubmsg)->wait_for(TIMEOUT);
 		cout << "  ...OK" << endl;
 
 		// Now try with itemized publish.
@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
 		cout << "  ...with token: " << pubtok->get_message_id() << endl;
 		cout << "  ...for message with " << pubtok->get_message()->get_payload().size()
 			<< " bytes" << endl;
-		pubtok->wait_for_completion(TIMEOUT);
+		pubtok->wait_for(TIMEOUT);
 		cout << "  ...OK" << endl;
 
 		// Now try with a listener
@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
 		action_listener listener;
 		pubmsg = mqtt::make_message(PAYLOAD3);
 		pubtok = client.publish(TOPIC, pubmsg, nullptr, listener);
-		pubtok->wait_for_completion();
+		pubtok->wait();
 		cout << "  ...OK" << endl;
 
 		// Finally try with a listener, but no token
@@ -183,7 +183,7 @@ int main(int argc, char* argv[])
 		// Disconnect
 		cout << "\nDisconnecting..." << endl;
 		conntok = client.disconnect();
-		conntok->wait_for_completion();
+		conntok->wait();
 		cout << "  ...OK" << endl;
 	}
 	catch (const mqtt::exception& exc) {

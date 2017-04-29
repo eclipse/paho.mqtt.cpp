@@ -46,8 +46,8 @@ int main(int argc, char* argv[])
 
 	try {
 		cout << "Connecting to the MQTT server..." << flush;
-		cli.connect(connOpts)->wait_for_completion();
-		cli.subscribe(TOPIC, QOS)->wait_for_completion();
+		cli.connect(connOpts)->wait();
+		cli.subscribe(TOPIC, QOS)->wait();
 		cout << "OK" << endl;
 
 		// Consume messages
@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
 		// Disconnect
 
 		cout << "\nDisconnecting from the MQTT server..." << flush;
-		cli.disconnect()->wait_for_completion();
+		cli.disconnect()->wait();
 		cout << "OK" << endl;
 	}
 	catch (const mqtt::exception& exc) {

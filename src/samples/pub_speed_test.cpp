@@ -66,7 +66,7 @@ void token_wait_func()
 		mqtt::delivery_token_ptr tok = que.get();
 		if (!tok) break;
 		//cout.put('x');
-		tok->wait_for_completion();
+		tok->wait();
 	}
 }
 
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
 		// Connect to the broker
 		cout << "\nConnecting..." << flush;
 		auto start = now();
-		cli.connect(connOpts)->wait_for_completion();
+		cli.connect(connOpts)->wait();
 		auto end = now();
 		cout << "OK" << endl;
 
@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
 		// Disconnect
 		cout << "\nDisconnecting..." << flush;
 		start = now();
-		cli.disconnect(seconds(10))->wait_for_completion();
+		cli.disconnect(seconds(10))->wait();
 		end = now();
 		cout << "OK" << endl;
 		cout << "Disconnected in " << msec(end - start) << "ms" << endl;

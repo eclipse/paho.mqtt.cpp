@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
 		cout << "\nConnecting..." << endl;
 		mqtt::token_ptr conntok = client.connect(connopts);
 		cout << "Waiting for the connection..." << endl;
-		conntok->wait_for_completion();
+		conntok->wait();
 		cout << "  ...OK" << endl;
 
 		// First use a message pointer.
@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
 		cout << "\nSending message..." << endl;
 		mqtt::message_ptr pubmsg = mqtt::make_message(PAYLOAD1);
 		pubmsg->set_qos(QOS);
-		client.publish(TOPIC, pubmsg)->wait_for_completion(TIMEOUT);
+		client.publish(TOPIC, pubmsg)->wait_for(TIMEOUT);
 		cout << "  ...OK" << endl;
 
 		// Now try with itemized publish.
@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
 		cout << "\nSending next message..." << endl;
 		mqtt::delivery_token_ptr pubtok;
 		pubtok = client.publish(TOPIC, PAYLOAD2, strlen(PAYLOAD2), QOS, false);
-		pubtok->wait_for_completion(TIMEOUT);
+		pubtok->wait_for(TIMEOUT);
 		cout << "  ...OK" << endl;
 
 
@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
 		// Disconnect
 		cout << "\nDisconnecting..." << endl;
 		conntok = client.disconnect();
-		conntok->wait_for_completion();
+		conntok->wait();
 		cout << "  ...OK" << endl;
 	}
 	catch (const mqtt::exception& exc) {

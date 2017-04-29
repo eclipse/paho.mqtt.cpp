@@ -49,12 +49,14 @@ class token_test : public CppUnit::TestFixture
 	CPPUNIT_TEST( test_on_failure_with_data );
 	CPPUNIT_TEST( test_on_failure_without_data );
 	CPPUNIT_TEST( test_action_callback );
-	CPPUNIT_TEST( test_wait_for_completion_success );
-	CPPUNIT_TEST( test_wait_for_completion_failure );
-	CPPUNIT_TEST( test_wait_for_completion_timeout_success );
-	CPPUNIT_TEST( test_wait_for_completion_timeout_failure );
+	CPPUNIT_TEST( test_wait_success );
+	CPPUNIT_TEST( test_wait_failure );
+	CPPUNIT_TEST( test_wait_for_timeout );
 
 	CPPUNIT_TEST_SUITE_END();
+
+	using milliseconds = std::chrono::milliseconds;
+	using steady_clock = std::chrono::steady_clock;
 
 	mqtt::test::dummy_async_client cli;
 
@@ -209,33 +211,74 @@ public:
 
 // ----------------------------------------------------------------------
 // Test wait for completion on success case
+// All wait's should succeed immediately on successful completion.
 // ----------------------------------------------------------------------
 
-	void test_wait_for_completion_success() {
+	void test_wait_success() {
+		const auto TIMEOUT = milliseconds(10);
+
 		mqtt::token tok{ cli };
 
 		// NOTE: Make sure the complete flag is already true and the return
-		// code (rc) is MQTTASYNC_SUCCESS, so the token::wait_for_completion()
+		// code (rc) is MQTTASYNC_SUCCESS, so the token::wait()
 		// returns immediately. Otherwise we will get stuck in a single thread
 		// that can't change the complete flag.
-		CPPUNIT_ASSERT_EQUAL(false, tok.is_complete());
 		token::on_success(&tok, nullptr);
 		CPPUNIT_ASSERT_EQUAL(true, tok.is_complete());
-		tok.wait_for_completion();
+
+		// A wait does not reset the "complete" flag.
+
+		try {
+			tok.wait();
+			CPPUNIT_ASSERT_EQUAL(true, tok.is_complete());
+		}
+		catch (...) {
+			CPPUNIT_FAIL("token::wait() should not throw on success");
+		}
+
+		// try_wait()
+		try {
+			CPPUNIT_ASSERT_EQUAL(true, tok.try_wait());
+			CPPUNIT_ASSERT_EQUAL(true, tok.is_complete());
+		}
+		catch (...) {
+			CPPUNIT_FAIL("token::wait() should not throw on success");
+		}
+
+		// wait_for()
+		try {
+			CPPUNIT_ASSERT_EQUAL(true, tok.wait_for(TIMEOUT));
+			CPPUNIT_ASSERT_EQUAL(true, tok.is_complete());
+		}
+		catch (...) {
+			CPPUNIT_FAIL("token::wait_for() should not throw on success");
+		}
+
+		// wait_until()
+		const auto TO = steady_clock::now() + TIMEOUT;
+		try {
+			CPPUNIT_ASSERT_EQUAL(true, tok.wait_until(TO));
+			CPPUNIT_ASSERT_EQUAL(true, tok.is_complete());
+		}
+		catch (...) {
+			CPPUNIT_FAIL("token::wait_until() should not throw on success");
+		}
 	}
 
 // ----------------------------------------------------------------------
 // Test wait for completion on failure case
+// All wait's should throw if the action failed
 // ----------------------------------------------------------------------
 
-	void test_wait_for_completion_failure() {
+	void test_wait_failure() {
+		const auto TIMEOUT = milliseconds(10);
+
 		mqtt::token tok{ cli };
 
 		// NOTE: Make sure the complete flag is already true and the return
-		// code (rc) is MQTTASYNC_FAILURE, so the token::wait_for_completion()
+		// code (rc) is MQTTASYNC_FAILURE, so the token::wait()
 		// returns immediately. Otherwise we will get stuck in a single thread
 		// that can't change the complete flag.
-		CPPUNIT_ASSERT_EQUAL(false, tok.is_complete());
 		constexpr int MESSAGE_ID = 12;
 		MQTTAsync_failureData data = {
 				.token = MESSAGE_ID,
@@ -243,86 +286,84 @@ public:
 				.message = nullptr,
 		};
 		token::on_failure(&tok, &data);
+
 		CPPUNIT_ASSERT_EQUAL(true, tok.is_complete());
 		CPPUNIT_ASSERT_EQUAL(MESSAGE_ID, tok.get_message_id());
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, tok.get_return_code());
+
 		try {
-			tok.wait_for_completion();
+			tok.wait();
+			CPPUNIT_FAIL("token::wait() should throw on failure");
 		}
 		catch (mqtt::exception& ex) {
 			CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex.get_reason_code());
 		}
-	}
 
-// ----------------------------------------------------------------------
-// Test wait for completion on success due timeout case
-// ----------------------------------------------------------------------
+		try {
+			tok.try_wait();
+			CPPUNIT_FAIL("token::try_wait() should throw on failure");
+		}
+		catch (mqtt::exception& ex) {
+			CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex.get_reason_code());
+		}
 
-	void test_wait_for_completion_timeout_success() {
-		mqtt::token tok{ cli };
+		try {
+			tok.wait_for(TIMEOUT);
+			CPPUNIT_FAIL("token::wait_for() should throw on failure");
+		}
+		catch (mqtt::exception& ex) {
+			CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex.get_reason_code());
+		}
 
-		CPPUNIT_ASSERT_EQUAL(false, tok.is_complete());
-		token::on_success(&tok, nullptr);
-
-		// timeout == 0
-		CPPUNIT_ASSERT_EQUAL(true, tok.is_complete());
-		tok.wait_for_completion(0);
-
-		// timeout > 0
-		CPPUNIT_ASSERT_EQUAL(true, tok.is_complete());
-		tok.wait_for_completion(10);
-
-		// timeout < 0
-		CPPUNIT_ASSERT_EQUAL(true, tok.is_complete());
-		tok.wait_for_completion(-10);
+		try {
+			tok.wait_until(steady_clock::now() + TIMEOUT);
+			CPPUNIT_FAIL("token::wait_until() should throw on failure");
+		}
+		catch (mqtt::exception& ex) {
+			CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex.get_reason_code());
+		}
 	}
 
 // ----------------------------------------------------------------------
 // Test wait for completion on failure due timeout case
+// All waits should return false, but not throw, on a timeout
 // ----------------------------------------------------------------------
 
-	void test_wait_for_completion_timeout_failure() {
+	void test_wait_for_timeout() {
+		const auto TIMEOUT = milliseconds(10);
+
 		mqtt::token tok{ cli };
 
-		// timeout == 0
-		// NOTE: This test must be performed BEFORE invoking the 
-		// on_failure() callback. Because complete_ must be false. 
+		// Test for timeout on non-signaled token.
 		CPPUNIT_ASSERT_EQUAL(false, tok.is_complete());
+
+		// try_wait()
 		try {
-			tok.wait_for_completion(0);
+			CPPUNIT_ASSERT_EQUAL(false, tok.try_wait());
 		} 
-		catch (mqtt::exception& ex) {
-			CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex.get_reason_code());
+		catch (...) {
+			CPPUNIT_FAIL("token::try_wait() should not throw");
 		}
 
-		// timeout > 0
-		// NOTE: This test must be performed BEFORE invoking the 
-		// on_failure() callback. Because we will make 
-		// condition_variable::wait_for() to fail. 
+		// wait_for()
 		CPPUNIT_ASSERT_EQUAL(false, tok.is_complete());
 		try {
-			tok.wait_for_completion(10);
-		} 
-		catch (mqtt::exception& ex) {
-			CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex.get_reason_code());
+			CPPUNIT_ASSERT_EQUAL(false, tok.wait_for(TIMEOUT));
+		}
+		catch (...) {
+			CPPUNIT_FAIL("token::wait_for() should not throw on timeout");
 		}
 
+		// wait_until()
+		const auto TO = steady_clock::now() + TIMEOUT;
 		CPPUNIT_ASSERT_EQUAL(false, tok.is_complete());
-		constexpr int MESSAGE_ID = 12;
-		MQTTAsync_failureData data = {
-				.token = MESSAGE_ID,
-				.code = MQTTASYNC_FAILURE,
-				.message = nullptr,
-		};
-		token::on_failure(&tok, &data);
-
-		// timeout < 0
-		CPPUNIT_ASSERT_EQUAL(true, tok.is_complete());
 		try {
-			tok.wait_for_completion(-10);
-		} 
-		catch (mqtt::exception& ex) {
-			CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex.get_reason_code());
+			CPPUNIT_ASSERT_EQUAL(false, tok.wait_until(TO));
 		}
+		catch (...) {
+			CPPUNIT_FAIL("token::wait_until() should not throw on timeout");
+		}
+
 	}
 
 };
@@ -332,3 +373,4 @@ public:
 }
 
 #endif //  __mqtt_token_test_h
+

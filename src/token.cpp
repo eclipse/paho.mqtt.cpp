@@ -135,32 +135,11 @@ token::token(iasync_client& cli, MQTTAsync_token tok)
 {
 }
 
-void token::wait_for_completion()
+void token::wait()
 {
 	unique_lock g(lock_);
 	cond_.wait(g, [this]{return complete_;});
-	if (rc_ != MQTTASYNC_SUCCESS)
-		throw exception(rc_);
-}
-
-bool token::wait_for_completion(long timeout)
-{
-	unique_lock g(lock_);
-	if (timeout == 0)			// No wait. Are we done now?
-		return complete_;
-
-	if (timeout < 0) {			// Wait forever
-		cond_.wait(g, [this]{return complete_;});
-	}
-	else if (!cond_.wait_for(g, std::chrono::milliseconds(timeout),
-							 [this]{return complete_;})) {
-		return false;
-	}
-
-	if (rc_ != MQTTASYNC_SUCCESS)
-		throw exception(rc_);
-
-	return true;
+	check_rc();
 }
 
 /////////////////////////////////////////////////////////////////////////////

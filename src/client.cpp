@@ -60,7 +60,7 @@ void client::close()
 
 void client::disconnect(int timeout)
 {
-	cli_.disconnect(timeout)->wait_for_completion(timeout_);
+	cli_.disconnect(timeout)->wait_for(timeout_);
 }
 
 
@@ -76,17 +76,17 @@ std::vector<delivery_token_ptr> client::get_pending_delivery_tokens() const
 void client::publish(const string& top, const void* payload, size_t n,
 					 int qos, bool retained)
 {
-	cli_.publish(std::move(top), payload, n, qos, retained)->wait_for_completion(timeout_);
+	cli_.publish(std::move(top), payload, n, qos, retained)->wait_for(timeout_);
 }
 
 void client::publish(const string& top, const_message_ptr msg)
 {
-	cli_.publish(std::move(top), msg)->wait_for_completion(timeout_);
+	cli_.publish(std::move(top), msg)->wait_for(timeout_);
 }
 
 void client::publish(const string& top, const message& msg)
 {
-	cli_.publish(top, ptr(msg))->wait_for_completion(timeout_);
+	cli_.publish(top, ptr(msg))->wait_for(timeout_);
 }
 
 void client::set_callback(callback& cb)
@@ -96,7 +96,7 @@ void client::set_callback(callback& cb)
 
 void client::subscribe(const string& topicFilter)
 {
-	cli_.subscribe(topicFilter, DFLT_QOS)->wait_for_completion(timeout_);
+	cli_.subscribe(topicFilter, DFLT_QOS)->wait_for(timeout_);
 }
 
 void client::subscribe(const string_collection& topicFilters)
@@ -105,28 +105,28 @@ void client::subscribe(const string_collection& topicFilters)
 	for (size_t i=0; i<topicFilters.size(); ++i)
 		qos.push_back(DFLT_QOS);
 
-	cli_.subscribe(ptr(topicFilters), qos)->wait_for_completion(timeout_);
+	cli_.subscribe(ptr(topicFilters), qos)->wait_for(timeout_);
 }
 
 void client::subscribe(const string_collection& topicFilters,
 					   const qos_collection& qos)
 {
-	cli_.subscribe(ptr(topicFilters), qos)->wait_for_completion(timeout_);
+	cli_.subscribe(ptr(topicFilters), qos)->wait_for(timeout_);
 }
 
 void client::subscribe(const string& topicFilter, int qos)
 {
-	cli_.subscribe(topicFilter, qos)->wait_for_completion(timeout_);
+	cli_.subscribe(topicFilter, qos)->wait_for(timeout_);
 }
 
 void client::unsubscribe(const string& topicFilter)
 {
-	cli_.unsubscribe(topicFilter)->wait_for_completion(timeout_);
+	cli_.unsubscribe(topicFilter)->wait_for(timeout_);
 }
 
 void client::unsubscribe(const string_collection& topicFilters)
 {
-	cli_.unsubscribe(ptr(topicFilters))->wait_for_completion(timeout_);
+	cli_.unsubscribe(ptr(topicFilters))->wait_for(timeout_);
 }
 
 /////////////////////////////////////////////////////////////////////////////

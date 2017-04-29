@@ -133,6 +133,15 @@ class token
 	 */
 	void on_failure(MQTTAsync_failureData* rsp);
 
+	/**
+	 * Check the current return code and throw an exception if it is not a
+	 * success code.
+	 */
+	void check_rc() {
+		if (rc_ != MQTTASYNC_SUCCESS)
+			throw exception(rc_);
+	}
+
 public:
 	/** Smart/shared pointer to an object of this class */
 	using ptr_t = std::shared_ptr<token>;
@@ -249,7 +258,7 @@ public:
 	 * @return iaction_listener
 	 */
 	virtual iaction_listener* get_action_callback() const {
-		// TODO: Guard?
+		guard g(lock_);
 		return listener_;
 	}
 	/**
@@ -287,6 +296,13 @@ public:
 	 */
 	virtual bool is_complete() const { return complete_; }
 	/**
+	 * Gets the return code from the action.
+	 * This is only valid after the action has completed (i.e. if @ref
+	 * is_complete() returns @em true).
+	 * @return The return code from the action.
+	 */
+	virtual int get_return_code() const { return rc_; }
+	/**
 	 * Register a listener to be notified when an action completes.
 	 * @param listener
 	 */
@@ -306,7 +322,18 @@ public:
 	 * Blocks the current thread until the action this token is associated
 	 * with has completed.
 	 */
-	virtual void wait_for_completion();
+	virtual void wait();
+	/**
+	 * Non-blocking check to see if the action has completed.
+	 * @return @em true if the wait finished successfully, @em false if the
+	 *  	   action has not completed yet.
+	 */
+	virtual bool try_wait() {
+		guard g(lock_);
+		if (complete_)
+			check_rc();
+		return complete_;
+	}
 	/**
 	 * Blocks the current thread until the action this token is associated
 	 * with has completed.
@@ -314,7 +341,9 @@ public:
 	 * @return @em true if the wait finished successfully, @em false if a
 	 *  	   timeout occurred.
 	 */
-	virtual bool wait_for_completion(long timeout);
+	virtual bool wait_for(long timeout) {
+		return wait_for(std::chrono::milliseconds(timeout));
+	}
 	/**
 	 * Waits a relative amount of time for the action to complete.
 	 * @param relTime The amount of time to wait for the event.
@@ -322,8 +351,13 @@ public:
 	 *  	   @em false on a timeout.
 	 */
 	template <class Rep, class Period>
-	bool wait_for_completion(const std::chrono::duration<Rep, Period>& relTime) {
-		return wait_for_completion(to_milliseconds_count(relTime));
+	bool wait_for(const std::chrono::duration<Rep, Period>& relTime) {
+		unique_lock g(lock_);
+		if (!cond_.wait_for(g, std::chrono::milliseconds(relTime),
+							[this]{return complete_;}))
+			return false;
+		check_rc();
+		return true;
 	}
 	/**
 	 * Waits until an absolute time for the action to complete.
@@ -332,12 +366,11 @@ public:
 	 *  	   @em false on a timeout.
 	 */
 	template <class Clock, class Duration>
-	bool wait_until_completion(const std::chrono::time_point<Clock, Duration>& absTime) {
-		guard g(lock_);
+	bool wait_until( const std::chrono::time_point<Clock, Duration>& absTime) {
+		unique_lock g(lock_);
 		if (!cond_.wait_until(g, absTime, [this]{return complete_;}))
 			return false;
-		if (rc_ != MQTTASYNC_SUCCESS)
-			throw exception(rc_);
+		check_rc();
 		return true;
 	}
 };

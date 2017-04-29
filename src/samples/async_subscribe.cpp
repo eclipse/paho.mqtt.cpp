@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
 
 	try {
 		std::cout << "\nDisconnecting from the MQTT server..." << std::flush;
-		client.disconnect()->wait_for_completion();
+		client.disconnect()->wait();
 		std::cout << "OK" << std::endl;
 	}
 	catch (const mqtt::exception& exc) {
