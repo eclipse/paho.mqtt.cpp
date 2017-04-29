@@ -255,7 +255,7 @@ public:
 	template <class Rep, class Period>
 	token_ptr disconnect(const std::chrono::duration<Rep, Period>& timeout) {
 		// TODO: check range
-		return disconnect((int) to_milliseconds(timeout).count());
+		return disconnect((int) to_milliseconds_count(timeout));
 	}
 	/**
 	 * Disconnects from the server.
@@ -291,7 +291,7 @@ public:
 	token_ptr disconnect(const std::chrono::duration<Rep, Period>& timeout,
 						 void* userContext, iaction_listener& cb) {
 		// TODO: check range
-		return disconnect((int) to_milliseconds(timeout).count(), userContext, cb);
+		return disconnect((int) to_milliseconds_count(timeout), userContext, cb);
 	}
 	/**
 	 * Disconnects from the server.

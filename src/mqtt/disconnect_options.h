@@ -114,7 +114,7 @@ public:
 	template <class Rep, class Period>
 	void set_timeout(const std::chrono::duration<Rep, Period>& to) {
 		// TODO: check range
-		set_timeout((int) to_milliseconds(to).count());
+		set_timeout((int) to_milliseconds_count(to));
 	}
 	/**
 	 * Sets the callback context to a delivery token.

@@ -24,32 +24,33 @@
 
 namespace mqtt {
 
-const int client::DFLT_QOS = 1;
+constexpr std::chrono::minutes client::DFLT_TIMEOUT;
+constexpr int client::DFLT_QOS;
 
 /////////////////////////////////////////////////////////////////////////////
 
 
 client::client(const string& serverURI, const string& clientId,
 			   iclient_persistence* persistence /*=nullptr*/)
-		: cli_(serverURI, clientId, persistence), timeout_(-1)
+		: cli_(serverURI, clientId, persistence), timeout_(DFLT_TIMEOUT)
 {
 }
 
 client::client(const string& serverURI, const string& clientId,
 			   const string& persistDir)
-		: cli_(serverURI, clientId, persistDir), timeout_(-1)
+		: cli_(serverURI, clientId, persistDir), timeout_(DFLT_TIMEOUT)
 {
 }
 
 client::client(const string& serverURI, const string& clientId,
 			   int maxBufferedMessages, iclient_persistence* persistence /*=nullptr*/)
-		: cli_(serverURI, clientId, maxBufferedMessages, persistence), timeout_(-1)
+		: cli_(serverURI, clientId, maxBufferedMessages, persistence), timeout_(DFLT_TIMEOUT)
 {
 }
 
 client::client(const string& serverURI, const string& clientId,
 			   int maxBufferedMessages, const string& persistDir)
-		: cli_(serverURI, clientId, maxBufferedMessages, persistDir), timeout_(-1)
+		: cli_(serverURI, clientId, maxBufferedMessages, persistDir), timeout_(DFLT_TIMEOUT)
 {
 }
 

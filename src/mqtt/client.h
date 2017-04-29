@@ -40,13 +40,14 @@ public:
 	using consumer_message_type = async_client::consumer_message_type;
 
 private:
+	/** An arbitrary, but relatively long timeout */
+	static constexpr auto DFLT_TIMEOUT = std::chrono::minutes(5);
 	/** The default quality of service */
-	static const int DFLT_QOS;
+	static constexpr int DFLT_QOS = 1;
+
 	/** The actual client */
 	async_client cli_;
-	/**
-	 * The longest amount of time to wait for an operation to complete.
-	 */
+	/** The longest time to wait for an operation to complete.  */
 	std::chrono::milliseconds timeout_;
 
 	/**
@@ -175,7 +176,7 @@ public:
 	 */
 	template <class Rep, class Period>
 	void disconnect(const std::chrono::duration<Rep, Period>& to) {
-		disconnect((int) to_milliseconds(to).count());
+		disconnect((int) to_milliseconds_count(to));
 	}
 	/**
 	 * Returns a randomly generated client identifier based on the current
