@@ -76,6 +76,8 @@ class token
 	bool complete_;
 	/** The action success/failure code */
 	int rc_;
+	/** Error message from the C lib (if any) */
+	string errMsg_;
 
 	/** Client and token-related options have special access */
 	friend class async_client;
@@ -139,7 +141,7 @@ class token
 	 */
 	void check_rc() {
 		if (rc_ != MQTTASYNC_SUCCESS)
-			throw exception(rc_);
+			throw exception(rc_, errMsg_);
 	}
 
 public:

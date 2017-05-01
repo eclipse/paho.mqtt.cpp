@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
 		std::cout << "OK" << std::endl;
 	}
 	catch (const mqtt::exception& exc) {
-		std::cerr << "Error: " << exc.what() << std::endl;
+		std::cerr << exc.what() << std::endl;
 		return 1;
 	}
 

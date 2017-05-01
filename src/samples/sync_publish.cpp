@@ -190,8 +190,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 	catch (const mqtt::exception& exc) {
-		std::cerr << "Error: " << exc.what() << " ["
-			<< exc.get_reason_code() << "]" << std::endl;
+		std::cerr << exc.what() << std::endl;
 		return 1;
 	}
 

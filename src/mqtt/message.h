@@ -26,8 +26,8 @@
 
 #include "MQTTAsync.h"
 #include "mqtt/buffer_ref.h"
+#include "mqtt/exception.h"
 #include <memory>
-#include <stdexcept>
 
 namespace mqtt {
 
@@ -286,7 +286,7 @@ public:
 	 */
 	static void validate_qos(int qos) {
 		if (qos < 0 || qos > 2)
-			throw std::invalid_argument("QOS invalid");
+			throw exception(MQTTASYNC_BAD_QOS, "Bad QoS");
 	}
 };
 

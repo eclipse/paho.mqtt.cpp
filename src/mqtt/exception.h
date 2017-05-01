@@ -41,21 +41,30 @@ namespace mqtt {
  */
 class exception : public std::runtime_error
 {
+protected:
 	/** The error code from the C library */
 	int code_;
+	/** The error message from the C library */
 	string msg_;
 
 public:
-	explicit exception(int reasonCode) : std::runtime_error("mqtt::exception"),
-											code_(reasonCode),
-											msg_("MQTT exception ") {
-		msg_ += std::to_string(code_);
-
-	}
 	/**
-	 * Returns the detail message for this exception.
+	 * Creates an MQTT exception.
+	 * @param code The error code from the C library.
 	 */
-	string get_message() const { return string(what()); }
+	explicit exception(int code)
+		: std::runtime_error("MQTT error ["+std::to_string(code)+"]"), code_(code) {}
+	/**
+	 * Creates an MQTT exception.
+	 * @param code The error code from the C library.
+	 */
+	exception(int code, const string& msg) :
+		 std::runtime_error("MQTT error ["+std::to_string(code)+"]: "+msg),
+					code_(code), msg_(msg) {}
+	/**
+	 * Returns the error message for this exception.
+	 */
+	string get_message() const { return msg_; }
 	/**
 	 * Returns the reason code for this exception.
 	 */
@@ -64,14 +73,7 @@ public:
 	 * Gets a string representation of this exception.
 	 * @return A string representation of this exception.
 	 */
-	string to_string() const { return get_message(); }
-	/**
-	 * Returns an explanatory string for the exception.
-	 * @return const char*
-	 */
-	const char* what() const noexcept override {
-		return msg_.c_str();
-	}
+	string to_string() const { return msg_; }
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -83,21 +85,25 @@ public:
 class persistence_exception : public exception
 {
 public:
-	// TODO: Define "reason codes"
 	persistence_exception() : exception(MQTTCLIENT_PERSISTENCE_ERROR) {}
-	persistence_exception(int reasonCode) : exception(reasonCode) {}
+	explicit persistence_exception(int code) : exception(code) {}
+	explicit persistence_exception(const string& msg)
+				: exception(MQTTCLIENT_PERSISTENCE_ERROR, msg) {}
+	persistence_exception(int code, const string& msg)
+				: exception(code, msg) {}
 };
 
 /////////////////////////////////////////////////////////////////////////////
 
 /**
  * Thrown when a client is not authorized to perform an operation, or if
-   there is a problem with the security configuration.
+ * there is a problem with the security configuration.
  */
 class security_exception : public exception
 {
 public:
-	security_exception(int reasonCode) : exception(reasonCode) {}
+	explicit security_exception(int code) : exception(code) {}
+	security_exception(int code, const string& msg) : exception(code, msg) {}
 };
 
 /////////////////////////////////////////////////////////////////////////////

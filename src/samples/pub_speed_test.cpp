@@ -92,12 +92,12 @@ int main(int argc, char* argv[])
 	for (size_t i=0; i<msgSz; ++i)
 		payload.push_back('a' + i%26);
 
-	auto msg = mqtt::make_message(TOPIC, std::move(payload), qos, false);
-
-	auto fut = std::async(launch::async, token_wait_func);
 	cout << "OK" << endl;
 
 	try {
+		// Create the message (move payload into it)
+		auto msg = mqtt::make_message(TOPIC, std::move(payload), qos, false);
+
 		// Connect to the broker
 		cout << "\nConnecting..." << flush;
 		auto start = now();
@@ -106,6 +106,8 @@ int main(int argc, char* argv[])
 		cout << "OK" << endl;
 
 		cout << "Connected in " << msec(end - start) << "ms" << endl;
+
+		auto fut = std::async(launch::async, token_wait_func);
 
 		// Publish the messages
 		cout << "\nPublishing " << nMsg << " messages..." << flush;
@@ -137,7 +139,8 @@ int main(int argc, char* argv[])
 		cout << "Disconnected in " << msec(end - start) << "ms" << endl;
 	}
 	catch (const mqtt::exception& exc) {
-		cerr << "Error: " << exc.what() << endl;
+		que.put(mqtt::delivery_token_ptr{});
+		cerr << exc.what() << endl;
 		return 1;
 	}
 

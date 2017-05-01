@@ -20,6 +20,8 @@
 #include "mqtt/async_client.h"
 #include <cstring>
 
+#include <iostream>
+
 namespace mqtt {
 
 // --------------------------------------------------------------------------
@@ -76,6 +78,8 @@ void token::on_failure(MQTTAsync_failureData* rsp)
 	if (rsp) {
 		tok_ = rsp->token;
 		rc_ = rsp->code;
+		if (rsp->message)
+			errMsg_ = string(rsp->message);
 	}
 	else {
 		tok_ = 0;
