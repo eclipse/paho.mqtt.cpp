@@ -83,8 +83,8 @@ int main(int argc, char* argv[])
 	mqtt::async_client cli(address, CLIENT_ID);
 
 	mqtt::connect_options connOpts;
-	mqtt::message willmsg(LWT_PAYLOAD, 1, true);
-	mqtt::will_options will(TOPIC, willmsg);
+	mqtt::message willmsg(TOPIC, LWT_PAYLOAD, 1, true);
+	mqtt::will_options will(willmsg);
 	connOpts.set_will(will);
 
 	// Create a payload
@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
 	for (size_t i=0; i<msgSz; ++i)
 		payload.push_back('a' + i%26);
 
-	auto msg = mqtt::make_message(std::move(payload), qos, false);
+	auto msg = mqtt::make_message(TOPIC, std::move(payload), qos, false);
 
 	auto fut = std::async(launch::async, token_wait_func);
 	cout << "OK" << endl;
@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
 		cout << "\nPublishing " << nMsg << " messages..." << flush;
 		start = now();
 		for (int i=0; i<nMsg; ++i) {
-			auto dtok = cli.publish(TOPIC, msg);
+			auto dtok = cli.publish(msg);
 			//cout.put('^');
 			que.put(std::move(dtok));
 		}

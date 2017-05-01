@@ -71,7 +71,7 @@ public:
 	void test_publish_1_arg() {
 		mqtt::topic topic{ TOPIC_NAME, cli };
 
-		mqtt::const_message_ptr msg_in { new mqtt::message { "message" } };
+		mqtt::const_message_ptr msg_in { new mqtt::message { TOPIC_NAME, "message" } };
 
 		mqtt::delivery_token_ptr token { topic.publish(msg_in) };
 		CPPUNIT_ASSERT(token);

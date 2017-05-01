@@ -31,10 +31,10 @@ will_options::will_options() : opts_(DFLT_C_STRUCT)
 //	set_payload(binary_ref());
 }
 
-will_options::will_options(const string& top,
+will_options::will_options(string_ref top,
 						   const void *payload, size_t payloadlen,
 						   int qos, bool retained)
-		: opts_(DFLT_C_STRUCT), topic_(top)
+		: opts_(DFLT_C_STRUCT), topic_(std::move(top))
 {
 	opts_.topicName = c_str(topic_);
 	opts_.qos = qos;
@@ -50,9 +50,9 @@ will_options::will_options(const topic& top,
 }
 
 
-will_options::will_options(const string& top, binary_ref payload,
+will_options::will_options(string_ref top, binary_ref payload,
 						   int qos, bool retained)
-		: opts_(DFLT_C_STRUCT), topic_(top)
+		: opts_(DFLT_C_STRUCT), topic_(std::move(top))
 {
 	opts_.topicName = c_str(topic_);
 	opts_.qos = qos;
@@ -60,9 +60,9 @@ will_options::will_options(const string& top, binary_ref payload,
 	set_payload(std::move(payload));
 }
 
-will_options::will_options(const string& top, const string& payload,
+will_options::will_options(string_ref top, const string& payload,
 						   int qos, bool retained)
-		: opts_(DFLT_C_STRUCT), topic_(top)
+		: opts_(DFLT_C_STRUCT), topic_(std::move(top))
 {
 	opts_.topicName = c_str(topic_);
 	opts_.qos = qos;
@@ -70,8 +70,8 @@ will_options::will_options(const string& top, const string& payload,
 	set_payload(payload);
 }
 
-will_options::will_options(const string& top, const message& msg)
-	: will_options(top, msg.get_payload(), msg.get_qos(), msg.is_retained())
+will_options::will_options(const message& msg)
+	: will_options(msg.get_topic(), msg.get_payload(), msg.get_qos(), msg.is_retained())
 {
 }
 

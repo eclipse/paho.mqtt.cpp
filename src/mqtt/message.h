@@ -34,23 +34,24 @@ namespace mqtt {
 /////////////////////////////////////////////////////////////////////////////
 
 /**
- * An MQTT message holds the application payload and options specifying how
- * the message is to be delivered The message includes a "payload" (the body
- * of the message) represented as a byte array.
+ * An MQTT message holds everything required for an MQTT PUBLISH message.
+ * This holds the binary message payload, topic string, and all the
+ * additional meta-data for an MQTT message.
  */
 class message
 {
+	/** The default QoS for a message */
 	static constexpr int DFLT_QOS = 0;
+	/** The default retained flag */
 	static constexpr bool DFLT_RETAINED = false;
+	/** Initializer for the C struct (from the C library) */
 	static constexpr MQTTAsync_message DFLT_C_STRUCT MQTTAsync_message_initializer;
 
 	/** The underlying C message struct */
 	MQTTAsync_message msg_;
-	/**
-	 * The message payload.
-	 * Note that this is not necessarily a printable text string, but rather
-	 * an arbitrary binary blob held in a string container.
-	 */
+	/** The topic that the message was (or should be) sent on. */
+	string_ref topic_;
+	/** The message payload - an arbitrary binary blob. */
 	binary_ref payload_;
 
 	/** The client has special access. */
@@ -77,39 +78,46 @@ public:
 	/**
 	 * Constructs a message with the specified array as a payload, and all
 	 * other values set to defaults.
+	 * @param topic The message topic
 	 * @param payload the bytes to use as the message payload
 	 * @param len the number of bytes in the payload
 	 * @param qos The quality of service for the message.
 	 * @param retained Whether the message should be retained by the broker.
 	 */
-	message(const void* payload, size_t len, int qos, bool retained);
+	message(string_ref topic, const void* payload, size_t len,
+			int qos, bool retained);
 	/**
 	 * Constructs a message with the specified array as a payload, and all
 	 * other values set to defaults.
+	 * @param topic The message topic
 	 * @param payload the bytes to use as the message payload
 	 * @param len the number of bytes in the payload
 	 */
-	message(const void* payload, size_t len)
-		: message(payload, len, DFLT_QOS, DFLT_RETAINED) {}
+	message(string_ref topic, const void* payload, size_t len)
+		: message(std::move(topic), payload, len, DFLT_QOS, DFLT_RETAINED) {}
 	/**
 	 * Constructs a message from a byte buffer.
 	 * Note that the payload accepts copy or move semantics.
+	 * @param topic The message topic
 	 * @param payload A byte buffer to use as the message payload.
 	 * @param qos The quality of service for the message.
 	 * @param retained Whether the message should be retained by the broker.
 	 */
-	message(binary_ref payload, int qos, bool retained);
+	message(string_ref topic, binary_ref payload, int qos, bool retained);
 	/**
 	 * Constructs a message from a byte buffer.
 	 * Note that the payload accepts copy or move semantics.
+	 * @param topic The message topic
 	 * @param payload A byte buffer to use as the message payload.
 	 */
-	message(binary_ref payload) : message(std::move(payload), DFLT_QOS, DFLT_RETAINED) {}
+	message(string_ref topic, binary_ref payload)
+		: message(std::move(topic), std::move(payload), DFLT_QOS, DFLT_RETAINED) {}
 	/**
 	 * Constructs a message as a copy of the message structure.
+	 * @param topic The message topic
 	 * @param msg A "C" MQTTAsync_message structure.
 	 */
-	message(const MQTTAsync_message& msg);
+	message(string_ref topic, const MQTTAsync_message& msg);
 	/**
 	 * Constructs a message as a copy of the other message.
 	 * @param other The message to copy into this one.
@@ -124,6 +132,63 @@ public:
 	 * Destroys a message and frees all associated resources.
 	 */
 	~message() {}
+
+
+	/**
+	 * Constructs a message with the specified array as a payload, and all
+	 * other values set to defaults.
+	 * @param topic The message topic
+	 * @param payload the bytes to use as the message payload
+	 * @param len the number of bytes in the payload
+	 * @param qos The quality of service for the message.
+	 * @param retained Whether the message should be retained by the broker.
+	 */
+	static ptr_t create(string_ref topic, const void* payload, size_t len,
+						int qos, bool retained) {
+		return std::make_shared<message>(std::move(topic), payload, len,
+										 qos, retained);
+	}
+	/**
+	 * Constructs a message with the specified array as a payload, and all
+	 * other values set to defaults.
+	 * @param topic The message topic
+	 * @param payload the bytes to use as the message payload
+	 * @param len the number of bytes in the payload
+	 */
+	static ptr_t create(string_ref topic, const void* payload, size_t len) {
+		return std::make_shared<message>(std::move(topic), payload, len,
+										 DFLT_QOS, DFLT_RETAINED);
+	}
+	/**
+	 * Constructs a message from a byte buffer.
+	 * Note that the payload accepts copy or move semantics.
+	 * @param topic The message topic
+	 * @param payload A byte buffer to use as the message payload.
+	 * @param qos The quality of service for the message.
+	 * @param retained Whether the message should be retained by the broker.
+	 */
+	static ptr_t create(string_ref topic, binary_ref payload, int qos, bool retained) {
+		return std::make_shared<message>(std::move(topic), std::move(payload),
+										 qos, retained);
+	}
+	/**
+	 * Constructs a message from a byte buffer.
+	 * Note that the payload accepts copy or move semantics.
+	 * @param topic The message topic
+	 * @param payload A byte buffer to use as the message payload.
+	 */
+	static ptr_t create(string_ref topic, binary_ref payload) {
+		return std::make_shared<message>(std::move(topic), std::move(payload),
+										 DFLT_QOS, DFLT_RETAINED);
+	}
+	/**
+	 * Constructs a message as a copy of the C message struct.
+	 * @param topic The message topic
+	 * @param msg A "C" MQTTAsync_message structure.
+	 */
+	static ptr_t create(string_ref topic, const MQTTAsync_message& msg) {
+		return std::make_shared<message>(std::move(topic), msg);
+	}
 	/**
 	 * Copies another message to this one.
 	 * @param rhs The other message.
@@ -136,6 +201,18 @@ public:
 	 * @return A reference to this message.
 	 */
 	message& operator=(message&& rhs);
+	/**
+	 * Sets the topic string.
+	 * @param topic The topic on which the message is published.
+	 */
+	void set_topic(string_ref topic) {
+		topic_ = topic_ ? std::move(topic) : string_ref(string());
+	}
+	/**
+	 * Gets the topic for the message.
+	 * @return The topic string for the message.
+	 */
+	string get_topic() const { return topic_.str(); }
 	/**
 	 * Clears the payload, resetting it to be empty.
 	 */
@@ -222,43 +299,48 @@ using const_message_ptr = message::const_ptr_t;
 /**
  * Constructs a message with the specified array as a payload, and all
  * other values set to defaults.
+ * @param topic The message topic
  * @param payload the bytes to use as the message payload
  * @param len the number of bytes in the payload
  */
-inline message_ptr make_message(const void* payload, size_t len) {
-	return std::make_shared<mqtt::message>(payload, len);
+inline message_ptr make_message(string_ref topic, const void* payload, size_t len) {
+	return mqtt::message::create(std::move(topic), payload, len);
 }
 
 /**
  * Constructs a message with the specified array as a payload, and all
  * other values set to defaults.
+ * @param topic The message topic
  * @param payload the bytes to use as the message payload
  * @param len the number of bytes in the payload
  * @param qos The quality of service for the message.
  * @param retained Whether the message should be retained by the broker.
  */
-inline message_ptr make_message(const void* payload, size_t len,
+inline message_ptr make_message(string_ref topic, const void* payload, size_t len,
 								int qos, bool retained) {
-	return std::make_shared<mqtt::message>(payload, len, qos, retained);
+	return mqtt::message::create(std::move(topic), payload, len, qos, retained);
 }
 
 /**
  * Constructs a message with the specified buffer as a payload, and
  * all other values set to defaults.
+ * @param topic The message topic
  * @param payload A string to use as the message payload.
  */
-inline message_ptr make_message(binary_ref payload) {
-	return std::make_shared<mqtt::message>(std::move(payload));
+inline message_ptr make_message(string_ref topic, binary_ref payload) {
+	return mqtt::message::create(std::move(topic), std::move(payload));
 }
 
 /**
  * Constructs a message with the specified values.
+ * @param topic The message topic
  * @param payload A buffer to use as the message payload.
  * @param qos The quality of service for the message.
  * @param retained Whether the message should be retained by the broker.
  */
-inline message_ptr make_message(binary_ref payload, int qos, bool retained) {
-	return std::make_shared<mqtt::message>(std::move(payload), qos, retained);
+inline message_ptr make_message(string_ref topic, binary_ref payload,
+								int qos, bool retained) {
+	return mqtt::message::create(std::move(topic), std::move(payload), qos, retained);
 }
 
 /////////////////////////////////////////////////////////////////////////////

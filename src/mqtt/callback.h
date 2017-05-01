@@ -57,10 +57,9 @@ public:
 	virtual void connection_lost(const string& cause) =0;
 	/**
 	 * This method is called when a message arrives from the server.
-	 * @param topic The topic on which the message was published.
 	 * @param msg The message
 	 */
-	virtual void message_arrived(const string& topic, const_message_ptr msg) =0;
+	virtual void message_arrived(const_message_ptr msg) =0;
 	/**
 	 * Called when delivery for a message has been completed, and all
 	 * acknowledgments have been received.

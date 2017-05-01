@@ -175,8 +175,8 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_string_message_constructor() {
-		mqtt::message msg(PAYLOAD, QOS, true);
-		mqtt::will_options opts(TOPIC, msg);
+		mqtt::message msg(TOPIC, PAYLOAD, QOS, true);
+		mqtt::will_options opts(msg);
 
 		CPPUNIT_ASSERT_EQUAL(TOPIC, opts.get_topic());
 		CPPUNIT_ASSERT_EQUAL(PAYLOAD, opts.get_payload_str());

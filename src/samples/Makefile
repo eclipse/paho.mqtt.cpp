@@ -9,7 +9,9 @@ else
   PAHO_C_INC_DIR ?= /usr/local/include
 endif
 
-all: async_publish async_subscribe async_consume sync_publish sync_consume pub_speed_test 
+TGTS = async_publish async_subscribe async_consume sync_publish sync_consume pub_speed_test
+
+all: $(TGTS)
 
 # SSL/TLS samples
 ifdef SSL
@@ -65,7 +67,7 @@ ssl_publish: ssl_publish.cpp
 .PHONY: clean distclean
 
 clean:
-	rm -f async_publish async_subscribe sync_publish  pub_speed_test ssl_publish
+	rm -f $(TGTS)
 
 distclean: clean
 

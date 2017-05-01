@@ -96,31 +96,42 @@ public:
 		return true;
 	};
 
-	mqtt::delivery_token_ptr publish(const string&  topic,
+	mqtt::delivery_token_ptr publish(string_ref topic,
 									 const void* payload, size_t n,
 									 int qos, bool retained) override {
-		auto msg = mqtt::make_message(payload, n, qos, retained);
-		return publish(topic, msg);
+		auto msg = mqtt::message::create(topic, payload, n, qos, retained);
+		return publish(msg);
 	};
 
-	mqtt::delivery_token_ptr publish(const string& topic, binary_ref payload,
+	mqtt::delivery_token_ptr publish(string_ref topic,
+									 const void* payload, size_t n) override {
+		auto msg = mqtt::message::create(topic, payload, n);
+		return publish(msg);
+	};
+
+	mqtt::delivery_token_ptr publish(string_ref topic, binary_ref payload,
 									 int qos, bool retained) override {
-		auto msg = mqtt::make_message(payload, qos, retained);
-		return publish(topic, msg);
+		auto msg = mqtt::message::create(topic, payload, qos, retained);
+		return publish(msg);
 	};
 
-	mqtt::delivery_token_ptr publish(const string& topic,
+	mqtt::delivery_token_ptr publish(string_ref topic, binary_ref payload) override {
+		auto msg = mqtt::message::create(topic, payload);
+		return publish(msg);
+	};
+
+	mqtt::delivery_token_ptr publish(string_ref topic,
 									 const void* payload, size_t n,
 									 int qos, bool retained, void* userContext,
 									 mqtt::iaction_listener& cb) override {
 		return mqtt::delivery_token_ptr{};
 	}
 
-	mqtt::delivery_token_ptr publish(const string& topic, mqtt::const_message_ptr msg) override {
-		return std::make_shared<mqtt::delivery_token>(*this, topic, msg);
+	mqtt::delivery_token_ptr publish(mqtt::const_message_ptr msg) override {
+		return mqtt::delivery_token::create(*this, msg);
 	}
 
-	mqtt::delivery_token_ptr publish(const string& topic, mqtt::const_message_ptr msg,
+	mqtt::delivery_token_ptr publish(mqtt::const_message_ptr msg,
 									 void* userContext, mqtt::iaction_listener& cb) override {
 		return mqtt::delivery_token_ptr{};
 	}

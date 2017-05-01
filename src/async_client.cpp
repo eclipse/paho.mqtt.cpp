@@ -129,12 +129,13 @@ int async_client::on_message_arrived(void* context, char* topicName, int topicLe
 
 		if (cb || que) {
 			string topic(topicName, topicName+topicLen);
-			auto m = std::make_shared<message>(*msg);
+			auto m = message::create(std::move(topic), *msg);
 
 			if (cb)
-				cb->message_arrived(topic, m);
+				cb->message_arrived(m);
+
 			if (que)
-				que->put(std::make_tuple(topic, m));
+				que->put(m);
 		}
 	}
 
@@ -225,6 +226,21 @@ void async_client::remove_token(token* tok)
 			return;
 		}
 	}
+}
+
+int async_client::disable_callbacks()
+{
+	// TODO: It would be nice to disable callbacks at the C library level,
+	// but the setCallback function currently does not accept a nullptr for
+	// the "message arrived" parameter. So, for now we send it an empty
+	// lambda function.
+	#if 0
+	return MQTTAsync_setCallbacks(cli_, this, nullptr, nullptr, nullptr);
+	#else
+	return MQTTAsync_setCallbacks(cli_, this, nullptr,
+				[](void*,char*,int,MQTTAsync_message*) -> int {return !0;},
+				nullptr);
+	#endif
 }
 
 // --------------------------------------------------------------------------
@@ -390,37 +406,38 @@ std::vector<delivery_token_ptr> async_client::get_pending_delivery_tokens() cons
 // --------------------------------------------------------------------------
 // Publish
 
-delivery_token_ptr async_client::publish(const string& topic, const void* payload,
+delivery_token_ptr async_client::publish(string_ref topic, const void* payload,
 										 size_t n, int qos, bool retained)
 {
-	auto msg = make_message(payload, n, qos, retained);
-	return publish(topic, std::move(msg));
+	auto msg = message::create(std::move(topic), payload, n, qos, retained);
+	return publish(std::move(msg));
 }
 
-delivery_token_ptr async_client::publish(const string& topic, binary_ref payload,
+delivery_token_ptr async_client::publish(string_ref topic, binary_ref payload,
 										 int qos, bool retained)
 {
-	auto msg = make_message(payload, qos, retained);
-	return publish(topic, std::move(msg));
+	auto msg = message::create(std::move(topic), std::move(payload), qos, retained);
+	return publish(std::move(msg));
 }
 
-delivery_token_ptr async_client::publish(const string& topic,
+delivery_token_ptr async_client::publish(string_ref topic,
 										 const void* payload, size_t n,
 										 int qos, bool retained, void* userContext,
 										 iaction_listener& cb)
 {
-	auto msg = make_message(payload, n, qos, retained);
-	return publish(topic, std::move(msg), userContext, cb);
+	auto msg = message::create(std::move(topic), payload, n, qos, retained);
+	return publish(std::move(msg), userContext, cb);
 }
 
-delivery_token_ptr async_client::publish(const string& topic, const_message_ptr msg)
+delivery_token_ptr async_client::publish(const_message_ptr msg)
 {
-	auto tok = delivery_token::create(*this, topic, msg);
+	auto tok = delivery_token::create(*this, msg);
 	add_token(tok);
 
 	delivery_response_options opts(tok);
 
-	int rc = MQTTAsync_sendMessage(cli_, topic.c_str(), &(msg->msg_), &opts.opts_);
+	int rc = MQTTAsync_sendMessage(cli_, msg->get_topic().c_str(),
+								   &(msg->msg_), &opts.opts_);
 
 	if (rc == MQTTASYNC_SUCCESS) {
 		tok->set_message_id(opts.opts_.token);
@@ -433,15 +450,16 @@ delivery_token_ptr async_client::publish(const string& topic, const_message_ptr 
 	return tok;
 }
 
-delivery_token_ptr async_client::publish(const string& topic, const_message_ptr msg,
+delivery_token_ptr async_client::publish(const_message_ptr msg,
 										 void* userContext, iaction_listener& cb)
 {
-	delivery_token_ptr tok = delivery_token::create(*this, topic, msg, userContext, cb);
+	delivery_token_ptr tok = delivery_token::create(*this, msg, userContext, cb);
 	add_token(tok);
 
 	delivery_response_options opts(tok);
 
-	int rc = MQTTAsync_sendMessage(cli_, topic.c_str(), &(msg->msg_), &opts.opts_);
+	int rc = MQTTAsync_sendMessage(cli_, msg->get_topic().c_str(),
+								   &(msg->msg_), &opts.opts_);
 
 	if (rc == MQTTASYNC_SUCCESS) {
 		tok->set_message_id(opts.opts_.token);
@@ -640,12 +658,13 @@ token_ptr async_client::unsubscribe(const string& topicFilter,
 
 void async_client::start_consuming()
 {
+	// Make sure callbacks don't happen while we update the que, etc
+	disable_callbacks();
+
 	// TODO: Should we replace user callback?
 	//userCallback_ = nullptr;
 
-	// TODO: Check if callbacks already set/running, otherwise we have race
-	// conditions and/or stomping other callbacks
-	que_.reset(new thread_queue<consumer_message_type>);
+	que_.reset(new thread_queue<const_message_ptr>);
 
 	int rc = MQTTAsync_setCallbacks(cli_, this,
 									&async_client::on_connection_lost,
@@ -658,8 +677,8 @@ void async_client::start_consuming()
 
 void async_client::stop_consuming()
 {
-	int rc = MQTTAsync_setCallbacks(cli_, this, nullptr, nullptr, nullptr);
-	que_.reset(new thread_queue<consumer_message_type>);
+	int rc = disable_callbacks();
+	que_.reset();
 
 	if (rc != MQTTASYNC_SUCCESS)
 		throw exception(rc);

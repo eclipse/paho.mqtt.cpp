@@ -38,7 +38,7 @@ public:
 		connection_lost_called = true;
 	}
 
-	void message_arrived(const std::string& topic, mqtt::const_message_ptr msg) override {
+	void message_arrived(mqtt::const_message_ptr msg) override {
 		message_arrived_called = true;
 	}
 

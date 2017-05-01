@@ -60,8 +60,7 @@ public:
 	/** Smart/shared pointer for an object of this class */
 	using ptr_t = std::shared_ptr<async_client>;
 
-	using consumer_message_type = std::tuple<string, const_message_ptr>;
-	using consumer_queue_type = std::unique_ptr< thread_queue<consumer_message_type> >;
+	using consumer_queue_type = std::unique_ptr<thread_queue<const_message_ptr>>;
 
 private:
 	/** Lock guard type for this class */
@@ -100,6 +99,9 @@ private:
 	virtual void remove_token(token* tok) override;
 	virtual void remove_token(token_ptr tok) { remove_token(tok.get()); }
 	void remove_token(delivery_token_ptr tok) { remove_token(tok.get()); }
+
+	/** Tell the C lib to stop sending us callbacks */
+	int disable_callbacks();
 
 	/** Non-copyable */
 	async_client() =delete;
@@ -344,7 +346,32 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	delivery_token_ptr publish(const string& topic, const void* payload, size_t n,
+	delivery_token_ptr publish(string_ref topic, const void* payload, size_t n,
+							   int qos, bool retained) override;
+	/**
+	 * Publishes a message to a topic on the server
+	 * @param topic The topic to deliver the message to
+	 * @param payload the bytes to use as the message payload
+	 * @param n the number of bytes in the payload
+	 * @return token used to track and wait for the publish to complete. The
+	 *  	   token will be passed to callback methods if set.
+	 */
+	delivery_token_ptr publish(string_ref topic, const void* payload, size_t n) override {
+		return publish(std::move(topic), payload, n,
+					   message::DFLT_QOS, message::DFLT_RETAINED);
+	}
+	/**
+	 * Publishes a message to a topic on the server
+	 * @param topic The topic to deliver the message to
+	 * @param payload the bytes to use as the message payload
+	 * @param qos the Quality of Service to deliver the message at. Valid
+	 *  		  values are 0, 1 or 2.
+	 * @param retained whether or not this message should be retained by the
+	 *  			   server.
+	 * @return token used to track and wait for the publish to complete. The
+	 *  	   token will be passed to callback methods if set.
+	 */
+	delivery_token_ptr publish(string_ref topic, binary_ref payload,
 							   int qos, bool retained) override;
 	/**
 	 * Publishes a message to a topic on the server
@@ -357,8 +384,10 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	delivery_token_ptr publish(const string& topic, binary_ref payload,
-							   int qos, bool retained) override;
+	delivery_token_ptr publish(string_ref topic, binary_ref payload) override {
+		return publish(std::move(topic), std::move(payload),
+					   message::DFLT_QOS, message::DFLT_RETAINED);
+	}
 	/**
 	 * Publishes a message to a topic on the server
 	 * @param topic The topic to deliver the message to
@@ -374,23 +403,21 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	delivery_token_ptr publish(const string& topic,
+	delivery_token_ptr publish(string_ref topic,
 							   const void* payload, size_t n,
-							   int qos, bool retained, void* userContext,
-							   iaction_listener& cb) override;
+							   int qos, bool retained,
+							   void* userContext, iaction_listener& cb) override;
 	/**
 	 * Publishes a message to a topic on the server Takes an Message
 	 * message and delivers it to the server at the requested quality of
 	 * service.
-	 * @param topic the topic to deliver the message to
 	 * @param msg the message to deliver to the server
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	delivery_token_ptr publish(const string& topic, const_message_ptr msg) override;
+	delivery_token_ptr publish(const_message_ptr msg) override;
 	/**
 	 * Publishes a message to a topic on the server.
-	 * @param topic the topic to deliver the message to
 	 * @param msg the message to deliver to the server
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
@@ -400,7 +427,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	delivery_token_ptr publish(const string& topic, const_message_ptr msg,
+	delivery_token_ptr publish(const_message_ptr msg,
 							   void* userContext, iaction_listener& cb) override;
 	/**
 	 * Sets a callback listener to use for events that happen
@@ -525,15 +552,15 @@ public:
 	 * This blocks until a new message arrives.
 	 * @return The message and topic.
 	 */
-	consumer_message_type consume_message() { return que_->get(); }
+	const_message_ptr consume_message() { return que_->get(); }
 	/**
 	 * Try to read the next message from the queue without blocking.
 	 * @param val Pointer to the value to receive the message
 	 * @return @em true is a message was read, @em false if no message was
 	 *  	   available.
 	 */
-	bool try_consume_message(consumer_message_type* val) {
-		return que_->try_get(val);
+	bool try_consume_message(const_message_ptr* msg) {
+		return que_->try_get(msg);
 	}
 	/**
 	 * Waits a limited time for a message to arrive.
@@ -543,9 +570,9 @@ public:
 	 *  	   occurred.
 	 */
 	template <typename Rep, class Period>
-	bool try_consume_message_for(consumer_message_type* val,
+	bool try_consume_message_for(const_message_ptr* msg,
 								 const std::chrono::duration<Rep, Period>& relTime) {
-		return que_->try_get_for(val, relTime);
+		return que_->try_get_for(msg, relTime);
 	}
 	/**
 	 * Waits until a specific time for a message to occur.
@@ -555,9 +582,9 @@ public:
 	 *  	   occurred.
 	 */
 	template <class Clock, class Duration>
-	bool try_consume_message_until(consumer_message_type* val,
+	bool try_consume_message_until(const_message_ptr* msg,
 								   const std::chrono::time_point<Clock,Duration>& absTime) {
-		return que_->try_get_until(val, absTime);
+		return que_->try_get_until(msg, absTime);
 	}
 
 };

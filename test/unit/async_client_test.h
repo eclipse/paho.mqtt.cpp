@@ -393,15 +393,15 @@ public:
 		// completion.
 
 		// Messages with QOS=2 are kept by the library
-		mqtt::message_ptr msg2 { mqtt::make_message(PAYLOAD, GOOD_QOS_COLL[2], RETAINED) };
-		token_pub = cli.publish(TOPIC, msg2);
+		mqtt::message_ptr msg2 { mqtt::message::create(TOPIC, PAYLOAD, GOOD_QOS_COLL[2], RETAINED) };
+		token_pub = cli.publish(msg2);
 		CPPUNIT_ASSERT(token_pub);
 		token_pending = cli.get_pending_delivery_token(message_id++);
 		CPPUNIT_ASSERT(token_pending);
 
 		// Messages with QOS=1 are kept by the library
-		mqtt::message_ptr msg1 { mqtt::make_message(PAYLOAD, GOOD_QOS_COLL[1], RETAINED) };
-		token_pub = cli.publish(TOPIC, msg1);
+		mqtt::message_ptr msg1 { mqtt::message::create(TOPIC, PAYLOAD, GOOD_QOS_COLL[1], RETAINED) };
+		token_pub = cli.publish(msg1);
 		CPPUNIT_ASSERT(token_pub);
 		token_pending = cli.get_pending_delivery_token(message_id++);
 		CPPUNIT_ASSERT(token_pending);
@@ -413,8 +413,8 @@ public:
 		// have a msgID that is always zero.
 
 		// Messages with QOS=0 are NOT kept by the library
-		mqtt::message_ptr msg0 { mqtt::make_message(PAYLOAD, GOOD_QOS_COLL[0], RETAINED) };
-		token_pub = cli.publish(TOPIC, msg0);
+		mqtt::message_ptr msg0 { mqtt::message::create(TOPIC, PAYLOAD, GOOD_QOS_COLL[0], RETAINED) };
+		token_pub = cli.publish(msg0);
 		CPPUNIT_ASSERT(token_pub);
 		token_pending = cli.get_pending_delivery_token(message_id++);
 		CPPUNIT_ASSERT(!token_pending);
@@ -445,18 +445,18 @@ public:
 		// The other functions add token async_client::add_token(token_ptr tok).
 
 		// Messages with QOS=0 are NOT kept by the library
-		mqtt::message_ptr msg0 { mqtt::make_message(PAYLOAD, GOOD_QOS_COLL[0], RETAINED) };
-		token_pub = cli.publish(TOPIC, msg0);
+		mqtt::message_ptr msg0 { mqtt::message::create(TOPIC, PAYLOAD, GOOD_QOS_COLL[0], RETAINED) };
+		token_pub = cli.publish(msg0);
 		CPPUNIT_ASSERT(token_pub);
 
 		// Messages with QOS=1 are kept by the library
-		mqtt::message_ptr msg1 { mqtt::make_message(PAYLOAD, GOOD_QOS_COLL[1], RETAINED) };
-		token_pub = cli.publish(TOPIC, msg1);
+		mqtt::message_ptr msg1 { mqtt::message::create(TOPIC, PAYLOAD, GOOD_QOS_COLL[1], RETAINED) };
+		token_pub = cli.publish(msg1);
 		CPPUNIT_ASSERT(token_pub);
 
 		// Messages with QOS=2 are kept by the library
-		mqtt::message_ptr msg2 { mqtt::make_message(PAYLOAD, GOOD_QOS_COLL[2], RETAINED) };
-		token_pub = cli.publish(TOPIC, msg2);
+		mqtt::message_ptr msg2 { mqtt::message::create(TOPIC, PAYLOAD, GOOD_QOS_COLL[2], RETAINED) };
+		token_pub = cli.publish(msg2);
 		CPPUNIT_ASSERT(token_pub);
 
 		// NOTE: Only tokens for messages with QOS=1 and QOS=2 are kept. That's
@@ -483,8 +483,8 @@ public:
 		token_conn->wait();
 		CPPUNIT_ASSERT(cli.is_connected());
 
-		mqtt::message_ptr msg { mqtt::make_message(PAYLOAD) };
-		mqtt::delivery_token_ptr token_pub { cli.publish(TOPIC, msg) };
+		mqtt::message_ptr msg { mqtt::message::create(TOPIC, PAYLOAD) };
+		mqtt::delivery_token_ptr token_pub { cli.publish(msg) };
 		CPPUNIT_ASSERT(token_pub);
 		token_pub->wait_for(TIMEOUT);
 
@@ -500,8 +500,8 @@ public:
 
 		int reason_code = MQTTASYNC_SUCCESS;
 		try {
-			mqtt::message_ptr msg { mqtt::make_message(PAYLOAD) };
-			mqtt::delivery_token_ptr token_pub { cli.publish(TOPIC, msg) };
+			mqtt::message_ptr msg { mqtt::message::create(TOPIC, PAYLOAD) };
+			mqtt::delivery_token_ptr token_pub { cli.publish(msg) };
 			CPPUNIT_ASSERT(token_pub);
 			token_pub->wait_for(TIMEOUT);
 		}
@@ -520,9 +520,9 @@ public:
 		token_conn->wait();
 		CPPUNIT_ASSERT(cli.is_connected());
 
-		mqtt::message_ptr msg { mqtt::make_message(PAYLOAD) };
+		mqtt::message_ptr msg { mqtt::message::create(TOPIC, PAYLOAD) };
 		mqtt::test::dummy_action_listener listener;
-		mqtt::delivery_token_ptr token_pub { cli.publish(TOPIC, msg, &CONTEXT, listener) };
+		mqtt::delivery_token_ptr token_pub { cli.publish(msg, &CONTEXT, listener) };
 		CPPUNIT_ASSERT(token_pub);
 		token_pub->wait_for(TIMEOUT);
 		CPPUNIT_ASSERT_EQUAL(CONTEXT, *static_cast<int*>(token_pub->get_user_context()));
@@ -539,9 +539,9 @@ public:
 
 		int reason_code = MQTTASYNC_SUCCESS;
 		try {
-			mqtt::message_ptr msg { mqtt::make_message(PAYLOAD) };
+			mqtt::message_ptr msg { mqtt::message::create(TOPIC, PAYLOAD) };
 			mqtt::test::dummy_action_listener listener;
-			mqtt::delivery_token_ptr token_pub { cli.publish(TOPIC, msg, &CONTEXT, listener) };
+			mqtt::delivery_token_ptr token_pub { cli.publish(msg, &CONTEXT, listener) };
 			CPPUNIT_ASSERT(token_pub);
 			token_pub->wait_for(TIMEOUT);
 		}
@@ -560,7 +560,7 @@ public:
 		token_conn->wait();
 		CPPUNIT_ASSERT(cli.is_connected());
 
-		const void* payload { PAYLOAD.c_str() };
+		const void* payload { PAYLOAD.data() };
 		const size_t payload_size { PAYLOAD.size() };
 		mqtt::delivery_token_ptr token_pub { cli.publish(TOPIC, payload, payload_size, GOOD_QOS, RETAINED) };
 		CPPUNIT_ASSERT(token_pub);

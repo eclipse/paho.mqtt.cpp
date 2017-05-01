@@ -114,9 +114,9 @@ class callback : public virtual mqtt::callback,
 		reconnect();
 	}
 
-	void message_arrived(const std::string& topic, mqtt::const_message_ptr msg) override {
+	void message_arrived(mqtt::const_message_ptr msg) override {
 		std::cout << "Message arrived" << std::endl;
-		std::cout << "\ttopic: '" << topic << "'" << std::endl;
+		std::cout << "\ttopic: '" << msg->get_topic() << "'" << std::endl;
 		std::cout << "\t'" << msg->to_string() << "'\n" << std::endl;
 	}
 

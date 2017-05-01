@@ -56,7 +56,7 @@ public:
 	}
 
 	// We're not subscribed to anything, so this should never be called.
-	void message_arrived(const string& topic, mqtt::const_message_ptr msg) override {}
+	void message_arrived(mqtt::const_message_ptr msg) override {}
 
 	void delivery_complete(mqtt::delivery_token_ptr tok) override {
 		cout << "\tDelivery complete for token: "
@@ -121,8 +121,8 @@ int main(int argc, char* argv[])
 	client.set_callback(cb);
 
 	mqtt::connect_options conopts;
-	mqtt::message willmsg(LWT_PAYLOAD, 1, true);
-	mqtt::will_options will(TOPIC, willmsg);
+	mqtt::message willmsg(TOPIC, LWT_PAYLOAD, 1, true);
+	mqtt::will_options will(willmsg);
 	conopts.set_will(will);
 
 	cout << "  ...OK" << endl;
@@ -137,9 +137,9 @@ int main(int argc, char* argv[])
 		// First use a message pointer.
 
 		cout << "\nSending message..." << endl;
-		mqtt::message_ptr pubmsg = mqtt::make_message(PAYLOAD1);
+		mqtt::message_ptr pubmsg = mqtt::make_message(TOPIC, PAYLOAD1);
 		pubmsg->set_qos(QOS);
-		client.publish(TOPIC, pubmsg)->wait_for(TIMEOUT);
+		client.publish(pubmsg)->wait_for(TIMEOUT);
 		cout << "  ...OK" << endl;
 
 		// Now try with itemized publish.
@@ -157,8 +157,8 @@ int main(int argc, char* argv[])
 
 		cout << "\nSending next message..." << endl;
 		action_listener listener;
-		pubmsg = mqtt::make_message(PAYLOAD3);
-		pubtok = client.publish(TOPIC, pubmsg, nullptr, listener);
+		pubmsg = mqtt::make_message(TOPIC, PAYLOAD3);
+		pubtok = client.publish(pubmsg, nullptr, listener);
 		pubtok->wait();
 		cout << "  ...OK" << endl;
 
@@ -166,8 +166,8 @@ int main(int argc, char* argv[])
 
 		cout << "\nSending final message..." << endl;
 		delivery_action_listener deliveryListener;
-		pubmsg = mqtt::make_message(PAYLOAD4);
-		client.publish(TOPIC, pubmsg, nullptr, deliveryListener);
+		pubmsg = mqtt::make_message(TOPIC, PAYLOAD4);
+		client.publish(pubmsg, nullptr, deliveryListener);
 
 		while (!deliveryListener.is_done()) {
 			this_thread::sleep_for(std::chrono::milliseconds(100));

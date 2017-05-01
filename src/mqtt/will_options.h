@@ -101,7 +101,7 @@ public:
 	 * @param retained Tell the broker to keep the LWT message after send to
 	 *  			   subscribers.
 	 */
-	will_options(const string& top, const void *payload, size_t payload_len,
+	will_options(string_ref top, const void *payload, size_t payload_len,
 				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED);
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
@@ -123,7 +123,7 @@ public:
 	 * @param retained Tell the broker to keep the LWT message after send to
 	 *  			   subscribers.
 	 */
-	will_options(const string& top, binary_ref payload,
+	will_options(string_ref top, binary_ref payload,
 				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED);
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
@@ -134,14 +134,14 @@ public:
 	 * @param retained Tell the broker to keep the LWT message after send to
 	 *  			   subscribers.
 	 */
-	will_options(const string& top, const string& payload,
+	will_options(string_ref top, const string& payload,
 				 int qos=DFLT_QOS, bool retained=DFLT_QOS);
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
 	 * @param top The LWT message is published to the this topic.
 	 * @param msg The message that is published to the Will Topic.
 	 */
-	will_options(const string& top, const message& msg);
+	will_options(const message& msg);
 	/**
 	 * Copy constructor for the LWT options.
 	 * @param opt The other options.
@@ -194,7 +194,7 @@ public:
 	 * @return A copy of the LWT message.
 	 */
 	const_message_ptr get_message() const {
-		return make_message(payload_, opts_.qos, opts_.retained);
+		return make_message(topic_, payload_, opts_.qos, opts_.retained);
 	}
 	/**
 	 * Sets the LWT message topic name.

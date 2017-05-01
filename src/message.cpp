@@ -31,56 +31,50 @@ constexpr MQTTAsync_message message::DFLT_C_STRUCT;
 
 // --------------------------------------------------------------------------
 
-message::message() : msg_(DFLT_C_STRUCT)
+message::message() : msg_(DFLT_C_STRUCT), topic_(string())
 {
-	set_payload(string());
+	set_payload(binary());
 }
 
-message::message(const void* payload, size_t len, int qos, bool retained)
-						: msg_(DFLT_C_STRUCT)
+message::message(string_ref topic, const void* payload, size_t len, int qos, bool retained)
+						: msg_(DFLT_C_STRUCT), topic_(std::move(topic))
 {
 	set_payload(payload, len);
 	set_qos(qos);
 	set_retained(retained);
 }
 
-message::message(binary_ref payload, int qos, bool retained)
-						: msg_(DFLT_C_STRUCT)
+message::message(string_ref topic, binary_ref payload, int qos, bool retained)
+						: msg_(DFLT_C_STRUCT), topic_(std::move(topic))
 {
 	set_payload(std::move(payload));
 	set_qos(qos);
 	set_retained(retained);
 }
-#if 0
-message::message(const string& payload, int qos, bool retained)
-						: msg_(DFLT_C_STRUCT)
-{
-	set_payload(payload);
-	set_qos(qos);
-	set_retained(retained);
-}
-#endif
-message::message(const MQTTAsync_message& msg) : msg_(msg)
+
+message::message(string_ref topic, const MQTTAsync_message& msg)
+						: msg_(msg), topic_(std::move(topic))
 {
 	set_payload(msg.payload, msg.payloadlen);
 }
 
-message::message(const message& other) : msg_(other.msg_)
+message::message(const message& other) : msg_(other.msg_), topic_(other.topic_)
 {
 	set_payload(other.payload_);
 }
 
-message::message(message&& other) : msg_(other.msg_)
+message::message(message&& other) : msg_(other.msg_), topic_(std::move(other.topic_))
 {
 	set_payload(std::move(other.payload_));
-	other.msg_ = DFLT_C_STRUCT;
+	other.msg_.payloadlen = 0;
+	other.msg_.payload = nullptr;
 }
-
 
 message& message::operator=(const message& rhs)
 {
 	if (&rhs != this) {
 		msg_ = rhs.msg_;
+		topic_ = rhs.topic_;
 		set_payload(rhs.payload_);
 	}
 	return *this;
@@ -90,15 +84,17 @@ message& message::operator=(message&& rhs)
 {
 	if (&rhs != this) {
 		msg_ = rhs.msg_;
+		topic_ = std::move(rhs.topic_);
 		set_payload(std::move(rhs.payload_));
-		rhs.msg_ = DFLT_C_STRUCT;
+		rhs.msg_.payloadlen = 0;
+		rhs.msg_.payload = nullptr;
 	}
 	return *this;
 }
 
 void message::clear_payload()
 {
-	payload_ = string();	//.reset();
+	payload_ = string();
 	msg_.payload = nullptr;
 	msg_.payloadlen = 0;
 }

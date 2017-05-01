@@ -70,55 +70,28 @@ public:
 	 * @param cli The asynchronous client object.
 	 * @param topic The topic that the message is associated with.
 	 */
-	delivery_token(iasync_client& cli, const string& topic) : token(cli, topic) {}
+	//delivery_token(iasync_client& cli, const string& topic) : token(cli, topic) {}
+	/**
+	 * Creates a delivery token connected to a particular client.
+	 * @param cli The asynchronous client object.
+	 * @param msg The message being tracked.
+	 */
+	delivery_token(iasync_client& cli, const_message_ptr msg)
+			: token(cli, msg->get_topic()), msg_(std::move(msg)) {}
 	/**
 	 * Creates a delivery token connected to a particular client.
 	 * @param cli The asynchronous client object.
 	 * @param topic The topic that the message is associated with.
 	 * @param msg The message data.
-	 */
-	delivery_token(iasync_client& cli, const string& topic, const_message_ptr msg)
-			: token(cli, topic), msg_(msg) {}
-	/**
-	 * Creates a delivery token connected to a particular client.
-	 * @param cli The asynchronous client object.
-	 * @param topic The topic that the message is associated with.
-	 * @param msg The message data.
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb callback optional listener that will be notified when message
 	 *  			   delivery has completed to the requested quality of
 	 *  			   service
 	 */
-	delivery_token(iasync_client& cli, const string& topic, const_message_ptr msg,
+	delivery_token(iasync_client& cli, const_message_ptr msg,
 				   void* userContext, iaction_listener& cb)
-			: token(cli, topic, userContext, cb), msg_(msg) {}
-	/**
-	 * Creates a delivery token connected to a particular client.
-	 * @param cli The asynchronous client object.
-	 * @param topics The topics that the message is associated with.
-	 * @param userContext optional object used to pass context to the
-	 *  				  callback. Use @em nullptr if not required.
-	 * @param cb callback optional listener that will be notified when message
-	 *  			   delivery has completed to the requested quality of
-	 *  			   service
-	 */
-	delivery_token(iasync_client& cli, const_string_collection_ptr topics, const_message_ptr msg)
-			: token(cli, topics), msg_(msg) {}
-	/**
-	 * Creates a delivery token connected to a particular client.
-	 * @param cli The asynchronous client object.
-	 * @param topics The topics that the message is associated with.
-	 * @param userContext optional object used to pass context to the
-	 *  				  callback. Use @em nullptr if not required.
-	 * @param cb callback optional listener that will be notified when message
-	 *  			   delivery has completed to the requested quality of
-	 *  			   service
-	 */
-	delivery_token(iasync_client& cli, const_string_collection_ptr topics, const_message_ptr msg,
-				   void* userContext, iaction_listener& cb)
-			: token(cli, topics, userContext, cb), msg_(msg) {}
-
+			: token(cli, msg->get_topic(), userContext, cb), msg_(std::move(msg)) {}
 	/**
 	 * Creates an empty delivery token connected to a particular client.
 	 * @param cli The asynchronous client object.
@@ -129,19 +102,10 @@ public:
 	/**
 	 * Creates a delivery token connected to a particular client.
 	 * @param cli The asynchronous client object.
-	 * @param topic The topic that the message is associated with.
-	 */
-	static ptr_t create(iasync_client& cli, const string& topic) {
-		return std::make_shared<delivery_token>(cli, topic);
-	}
-	/**
-	 * Creates a delivery token connected to a particular client.
-	 * @param cli The asynchronous client object.
-	 * @param topic The topic that the message is associated with.
 	 * @param msg The message data.
 	 */
-	static ptr_t create(iasync_client& cli, const string& topic, const_message_ptr msg) {
-		return std::make_shared<delivery_token>(cli, topic, msg);
+	static ptr_t create(iasync_client& cli, const_message_ptr msg) {
+		return std::make_shared<delivery_token>(cli, msg);
 	}
 	/**
 	 * Creates a delivery token connected to a particular client.
@@ -154,35 +118,9 @@ public:
 	 *  			   delivery has completed to the requested quality of
 	 *  			   service
 	 */
-	static ptr_t create(iasync_client& cli, const string& topic, const_message_ptr msg,
+	static ptr_t create(iasync_client& cli, const_message_ptr msg,
 						void* userContext, iaction_listener& cb) {
-		return std::make_shared<delivery_token>(cli, topic, msg, userContext, cb);
-	}
-	/**
-	 * Creates a delivery token connected to a particular client.
-	 * @param cli The asynchronous client object.
-	 * @param topic The topic that the message is associated with.
-	 * @param msg The message data.
-	 */
-	static ptr_t create(iasync_client& cli, const_string_collection_ptr topics,
-						const_message_ptr msg) {
-		return std::make_shared<delivery_token>(cli, topics, msg);
-	}
-	/**
-	 * Creates a delivery token connected to a particular client.
-	 * @param cli The asynchronous client object.
-	 * @param topic The topic that the message is associated with.
-	 * @param msg The message data.
-	 * @param userContext optional object used to pass context to the
-	 *  				  callback. Use @em nullptr if not required.
-	 * @param cb callback optional listener that will be notified when message
-	 *  			   delivery has completed to the requested quality of
-	 *  			   service
-	 */
-	static ptr_t create(iasync_client& cli, const_string_collection_ptr topics,
-						const_message_ptr msg,
-						void* userContext, iaction_listener& cb) {
-		return std::make_shared<delivery_token>(cli, topics, msg, userContext, cb);
+		return std::make_shared<delivery_token>(cli, msg, userContext, cb);
 	}
 	/**
 	 * Gets the message associated with this token.

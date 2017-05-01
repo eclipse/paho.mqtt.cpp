@@ -53,6 +53,7 @@ class message_test : public CppUnit::TestFixture
 	const bool DFLT_RETAINED = false;
 	const bool DFLT_DUP = false;
 
+	const std::string TOPIC { "hello" };
 	const char* BUF = "Hello there";
 	const size_t N = std::strlen(BUF);
 	const std::string PAYLOAD = std::string(BUF);
@@ -62,7 +63,7 @@ class message_test : public CppUnit::TestFixture
 
 public:
 	void setUp() {
-		orgMsg = mqtt::message(PAYLOAD, QOS, true);
+		orgMsg = mqtt::message(TOPIC, PAYLOAD, QOS, true);
 	}
 	void tearDown() {}
 
@@ -91,8 +92,9 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_buf_len_constructor() {
-		mqtt::message msg(BUF, N);
+		mqtt::message msg(TOPIC, BUF, N);
 
+		CPPUNIT_ASSERT_EQUAL(TOPIC, msg.get_topic());
 		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, msg.get_qos());
 		CPPUNIT_ASSERT_EQUAL(DFLT_RETAINED, msg.is_retained());
@@ -112,8 +114,9 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_buf_constructor() {
-		mqtt::message msg(BUF, N, QOS, true);
+		mqtt::message msg(TOPIC, BUF, N, QOS, true);
 
+		CPPUNIT_ASSERT_EQUAL(TOPIC, msg.get_topic());
 		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
@@ -133,8 +136,9 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_string_constructor() {
-		mqtt::message msg(PAYLOAD);
+		mqtt::message msg(TOPIC, PAYLOAD);
 
+		CPPUNIT_ASSERT_EQUAL(TOPIC, msg.get_topic());
 		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, msg.get_qos());
 		CPPUNIT_ASSERT(!msg.is_retained());
@@ -154,8 +158,9 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_string_qos_constructor() {
-		mqtt::message msg(PAYLOAD, QOS, true);
+		mqtt::message msg(TOPIC, PAYLOAD, QOS, true);
 
+		CPPUNIT_ASSERT_EQUAL(TOPIC, msg.get_topic());
 		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
@@ -182,8 +187,10 @@ public:
 		c_msg.qos = QOS;
 		c_msg.retained = 1;
 		c_msg.dup = 1;
-		mqtt::message msg(c_msg);
 
+		mqtt::message msg(TOPIC, c_msg);
+
+		CPPUNIT_ASSERT_EQUAL(TOPIC, msg.get_topic());
 		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
@@ -205,6 +212,7 @@ public:
 	void test_copy_constructor() {
 		mqtt::message msg(orgMsg);
 
+		CPPUNIT_ASSERT_EQUAL(TOPIC, msg.get_topic());
 		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
@@ -234,6 +242,7 @@ public:
 	void test_move_constructor() {
 		mqtt::message msg(std::move(orgMsg));
 
+		CPPUNIT_ASSERT_EQUAL(TOPIC, msg.get_topic());
 		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
@@ -259,6 +268,7 @@ public:
 
 		msg = orgMsg;
 
+		CPPUNIT_ASSERT_EQUAL(TOPIC, msg.get_topic());
 		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
@@ -276,6 +286,7 @@ public:
 		orgMsg.set_qos(DFLT_QOS);
 		orgMsg.set_retained(false);
 
+		CPPUNIT_ASSERT_EQUAL(TOPIC, msg.get_topic());
 		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
@@ -296,6 +307,7 @@ public:
 		mqtt::message msg;
 		msg = std::move(orgMsg);
 
+		CPPUNIT_ASSERT_EQUAL(TOPIC, msg.get_topic());
 		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg.get_payload_str());
 		CPPUNIT_ASSERT_EQUAL(QOS, msg.get_qos());
 		CPPUNIT_ASSERT(msg.is_retained());
@@ -355,3 +367,4 @@ public:
 }
 
 #endif		//  __mqtt_message_test_h
+

@@ -27,9 +27,6 @@ using namespace std;
 
 const string ADDRESS	{ "tcp://localhost:1883" };
 const string CLIENT_ID	{ "sync_consumer" };
-const string TOPIC 		{ "hello" };
-
-const int  QOS = 1;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -41,26 +38,41 @@ int main(int argc, char* argv[])
 
 	mqtt::client cli(ADDRESS, CLIENT_ID);
 
+	const vector<string> TOPICS { "hello", "command" };
+	const vector<int> QOS { 1, 1 };
+
 	// Start the connection.
 	// When completed, the callback will subscribe to topic.
 
 	try {
 		cout << "Connecting to the MQTT server..." << flush;
 		cli.connect(connOpts);
-		cli.subscribe(TOPIC, QOS);
-		cout << "OK" << endl;
+		cli.subscribe(TOPICS, QOS);
+		cout << "OK\n" << endl;
 
 		// Consume messages
-
-		string top;
-		mqtt::const_message_ptr msg;
 
 		cli.start_consuming();
 
 		while (true) {
-			std::tie(top, msg) = cli.consume_message();
-			if (!msg) break;
-			cout << top << ": " << msg->to_string() << endl;
+			auto msg = cli.consume_message();
+
+			if (!msg) {
+				if (!cli.is_connected()) {
+					cout << "Lost connection. Attempting reconnect" << endl;
+					cli.reconnect();
+					continue;
+				}
+				else
+					break;
+			}
+			if (msg->get_topic() == "command" &&
+					msg->to_string() == "exit") {
+				cout << "Exit command received" << endl;
+				break;
+			}
+
+			cout << msg->get_topic() << ": " << msg->to_string() << endl;
 		}
 
 		cli.stop_consuming();

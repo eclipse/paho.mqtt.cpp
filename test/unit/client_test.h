@@ -274,8 +274,8 @@ public:
 		cli.connect();
 		CPPUNIT_ASSERT(cli.is_connected());
 
-		mqtt::message_ptr msg { mqtt::make_message(PAYLOAD) };
-		cli.publish(TOPIC, msg);
+		mqtt::message_ptr msg { mqtt::message::create(TOPIC, PAYLOAD) };
+		cli.publish(msg);
 
 		cli.disconnect();
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
@@ -287,8 +287,8 @@ public:
 
 		int reason_code = MQTTASYNC_SUCCESS;
 		try {
-			mqtt::message_ptr msg { mqtt::make_message(PAYLOAD) };
-			cli.publish(TOPIC, msg);
+			mqtt::message_ptr msg { mqtt::message::create(TOPIC, PAYLOAD) };
+			cli.publish(msg);
 		} catch (mqtt::exception& ex) {
 			reason_code = ex.get_reason_code();
 		}
@@ -302,8 +302,8 @@ public:
 		cli.connect();
 		CPPUNIT_ASSERT(cli.is_connected());
 
-		mqtt::message msg { PAYLOAD };
-		cli.publish(TOPIC, msg);
+		mqtt::message msg { TOPIC, PAYLOAD };
+		cli.publish(msg);
 
 		cli.disconnect();
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());

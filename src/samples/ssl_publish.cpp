@@ -58,7 +58,7 @@ public:
 	}
 
 	// We're not subscribed to anything, so this should never be called.
-	void message_arrived(const std::string& topic, mqtt::const_message_ptr msg) override {}
+	void message_arrived(mqtt::const_message_ptr msg) override {}
 
 	void delivery_complete(mqtt::delivery_token_ptr tok) override {
 		std::cout << "\tDelivery complete for token: "
@@ -86,8 +86,8 @@ int main(int argc, char* argv[])
 	mqtt::ssl_options sslopts;
 	sslopts.set_trust_store("test-root-ca.crt");
 
-	mqtt::message willmsg(LWT_PAYLOAD, 1, true);
-	mqtt::will_options will(TOPIC, willmsg);
+	mqtt::message willmsg(TOPIC, LWT_PAYLOAD, 1, true);
+	mqtt::will_options will(willmsg);
 
 	connopts.set_will(will);
 	connopts.set_ssl(sslopts);
@@ -104,9 +104,9 @@ int main(int argc, char* argv[])
 		// First use a message pointer.
 
 		cout << "\nSending message..." << endl;
-		mqtt::message_ptr pubmsg = mqtt::make_message(PAYLOAD1);
+		mqtt::message_ptr pubmsg = mqtt::make_message(TOPIC, PAYLOAD1);
 		pubmsg->set_qos(QOS);
-		client.publish(TOPIC, pubmsg)->wait_for(TIMEOUT);
+		client.publish(pubmsg)->wait_for(TIMEOUT);
 		cout << "  ...OK" << endl;
 
 		// Now try with itemized publish.

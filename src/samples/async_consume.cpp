@@ -52,15 +52,12 @@ int main(int argc, char* argv[])
 
 		// Consume messages
 
-		string top;
-		mqtt::const_message_ptr msg;
-
 		cli.start_consuming();
 
 		while (true) {
-			std::tie(top, msg) = cli.consume_message();
+			auto msg = cli.consume_message();
 			if (!msg) break;
-			cout << top << ": " << msg->to_string() << endl;
+			cout << msg->get_topic() << ": " << msg->to_string() << endl;
 		}
 
 		// Disconnect

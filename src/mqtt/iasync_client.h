@@ -198,11 +198,12 @@ public:
 	 * @param n the number of bytes in the payload
 	 * @param qos the Quality of Service to deliver the message at. Valid
 	 *  		  values are 0, 1 or 2.
-	 * @param retained
+	 * @param retained whether or not this message should be retained by the
+	 *  			   server.
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	virtual delivery_token_ptr publish(const string& topic,
+	virtual delivery_token_ptr publish(string_ref topic,
 									   const void* payload, size_t n,
 									   int qos, bool retained) =0;
 	/**
@@ -210,16 +211,27 @@ public:
 	 * @param topic The topic to deliver the message to
 	 * @param payload the bytes to use as the message payload
 	 * @param n the number of bytes in the payload
+	 * @return token used to track and wait for the publish to complete. The
+	 *  	   token will be passed to callback methods if set.
+	 */
+	virtual delivery_token_ptr publish(string_ref topic,
+									   const void* payload, size_t n) =0;
+	/**
+	 * Publishes a message to a topic on the server
+	 * @param topic The topic to deliver the message to
+	 * @param payload the bytes to use as the message payload
+	 * @param n the number of bytes in the payload
 	 * @param qos the Quality of Service to deliver the message at. Valid
 	 *  		  values are 0, 1 or 2.
-	 * @param retained
+	 * @param retained whether or not this message should be retained by the
+	 *  			   server.
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	virtual delivery_token_ptr publish(const string& topic,
+	virtual delivery_token_ptr publish(string_ref topic,
 									   const void* payload, size_t n,
 									   int qos, bool retained,
 									   void* userContext, iaction_listener& cb) =0;
@@ -234,21 +246,27 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	virtual delivery_token_ptr publish(const string& topic, binary_ref payload,
+	virtual delivery_token_ptr publish(string_ref topic, binary_ref payload,
 									   int qos, bool retained) =0;
+	/**
+	 * Publishes a message to a topic on the server.
+	 * @param topic The topic to deliver the message to
+	 * @param payload the bytes to use as the message payload
+	 * @return token used to track and wait for the publish to complete. The
+	 *  	   token will be passed to callback methods if set.
+	 */
+	virtual delivery_token_ptr publish(string_ref topic, binary_ref payload) =0;
 	/**
 	 * Publishes a message to a topic on the server Takes an Message
 	 * message and delivers it to the server at the requested quality of
 	 * service.
-	 * @param topic the topic to deliver the message to
 	 * @param msg the message to deliver to the server
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	virtual delivery_token_ptr publish(const string& topic, const_message_ptr msg) =0;
+	virtual delivery_token_ptr publish(const_message_ptr msg) =0;
 	/**
 	 * Publishes a message to a topic on the server.
-	 * @param topic the topic to deliver the message to
 	 * @param msg the message to deliver to the server
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
@@ -257,7 +275,7 @@ public:
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
-	virtual delivery_token_ptr publish(const string& topic, const_message_ptr msg,
+	virtual delivery_token_ptr publish(const_message_ptr msg,
 									   void* userContext, iaction_listener& cb) =0;
 	/**
 	 * Sets a callback listener to use for events that happen

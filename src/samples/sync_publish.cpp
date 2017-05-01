@@ -130,8 +130,7 @@ public:
 	}
 
 	// We're not subscrived to anything, so this should never be called.
-	void message_arrived(const std::string& topic,
-						 mqtt::const_message_ptr msg) override {}
+	void message_arrived(mqtt::const_message_ptr) override {}
 
 	void delivery_complete(mqtt::delivery_token_ptr tok) override {
 		std::cout << "\n\t[Delivery complete for token: "
@@ -163,9 +162,9 @@ int main(int argc, char* argv[])
 		// First use a message pointer.
 
 		std::cout << "\nSending message..." << std::endl;
-		auto pubmsg = mqtt::make_message(PAYLOAD1);
+		auto pubmsg = mqtt::make_message(TOPIC, PAYLOAD1);
 		pubmsg->set_qos(QOS);
-		client.publish(TOPIC, pubmsg);
+		client.publish(pubmsg);
 		std::cout << "...OK" << std::endl;
 
 		// Now try with itemized publish.
@@ -177,7 +176,7 @@ int main(int argc, char* argv[])
 		// Now try with a listener, no token, and non-heap message
 
 		std::cout << "\nSending final message..." << std::endl;
-		client.publish(TOPIC, mqtt::message(PAYLOAD3, QOS, false));
+		client.publish(mqtt::message(TOPIC, PAYLOAD3, QOS, false));
 		std::cout << "OK" << std::endl;
 
 		// Disconnect

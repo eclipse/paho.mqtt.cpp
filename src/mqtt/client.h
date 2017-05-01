@@ -36,10 +36,6 @@ namespace mqtt {
  */
 class client
 {
-public:
-	using consumer_message_type = async_client::consumer_message_type;
-
-private:
 	/** An arbitrary, but relatively long timeout */
 	static constexpr auto DFLT_TIMEOUT = std::chrono::minutes(5);
 	/** The default quality of service */
@@ -223,20 +219,28 @@ public:
 	 * @param qos
 	 * @param retained
 	 */
-	virtual void publish(const string& top, const void* payload, size_t n,
+	virtual void publish(string_ref top, const void* payload, size_t n,
 						 int qos, bool retained);
 	/**
-	 * Publishes a message to a topic on the server.
-	 * @param top The topic to publish on
-	 * @param msg The message
+	 * Publishes a message to a topic on the server and return once it is
+	 * delivered.
+	 * @param top The topic to publish
+	 * @param payload The data to publish
+	 * @param retained
 	 */
-	virtual void publish(const string& top, const_message_ptr msg);
+	virtual void publish(string_ref top, const void* payload, size_t n);
 	/**
 	 * Publishes a message to a topic on the server.
 	 * @param top The topic to publish on
 	 * @param msg The message
 	 */
-	virtual void publish(const string& top, const message& msg);
+	virtual void publish(const_message_ptr msg);
+	/**
+	 * Publishes a message to a topic on the server.
+	 * @param top The topic to publish on
+	 * @param msg The message
+	 */
+	virtual void publish(const message& msg);
 	/**
 	 * Sets the callback listener to use for events that happen
 	 * asynchronously.
@@ -309,15 +313,15 @@ public:
 	 * This blocks until a new message arrives.
 	 * @return The message and topic.
 	 */
-	consumer_message_type consume_message() { return cli_.consume_message(); }
+	const_message_ptr consume_message() { return cli_.consume_message(); }
 	/**
 	 * Try to read the next message from the queue without blocking.
 	 * @param val Pointer to the value to receive the message
 	 * @return @em true is a message was read, @em false if no message was
 	 *  	   available.
 	 */
-	bool try_consume_message(consumer_message_type* val) {
-		return cli_.try_consume_message(val);
+	bool try_consume_message(const_message_ptr* msg) {
+		return cli_.try_consume_message(msg);
 	}
 	/**
 	 * Waits a limited time for a message to arrive.
@@ -327,9 +331,9 @@ public:
 	 *  	   occurred.
 	 */
 	template <typename Rep, class Period>
-	bool try_consume_message_for(consumer_message_type* val,
+	bool try_consume_message_for(const_message_ptr* msg,
 								 const std::chrono::duration<Rep, Period>& relTime) {
-		return cli_.try_consume_message_for(val, relTime);
+		return cli_.try_consume_message_for(msg, relTime);
 	}
 	/**
 	 * Waits until a specific time for a message to occur.
@@ -339,9 +343,9 @@ public:
 	 *  	   occurred.
 	 */
 	template <class Clock, class Duration>
-	bool try_consume_message_until(consumer_message_type* val,
+	bool try_consume_message_until(const_message_ptr* msg,
 								   const std::chrono::time_point<Clock,Duration>& absTime) {
-		return cli_.try_consume_message_until(val, absTime);
+		return cli_.try_consume_message_until(msg, absTime);
 	}
 };
 
