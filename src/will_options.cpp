@@ -90,7 +90,7 @@ will_options::will_options(will_options&& other) : opts_(other.opts_)
 will_options& will_options::operator=(const will_options& rhs)
 {
 	if (&rhs != this) {
-		std::memcpy(&opts_, &rhs.opts_, sizeof(MQTTAsync_willOptions));
+		opts_ = rhs.opts_;
 		set_topic(rhs.topic_);
 		set_payload(rhs.payload_);
 	}
@@ -100,7 +100,7 @@ will_options& will_options::operator=(const will_options& rhs)
 will_options& will_options::operator=(will_options&& rhs)
 {
 	if (&rhs != this) {
-		std::memcpy(&opts_, &rhs.opts_, sizeof(MQTTAsync_willOptions));
+		opts_ = rhs.opts_;
 		set_topic(std::move(rhs.topic_));
 		set_payload(std::move(rhs.payload_));
 	}

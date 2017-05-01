@@ -33,15 +33,15 @@ disconnect_options::disconnect_options(disconnect_options&& opt)
 
 disconnect_options& disconnect_options::operator=(const disconnect_options& opt)
 {
-	std::memcpy(&opts_, &opt.opts_, sizeof(MQTTAsync_disconnectOptions));
+	opts_ = opt.opts_;
 	tok_ = opt.tok_;
 	return *this;
 }
 
 disconnect_options& disconnect_options::operator=(disconnect_options&& opt)
 {
+	opts_ = opt.opts_;
 	tok_ = std::move(opt.tok_);
-	std::memcpy(&opts_, &opt.opts_, sizeof(MQTTAsync_disconnectOptions));
 	return *this;
 }
 

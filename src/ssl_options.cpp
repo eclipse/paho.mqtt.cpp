@@ -23,7 +23,9 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-ssl_options::ssl_options() : opts_(MQTTAsync_SSLOptions_initializer)
+constexpr MQTTAsync_SSLOptions ssl_options::DFLT_C_STRUCT;
+
+ssl_options::ssl_options() : opts_(DFLT_C_STRUCT)
 {
 }
 
@@ -34,7 +36,7 @@ ssl_options::ssl_options(
 		const string& privateKeyPassword,
 		const string& enabledCipherSuites,
 		bool enableServerCertAuth)
-		: opts_(MQTTAsync_SSLOptions_initializer),
+		: opts_(DFLT_C_STRUCT),
 		  trustStore_(trustStore),
 		  keyStore_(keyStore),
 		  privateKey_(privateKey),
@@ -62,8 +64,7 @@ ssl_options::ssl_options(ssl_options&& opt)
 	update_c_struct();
 
 	// NOTE: leave the source object "empty" (i.e. with default values)
-	MQTTAsync_SSLOptions dfltSSLOpt = MQTTAsync_SSLOptions_initializer;
-	std::memcpy(&opt.opts_, &dfltSSLOpt, sizeof(opt.opts_));
+	opt.opts_ = DFLT_C_STRUCT;
 }
 
 void ssl_options::update_c_struct()
@@ -80,7 +81,7 @@ ssl_options& ssl_options::operator=(const ssl_options& rhs)
 	if (&rhs == this)
 		return *this;
 
-	std::memcpy(&opts_, &rhs.opts_, sizeof(MQTTAsync_SSLOptions));
+	opts_ = rhs.opts_;
 
 	trustStore_ = rhs.trustStore_;
 	keyStore_ = rhs.keyStore_;
@@ -97,7 +98,7 @@ ssl_options& ssl_options::operator=(ssl_options&& rhs)
 	if (&rhs == this)
 		return *this;
 
-	std::memcpy(&opts_, &rhs.opts_, sizeof(MQTTAsync_SSLOptions));
+	opts_ = rhs.opts_;
 
 	trustStore_ = std::move(rhs.trustStore_);
 	keyStore_ = std::move(rhs.keyStore_);
@@ -107,8 +108,7 @@ ssl_options& ssl_options::operator=(ssl_options&& rhs)
 
 	// NOTE: the correct semantic is to leave the source object
 	// "empty" (i.e. with default values)
-	MQTTAsync_SSLOptions dfltSSLOpt = MQTTAsync_SSLOptions_initializer;
-	std::memcpy(&rhs.opts_, &dfltSSLOpt, sizeof(rhs.opts_));
+	rhs.opts_ = DFLT_C_STRUCT;
 
 	update_c_struct();
 	return *this;

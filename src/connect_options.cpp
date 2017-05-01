@@ -71,7 +71,7 @@ connect_options::connect_options(connect_options&& opt) : opts_(opt.opts_),
 
 connect_options& connect_options::operator=(const connect_options& opt)
 {
-	std::memcpy(&opts_, &opt.opts_, sizeof(MQTTAsync_connectOptions));
+	opts_ = opt.opts_;
 
 	if (opts_.will)
 		set_will(opt.will_);
@@ -89,7 +89,7 @@ connect_options& connect_options::operator=(const connect_options& opt)
 
 connect_options& connect_options::operator=(connect_options&& opt)
 {
-	std::memcpy(&opts_, &opt.opts_, sizeof(MQTTAsync_connectOptions));
+	opts_ = opt.opts_;
 
 	will_ = std::move(opt.will_);
 	if (opts_.will)
