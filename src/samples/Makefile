@@ -14,7 +14,9 @@ TGTS = async_publish async_subscribe async_consume sync_publish sync_consume pub
 all: $(TGTS)
 
 # SSL/TLS samples
-ifdef SSL
+SSL ?= 1
+ifneq ($(SSL),0)
+  CPPFLAGS += -DOPENSSL
   all: ssl_publish
 endif
 
@@ -26,7 +28,7 @@ ifneq ($(CROSS_COMPILE),)
 endif
 
 CXXFLAGS += -Wall -std=c++11
-CPPFLAGS += -I.. -I$(PAHO_C_INC_DIR) -DOPENSSL
+CPPFLAGS += -I.. -I$(PAHO_C_INC_DIR)
 
 ifdef DEBUG
   CPPFLAGS += -DDEBUG

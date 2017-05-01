@@ -30,8 +30,6 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(OPENSSL)
-
 class ssl_options_test : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE( ssl_options_test );
@@ -315,9 +313,8 @@ public:
 	}
 };
 
-#endif // OPENSSL
-
 /////////////////////////////////////////////////////////////////////////////
 } // end namespace mqtt
 
 #endif		//  __mqtt_ssl_options_test_h
+

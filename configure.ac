@@ -155,7 +155,7 @@ AC_ARG_WITH(
 		CPPFLAGS="$CPPFLAGS -I$with_paho_mqtt_c/src -I$with_paho_mqtt_c/include"
 	],
 )
-AC_SEARCH_LIBS([MQTTAsync_create], [mqtt paho-mqtt mqtt3 paho-mqtt3 mqtt3a paho-mqtt3a], , AC_MSG_ERROR([missing paho.mqtt.c library]))
+
 AC_CHECK_HEADER([MQTTAsync.h], , AC_MSG_ERROR([missing paho.mqtt.c headers]))
 
 
@@ -167,7 +167,7 @@ AC_ARG_WITH(
 		[with OpenSSL support @<:@default=no@:>@]
 	),
 	,
-	with_ssl=no
+	with_ssl=yes
 )
 
 AS_IF([test "x$with_ssl" = "xyes"], [
@@ -180,6 +180,9 @@ AS_IF([test "x$with_ssl" = "xyes"], [
 	AC_CHECK_LIB([paho-mqtt3as], [MQTTAsync_create], , AC_MSG_ERROR([missing paho.mqtt.c SSL library]))
 
 	AC_DEFINE([OPENSSL], [], [OpenSSL support])
+],
+[
+	AC_SEARCH_LIBS([MQTTAsync_create], [mqtt paho-mqtt mqtt3 paho-mqtt3 mqtt3a paho-mqtt3a], , AC_MSG_ERROR([missing paho.mqtt.c library]))
 ])
 
 AM_CONDITIONAL([PAHO_WITH_SSL], [test "$with_ssl" = yes])

@@ -31,9 +31,7 @@
 #include "mqtt/token.h"
 #include "mqtt/string_collection.h"
 #include "mqtt/will_options.h"
-#if defined(OPENSSL)
-	#include "mqtt/ssl_options.h"
-#endif
+#include "mqtt/ssl_options.h"
 #include <vector>
 #include <chrono>
 
@@ -57,10 +55,8 @@ class connect_options
 	/** The LWT options */
 	will_options will_;
 
-	#if defined(OPENSSL)
-		/** The SSL options  */
-		ssl_options ssl_;
-	#endif
+	/** The SSL options  */
+	ssl_options ssl_;
 
 	/** The user name to use for the connection. */
 	string_ref userName_;
@@ -187,20 +183,18 @@ public:
 	 * @return The LWT options to use for the connection.
 	 */
 	const will_options& get_will_options() const { return will_; }
-
-	#if defined(OPENSSL)
-		/**
-		 * Get the SSL options to use for the connection.
-		 * @return The SSL options to use for the connection.
-		 */
-		 const ssl_options& get_ssl_options() const { return ssl_; }
-		 /**
-		  * Sets the SSL for the connection.
-		  * @param ssl The SSL options.
-		  */
-		 void set_ssl(const ssl_options& ssl);
-	#endif
-
+	/**
+	 * Get the SSL options to use for the connection.
+	 * @return The SSL options to use for the connection.
+	 */
+	const ssl_options& get_ssl_options() const { return ssl_; }
+	/**
+	 * Sets the SSL for the connection.
+	 * These will only have an effect if compiled against the SSL version of
+	 * the Paho C library.
+	 * @param ssl The SSL options.
+	 */
+	void set_ssl(const ssl_options& ssl);
 	/**
 	 * Returns whether the server should remember state for the client
 	 * across reconnects.

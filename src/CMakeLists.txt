@@ -42,6 +42,7 @@ set(COMMON_SRC
     iclient_persistence.cpp
     message.cpp
     response_options.cpp
+    ssl_options.cpp
     string_collection.cpp
     token.cpp
     topic.cpp
@@ -49,9 +50,6 @@ set(COMMON_SRC
     will_options.cpp)
 
 if(PAHO_WITH_SSL)
-    set(COMMON_SRC
-        ${COMMON_SRC}
-        ssl_options.cpp)
     add_definitions(-DOPENSSL)
 endif()
 

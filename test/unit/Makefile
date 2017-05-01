@@ -49,7 +49,8 @@ else
   CXXFLAGS += -O2
 endif
 
-ifdef SSL
+SSL ?= 1
+ifneq ($(SSL),0)
   CPPFLAGS += -DOPENSSL
   PAHO_C_LIB ?= paho-mqtt3as
 else
@@ -85,4 +86,7 @@ dump:
 	@echo CXX: $(CXX)
 	@echo Tests: $(HDR_TESTS)
 	@echo Headers: $(HDRS)
+	@echo CXXFLAGS: $(CXXFLAGS)
+	@echo LDFLAGS: $(LDFLAGS)
+	@echo LDLIBS: $(LDLIBS)
 

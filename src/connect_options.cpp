@@ -40,10 +40,8 @@ connect_options::connect_options(const connect_options& opt) : opts_(opt.opts_)
 	if (opts_.will)
 		set_will(opt.will_);
 
-	#if defined(OPENSSL)
-		if (opts_.ssl)
-			set_ssl(opt.ssl_);
-	#endif
+	if (opts_.ssl)
+		set_ssl(opt.ssl_);
 
 	set_user_name(opt.userName_);
 	set_password(opt.password_);
@@ -51,19 +49,15 @@ connect_options::connect_options(const connect_options& opt) : opts_(opt.opts_)
 
 connect_options::connect_options(connect_options&& opt) : opts_(opt.opts_),
 						will_(std::move(opt.will_)),
-						#if defined(OPENSSL)
-							ssl_(std::move(opt.ssl_)),
-						#endif
+						ssl_(std::move(opt.ssl_)),
 						userName_(std::move(opt.userName_)),
 						password_(std::move(opt.password_))
 {
 	if (opts_.will)
 		opts_.will = &will_.opts_;
 
-	#if defined(OPENSSL)
-		if (opts_.ssl)
-			opts_.ssl = &ssl_.opts_;
-	#endif
+	if (opts_.ssl)
+		opts_.ssl = &ssl_.opts_;
 
 	opts_.username = c_str(userName_);
 	set_password(password_);
@@ -76,10 +70,8 @@ connect_options& connect_options::operator=(const connect_options& opt)
 	if (opts_.will)
 		set_will(opt.will_);
 
-	#if defined(OPENSSL)
-		if (opts_.ssl)
-			set_ssl(opt.ssl_);
-	#endif
+	if (opts_.ssl)
+		set_ssl(opt.ssl_);
 
 	set_user_name(opt.userName_);
 	set_password(opt.password_);
@@ -101,11 +93,9 @@ connect_options& connect_options::operator=(connect_options&& opt)
 	password_ = std::move(opt.password_);
 	set_password(password_);
 
-	#if defined(OPENSSL)
-		ssl_ = std::move(opt.ssl_);
-		if (opts_.ssl)
-			opts_.ssl = &ssl_.opts_;
-	#endif
+	ssl_ = std::move(opt.ssl_);
+	if (opts_.ssl)
+		opts_.ssl = &ssl_.opts_;
 
 	return *this;
 }
@@ -136,13 +126,11 @@ void connect_options::set_password(binary_ref password)
 	}
 }
 
-#if defined(OPENSSL)
 void connect_options::set_ssl(const ssl_options& ssl)
 {
 	ssl_ = ssl;
 	opts_.ssl = &ssl_.opts_;
 }
-#endif
 
 void connect_options::set_token(const token_ptr& tok)
 {

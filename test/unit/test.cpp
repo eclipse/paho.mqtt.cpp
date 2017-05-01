@@ -40,9 +40,11 @@ int main(int argc, char* argv[])
 {
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::buffer_ref_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::will_options_test );
-#if defined(OPENSSL)
-	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::ssl_options_test );
-#endif // OPENSSL
+
+	#if defined(OPENSSL)
+		CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::ssl_options_test );
+	#endif
+
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::connect_options_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::disconnect_options_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::response_options_test );

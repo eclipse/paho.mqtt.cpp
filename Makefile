@@ -20,7 +20,6 @@ INSTALL ?= install
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA =  $(INSTALL) -m 644
 
-
 # ----- Directories -----
 
 SRC_DIR ?= src
@@ -72,10 +71,6 @@ TGT = $(LIB_DIR)/$(LIB)
 
 SRCS += $(notdir $(wildcard $(SRC_DIR)/*.cpp))
 
-ifndef SSL
-  SRC_IGNORE += ssl_options.cpp
-endif
-
 ifdef SRC_IGNORE
   SRCS := $(filter-out $(SRC_IGNORE),$(SRCS))
 endif
@@ -103,7 +98,8 @@ else
   CPPFLAGS += -O2 -Wno-unused-result -Werror
 endif
 
-ifdef SSL
+SSL ?= 1
+ifneq ($(SSL),0)
   DEFS += OPENSSL
   LIB_DEPS += paho-mqtt3as
 else

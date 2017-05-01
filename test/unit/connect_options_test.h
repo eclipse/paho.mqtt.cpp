@@ -350,16 +350,14 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_set_ssl() {
-		#if defined(OPENSSL)
-			mqtt::connect_options opts;
-			const auto& c_struct = opts.opts_;
+		mqtt::connect_options opts;
+		const auto& c_struct = opts.opts_;
 
-			CPPUNIT_ASSERT(nullptr == c_struct.ssl);
-			mqtt::ssl_options sslOpts;
-			opts.set_ssl(sslOpts);
-			CPPUNIT_ASSERT(nullptr != c_struct.ssl);
-			CPPUNIT_ASSERT_EQUAL(&opts.ssl_.opts_, c_struct.ssl);
-		#endif
+		CPPUNIT_ASSERT(nullptr == c_struct.ssl);
+		mqtt::ssl_options sslOpts;
+		opts.set_ssl(sslOpts);
+		CPPUNIT_ASSERT(nullptr != c_struct.ssl);
+		CPPUNIT_ASSERT_EQUAL(&opts.ssl_.opts_, c_struct.ssl);
 	}
 
 // ----------------------------------------------------------------------

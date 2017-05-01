@@ -38,9 +38,7 @@ libpaho_mqttpp3_la_SOURCES += src/string_collection.cpp
 libpaho_mqttpp3_la_SOURCES += src/token.cpp
 libpaho_mqttpp3_la_SOURCES += src/topic.cpp
 libpaho_mqttpp3_la_SOURCES += src/will_options.cpp
-if PAHO_WITH_SSL
 libpaho_mqttpp3_la_SOURCES += src/ssl_options.cpp
-endif
 
 
 ###############################################################################
@@ -98,9 +96,7 @@ include_HEADERS += src/mqtt/topic.h
 include_HEADERS += src/mqtt/string_collection.h
 include_HEADERS += src/mqtt/types.h
 include_HEADERS += src/mqtt/will_options.h
-if PAHO_WITH_SSL
 include_HEADERS += src/mqtt/ssl_options.h
-endif
 
 
 ###############################################################################
