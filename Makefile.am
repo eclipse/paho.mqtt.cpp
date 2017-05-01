@@ -148,14 +148,6 @@ endif
 # Samples: proprocessor flags
 ###############################################################################
 
-if PAHO_WITH_SSL
-ssl_publish_CPPFLAGS = $(COMMONCPPFLAGS)
-endif
-
-###############################################################################
-# Samples: proprocessor flags
-###############################################################################
-
 async_publish_CPPFLAGS = $(COMMONCPPFLAGS)
 
 async_subscribe_CPPFLAGS = $(COMMONCPPFLAGS)
@@ -167,6 +159,10 @@ sync_publish_CPPFLAGS = $(COMMONCPPFLAGS)
 sync_consume_CPPFLAGS = $(COMMONCPPFLAGS)
 
 pub_speed_test_CPPFLAGS = $(COMMONCPPFLAGS)
+
+if PAHO_WITH_SSL
+ssl_publish_CPPFLAGS = $(COMMONCPPFLAGS)
+endif
 
 ###############################################################################
 # Samples: compiler flags
