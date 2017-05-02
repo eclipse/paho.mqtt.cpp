@@ -342,13 +342,13 @@ public:
 			mqtt::message::validate_qos(-1);
 			CPPUNIT_FAIL("message shouldn't accept QoS <min");
 		} 
-		catch (std::invalid_argument& ex) {}
+		catch (const mqtt::exception& ex) {}
 
 		for (int i=0; i<=2; ++i) {
 			try {
 				mqtt::message::validate_qos(0);
 			} 
-			catch (std::invalid_argument& ex) {
+			catch (...) {
 				CPPUNIT_FAIL("mesage should accept valid QoS: "+std::to_string(i));
 			}
 		}
@@ -357,7 +357,7 @@ public:
 			mqtt::message::validate_qos(3);
 			CPPUNIT_FAIL("message shouldn't accept QoS >max");
 		}
-		catch (std::invalid_argument& ex) {}
+		catch (const mqtt::exception& ex) {}
 	}
 
 };

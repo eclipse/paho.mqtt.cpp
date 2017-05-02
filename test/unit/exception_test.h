@@ -65,9 +65,8 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_get_message() {
-		mqtt::exception ex1(MQTTASYNC_FAILURE);
 		std::string msg1 { "MQTT exception -1" };
-
+		mqtt::exception ex1(MQTTASYNC_FAILURE, msg1);
 		CPPUNIT_ASSERT_EQUAL(msg1, ex1.get_message());
 	}
 
@@ -77,7 +76,6 @@ public:
 
 	void test_get_reason_code() {
 		mqtt::exception ex1(MQTTASYNC_FAILURE);
-
 		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex1.get_reason_code());
 	}
 
@@ -87,7 +85,7 @@ public:
 
 	void test_to_str() {
 		mqtt::exception ex1(MQTTASYNC_FAILURE);
-		std::string msg1 { "MQTT exception -1" };
+		std::string msg1 { "MQTT error [-1]" };
 
 		CPPUNIT_ASSERT_EQUAL(msg1, ex1.to_string());
 	}
@@ -98,9 +96,9 @@ public:
 
 	void test_what() {
 		mqtt::exception ex1(MQTTASYNC_FAILURE);
-		const char *msg1 { "MQTT exception -1" };
+		const char *msg1 = "MQTT error [-1]";
 
-		CPPUNIT_ASSERT_EQUAL(0, strcmp(msg1, ex1.what()));
+		CPPUNIT_ASSERT(!strcmp(msg1, ex1.what()));
 	}
 
 };

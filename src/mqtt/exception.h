@@ -73,7 +73,7 @@ public:
 	 * Gets a string representation of this exception.
 	 * @return A string representation of this exception.
 	 */
-	string to_string() const { return msg_; }
+	string to_string() const { return string(what()); }
 };
 
 /////////////////////////////////////////////////////////////////////////////

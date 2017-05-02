@@ -29,19 +29,12 @@ ssl_options::ssl_options() : opts_(DFLT_C_STRUCT)
 {
 }
 
-ssl_options::ssl_options(
-		const string& trustStore,
-		const string& keyStore,
-		const string& privateKey,
-		const string& privateKeyPassword,
-		const string& enabledCipherSuites,
-		bool enableServerCertAuth)
-		: opts_(DFLT_C_STRUCT),
-		  trustStore_(trustStore),
-		  keyStore_(keyStore),
-		  privateKey_(privateKey),
-		  privateKeyPassword_(privateKeyPassword),
-		  enabledCipherSuites_(enabledCipherSuites)
+ssl_options::ssl_options(const string& trustStore, const string& keyStore,
+						 const string& privateKey, const string& privateKeyPassword,
+						 const string& enabledCipherSuites, bool enableServerCertAuth)
+			: opts_(DFLT_C_STRUCT), trustStore_(trustStore), keyStore_(keyStore),
+				privateKey_(privateKey), privateKeyPassword_(privateKeyPassword),
+				enabledCipherSuites_(enabledCipherSuites)
 {
 	update_c_struct();
 	opts_.enableServerCertAuth = enableServerCertAuth;
@@ -62,9 +55,6 @@ ssl_options::ssl_options(ssl_options&& opt)
 			enabledCipherSuites_(std::move(opt.enabledCipherSuites_))
 {
 	update_c_struct();
-
-	// NOTE: leave the source object "empty" (i.e. with default values)
-	opt.opts_ = DFLT_C_STRUCT;
 }
 
 void ssl_options::update_c_struct()
@@ -105,10 +95,6 @@ ssl_options& ssl_options::operator=(ssl_options&& rhs)
 	privateKey_ = std::move(rhs.privateKey_);
 	privateKeyPassword_ = std::move(rhs.privateKeyPassword_);
 	enabledCipherSuites_ = std::move(rhs.enabledCipherSuites_);
-
-	// NOTE: the correct semantic is to leave the source object
-	// "empty" (i.e. with default values)
-	rhs.opts_ = DFLT_C_STRUCT;
 
 	update_c_struct();
 	return *this;
@@ -151,3 +137,4 @@ void ssl_options::set_enable_server_cert_auth(bool enableServerCertAuth)
 
 /////////////////////////////////////////////////////////////////////////////
 } // end namespace mqtt
+

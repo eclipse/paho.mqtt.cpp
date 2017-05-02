@@ -39,8 +39,10 @@ namespace mqtt {
  */
 class string_collection
 {
+	/** The type for the collection of strings */
 	using collection_type = std::vector<string>;
-	using c_arr_type = std::vector<char*>;
+	/** The type for the array of C pointers */
+	using c_arr_type = std::vector<const char*>;
 
 	/**
 	 * The collection of strings for the topics.
@@ -55,7 +57,9 @@ class string_collection
 	 */
 	c_arr_type cArr_;
 	/**
-	 * Updated the cArr_ object to agree with the values in coll_
+	 * Updated the cArr_ object to agree with the values in coll_ 
+	 * This should be called any time the coll_ variable is modified 
+	 * <i>in any way</i>. 
 	 */
 	void update_c_arr();
 
@@ -124,7 +128,8 @@ public:
 	 *  	   the topics in the object.
 	 *
 	 */
-	char* const* c_arr() const { return cArr_.data(); }
+	char* const* c_arr() const { return (char* const *) cArr_.data(); }
+	//const char* const* c_arr() const { return cArr_.data(); }
 };
 
 /////////////////////////////////////////////////////////////////////////////

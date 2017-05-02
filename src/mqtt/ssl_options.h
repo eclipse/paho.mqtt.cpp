@@ -115,13 +115,9 @@ public:
 	 * @param enableServerCertAuth True/False option to enable verification of
 	 * the server certificate
 	 */
-	ssl_options(
-			const string& trustStore,
-			const string& keyStore,
-			const string& privateKey,
-			const string& privateKeyPassword,
-			const string& enabledCipherSuites,
-			bool enableServerCertAuth);
+	ssl_options(const string& trustStore, const string& keyStore,
+				const string& privateKey, const string& privateKeyPassword,
+				const string& enabledCipherSuites, bool enableServerCertAuth);
 	/**
 	 * Copy constructor.
 	 * @param opt The other options to copy.

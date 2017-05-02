@@ -186,7 +186,6 @@ public:
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_private_key());
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_private_key_password());
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_enabled_cipher_suites());
-		CPPUNIT_ASSERT_EQUAL(!SERVER_CERT, orgOpts.get_enable_server_cert_auth());
 	}
 
 // ----------------------------------------------------------------------
@@ -253,7 +252,6 @@ public:
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_private_key());
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_private_key_password());
 		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgOpts.get_enabled_cipher_suites());
-		CPPUNIT_ASSERT_EQUAL(!SERVER_CERT, orgOpts.get_enable_server_cert_auth());
 
 		// Self assignment should cause no harm
 		// (clang++ is smart enough to warn about this)

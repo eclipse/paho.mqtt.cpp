@@ -34,11 +34,11 @@ will_options::will_options() : opts_(DFLT_C_STRUCT)
 will_options::will_options(string_ref top,
 						   const void *payload, size_t payloadlen,
 						   int qos, bool retained)
-		: opts_(DFLT_C_STRUCT), topic_(std::move(top))
+		: opts_(DFLT_C_STRUCT)
 {
-	opts_.topicName = c_str(topic_);
 	opts_.qos = qos;
 	opts_.retained = retained;
+	set_topic(std::move(top));
 	set_payload(binary_ref(static_cast<const binary_ref::value_type*>(payload), payloadlen));
 }
 
@@ -52,21 +52,21 @@ will_options::will_options(const topic& top,
 
 will_options::will_options(string_ref top, binary_ref payload,
 						   int qos, bool retained)
-		: opts_(DFLT_C_STRUCT), topic_(std::move(top))
+		: opts_(DFLT_C_STRUCT)
 {
-	opts_.topicName = c_str(topic_);
 	opts_.qos = qos;
 	opts_.retained = retained;
+	set_topic(std::move(top));
 	set_payload(std::move(payload));
 }
 
 will_options::will_options(string_ref top, const string& payload,
 						   int qos, bool retained)
-		: opts_(DFLT_C_STRUCT), topic_(std::move(top))
+		: opts_(DFLT_C_STRUCT)
 {
-	opts_.topicName = c_str(topic_);
 	opts_.qos = qos;
 	opts_.retained = retained;
+	set_topic(std::move(top));
 	set_payload(payload);
 }
 
@@ -110,13 +110,13 @@ will_options& will_options::operator=(will_options&& rhs)
 void will_options::set_topic(string_ref top)
 {
 	topic_ = top ? std::move(top) : string_ref(string());
-	opts_.topicName = c_str(topic_);
+	opts_.topicName = topic_.c_str();
 }
 
 void will_options::set_payload(binary_ref msg)
 {
 	// The C struct payload must not be nullptr for will options
-	payload_ = msg ? std::move(msg) : binary_ref(string());
+	payload_ = msg ? std::move(msg) : binary_ref(binary());
 
 	opts_.payload.len = (int) payload_.size();
 	opts_.payload.data = payload_.data();

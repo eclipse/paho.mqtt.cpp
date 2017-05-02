@@ -506,7 +506,7 @@ token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 	response_options opts(tok);
 
 	int rc = MQTTAsync_subscribeMany(cli_, int(n), topicFilters->c_arr(),
-									 const_cast<int*>(&qos[0]), &opts.opts_);
+									 const_cast<int*>(qos.data()), &opts.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(tok);
@@ -531,7 +531,7 @@ token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 	response_options opts(tok);
 
 	int rc = MQTTAsync_subscribeMany(cli_, int(n), topicFilters->c_arr(),
-									 const_cast<int*>(&qos[0]), &opts.opts_);
+									 const_cast<int*>(qos.data()), &opts.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(tok);

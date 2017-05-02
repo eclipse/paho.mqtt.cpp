@@ -106,7 +106,7 @@ class async_client_test : public CppUnit::TestFixture
 	const int BAD_QOS  { 3 };
 	const_string_collection_ptr TOPIC_COLL { string_collection::create({ "TOPIC0", "TOPIC1", "TOPIC2" }) };
 	mqtt::iasync_client::qos_collection GOOD_QOS_COLL { 0, 1, 2 };
-	mqtt::iasync_client::qos_collection BAD_QOS_COLL  { BAD_QOS };
+	mqtt::iasync_client::qos_collection BAD_QOS_COLL  { BAD_QOS, 1, 2 };
 	const std::string PAYLOAD { "PAYLOAD" };
 	const int TIMEOUT { 1000 };
 	int CONTEXT { 4 };
@@ -688,16 +688,15 @@ public:
 
 	void test_subscribe_many_topics_2_args() {
 		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
-		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
-
-		mqtt::token_ptr token_conn { cli.connect() };
-		CPPUNIT_ASSERT(token_conn);
-		token_conn->wait();
+		cli.connect()->wait();
 		CPPUNIT_ASSERT(cli.is_connected());
 
-		mqtt::token_ptr token_sub { cli.subscribe(TOPIC_COLL, GOOD_QOS_COLL) };
-		CPPUNIT_ASSERT(token_sub);
-		token_sub->wait_for(TIMEOUT);
+		try {
+			cli.subscribe(TOPIC_COLL, GOOD_QOS_COLL)->wait_for(TIMEOUT);
+		}
+		catch (const mqtt::exception& exc) {
+			CPPUNIT_FAIL(exc.what());
+		}
 
 		mqtt::token_ptr token_disconn { cli.disconnect() };
 		CPPUNIT_ASSERT(token_disconn);
@@ -714,7 +713,9 @@ public:
 			CPPUNIT_ASSERT(token_sub);
 			token_sub->wait_for(TIMEOUT);
 		}
-		catch (std::invalid_argument& ex) {}
+		catch (const mqtt::exception& ex) {
+			//CPPUNIT_ASSERT_EQUAL(MQTTASYNC_BAD_QOS, ex.get_reason_code());
+		}
 
 		int reason_code = MQTTASYNC_SUCCESS;
 		try {
@@ -756,11 +757,11 @@ public:
 		mqtt::test::dummy_action_listener listener;
 
 		try {
-			mqtt::token_ptr token_sub { cli.subscribe(TOPIC_COLL, BAD_QOS_COLL, &CONTEXT, listener) };
-			CPPUNIT_ASSERT(token_sub);
-			token_sub->wait_for(TIMEOUT);
+			cli.subscribe(TOPIC_COLL, BAD_QOS_COLL, &CONTEXT, listener)->wait_for(TIMEOUT);
 		}
-		catch (std::invalid_argument& ex) {}
+		catch (const mqtt::exception& ex) {
+			//CPPUNIT_ASSERT_EQUAL(MQTTASYNC_BAD_QOS, ex.get_reason_code());
+		}
 
 		int reason_code = MQTTASYNC_SUCCESS;
 		try {

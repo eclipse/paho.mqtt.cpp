@@ -51,13 +51,15 @@ string_collection::string_collection(const string_collection& coll) : coll_ { co
 string_collection::string_collection(std::initializer_list<string> sl)
 {
 	for (const auto& s : sl)
-		push_back(s);
+		coll_.push_back(s);
+	update_c_arr();
 }
 
 string_collection::string_collection(std::initializer_list<const char*> sl)
 {
 	for (const auto& s : sl)
-		push_back(string(s));
+		coll_.push_back(string(s));
+	update_c_arr();
 }
 
 void string_collection::update_c_arr()
@@ -65,7 +67,7 @@ void string_collection::update_c_arr()
 	cArr_.clear();
 	cArr_.reserve(coll_.size());
 	for (const auto& s : coll_)
-		cArr_.push_back(const_cast<char*>(s.c_str()));
+		cArr_.push_back(s.c_str());
 }
 
 string_collection& string_collection::operator=(const string_collection& coll)
@@ -77,19 +79,15 @@ string_collection& string_collection::operator=(const string_collection& coll)
 
 void string_collection::push_back(const string& str)
 {
-	size_t i = coll_.size();
 	coll_.push_back(str);
-	cArr_.push_back(const_cast<char*>(coll_[i].c_str()));
+	update_c_arr();
 }
-
 
 void string_collection::push_back(string&& str)
 {
-	size_t i = coll_.size();
 	coll_.push_back(str);
-	cArr_.push_back(const_cast<char*>(coll_[i].c_str()));
+	update_c_arr();
 }
-
 
 void string_collection::clear()
 {
