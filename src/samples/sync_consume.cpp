@@ -52,8 +52,6 @@ int main(int argc, char* argv[])
 
 		// Consume messages
 
-		cli.start_consuming();
-
 		while (true) {
 			auto msg = cli.consume_message();
 
@@ -74,8 +72,6 @@ int main(int argc, char* argv[])
 
 			cout << msg->get_topic() << ": " << msg->to_string() << endl;
 		}
-
-		cli.stop_consuming();
 
 		// Disconnect
 

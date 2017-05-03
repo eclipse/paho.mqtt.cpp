@@ -41,18 +41,14 @@ int main(int argc, char* argv[])
 
 	mqtt::async_client cli(ADDRESS, CLIENT_ID);
 
-	// Start the connection.
-	// When completed, the callback will subscribe to topic.
-
 	try {
 		cout << "Connecting to the MQTT server..." << flush;
 		cli.connect(connOpts)->wait();
+		cli.start_consuming();
 		cli.subscribe(TOPIC, QOS)->wait();
 		cout << "OK" << endl;
 
 		// Consume messages
-
-		cli.start_consuming();
 
 		while (true) {
 			auto msg = cli.consume_message();
@@ -62,7 +58,9 @@ int main(int argc, char* argv[])
 
 		// Disconnect
 
-		cout << "\nDisconnecting from the MQTT server..." << flush;
+		cout << "\nShutting down and disconnecting from the MQTT server..." << flush;
+		cli.unsubscribe(TOPIC)->wait();
+		cli.stop_consuming();
 		cli.disconnect()->wait();
 		cout << "OK" << endl;
 	}

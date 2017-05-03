@@ -138,6 +138,7 @@ public:
 	 */
 	virtual void connect() {
 		cli_.connect()->wait_for(timeout_);
+		cli_.start_consuming();
 	}
 	/**
 	 * Connects to an MQTT server using the specified options.
@@ -145,6 +146,7 @@ public:
 	 */
 	virtual void connect(connect_options opts) {
 		cli_.connect(std::move(opts))->wait_for(timeout_);
+		cli_.start_consuming();
 	}
 	/**
 	 * Reconnects the client using options from the previous connect.
@@ -155,6 +157,7 @@ public:
 	 * Disconnects from the server.
 	 */
 	virtual void disconnect() {
+		cli_.stop_consuming();
 		cli_.disconnect()->wait_for(timeout_);
 	}
 	/**
@@ -163,7 +166,10 @@ public:
 	 *  			  existing work to finish before disconnecting. A value
 	 *  			  of zero or less means the client will not quiesce.
 	 */
-	virtual void disconnect(int timeoutMS);
+	virtual void disconnect(int timeoutMS) {
+		cli_.stop_consuming();
+		cli_.disconnect(timeoutMS)->wait_for(timeout_);
+	}
 	/**
 	 * Disconnects from the server.
 	 * @param to the amount of time in milliseconds to allow for

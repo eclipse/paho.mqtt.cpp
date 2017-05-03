@@ -59,12 +59,6 @@ void client::close()
 	// TODO: What?
 }
 
-void client::disconnect(int timeout)
-{
-	cli_.disconnect(timeout)->wait_for(timeout_);
-}
-
-
 //string client::generate_client_id()
 //{
 //}

@@ -113,9 +113,13 @@ void async_client::on_connection_lost(void *context, char *cause)
 	if (context) {
 		async_client* cli = static_cast<async_client*>(context);
 		callback* cb = cli->userCallback_;
+		consumer_queue_type& que = cli->que_;
 
 		if (cb)
 			cb->connection_lost(cause ? string(cause) : string());
+
+		if (que)
+			que->put(const_message_ptr{});
 	}
 }
 
