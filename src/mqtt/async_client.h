@@ -80,6 +80,8 @@ private:
 	std::unique_ptr<MQTTClient_persistence> persist_;
 	/** Callback supplied by the user (if any) */
 	callback* userCallback_;
+	/** Copy of connect token (for re-connects) */
+	token_ptr connTok_;
 	/** A list of tokens that are in play */
 	std::list<token_ptr> pendingTokens_;
 	/** A list of delivery tokens that are in play */

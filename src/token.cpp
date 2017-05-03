@@ -20,8 +20,6 @@
 #include "mqtt/async_client.h"
 #include <cstring>
 
-#include <iostream>
-
 namespace mqtt {
 
 // --------------------------------------------------------------------------
@@ -45,9 +43,13 @@ void token::on_connected(void* context, char* /*cause*/)
 {
 	if (context) {
 		token* tok = static_cast<token*>(context);
-		tok->on_success(nullptr);
+
 		// No more callback (till client sets up another token)
-		MQTTAsync_setConnected(tok->get_client(), nullptr, nullptr);
+		auto cli = dynamic_cast<async_client*>(tok->get_client());
+		if (cli)
+			MQTTAsync_setConnected(cli->cli_, nullptr, nullptr);
+
+		tok->on_success(nullptr);
 	}
 }
 
@@ -137,6 +139,14 @@ token::token(iasync_client& cli, MQTTAsync_token tok)
 				: cli_(&cli), tok_(tok), userContext_(nullptr),
 					listener_(nullptr), complete_(false), rc_(0)
 {
+}
+
+void token::reset()
+{
+	guard g(lock_);
+	complete_ = false;
+	rc_ = 0;
+	errMsg_.clear();
 }
 
 void token::wait()

@@ -269,7 +269,8 @@ token_ptr async_client::connect(connect_options opts)
 		throw exception(rc);
 	}
 
-	return tok;
+	connTok_ = std::move(tok);
+	return connTok_;
 }
 
 token_ptr async_client::connect(connect_options opts, void* userContext,
@@ -287,7 +288,8 @@ token_ptr async_client::connect(connect_options opts, void* userContext,
 		throw exception(rc);
 	}
 
-	return tok;
+	connTok_ = std::move(tok);
+	return connTok_;
 }
 
 token_ptr async_client::connect(void* userContext, iaction_listener& cb)
@@ -303,7 +305,12 @@ token_ptr async_client::connect(void* userContext, iaction_listener& cb)
 
 token_ptr async_client::reconnect()
 {
-	auto tok = token::create(*this);
+	auto tok = connTok_;
+
+	if (!tok)
+		throw exception(MQTTASYNC_FAILURE, "Can't reconnect before a successful connect");
+
+	tok->reset();
 	add_token(tok);
 
 	int rc = MQTTAsync_setConnected(cli_, tok.get(), &token::on_connected);

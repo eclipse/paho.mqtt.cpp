@@ -89,6 +89,10 @@ class token
 	friend class disconnect_options;
 
 	/**
+	 * Resets the token back to a non-signaled state.
+	 */
+	void reset();
+	/**
 	 * Sets the ID for the message.
 	 * This is a guaranteed atomic operation.
 	 * @param msgid The ID of the message.

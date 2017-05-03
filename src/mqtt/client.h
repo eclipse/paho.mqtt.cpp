@@ -152,7 +152,7 @@ public:
 	 * Reconnects the client using options from the previous connect.
 	 * The client must have previously called connect() for this to work.
 	 */
-	virtual void reconnect() { cli_.reconnect(); }
+	virtual void reconnect() { cli_.reconnect()->wait_for(timeout_); }
 	/**
 	 * Disconnects from the server.
 	 */

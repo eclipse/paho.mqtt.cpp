@@ -1,3 +1,7 @@
+// sync_consume.cpp
+//
+// This is a Paho MQTT C++ sample application for synchronous consumption
+// of incoming
 /*******************************************************************************
  * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
  *
@@ -24,9 +28,29 @@
 #include "mqtt/client.h"
 
 using namespace std;
+using namespace std::chrono;
 
 const string ADDRESS	{ "tcp://localhost:1883" };
 const string CLIENT_ID	{ "sync_consumer" };
+
+// --------------------------------------------------------------------------
+// Simple function to manually reconect a client.
+
+bool try_reconnect(mqtt::client& cli)
+{
+	constexpr int N_ATTEMPT = 30;
+
+	for (int i=0; i<N_ATTEMPT && !cli.is_connected(); ++i) {
+		try {
+			cli.reconnect();
+			return true;
+		}
+		catch (const mqtt::exception&) {
+			this_thread::sleep_for(seconds(1));
+		}
+	}
+	return false;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -38,11 +62,8 @@ int main(int argc, char* argv[])
 
 	mqtt::client cli(ADDRESS, CLIENT_ID);
 
-	const vector<string> TOPICS { "hello", "command" };
+	const vector<string> TOPICS { "data/#", "command" };
 	const vector<int> QOS { 1, 1 };
-
-	// Start the connection.
-	// When completed, the callback will subscribe to topic.
 
 	try {
 		cout << "Connecting to the MQTT server..." << flush;
@@ -58,8 +79,15 @@ int main(int argc, char* argv[])
 			if (!msg) {
 				if (!cli.is_connected()) {
 					cout << "Lost connection. Attempting reconnect" << endl;
-					cli.reconnect();
-					continue;
+					if (try_reconnect(cli)) {
+						cli.subscribe(TOPICS, QOS);
+						cout << "Reconnected" << endl;
+						continue;
+					}
+					else {
+						cout << "Reconnect failed." << endl;
+						break;
+					}
 				}
 				else
 					break;
