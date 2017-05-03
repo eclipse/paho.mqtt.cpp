@@ -29,11 +29,13 @@ constexpr int message::DFLT_QOS;
 constexpr bool message::DFLT_RETAINED;
 constexpr MQTTAsync_message message::DFLT_C_STRUCT;
 
+const string message::EMPTY_STR;
+const binary message::EMPTY_BIN;
+
 // --------------------------------------------------------------------------
 
-message::message() : msg_(DFLT_C_STRUCT), topic_(string())
+message::message() : msg_(DFLT_C_STRUCT)
 {
-	set_payload(binary());
 }
 
 message::message(string_ref topic, const void* payload, size_t len, int qos, bool retained)
@@ -94,7 +96,7 @@ message& message::operator=(message&& rhs)
 
 void message::clear_payload()
 {
-	payload_ = string();
+	payload_.reset();
 	msg_.payload = nullptr;
 	msg_.payloadlen = 0;
 }
@@ -103,7 +105,7 @@ void message::set_payload(binary_ref payload)
 {
 	payload_ = std::move(payload);
 
-	if (!payload_ || payload_.empty()) {
+	if (payload_.empty()) {
 		msg_.payload = nullptr;
 		msg_.payloadlen = 0;
 	}

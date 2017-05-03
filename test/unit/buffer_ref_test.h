@@ -26,7 +26,6 @@
 #include <cppunit/ui/text/TestRunner.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-
 namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
@@ -50,6 +49,7 @@ class buffer_ref_test : public CppUnit::TestFixture
 	CPPUNIT_TEST( test_cstr_assignment );
 	CPPUNIT_TEST( test_ptr_copy_assignment );
 	CPPUNIT_TEST( test_ptr_move_assignment );
+	CPPUNIT_TEST( test_reset );
 
 
 	CPPUNIT_TEST_SUITE_END();
@@ -74,9 +74,7 @@ public:
 		string_ref sr;
 
 		CPPUNIT_ASSERT(!sr);
-		CPPUNIT_ASSERT_EQUAL(size_t(0), sr.size());
-		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, sr.str());
-		CPPUNIT_ASSERT_EQUAL(size_t(0), strlen(sr.c_str()));
+		CPPUNIT_ASSERT(sr.empty());
 	}
 
 // ----------------------------------------------------------------------
@@ -158,7 +156,7 @@ public:
 
 		CPPUNIT_ASSERT_EQUAL(STR, sr.str());
 
-		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgSR.str());
+		CPPUNIT_ASSERT(!orgSR);
 		CPPUNIT_ASSERT_EQUAL(1L, sr.ptr().use_count());
 	}
 
@@ -191,7 +189,7 @@ public:
 
 		CPPUNIT_ASSERT_EQUAL(STR, sr.str());
 
-		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, orgSR.str());
+		CPPUNIT_ASSERT(!orgSR);
 		CPPUNIT_ASSERT_EQUAL(1L, sr.ptr().use_count());
 	}
 
@@ -263,6 +261,18 @@ public:
 		CPPUNIT_ASSERT_EQUAL(STR, sr.str());
 
 		CPPUNIT_ASSERT(!sp);
+	}
+
+// ----------------------------------------------------------------------
+// Test the reset
+// ----------------------------------------------------------------------
+
+	void test_reset() {
+		string_ref sr(STR);
+
+		sr.reset();
+		CPPUNIT_ASSERT(!sr);
+		CPPUNIT_ASSERT(sr.empty());
 	}
 
 };

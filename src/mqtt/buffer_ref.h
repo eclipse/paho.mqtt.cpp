@@ -34,14 +34,26 @@ namespace mqtt {
 
 /**
  * A reference object for holding immutable data buffers, with cheap copy
- * semantics.
+ * semantics and lifetime management.
  *
  * Each object of this class contains a reference-counted pointer to an
- * immutable data buffer. Onjects can be copied freely and easily since all
- * instances promise not to modify the contents of the buffer.
+ * immutable data buffer. Objects can be copied freely and easily, even
+ * across threads, since all instances promise not to modify the contents
+ * of the buffer.
  *
  * The buffer is immutable but the reference itself acts like a normal
  * variable. It can be reassigned to point to a different buffer.
+ *
+ * If no value has been assigned to a reference, then it is in a default
+ * "null" state. It is not safe to call any member functions on a null
+ * reference, other than to check if the object is null or empty.
+ * @verbatim
+ * string_ref sr;
+ * if (!sr)
+ *   cout << "null reference" << endl;
+ * else
+ *   cout.write(sr.data(), sr.size());
+ * @endverbatim
  */
 template <typename T>
 class buffer_ref
@@ -120,7 +132,8 @@ public:
 	 * NUL-terminated char array.
 	 * @param buf A NUL-terminated char array (C string).
 	 */
-	buffer_ref(const char* buf) : buffer_ref(reinterpret_cast<const value_type*>(buf), std::strlen(buf)) {
+	buffer_ref(const char* buf) : buffer_ref(reinterpret_cast<const value_type*>(buf), 
+											 std::strlen(buf)) {
 		static_assert(sizeof(char) == sizeof(T), "can only use C arr with char or byte buffers");
 	}
 
@@ -190,11 +203,21 @@ public:
 	 */
 	void reset() { data_.reset(); }
 	/**
-	 * Determines if the reference is valid.
+	 * Determines if the reference is valid. 
+	 * If the reference is invalid then it is not safe to call @em any 
+	 * member functions other than @ref is_null() and @ref empty() 
 	 * @return @em true if referring to a valid buffer, @em false if the
 	 *  	   reference (pointer) is null.
 	 */
 	explicit operator bool() const { return bool(data_); }
+	/**
+	 * Determines if the reference is invalid.
+	 * If the reference is invalid then it is not safe to call @em any 
+	 * member functions other than @ref is_null() and @ref empty() 
+	 * @return @em true if the reference is null, @em false if it is 
+	 *  	   referring to a valid buffer,
+	 */
+	bool is_null() const { return !data_; }
 	/**
 	 * Determines if the buffer is empty.
 	 * @return @em true if the buffer is empty or thr reference is null, @em
@@ -205,33 +228,33 @@ public:
 	 * Get a const pointer to the data buffer.
 	 * @return A pointer to the data buffer.
 	 */
-	const value_type* data() const { return data_ ? data_->data() : nullptr; }
+	const value_type* data() const { return data_->data(); }
 	/**
 	 * Get the size of the data buffer.
 	 * @return The size of the data buffer.
 	 */
-	size_t size() const { return data_ ? data_->size() : 0; }
+	size_t size() const { return data_->size(); }
 	/**
 	 * Get the size of the data buffer.
 	 * @return The size of the data buffer.
 	 */
-	size_t length() const { return size(); }
+	size_t length() const { return data_->length(); }
 	/**
 	 * Get the data buffer as a string.
 	 * @return The data buffer as a string.
 	 */
-	blob str() const { return data_ ? (*data_) : blob(); }
+	const blob& str() const { return *data_; }
 	/**
 	 * Get the data buffer as a string.
 	 * @return The data buffer as a string.
 	 */
-	blob to_string() const { return str(); }
+	const blob& to_string() const { return str(); }
 	/**
 	 * Get the data buffer as NUL-terminated C string.
 	 * Note that the reference must be set to call this function.
 	 * @return The data buffer as a string.
 	 */
-	const char* c_str() const { return data_ ? data_->c_str() : ""; }
+	const char* c_str() const { return data_->c_str(); }
 	/**
 	 * Gets a shared pointer to the (const) data buffer.
 	 * @return A shared pointer to the (const) data buffer.

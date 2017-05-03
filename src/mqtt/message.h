@@ -36,7 +36,18 @@ namespace mqtt {
 /**
  * An MQTT message holds everything required for an MQTT PUBLISH message.
  * This holds the binary message payload, topic string, and all the
- * additional meta-data for an MQTT message.
+ * additional meta-data for an MQTT message. 
+ *
+ * The topic and payload buffers are kept as references to const data, so
+ * they can be reassigned as needed, but the buffers can not be updated
+ * in-place. Normally they would be created externally then copied or moved
+ * into the message. The library to transport the messages never touchec the
+ * payloads or topics.
+ *
+ * This also means that message objects are farily cheap to copy, since they
+ * don't copy the payloads. They simply copy the reference to the buffers.
+ * It is safe to pass these buffer references across threads since all
+ * references promise not to update the contents of the buffer.
  */
 class message
 {
@@ -46,6 +57,11 @@ class message
 	static constexpr bool DFLT_RETAINED = false;
 	/** Initializer for the C struct (from the C library) */
 	static constexpr MQTTAsync_message DFLT_C_STRUCT MQTTAsync_message_initializer;
+
+	/** An instance of an empty string (for performance)  */
+	static const string EMPTY_STR;
+	/** An instance of an empty binary (for performance)  */
+	static const binary EMPTY_BIN;
 
 	/** The underlying C message struct */
 	MQTTAsync_message msg_;
@@ -133,7 +149,6 @@ public:
 	 */
 	~message() {}
 
-
 	/**
 	 * Constructs a message with the specified array as a payload, and all
 	 * other values set to defaults.
@@ -209,22 +224,37 @@ public:
 		topic_ = topic_ ? std::move(topic) : string_ref(string());
 	}
 	/**
+	 * Gets the topic reference for the message.
+	 * @return The topic reference for the message.
+	 */
+	const string_ref& get_topic_ref() const { return topic_; }
+	/**
 	 * Gets the topic for the message.
 	 * @return The topic string for the message.
 	 */
-	string get_topic() const { return topic_.str(); }
+	const string& get_topic() const { 
+		return topic_ ? topic_.str() : EMPTY_STR; 
+	}
 	/**
 	 * Clears the payload, resetting it to be empty.
 	 */
 	void clear_payload();
 	/**
+	 * Gets the payload reference.
+	 */
+	const binary_ref& get_payload_ref() const { return payload_; }
+	/**
 	 * Gets the payload
 	 */
-	const binary_ref& get_payload() const { return payload_; }
+	const binary& get_payload() const { 
+		return payload_ ? payload_.str() : EMPTY_BIN; 
+	}
 	/**
 	 * Gets the payload as a string
 	 */
-	string get_payload_str() const { return payload_ ? payload_.str() : string(); }
+	const string& get_payload_str() const { 
+		return payload_ ? payload_.str() : EMPTY_STR;
+	}
 	/**
 	 * Returns the quality of service for this message.
 	 * @return The quality of service for this message.
