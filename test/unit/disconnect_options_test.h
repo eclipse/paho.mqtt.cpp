@@ -74,7 +74,7 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_user_constructor() {
-		const int TIMEOUT = 10;
+		constexpr int TIMEOUT = 10;
 
 		auto tok = token::create(cli);
 		mqtt::disconnect_options opts { TIMEOUT, tok };
@@ -96,7 +96,7 @@ public:
 		mqtt::disconnect_options opts;
 		const auto& c_struct = opts.opts_;
 
-		const int TIMEOUT = 5000;	// ms
+		constexpr int TIMEOUT = 5000;	// ms
 
 		// Set with integer
 		opts.set_timeout(TIMEOUT);

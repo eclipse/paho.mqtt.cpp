@@ -181,11 +181,6 @@ public:
 		disconnect((int) to_milliseconds_count(to));
 	}
 	/**
-	 * Returns a randomly generated client identifier based on the current
-	 * user's login name and the system time.
-	 */
-	//static string generate_client_id();
-	/**
 	 * Returns the client ID used by this client.
 	 * @return string
 	 */

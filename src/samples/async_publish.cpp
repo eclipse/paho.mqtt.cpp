@@ -30,14 +30,14 @@ const std::string DFLT_CLIENT_ID {"AsyncPublisher"};
 
 const string TOPIC {"hello"};
 
-const char* PAYLOAD1 = "Hello World!";
-const char* PAYLOAD2 = "Hi there!";
-const char* PAYLOAD3 = "Is anyone listening?";
-const char* PAYLOAD4 = "Someone is always listening.";
+constexpr const char* PAYLOAD1 = "Hello World!";
+constexpr const char* PAYLOAD2 = "Hi there!";
+constexpr const char* PAYLOAD3 = "Is anyone listening?";
+constexpr const char* PAYLOAD4 = "Someone is always listening.";
 
-const char* LWT_PAYLOAD = "Last will and testament.";
+constexpr const char* LWT_PAYLOAD = "Last will and testament.";
 
-const int  QOS = 1;
+constexpr int  QOS = 1;
 
 const auto TIMEOUT = std::chrono::seconds(10);
 

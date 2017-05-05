@@ -27,7 +27,7 @@ const std::string ADDRESS("tcp://localhost:1883");
 const std::string CLIENTID("AsyncSubcriber");
 const std::string TOPIC("hello");
 
-const int  QOS = 1;
+constexpr int  QOS = 1;
 
 /////////////////////////////////////////////////////////////////////////////
 

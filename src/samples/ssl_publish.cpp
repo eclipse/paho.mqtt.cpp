@@ -35,12 +35,12 @@ const std::string DFLT_CLIENT_ID {"CppAsyncPublisherSSL"};
 
 const std::string TOPIC {"hello"};
 
-const char* PAYLOAD1 = "Hello World!";
-const char* PAYLOAD2 = "Hi there!";
+constexpr const char* PAYLOAD1 = "Hello World!";
+constexpr const char* PAYLOAD2 = "Hi there!";
 
-const char* LWT_PAYLOAD = "Last will and testament.";
+constexpr const char* LWT_PAYLOAD = "Last will and testament.";
 
-const int  QOS = 1;
+constexpr int  QOS = 1;
 const auto TIMEOUT = std::chrono::seconds(10);
 
 /////////////////////////////////////////////////////////////////////////////
