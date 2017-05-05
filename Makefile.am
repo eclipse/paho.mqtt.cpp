@@ -76,27 +76,29 @@ libpaho_mqttpp3_la_LDFLAGS += $(LIBS)
 # Library: headers to install
 ###############################################################################
 
-include_HEADERS  = src/mqtt/async_client.h
-include_HEADERS += src/mqtt/buffer_ref.h
-include_HEADERS += src/mqtt/callback.h
-include_HEADERS += src/mqtt/client.h
-include_HEADERS += src/mqtt/connect_options.h
-include_HEADERS += src/mqtt/delivery_token.h
-include_HEADERS += src/mqtt/disconnect_options.h
-include_HEADERS += src/mqtt/exception.h
-include_HEADERS += src/mqtt/iaction_listener.h
-include_HEADERS += src/mqtt/iasync_client.h
-include_HEADERS += src/mqtt/iclient_persistence.h
-include_HEADERS += src/mqtt/ipersistable.h
-include_HEADERS += src/mqtt/message.h
-include_HEADERS += src/mqtt/response_options.h
-include_HEADERS += src/mqtt/thread_queue.h
-include_HEADERS += src/mqtt/token.h
-include_HEADERS += src/mqtt/topic.h
-include_HEADERS += src/mqtt/string_collection.h
-include_HEADERS += src/mqtt/types.h
-include_HEADERS += src/mqtt/will_options.h
-include_HEADERS += src/mqtt/ssl_options.h
+otherincludedir = $(includedir)/mqtt
+
+otherinclude_HEADERS  = src/mqtt/async_client.h
+otherinclude_HEADERS += src/mqtt/buffer_ref.h
+otherinclude_HEADERS += src/mqtt/callback.h
+otherinclude_HEADERS += src/mqtt/client.h
+otherinclude_HEADERS += src/mqtt/connect_options.h
+otherinclude_HEADERS += src/mqtt/delivery_token.h
+otherinclude_HEADERS += src/mqtt/disconnect_options.h
+otherinclude_HEADERS += src/mqtt/exception.h
+otherinclude_HEADERS += src/mqtt/iaction_listener.h
+otherinclude_HEADERS += src/mqtt/iasync_client.h
+otherinclude_HEADERS += src/mqtt/iclient_persistence.h
+otherinclude_HEADERS += src/mqtt/ipersistable.h
+otherinclude_HEADERS += src/mqtt/message.h
+otherinclude_HEADERS += src/mqtt/response_options.h
+otherinclude_HEADERS += src/mqtt/thread_queue.h
+otherinclude_HEADERS += src/mqtt/token.h
+otherinclude_HEADERS += src/mqtt/topic.h
+otherinclude_HEADERS += src/mqtt/string_collection.h
+otherinclude_HEADERS += src/mqtt/types.h
+otherinclude_HEADERS += src/mqtt/will_options.h
+otherinclude_HEADERS += src/mqtt/ssl_options.h
 
 
 ###############################################################################
