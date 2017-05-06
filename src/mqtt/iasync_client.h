@@ -285,6 +285,10 @@ public:
 	 */
 	virtual void set_callback(callback& cb) =0;
 	/**
+	 * Stops the callbacks.
+	 */
+	virtual void disable_callbacks() = 0;
+	/**
 	 * Subscribe to multiple topics, each of which may include wildcards.
 	 * Provides an optimized way to subscribe to multiple topics compared to
 	 * subscribing to each one individually.

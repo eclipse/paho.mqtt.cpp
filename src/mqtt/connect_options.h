@@ -358,13 +358,12 @@ public:
 	}
 	/**
 	 * Enable or disable automatic reconnects.
-	 * @param on Whether to turn reconnects on or off
 	 * @param minRetryInterval Minimum retry interval in seconds.  Doubled
 	 *  					   on each failed retry.
 	 * @param maxRetryInterval Maximum retry interval in seconds.  The
 	 *  					   doubling stops here on failed retries.
 	 */
-	void set_automatic_reconnect(bool on, int minRetryInterval, int maxRetryInterval);
+	void set_automatic_reconnect(int minRetryInterval, int maxRetryInterval);
 	/**
 	 * Enable or disable automatic reconnects.
 	 * @param on Whether to turn reconnects on or off
@@ -374,10 +373,9 @@ public:
 	 *  					   here on failed retries.
 	 */
 	template <class Rep1, class Period1, class Rep2, class Period2>
-	void set_automatic_reconnect(bool on,
-								 const std::chrono::duration<Rep1, Period1>& minRetryInterval,
+	void set_automatic_reconnect(const std::chrono::duration<Rep1, Period1>& minRetryInterval,
 								 const std::chrono::duration<Rep2, Period2>& maxRetryInterval) {
-		set_automatic_reconnect(on, (int) to_seconds_count(minRetryInterval),
+		set_automatic_reconnect((int) to_seconds_count(minRetryInterval),
 								(int) to_seconds_count(maxRetryInterval));
 	}
 	/**

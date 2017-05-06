@@ -108,6 +108,21 @@ async_client::~async_client()
 // 'context' should be the address of the async_client object that
 // registered the callback.
 
+void async_client::on_connected(void* context, char* cause)
+{
+	if (context) {
+		async_client* cli = static_cast<async_client*>(context);
+		callback* cb = cli->userCallback_;
+		token_ptr tok = cli->connTok_;
+
+		if (cb)
+			cb->connected(cause ? string(cause) : string());
+
+		if (tok)
+			token::on_success(tok.get(), nullptr);
+	}
+}
+
 void async_client::on_connection_lost(void *context, char *cause)
 {
 	if (context) {
@@ -232,19 +247,17 @@ void async_client::remove_token(token* tok)
 	}
 }
 
-int async_client::disable_callbacks()
+void async_client::disable_callbacks()
 {
 	// TODO: It would be nice to disable callbacks at the C library level,
 	// but the setCallback function currently does not accept a nullptr for
 	// the "message arrived" parameter. So, for now we send it an empty
 	// lambda function.
-	#if 0
-	return MQTTAsync_setCallbacks(cli_, this, nullptr, nullptr, nullptr);
-	#else
-	return MQTTAsync_setCallbacks(cli_, this, nullptr,
-				[](void*,char*,int,MQTTAsync_message*) -> int {return !0;},
-				nullptr);
-	#endif
+	int rc = MQTTAsync_setCallbacks(cli_, this, nullptr,
+					[](void*,char*,int,MQTTAsync_message*) -> int {return !0;},
+					nullptr);
+	if (rc != MQTTASYNC_SUCCESS)
+		throw exception(rc);
 }
 
 // --------------------------------------------------------------------------
@@ -257,47 +270,46 @@ token_ptr async_client::connect()
 
 token_ptr async_client::connect(connect_options opts)
 {
-	auto tok = token::create(*this);
-	add_token(tok);
+	// TODO: If connTok_ is non-null, there could be a pending connect
+	// which might complete after creating/assigning a new one. If that
+	// happened, the callback would have the context address of the previous
+	// token which was destroyed. So for now, keep the old one alive within
+	// this function, and check the behavior of the C library...
+	auto tmpTok = connTok_;
+	connTok_ = token::create(*this);
+	add_token(connTok_);
 
-	opts.set_token(tok);
+	opts.set_token(connTok_);
 
 	int rc = MQTTAsync_connect(cli_, &opts.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
-		remove_token(tok);
+		remove_token(connTok_);
+		connTok_.reset();
 		throw exception(rc);
 	}
 
-	connTok_ = std::move(tok);
 	return connTok_;
 }
 
 token_ptr async_client::connect(connect_options opts, void* userContext,
 								iaction_listener& cb)
 {
-	auto tok = token::create(*this, userContext, cb);
-	add_token(tok);
+	auto tmpTok = connTok_;
+	connTok_ = token::create(*this, userContext, cb);
+	add_token(connTok_);
 
-	opts.set_token(tok);
+	opts.set_token(connTok_);
 
 	int rc = MQTTAsync_connect(cli_, &opts.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
-		remove_token(tok);
+		remove_token(connTok_);
+		connTok_.reset();
 		throw exception(rc);
 	}
 
-	connTok_ = std::move(tok);
 	return connTok_;
-}
-
-token_ptr async_client::connect(void* userContext, iaction_listener& cb)
-{
-	connect_options opts;
-	opts.opts_.keepAliveInterval = 30;
-	opts.opts_.cleansession = 1;
-	return connect(opts, userContext, cb);
 }
 
 // --------------------------------------------------------------------------
@@ -313,13 +325,12 @@ token_ptr async_client::reconnect()
 	tok->reset();
 	add_token(tok);
 
-	int rc = MQTTAsync_setConnected(cli_, tok.get(), &token::on_connected);
+	int rc = MQTTAsync_setConnected(cli_, this, &async_client::on_connected);
 
 	if (rc == MQTTASYNC_SUCCESS)
 		rc = MQTTAsync_reconnect(cli_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
-		MQTTAsync_setConnected(cli_, nullptr, nullptr);
 		remove_token(tok);
 		throw exception(rc);
 	}
@@ -490,13 +501,21 @@ void async_client::set_callback(callback& cb)
 	guard g(lock_);
 	userCallback_ = &cb;
 
-	int rc = MQTTAsync_setCallbacks(cli_, this,
+	int rc = MQTTAsync_setConnected(cli_, this, &async_client::on_connected);
+
+	if (rc == MQTTASYNC_SUCCESS) {
+		rc = MQTTAsync_setCallbacks(cli_, this,
 									&async_client::on_connection_lost,
 									&async_client::on_message_arrived,
 									nullptr /*&async_client::on_delivery_complete*/);
+	}
+	else
+		MQTTAsync_setConnected(cli_, nullptr, nullptr);
 
-	if (rc != MQTTASYNC_SUCCESS)
+	if (rc != MQTTASYNC_SUCCESS) {
+		userCallback_ = nullptr;
 		throw exception(rc);
+	}
 }
 
 // --------------------------------------------------------------------------
@@ -688,11 +707,14 @@ void async_client::start_consuming()
 
 void async_client::stop_consuming()
 {
-	int rc = disable_callbacks();
-	que_.reset();
-
-	if (rc != MQTTASYNC_SUCCESS)
-		throw exception(rc);
+	try {
+		disable_callbacks();
+		que_.reset();
+	}
+	catch (...) {
+		que_.reset();
+		throw;
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////

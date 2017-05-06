@@ -161,16 +161,12 @@ void connect_options::set_servers(const_string_collection_ptr serverURIs)
 	}
 }
 
-void connect_options::set_automatic_reconnect(bool on, int minRetryInterval,
+void connect_options::set_automatic_reconnect(int minRetryInterval,
 											  int maxRetryInterval)
 {
-	if (on) {
-		opts_.automaticReconnect = !0;
-		opts_.minRetryInterval = minRetryInterval;
-		opts_.maxRetryInterval = maxRetryInterval;
-	}
-	else
-		opts_.automaticReconnect = 0;
+	opts_.automaticReconnect = !0;
+	opts_.minRetryInterval = minRetryInterval;
+	opts_.maxRetryInterval = maxRetryInterval;
 }
 
 

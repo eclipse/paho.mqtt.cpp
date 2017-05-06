@@ -20,7 +20,53 @@
 #include "mqtt/async_client.h"
 #include <cstring>
 
+#include <iostream>
+
 namespace mqtt {
+
+// --------------------------------------------------------------------------
+// Constructors
+
+token::token(iasync_client& cli) : token(cli, MQTTAsync_token(0))
+{
+}
+
+token::token(iasync_client& cli, void* userContext, iaction_listener& cb)
+				: token(cli, const_string_collection_ptr(), userContext, cb)
+{
+}
+
+token::token(iasync_client& cli, const string& top)
+				: token(cli, string_collection::create(top))
+{
+}
+
+token::token(iasync_client& cli, const string& top,
+			 void* userContext, iaction_listener& cb)
+				: token(cli, string_collection::create(top), userContext, cb)
+{
+}
+
+token::token(iasync_client& cli, const_string_collection_ptr topics)
+				: cli_(&cli), tok_(MQTTAsync_token(0)), topics_(topics),
+						userContext_(nullptr), listener_(nullptr),
+						complete_(false), rc_(0)
+{
+}
+
+token::token(iasync_client& cli, const_string_collection_ptr topics,
+			 void* userContext, iaction_listener& cb)
+				: cli_(&cli), tok_(MQTTAsync_token(0)), topics_(topics),
+						userContext_(userContext), listener_(&cb),
+						complete_(false), rc_(0)
+{
+}
+
+token::token(iasync_client& cli, MQTTAsync_token tok)
+				: cli_(&cli), tok_(tok), userContext_(nullptr),
+					listener_(nullptr), complete_(false), rc_(0)
+{
+}
 
 // --------------------------------------------------------------------------
 // Class static callbacks.
@@ -37,20 +83,6 @@ void token::on_failure(void* context, MQTTAsync_failureData* rsp)
 {
 	if (context)
 		static_cast<token*>(context)->on_failure(rsp);
-}
-
-void token::on_connected(void* context, char* /*cause*/)
-{
-	if (context) {
-		token* tok = static_cast<token*>(context);
-
-		// No more callback (till client sets up another token)
-		auto cli = dynamic_cast<async_client*>(tok->get_client());
-		if (cli)
-			MQTTAsync_setConnected(cli->cli_, nullptr, nullptr);
-
-		tok->on_success(nullptr);
-	}
 }
 
 // --------------------------------------------------------------------------
@@ -99,47 +131,7 @@ void token::on_failure(MQTTAsync_failureData* rsp)
 }
 
 // --------------------------------------------------------------------------
-
-token::token(iasync_client& cli) : token(cli, MQTTAsync_token(0))
-{
-}
-
-token::token(iasync_client& cli, void* userContext, iaction_listener& cb)
-				: token(cli, const_string_collection_ptr(), userContext, cb)
-{
-}
-
-token::token(iasync_client& cli, const string& top)
-				: token(cli, string_collection::create(top))
-{
-}
-
-token::token(iasync_client& cli, const string& top,
-			 void* userContext, iaction_listener& cb)
-				: token(cli, string_collection::create(top), userContext, cb)
-{
-}
-
-token::token(iasync_client& cli, const_string_collection_ptr topics)
-				: cli_(&cli), tok_(MQTTAsync_token(0)), topics_(topics),
-						userContext_(nullptr), listener_(nullptr),
-						complete_(false), rc_(0)
-{
-}
-
-token::token(iasync_client& cli, const_string_collection_ptr topics,
-			 void* userContext, iaction_listener& cb)
-				: cli_(&cli), tok_(MQTTAsync_token(0)), topics_(topics),
-						userContext_(userContext), listener_(&cb),
-						complete_(false), rc_(0)
-{
-}
-
-token::token(iasync_client& cli, MQTTAsync_token tok)
-				: cli_(&cli), tok_(tok), userContext_(nullptr),
-					listener_(nullptr), complete_(false), rc_(0)
-{
-}
+// API
 
 void token::reset()
 {

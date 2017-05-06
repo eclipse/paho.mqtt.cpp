@@ -32,36 +32,31 @@ constexpr int client::DFLT_QOS;
 
 client::client(const string& serverURI, const string& clientId,
 			   iclient_persistence* persistence /*=nullptr*/)
-		: cli_(serverURI, clientId, persistence), timeout_(DFLT_TIMEOUT)
+		: cli_(serverURI, clientId, persistence),
+			timeout_(DFLT_TIMEOUT), userCallback_(nullptr)
 {
 }
 
 client::client(const string& serverURI, const string& clientId,
 			   const string& persistDir)
-		: cli_(serverURI, clientId, persistDir), timeout_(DFLT_TIMEOUT)
+		: cli_(serverURI, clientId, persistDir),
+			timeout_(DFLT_TIMEOUT), userCallback_(nullptr)
 {
 }
 
 client::client(const string& serverURI, const string& clientId,
 			   int maxBufferedMessages, iclient_persistence* persistence /*=nullptr*/)
-		: cli_(serverURI, clientId, maxBufferedMessages, persistence), timeout_(DFLT_TIMEOUT)
+		: cli_(serverURI, clientId, maxBufferedMessages, persistence),
+			timeout_(DFLT_TIMEOUT), userCallback_(nullptr)
 {
 }
 
 client::client(const string& serverURI, const string& clientId,
 			   int maxBufferedMessages, const string& persistDir)
-		: cli_(serverURI, clientId, maxBufferedMessages, persistDir), timeout_(DFLT_TIMEOUT)
+		: cli_(serverURI, clientId, maxBufferedMessages, persistDir),
+			timeout_(DFLT_TIMEOUT), userCallback_(nullptr)
 {
 }
-
-void client::close()
-{
-	// TODO: What?
-}
-
-//string client::generate_client_id()
-//{
-//}
 
 std::vector<delivery_token_ptr> client::get_pending_delivery_tokens() const
 {
@@ -91,7 +86,8 @@ void client::publish(const message& msg)
 
 void client::set_callback(callback& cb)
 {
-	cli_.set_callback(cb);
+	userCallback_ = &cb;
+	cli_.set_callback(*this);
 }
 
 void client::subscribe(const string& topicFilter)

@@ -89,9 +89,10 @@ private:
 
 	consumer_queue_type que_;
 
+	static void on_connected(void* context, char* cause);
 	static void on_connection_lost(void *context, char *cause);
-	static int on_message_arrived(void* context, char* topicName, int topicLen,
-								  MQTTAsync_message* msg);
+	static int  on_message_arrived(void* context, char* topicName, int topicLen,
+								   MQTTAsync_message* msg);
 	static void on_delivery_complete(void* context, MQTTAsync_token tok);
 
 	/** Manage internal list of active tokens */
@@ -101,9 +102,6 @@ private:
 	virtual void remove_token(token* tok) override;
 	virtual void remove_token(token_ptr tok) { remove_token(tok.get()); }
 	void remove_token(delivery_token_ptr tok) { remove_token(tok.get()); }
-
-	/** Tell the C lib to stop sending us callbacks */
-	int disable_callbacks();
 
 	/** Non-copyable */
 	async_client() =delete;
@@ -213,7 +211,9 @@ public:
 	 * @throw exception for non security related problems
 	 * @throw security_exception for security related problems
 	 */
-	token_ptr connect(void* userContext, iaction_listener& cb) override;
+	token_ptr connect(void* userContext, iaction_listener& cb) override {
+		return connect(connect_options{}, userContext, cb);
+	}
 	/**
 	 * Reconnects the client using options from the previous connect.
 	 * The client must have previously called connect() for this to work.
@@ -434,9 +434,16 @@ public:
 	/**
 	 * Sets a callback listener to use for events that happen
 	 * asynchronously.
-	 * @param cb callback which will be invoked for certain asynchronous events
+	 * @param cb callback receiver which will be invoked for certain
+	 *  		 asynchronous events
 	 */
 	void set_callback(callback& cb) override;
+	/**
+	 * Stops callbacks.
+	 * This is not normally called by the application. It should be used
+	 * cautiously as it may cause the application to lose messages.
+	 */
+	void disable_callbacks() override;
 	/**
 	 * Subscribe to multiple topics, each of which may include wildcards.
 	 * @param topicFilters

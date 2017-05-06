@@ -25,6 +25,7 @@
 #define __mqtt_client_h
 
 #include "mqtt/async_client.h"
+#include <future>
 
 namespace mqtt {
 
@@ -34,7 +35,7 @@ namespace mqtt {
  * Lightweight client for talking to an MQTT server using methods that block
  * until an operation completes.
  */
-class client
+class client : private callback
 {
 	/** An arbitrary, but relatively long timeout */
 	static constexpr auto DFLT_TIMEOUT = std::chrono::minutes(5);
@@ -45,6 +46,8 @@ class client
 	async_client cli_;
 	/** The longest time to wait for an operation to complete.  */
 	std::chrono::milliseconds timeout_;
+	/** Callback supplied by the user (if any) */
+	callback* userCallback_;
 
 	/**
 	 * Creates a shared pointer to a non-heap object. This creates a shared
@@ -58,6 +61,23 @@ class client
 	template <typename T>
 	std::shared_ptr<T> ptr(const T& val) {
 		return std::shared_ptr<T>(const_cast<T*>(&val), [](T*){});
+	}
+
+	// User callbacks
+	// Most are launched in a separate thread, for convenience, except
+	// message_arrived, for performance.
+	void connected(const string& cause) override {
+		std::async(std::launch::async, &callback::connected, userCallback_, cause);
+	}
+	void connection_lost(const string& cause) override {
+		std::async(std::launch::async,
+				   &callback::connection_lost, userCallback_, cause);
+	}
+	void message_arrived(const_message_ptr msg) override {
+		userCallback_->message_arrived(msg);
+	}
+	void delivery_complete(delivery_token_ptr tok) override {
+		std::async(std::launch::async, &callback::delivery_complete, userCallback_, tok);
 	}
 
 	/** Non-copyable */
@@ -128,11 +148,6 @@ public:
 	 * Virtual destructor
 	 */
 	virtual ~client() {}
-	/**
-	 * Close the client and releases all resource associated with the
-	 * client.
-	 */
-	virtual void close();
 	/**
 	 * Connects to an MQTT server using the default options.
 	 */
@@ -274,6 +289,12 @@ public:
 	 */
 	virtual void subscribe(const string& topicFilter);
 	/**
+	 * Subscribe to a topic, which may include wildcards.
+	 * @param topicFilter A single topic to subscribe
+	 * @param qos The QoS of the subscription
+	 */
+	virtual void subscribe(const string& topicFilter, int qos);
+	/**
 	 * Subscribes to a one or more topics, which may include wildcards using
 	 * a QoS of 1.
 	 * @param topicFilters A set of topics to subscribe
@@ -286,12 +307,6 @@ public:
 	 */
 	virtual void subscribe(const string_collection& topicFilters,
 						   const qos_collection& qos);
-	/**
-	 * Subscribe to a topic, which may include wildcards.
-	 * @param topicFilter A single topic to subscribe
-	 * @param qos The QoS of the subscription
-	 */
-	virtual void subscribe(const string& topicFilter, int qos);
 	/**
 	 * Requests the server unsubscribe the client from a topic.
 	 * @param topicFilter A single topic to unsubscribe.
