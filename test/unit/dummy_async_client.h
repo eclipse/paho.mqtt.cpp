@@ -137,6 +137,7 @@ public:
 	}
 
 	void set_callback(mqtt::callback& cb) override {}
+	void disable_callbacks() override {}
 
 	mqtt::token_ptr subscribe(const_string_collection_ptr topicFilters,
 							  const qos_collection& qos) override {

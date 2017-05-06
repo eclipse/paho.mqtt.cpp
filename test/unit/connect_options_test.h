@@ -449,7 +449,7 @@ public:
 
 		// Set as an int
 		const int TIMEOUT_SEC = 10;
-		opts.set_automatic_reconnect(true, TIMEOUT_SEC, 2*TIMEOUT_SEC);
+		opts.set_automatic_reconnect(TIMEOUT_SEC, 2*TIMEOUT_SEC);
 
 		CPPUNIT_ASSERT_EQUAL(true, opts.get_automatic_reconnect());
 		CPPUNIT_ASSERT_EQUAL(TIMEOUT_SEC, (int) opts.get_min_retry_interval().count());
@@ -459,7 +459,7 @@ public:
 		CPPUNIT_ASSERT_EQUAL(2*TIMEOUT_SEC, c_struct.maxRetryInterval);
 
 		// Set as an chrono
-		opts.set_automatic_reconnect(true, std::chrono::milliseconds(2000*TIMEOUT_SEC),
+		opts.set_automatic_reconnect(std::chrono::milliseconds(2000*TIMEOUT_SEC),
 									 std::chrono::milliseconds(4000*TIMEOUT_SEC));
 
 		CPPUNIT_ASSERT_EQUAL(true, opts.get_automatic_reconnect());
@@ -468,6 +468,10 @@ public:
 
 		CPPUNIT_ASSERT_EQUAL(2*TIMEOUT_SEC, c_struct.minRetryInterval);
 		CPPUNIT_ASSERT_EQUAL(4*TIMEOUT_SEC, c_struct.maxRetryInterval);
+
+		// Turn it off
+		opts.set_automatic_reconnect(false);
+		CPPUNIT_ASSERT_EQUAL(false, opts.get_automatic_reconnect());
 	}
 
 };
