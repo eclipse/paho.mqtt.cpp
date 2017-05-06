@@ -76,29 +76,29 @@ libpaho_mqttpp3_la_LDFLAGS += $(LIBS)
 # Library: headers to install
 ###############################################################################
 
-otherincludedir = $(includedir)/mqtt
+pkgincludedir = $(includedir)/mqtt
 
-otherinclude_HEADERS  = src/mqtt/async_client.h
-otherinclude_HEADERS += src/mqtt/buffer_ref.h
-otherinclude_HEADERS += src/mqtt/callback.h
-otherinclude_HEADERS += src/mqtt/client.h
-otherinclude_HEADERS += src/mqtt/connect_options.h
-otherinclude_HEADERS += src/mqtt/delivery_token.h
-otherinclude_HEADERS += src/mqtt/disconnect_options.h
-otherinclude_HEADERS += src/mqtt/exception.h
-otherinclude_HEADERS += src/mqtt/iaction_listener.h
-otherinclude_HEADERS += src/mqtt/iasync_client.h
-otherinclude_HEADERS += src/mqtt/iclient_persistence.h
-otherinclude_HEADERS += src/mqtt/ipersistable.h
-otherinclude_HEADERS += src/mqtt/message.h
-otherinclude_HEADERS += src/mqtt/response_options.h
-otherinclude_HEADERS += src/mqtt/thread_queue.h
-otherinclude_HEADERS += src/mqtt/token.h
-otherinclude_HEADERS += src/mqtt/topic.h
-otherinclude_HEADERS += src/mqtt/string_collection.h
-otherinclude_HEADERS += src/mqtt/types.h
-otherinclude_HEADERS += src/mqtt/will_options.h
-otherinclude_HEADERS += src/mqtt/ssl_options.h
+pkginclude_HEADERS  = src/mqtt/async_client.h
+pkginclude_HEADERS += src/mqtt/buffer_ref.h
+pkginclude_HEADERS += src/mqtt/callback.h
+pkginclude_HEADERS += src/mqtt/client.h
+pkginclude_HEADERS += src/mqtt/connect_options.h
+pkginclude_HEADERS += src/mqtt/delivery_token.h
+pkginclude_HEADERS += src/mqtt/disconnect_options.h
+pkginclude_HEADERS += src/mqtt/exception.h
+pkginclude_HEADERS += src/mqtt/iaction_listener.h
+pkginclude_HEADERS += src/mqtt/iasync_client.h
+pkginclude_HEADERS += src/mqtt/iclient_persistence.h
+pkginclude_HEADERS += src/mqtt/ipersistable.h
+pkginclude_HEADERS += src/mqtt/message.h
+pkginclude_HEADERS += src/mqtt/response_options.h
+pkginclude_HEADERS += src/mqtt/thread_queue.h
+pkginclude_HEADERS += src/mqtt/token.h
+pkginclude_HEADERS += src/mqtt/topic.h
+pkginclude_HEADERS += src/mqtt/string_collection.h
+pkginclude_HEADERS += src/mqtt/types.h
+pkginclude_HEADERS += src/mqtt/will_options.h
+pkginclude_HEADERS += src/mqtt/ssl_options.h
 
 
 ###############################################################################
