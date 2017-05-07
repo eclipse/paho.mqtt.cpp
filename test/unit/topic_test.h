@@ -37,16 +37,26 @@ class topic_test : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE( topic_test );
 
-	CPPUNIT_TEST( test_user_constructor );
-	CPPUNIT_TEST( test_publish_1_arg );
-	CPPUNIT_TEST( test_publish_3_arg );
-	CPPUNIT_TEST( test_publish_4_arg );
-	CPPUNIT_TEST( test_get_name );
-	CPPUNIT_TEST( test_to_str );
+	CPPUNIT_TEST( test_basic_ctor );
+	CPPUNIT_TEST( test_full_ctor );
+	CPPUNIT_TEST( test_publish_basic_c_arr );
+	CPPUNIT_TEST( test_publish_full_c_arr );
+	CPPUNIT_TEST( test_publish_basic_binary );
+	CPPUNIT_TEST( test_publish_basic_binary );
 
 	CPPUNIT_TEST_SUITE_END();
 
-	const std::string TOPIC_NAME { "topic_name" };
+	const int DFLT_QOS = message::DFLT_QOS;
+	const bool DFLT_RETAINED = message::DFLT_RETAINED;
+
+	const std::string TOPIC { "topic_name" };
+	const int QOS = 1;
+	const bool RETAINED = true;
+
+	const char* BUF = "Hello there";
+	const size_t N = std::strlen(BUF);
+	const binary PAYLOAD { BUF };
+
 	mqtt::test::dummy_async_client cli;
 
 public:
@@ -54,97 +64,112 @@ public:
 	void tearDown() {}
 
 // ----------------------------------------------------------------------
-// Test user constructor
+// Test basic constructor
 // ----------------------------------------------------------------------
 
-	void test_user_constructor() {
-		mqtt::topic topic{ TOPIC_NAME, cli };
+	void test_basic_ctor() {
+		mqtt::topic topic{ cli, TOPIC };
 
-		CPPUNIT_ASSERT_EQUAL(TOPIC_NAME, topic.get_name());
-		CPPUNIT_ASSERT_EQUAL(TOPIC_NAME, topic.to_string());
+		CPPUNIT_ASSERT_EQUAL(static_cast<iasync_client*>(&cli),
+							 &(topic.get_client()));
+		CPPUNIT_ASSERT_EQUAL(TOPIC, topic.get_name());
+		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, topic.get_qos());
+		CPPUNIT_ASSERT_EQUAL(DFLT_RETAINED, topic.get_retained());
 	}
 
 // ----------------------------------------------------------------------
-// Test publish with one argument
+// Test full constructor
 // ----------------------------------------------------------------------
 
-	void test_publish_1_arg() {
-		mqtt::topic topic{ TOPIC_NAME, cli };
+	void test_full_ctor() {
+		mqtt::topic topic{ cli, TOPIC, QOS, RETAINED };
 
-		mqtt::const_message_ptr msg_in { new mqtt::message { TOPIC_NAME, "message" } };
-
-		mqtt::delivery_token_ptr token { topic.publish(msg_in) };
-		CPPUNIT_ASSERT(token);
-
-		mqtt::const_message_ptr msg_out { token->get_message() };
-		CPPUNIT_ASSERT(msg_out);
-
-		CPPUNIT_ASSERT_EQUAL(msg_in->get_payload_str(), msg_out->get_payload_str());
-		CPPUNIT_ASSERT_EQUAL(msg_in->get_qos(), msg_out->get_qos());
-		CPPUNIT_ASSERT_EQUAL(0, msg_out->get_qos());
+		CPPUNIT_ASSERT_EQUAL(TOPIC, topic.get_name());
+		CPPUNIT_ASSERT_EQUAL(QOS, topic.get_qos());
+		CPPUNIT_ASSERT_EQUAL(RETAINED, topic.get_retained());
 	}
 
 // ----------------------------------------------------------------------
-// Test publish with three arguments
+// Test publish with the basic C array form
 // ----------------------------------------------------------------------
 
-	void test_publish_3_arg() {
-		mqtt::topic topic{ TOPIC_NAME, cli };
+	void test_publish_basic_c_arr() {
+		mqtt::topic topic{ cli, TOPIC, QOS, RETAINED };
 
-		std::string payload { "message" };
-		int qos { 1 };
+		auto tok = topic.publish(BUF, N);
 
-		mqtt::delivery_token_ptr token { topic.publish(payload, qos, false) };
-		CPPUNIT_ASSERT(token);
+		CPPUNIT_ASSERT(tok);
 
-		mqtt::const_message_ptr msg_out { token->get_message() };
-		CPPUNIT_ASSERT(msg_out);
+		auto msg = tok->get_message();
 
-		CPPUNIT_ASSERT_EQUAL(payload, msg_out->get_payload_str());
-		CPPUNIT_ASSERT_EQUAL(qos, msg_out->get_qos());
+		CPPUNIT_ASSERT(msg);
+		CPPUNIT_ASSERT_EQUAL(TOPIC, msg->get_topic());
+		CPPUNIT_ASSERT(msg->get_payload().data());
+		CPPUNIT_ASSERT(!memcmp(BUF, msg->get_payload().data(), N));
+		CPPUNIT_ASSERT_EQUAL(QOS, msg->get_qos());
+		CPPUNIT_ASSERT_EQUAL(RETAINED, msg->is_retained());
 	}
 
 // ----------------------------------------------------------------------
-// Test publish with four arguments
+// Test publish with the full C array form
 // ----------------------------------------------------------------------
 
-	void test_publish_4_arg() {
-		mqtt::topic topic{ TOPIC_NAME, cli };
+	void test_publish_full_c_arr() {
+		mqtt::topic topic{ cli, TOPIC };
 
-		std::string payload { "message" };
-		std::size_t payload_size { payload.size() };
-		int qos { 2 };
+		auto tok = topic.publish(BUF, N, QOS, RETAINED);
 
-		mqtt::delivery_token_ptr token = topic.publish(payload.c_str(), payload_size, qos, false);
-		CPPUNIT_ASSERT(token);
+		CPPUNIT_ASSERT(tok);
 
-		mqtt::const_message_ptr msg_out = token->get_message();
-		CPPUNIT_ASSERT(msg_out);
+		auto msg = tok->get_message();
 
-		CPPUNIT_ASSERT_EQUAL(payload, msg_out->get_payload_str());
-		CPPUNIT_ASSERT_EQUAL(qos, msg_out->get_qos());
+		CPPUNIT_ASSERT(msg);
+		CPPUNIT_ASSERT_EQUAL(TOPIC, msg->get_topic());
+		CPPUNIT_ASSERT(msg->get_payload().data());
+		CPPUNIT_ASSERT(!memcmp(BUF, msg->get_payload().data(), N));
+		CPPUNIT_ASSERT_EQUAL(QOS, msg->get_qos());
+		CPPUNIT_ASSERT_EQUAL(RETAINED, msg->is_retained());
 	}
 
 // ----------------------------------------------------------------------
-// Test get name
+// Test publish with the basic C array form
 // ----------------------------------------------------------------------
 
-	void test_get_name() {
-		mqtt::topic topic{ TOPIC_NAME, cli };
+	void test_publish_basic_binary() {
+		mqtt::topic topic{ cli, TOPIC, QOS, RETAINED };
 
-		CPPUNIT_ASSERT_EQUAL(TOPIC_NAME, topic.get_name());
+		auto tok = topic.publish(PAYLOAD);
+
+		CPPUNIT_ASSERT(tok);
+
+		auto msg = tok->get_message();
+
+		CPPUNIT_ASSERT(msg);
+		CPPUNIT_ASSERT_EQUAL(TOPIC, msg->get_topic());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg->get_payload());
+		CPPUNIT_ASSERT_EQUAL(QOS, msg->get_qos());
+		CPPUNIT_ASSERT_EQUAL(RETAINED, msg->is_retained());
 	}
 
 // ----------------------------------------------------------------------
-// Test to string
+// Test publish with the full C array form
 // ----------------------------------------------------------------------
 
-	void test_to_str() {
-		mqtt::topic topic { TOPIC_NAME, cli };
+	void test_publish_full_binary() {
+		mqtt::topic topic{ cli, TOPIC };
 
-		CPPUNIT_ASSERT_EQUAL(TOPIC_NAME, topic.to_string());
+		auto tok = topic.publish(PAYLOAD, QOS, RETAINED);
+
+		CPPUNIT_ASSERT(tok);
+
+		auto msg = tok->get_message();
+
+		CPPUNIT_ASSERT(msg);
+		CPPUNIT_ASSERT_EQUAL(TOPIC, msg->get_topic());
+		CPPUNIT_ASSERT_EQUAL(PAYLOAD, msg->get_payload());
+		CPPUNIT_ASSERT_EQUAL(QOS, msg->get_qos());
+		CPPUNIT_ASSERT_EQUAL(RETAINED, msg->is_retained());
 	}
-
 };
 
 /////////////////////////////////////////////////////////////////////////////

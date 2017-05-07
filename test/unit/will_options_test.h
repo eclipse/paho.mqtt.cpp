@@ -106,7 +106,7 @@ public:
 
 	void test_string_buf_constructor() {
 		test::dummy_async_client cli;
-		mqtt::topic topic { TOPIC, cli };
+		mqtt::topic topic { cli, TOPIC };
 
 		mqtt::will_options opts(topic, BUF, N, QOS, true);
 

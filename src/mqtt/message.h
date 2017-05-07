@@ -51,10 +51,13 @@ namespace mqtt {
  */
 class message
 {
+public:
 	/** The default QoS for a message */
 	static constexpr int DFLT_QOS = 0;
 	/** The default retained flag */
 	static constexpr bool DFLT_RETAINED = false;
+
+private:
 	/** Initializer for the C struct (from the C library) */
 	static constexpr MQTTAsync_message DFLT_C_STRUCT MQTTAsync_message_initializer;
 

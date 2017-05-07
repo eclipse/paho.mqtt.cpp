@@ -224,7 +224,7 @@ public:
 	 * @param top
 	 * @return topic
 	 */
-	virtual topic get_topic(const string& top) { return topic(top, cli_); }
+	virtual topic get_topic(const string& top) { return topic(cli_, top); }
 	/**
 	 * Determines if this client is currently connected to the server.
 	 * @return bool

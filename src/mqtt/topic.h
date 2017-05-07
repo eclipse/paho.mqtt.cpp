@@ -32,7 +32,7 @@
 
 namespace mqtt {
 
-class async_client;
+class iasync_client;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -41,11 +41,14 @@ class async_client;
  */
 class topic
 {
-	/** The topic name */
-	string name_;
-
 	/** The client to which this topic is connected */
 	iasync_client& cli_;
+	/** The topic name */
+	string name_;
+	/** The default QoS */
+	int qos_;
+	/** The default retined flag */
+	bool retained_;
 
 public:
 	/** A smart/shared pointer to this class. */
@@ -55,15 +58,54 @@ public:
 
 	/**
 	 * Construct an MQTT topic destination for messages.
+	 * @param cli Client to which the topic is attached
 	 * @param name The topic string
-	 * @param cli Client to which the topic should be attached
 	 */
-	topic(const string& name, iasync_client& cli) : name_(name), cli_(cli) {}
+	topic(iasync_client& cli, const string& name,
+		  int qos=message::DFLT_QOS, bool retained=message::DFLT_RETAINED)
+		: cli_(cli), name_(name), qos_(qos), retained_(retained) {}
 	/**
-	 * Returns the name of the topic.
+	 * Creates a new topic
+	 * @param cli Client to which the topic is attached
+	 * @param name The topic string
+	 * @param qos The default QoS for publishing.
+	 * @param retained The default retained flag for the topic.
+	 * @return A shared pointer to the topic.
+	 */
+	static ptr_t create(iasync_client& cli, const string& name,
+						int qos=message::DFLT_QOS,
+						bool retained=message::DFLT_RETAINED) {
+		return std::make_shared<topic>(cli, name, qos, retained);
+	}
+	/**
+	 * Gets a reference to the MQTT client used by this topic
+	 * @return The MQTT client used by this topic
+	 */
+	iasync_client& get_client() { return cli_; }
+	/**
+	 * Gets the name of the topic.
 	 * @return The name of the topic.
 	 */
 	const string& get_name() const { return name_; }
+	/**
+	 * Gets the default quality of service for this topic.
+	 * @return The default quality of service for this topic.
+	 */
+	int get_qos() const { return qos_; }
+	/**
+	 * Gets the default retained flag used for this topic.
+	 * @return The default retained flag used for this topic.
+	 */
+	bool get_retained() const { return retained_; }
+	/**
+	 * Publishes a message on the topic using the default QoS and retained
+	 * flag.
+	 * @param payload the bytes to use as the message payload
+	 * @param n the number of bytes in the payload
+	 * @return The delivery token used to track and wait for the publish to
+	 *  	   complete.
+	 */
+	delivery_token_ptr publish(const void* payload, size_t n);
 	/**
 	 * Publishes a message on the topic.
 	 * @param payload the bytes to use as the message payload
@@ -75,11 +117,19 @@ public:
 	 * @return The delivery token used to track and wait for the publish to
 	 *  	   complete.
 	 */
-	delivery_token_ptr publish(const void* payload, size_t n, int qos, bool retained);
+	delivery_token_ptr publish(const void* payload, size_t n,
+							   int qos, bool retained);
+	/**
+	 * Publishes a message on the topic using the default QoS and retained
+	 * flag.
+	 * @param payload the bytes to use as the message payload
+	 * @return The delivery token used to track and wait for the publish to
+	 *  	   complete.
+	 */
+	delivery_token_ptr publish(binary_ref payload);
 	/**
 	 * Publishes a message on the topic.
 	 * @param payload the bytes to use as the message payload
-	 * @param n the number of bytes in the payload
 	 * @param qos the Quality of Service to deliver the message at. Valid
 	 *  		  values are 0, 1 or 2.
 	 * @param retained whether or not this message should be retained by the
@@ -88,13 +138,6 @@ public:
 	 *  	   complete.
 	 */
 	delivery_token_ptr publish(binary_ref payload, int qos, bool retained);
-	/**
-	 * Publishes the specified message to this topic, but does not wait for
-	 * delivery of the message to complete.
-	 * @param msg
-	 * @return delivery_token
-	 */
-	delivery_token_ptr publish(const_message_ptr msg);
 	/**
 	 * Returns a string representation of this topic.
 	 * @return The name of the topic

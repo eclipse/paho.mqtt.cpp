@@ -2,15 +2,27 @@
 //
 // This is a Paho MQTT C++ client, sample application.
 //
-// This application is an example of how to collect and publish data to
-// MQTT. It's an MQTT publisher using the C++ asynchronous client interface.
+// It's an example of how to collect and publish periodic data to MQTT, as
+// an MQTT publisher using the C++ asynchronous client interface.
 //
 // The sample demonstrates:
-//  - Connecting to an MQTT server/broker.
-//  - Publishing messages to a topic
-//  - Automatic reconnects.
+//  - Connecting to an MQTT server/broker
+//  - Publishing messages
+//  - Using a topic object to repeatedly publish to the same topic.
+//  - Automatic reconnects
 //  - Off-line buffering
 //  - Default file-based persistence
+//
+// This just uses the steady clock to run a periodic loop. Each time
+// through, it generates a random number [0-100] as simulated data and
+// creates a text, CSV payload in the form:
+//  	<sample #>,<time stamp>,<data>
+//
+// Note that it uses the steady clock to pace the periodic timing, but then
+// reads the system_clock to generate the timestamp for local calendar time.
+//
+// The sample number is just a counting integer to help test the off-line
+// buffering to easily confirm that all the messages got across.
 //
 
 /*******************************************************************************
@@ -47,8 +59,7 @@ const std::string DFLT_ADDRESS { "tcp://localhost:1883" };
 const string TOPIC { "data/rand" };
 const int	 QOS = 1;
 
-const auto TIMEOUT = seconds(10);
-const auto PERIOD  = seconds(5);
+const auto PERIOD = seconds(5);
 
 const int MAX_BUFFERED_MSGS = 120;	// 120 * 5sec => 10min off-line buffering
 
@@ -60,14 +71,16 @@ int main(int argc, char* argv[])
 {
 	string address = (argc > 1) ? string(argv[1]) : DFLT_ADDRESS;
 
-	cout << "Initializing for server '" << address << "'..." << endl;
 	mqtt::async_client cli(address, "", MAX_BUFFERED_MSGS, PERSIST_DIR);
-	cout << "  ...OK" << endl;
 
 	mqtt::connect_options connOpts;
 	connOpts.set_keep_alive_interval(MAX_BUFFERED_MSGS * PERIOD);
 	connOpts.set_clean_session(true);
 	connOpts.set_automatic_reconnect(true);
+
+	// Create a topic object. This is a conventience since we will
+	// repeatedly publish messages with the same parameters.
+	mqtt::topic top(cli, TOPIC, QOS, true);
 
 	// Random number generator [0 - 100]
 	random_device rnd;
@@ -75,37 +88,43 @@ int main(int argc, char* argv[])
     uniform_int_distribution<> dis(0, 100);
 
 	try {
-		cout << "\nConnecting..." << endl;
+		// Connect to the MQTT broker
+		cout << "Connecting to server '" << address << "'..." << flush;
 		cli.connect(connOpts)->wait();
-		cout << "  ...OK" << endl;
+		cout << "OK\n" << endl;
 
 		char tmbuf[32];
 		unsigned nsample = 0;
 
-		auto msg = mqtt::message::create(TOPIC, "", QOS, true);
+		// The time at which to reads the next sample, starting now
 		auto tm = steady_clock::now();
 
 		while (true) {
+			// Pace the samples to the desired rate
 			this_thread::sleep_until(tm);
 
+			// Get a timestamp and format as a string
 			time_t t = system_clock::to_time_t(system_clock::now());
 			strftime(tmbuf, sizeof(tmbuf), "%F %T", localtime(&t));
 
-			int x = int(dis(gen));
-			string payload = to_string(++nsample) + "," + 
-						tmbuf + "," + to_string(x);
+			// Simulate reading some data
+			int x = dis(gen);
+
+			// Create the payload as a text CSV string
+			string payload = to_string(++nsample) + "," +
+								tmbuf + "," + to_string(x);
 			cout << payload << endl;
 
-			msg->set_payload(std::move(payload));
-			cli.publish(msg);
+			// Publish to the topic
+			top.publish(std::move(payload));
 
 			tm += PERIOD;
 		}
 
 		// Disconnect
-		cout << "\nDisconnecting..." << endl;
+		cout << "\nDisconnecting..." << flush;
 		cli.disconnect()->wait();
-		cout << "  ...OK" << endl;
+		cout << "OK" << endl;
 	}
 	catch (const mqtt::exception& exc) {
 		cerr << exc.what() << endl;

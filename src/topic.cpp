@@ -16,7 +16,6 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
-
 #include "mqtt/topic.h"
 #include "mqtt/async_client.h"
 
@@ -24,22 +23,25 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
+delivery_token_ptr topic::publish(const void* payload, size_t n)
+{
+	return cli_.publish(name_, payload, n, qos_, retained_);
+}
+
 delivery_token_ptr topic::publish(const void* payload, size_t n,
-								   int qos, bool retained)
+								  int qos, bool retained)
 {
 	return cli_.publish(name_, payload, n, qos, retained);
+}
+
+delivery_token_ptr topic::publish(binary_ref payload)
+{
+	return cli_.publish(name_, std::move(payload), qos_, retained_);
 }
 
 delivery_token_ptr topic::publish(binary_ref payload, int qos, bool retained)
 {
 	return cli_.publish(name_, std::move(payload), qos, retained);
-}
-
-delivery_token_ptr topic::publish(const_message_ptr msg)
-{
-	// TODO: Create a new message with our topic and then publish?
-	// or just get rid of this call?
-	return cli_.publish(msg);
 }
 
 /////////////////////////////////////////////////////////////////////////////
