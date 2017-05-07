@@ -11,7 +11,7 @@ endif
 
 TGTS  = async_publish async_subscribe async_consume 
 TGTS += sync_publish sync_consume sync_subscribe 
-TGTS += pub_speed_test
+TGTS += data_publish pub_speed_test
 
 all: $(TGTS)
 
@@ -59,6 +59,9 @@ sync_consume: sync_consume.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS)
 
 sync_subscribe: sync_subscribe.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS)
+
+data_publish: data_publish.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDLIBS)
 
 pub_speed_test: pub_speed_test.cpp

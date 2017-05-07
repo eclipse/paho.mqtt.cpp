@@ -116,6 +116,7 @@ bin_PROGRAMS += async_subscribe
 bin_PROGRAMS += async_consume
 bin_PROGRAMS += sync_publish
 bin_PROGRAMS += sync_consume
+bin_PROGRAMS += data_publish
 bin_PROGRAMS += pub_speed_test
 
 if PAHO_WITH_SSL
@@ -136,6 +137,8 @@ sync_publish_SOURCES = src/samples/sync_publish.cpp
 
 sync_consume_SOURCES = src/samples/sync_consume.cpp
 
+data_publish_SOURCES = src/samples/data_publish.cpp
+
 pub_speed_test_SOURCES = src/samples/pub_speed_test.cpp
 
 if PAHO_WITH_SSL
@@ -155,6 +158,8 @@ async_consume_CPPFLAGS = $(COMMONCPPFLAGS)
 sync_publish_CPPFLAGS = $(COMMONCPPFLAGS)
 
 sync_consume_CPPFLAGS = $(COMMONCPPFLAGS)
+
+data_publish_CPPFLAGS = $(COMMONCPPFLAGS)
 
 pub_speed_test_CPPFLAGS = $(COMMONCPPFLAGS)
 
@@ -178,6 +183,8 @@ async_consume_CXXFLAGS = $(COMMONCXXFLAGS)
 sync_publish_CXXFLAGS = $(COMMONCXXFLAGS)
 
 sync_consume_CXXFLAGS = $(COMMONCXXFLAGS)
+
+data_publish_CXXFLAGS = $(COMMONCXXFLAGS)
 
 pub_speed_test_CXXFLAGS = $(COMMONCXXFLAGS)
 
@@ -204,6 +211,8 @@ sync_publish_LDADD = $(COMMONLDFLAGS)
 sync_consume_LDADD = $(COMMONLDFLAGS)
 
 pub_speed_test_LDADD = $(COMMONLDFLAGS)
+
+data_publish_LDADD = $(COMMONLDFLAGS)
 
 if PAHO_WITH_SSL
 ssl_publish_LDADD = $(COMMONLDFLAGS)
