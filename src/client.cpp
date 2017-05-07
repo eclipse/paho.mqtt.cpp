@@ -17,7 +17,6 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
-
 #include "mqtt/client.h"
 #include <memory>
 #include <iostream>
@@ -58,41 +57,10 @@ client::client(const string& serverURI, const string& clientId,
 {
 }
 
-std::vector<delivery_token_ptr> client::get_pending_delivery_tokens() const
-{
-	return cli_.get_pending_delivery_tokens();
-}
-
-void client::publish(string_ref top, const void* payload, size_t n,
-					 int qos, bool retained)
-{
-	cli_.publish(std::move(top), payload, n, qos, retained)->wait_for(timeout_);
-}
-
-void client::publish(string_ref top, const void* payload, size_t n)
-{
-	cli_.publish(std::move(top), payload, n)->wait_for(timeout_);
-}
-
-void client::publish(const_message_ptr msg)
-{
-	cli_.publish(msg)->wait_for(timeout_);
-}
-
-void client::publish(const message& msg)
-{
-	cli_.publish(ptr(msg))->wait_for(timeout_);
-}
-
 void client::set_callback(callback& cb)
 {
 	userCallback_ = &cb;
 	cli_.set_callback(*this);
-}
-
-void client::subscribe(const string& topicFilter)
-{
-	cli_.subscribe(topicFilter, DFLT_QOS)->wait_for(timeout_);
 }
 
 void client::subscribe(const string_collection& topicFilters)
@@ -102,27 +70,6 @@ void client::subscribe(const string_collection& topicFilters)
 		qos.push_back(DFLT_QOS);
 
 	cli_.subscribe(ptr(topicFilters), qos)->wait_for(timeout_);
-}
-
-void client::subscribe(const string_collection& topicFilters,
-					   const qos_collection& qos)
-{
-	cli_.subscribe(ptr(topicFilters), qos)->wait_for(timeout_);
-}
-
-void client::subscribe(const string& topicFilter, int qos)
-{
-	cli_.subscribe(topicFilter, qos)->wait_for(timeout_);
-}
-
-void client::unsubscribe(const string& topicFilter)
-{
-	cli_.unsubscribe(topicFilter)->wait_for(timeout_);
-}
-
-void client::unsubscribe(const string_collection& topicFilters)
-{
-	cli_.unsubscribe(ptr(topicFilters))->wait_for(timeout_);
 }
 
 /////////////////////////////////////////////////////////////////////////////

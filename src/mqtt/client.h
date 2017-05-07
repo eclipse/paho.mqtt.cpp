@@ -50,13 +50,14 @@ class client : private callback
 	callback* userCallback_;
 
 	/**
-	 * Creates a shared pointer to a non-heap object. This creates a shared
-	 * pointer to an existing object. The pointer is given a no-op deleter,
-	 * so it will not try to destroy the object when it goes out of scope.
-	 * It is up to the caller to ensure that the object remains in scope for
-	 * as long as there may be pointers to it.
-	 * @param val A value which may live anywherte in memory.
-	 * @return A shared pointer to a non-heap object.
+	 * Creates a shared pointer to an existing non-heap object.
+	 * The shared pointer is given a no-op deleter, so it will not try to
+	 * destroy the object when it goes out of scope. It is up to the caller
+	 * to ensure that the object remains in memory for as long as there may
+	 * be pointers to it.
+	 * @param val A value which may live anywhere in memory (stack,
+	 *  		  file-scope, etc).
+	 * @return A shared pointer to the object.
 	 */
 	template <typename T>
 	std::shared_ptr<T> ptr(const T& val) {
@@ -196,22 +197,13 @@ public:
 		disconnect((int) to_milliseconds_count(to));
 	}
 	/**
-	 * Returns a randomly generated client identifier based on the current
-	 * user's login name and the system time.
-	 */
-	//static string generate_client_id();
-	/**
-	 * Returns the client ID used by this client.
-	 * @return string
+	 * Gets the client ID used by this client.
+	 * @return The client ID used by this client.
 	 */
 	virtual string get_client_id() const { return cli_.get_client_id(); }
 	/**
-	 * Returns the delivery tokens for any outstanding publish operations.
-	 */
-	virtual std::vector<delivery_token_ptr> get_pending_delivery_tokens() const;
-	/**
-	 * Returns the address of the server used by this client, as a URI.
-	 * @return string
+	 * Gets the address of the server used by this client.
+	 * @return The address of the server used by this client, as a URI.
 	 */
 	virtual string get_server_uri() const { return cli_.get_server_uri(); }
 	/**
@@ -220,9 +212,10 @@ public:
 	 */
 	virtual std::chrono::milliseconds get_timeout() const { return timeout_; }
 	/**
-	 * Get a topic object which can be used to publish messages.
-	 * @param top
-	 * @return topic
+	 * Get a topic object which can be used to publish messages on this
+	 * client.
+	 * @param top The topic name
+	 * @return A topic attached to this client.
 	 */
 	virtual topic get_topic(const string& top) { return topic(cli_, top); }
 	/**
@@ -241,7 +234,9 @@ public:
 	 * @param retained
 	 */
 	virtual void publish(string_ref top, const void* payload, size_t n,
-						 int qos, bool retained);
+						 int qos, bool retained) {
+		cli_.publish(std::move(top), payload, n, qos, retained)->wait_for(timeout_);
+	}
 	/**
 	 * Publishes a message to a topic on the server and return once it is
 	 * delivered.
@@ -249,19 +244,28 @@ public:
 	 * @param payload The data to publish
 	 * @param retained
 	 */
-	virtual void publish(string_ref top, const void* payload, size_t n);
+	virtual void publish(string_ref top, const void* payload, size_t n) {
+		cli_.publish(std::move(top), payload, n)->wait_for(timeout_);
+	}
 	/**
 	 * Publishes a message to a topic on the server.
 	 * @param top The topic to publish on
 	 * @param msg The message
 	 */
-	virtual void publish(const_message_ptr msg);
+	virtual void publish(const_message_ptr msg) {
+		cli_.publish(msg)->wait_for(timeout_);
+	}
 	/**
 	 * Publishes a message to a topic on the server.
+	 * This version will not timeout since that could leave the library with
+	 * a reference to memory that could disappear while the library is still
+	 * using it.
 	 * @param top The topic to publish on
 	 * @param msg The message
 	 */
-	virtual void publish(const message& msg);
+	virtual void publish(const message& msg) {
+		cli_.publish(ptr(msg))->wait();
+	}
 	/**
 	 * Sets the callback listener to use for events that happen
 	 * asynchronously.
@@ -287,13 +291,17 @@ public:
 	 * Subscribe to a topic, which may include wildcards using a QoS of 1.
 	 * @param topicFilter
 	 */
-	virtual void subscribe(const string& topicFilter);
+	virtual void subscribe(const string& topicFilter) {
+		cli_.subscribe(topicFilter, DFLT_QOS)->wait_for(timeout_);
+	}
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 * @param topicFilter A single topic to subscribe
 	 * @param qos The QoS of the subscription
 	 */
-	virtual void subscribe(const string& topicFilter, int qos);
+	virtual void subscribe(const string& topicFilter, int qos) {
+		cli_.subscribe(topicFilter, qos)->wait_for(timeout_);
+	}
 	/**
 	 * Subscribes to a one or more topics, which may include wildcards using
 	 * a QoS of 1.
@@ -306,17 +314,23 @@ public:
 	 * @param qos A collection of QoS for each topic
 	 */
 	virtual void subscribe(const string_collection& topicFilters,
-						   const qos_collection& qos);
+						   const qos_collection& qos) {
+		cli_.subscribe(ptr(topicFilters), qos)->wait_for(timeout_);
+	}
 	/**
 	 * Requests the server unsubscribe the client from a topic.
 	 * @param topicFilter A single topic to unsubscribe.
 	 */
-	virtual void unsubscribe(const string& topicFilter);
+	virtual void unsubscribe(const string& topicFilter) {
+		cli_.unsubscribe(topicFilter)->wait_for(timeout_);
+	}
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
 	 * @param topicFilters A collection of topics to unsubscribe.
 	 */
-	virtual void unsubscribe(const string_collection& topicFilters);
+	virtual void unsubscribe(const string_collection& topicFilters) {
+		cli_.unsubscribe(ptr(topicFilters))->wait_for(timeout_);
+	}
 	/**
 	 * Start consuming messages.
 	 * This initializes the client to receive messages through a queue that

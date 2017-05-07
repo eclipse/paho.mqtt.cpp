@@ -318,8 +318,8 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-// end namespace 'cooper'
+// end namespace mqtt
 }
 
-#endif		// __cooper_thread_queue_h
+#endif		// __mqtt_thread_queue_h
 
