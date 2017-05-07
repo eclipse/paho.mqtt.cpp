@@ -260,8 +260,8 @@ public:
 		return std::make_shared<token>(cli, topics, userContext, cb);
 	}
 	/**
-	 * Return the async listener for this token.
-	 * @return iaction_listener
+	 * Gets the action listener for this token.
+	 * @return The action listener for this token.
 	 */
 	virtual iaction_listener* get_action_callback() const {
 		guard g(lock_);
@@ -270,21 +270,22 @@ public:
 	/**
 	 * Returns the MQTT client that is responsible for processing the
 	 * asynchronous action.
-	 * @return iasync_client
+	 * @return The client to which this token is connected.
 	 */
 	virtual iasync_client* get_client() const { return cli_; }
 	/**
-	 * Returns the message ID of the message that is associated with the
-	 * token.
-	 * @return int
+	 * Returns the ID of the message that is associated with the token.
+	 * @return The message ID of the transaction being tracked.
 	 */
 	virtual int get_message_id() const {
 		static_assert(sizeof(tok_) <= sizeof(int), "MQTTAsync_token must fit into int");
 		return int(tok_);
 	}
 	/**
-	 * Returns the topic string(s) for the action being tracked by this
+	 * Gets the topic string(s) for the action being tracked by this
 	 * token.
+	 * @return A const pointer to the collection of topics being tracked by
+	 *  	   the token.
 	 */
 	virtual const_string_collection_ptr get_topics() const {
 		return topics_;
@@ -298,7 +299,7 @@ public:
 	}
 	/**
 	 * Returns whether or not the action has finished.
-	 * @return bool
+	 * @return @em true if the transaction has completed, @em false if not.
 	 */
 	virtual bool is_complete() const { return complete_; }
 	/**
@@ -310,7 +311,7 @@ public:
 	virtual int get_return_code() const { return rc_; }
 	/**
 	 * Register a listener to be notified when an action completes.
-	 * @param listener
+	 * @param listener The callback to be notified when actions complete.
 	 */
 	virtual void set_action_callback(iaction_listener& listener) {
 		guard g(lock_);

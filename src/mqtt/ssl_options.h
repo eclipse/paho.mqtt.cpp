@@ -177,38 +177,52 @@ public:
 	/**
 	 * Sets the file containing the public digital certificates trusted by
 	 * the client.
-	 * @param trustStore
+	 * @param trustStore The file in PEM format containing the public
+	 *  				 digital certificates trusted by the client.
 	 */
 	void set_trust_store(const string& trustStore);
-
 	/**
 	 * Sets the file containing the public certificate chain of the client.
-	 * @param keyStore
+	 * @param keyStore The file in PEM format containing the public
+	 *  			   certificate chain of the client. It may also include
+	 *				   the client's private key.
 	 */
 	void set_key_store(const string& keyStore);
-
 	/**
 	 * Sets the file containing the client's private key.
-	 * @param privateKey
+	 * @param privateKey If not included in the sslKeyStore, this is the
+	 *  				 file in PEM format containing the client's private
+	 *  				 key.
 	 */
 	void set_private_key(const string& privateKey);
-
 	/**
 	 * Sets the password to load the client's privateKey if encrypted.
-	 * @param privateKeyPassword
+	 * @param privateKeyPassword The password to load the privateKey if
+	 *  						 encrypted.
 	 */
 	void set_private_key_password(const string& privateKeyPassword);
-
 	/**
 	 * Sets the list of cipher suites that the client will present to the server
 	 * during the SSL handshake.
-	 * @param enabledCipherSuites
+	 * @param enabledCipherSuites The list of cipher suites that the client
+	 *  						  will present to the server during the SSL
+	 *  						  handshake. For a  full explanation of the
+	 *  						  cipher list format, please see the OpenSSL
+	 *  						  on-line documentation:
+	 *  						  http://www.openssl.org/docs/apps/ciphers.html#CIPHER_LIST_FORMAT
+	 *  						  If this setting is ommitted, its default
+	 *  						  value will be "ALL", that is, all the
+	 *  						  cipher suites -excluding those offering no
+	 *  						  encryption- will be considered. This
+	 *  						  setting can be used to set an SSL
+	 *  						  anonymous connection (empty string value,
+	 *  						  for instance).
 	 */
 	void set_enabled_cipher_suites(const string& enabledCipherSuites);
-
 	/**
-	 * Sets the if it's to enable verification of the server certificate.
-	 * @param enablServerCertAuth
+	 * Enables or disables verification of the server certificate.
+	 * @param enablServerCertAuth enable/disable verification of the server
+	 *  						  certificate
 	 */
 	void set_enable_server_cert_auth(bool enablServerCertAuth);
 };

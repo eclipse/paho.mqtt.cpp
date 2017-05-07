@@ -59,7 +59,7 @@ class async_client : public virtual iasync_client
 public:
 	/** Smart/shared pointer for an object of this class */
 	using ptr_t = std::shared_ptr<async_client>;
-
+	/** Type for a thread-safe queue to consume messages synchronously */
 	using consumer_queue_type = std::unique_ptr<thread_queue<const_message_ptr>>;
 
 private:
@@ -86,9 +86,10 @@ private:
 	std::list<token_ptr> pendingTokens_;
 	/** A list of delivery tokens that are in play */
 	std::list<delivery_token_ptr> pendingDeliveryTokens_;
-
+	/** A queue of messages for consumer API */
 	consumer_queue_type que_;
 
+	/** Callbacks from the C library  */
 	static void on_connected(void* context, char* cause);
 	static void on_connection_lost(void *context, char *cause);
 	static int  on_message_arrived(void* context, char* topicName, int topicLen,

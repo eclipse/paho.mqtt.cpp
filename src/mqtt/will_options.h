@@ -163,17 +163,17 @@ public:
 	 */
 	will_options& operator=(will_options&& opt);
 	/**
-	 * Returns the LWT message topic name.
-	 * @return string
+	 * Gets the LWT message topic name.
+	 * @return The LWT message topic name.
 	 */
 	string get_topic() const { return topic_ ? topic_.to_string() : string(); }
 	/**
-	 * Returns the LWT message payload.
+	 * Gets the LWT message payload.
 	 * @return The LWT message payload.
 	 */
 	const binary_ref& get_payload() const { return payload_; }
 	/**
-	 * Returns the LWT message payload as a string.
+	 * Gets the LWT message payload as a string.
 	 * @return The LWT message payload as a string.
 	 */
 	string get_payload_str() const { return payload_ ? payload_.to_string() : string(); }
@@ -188,13 +188,11 @@ public:
 	 */
 	bool is_retained() const { return opts_.retained != 0; }
 	/**
-	 * Gets the LWT message.
-	 * Note that this is a const pointer to a copy of the message, not to
-	 * the message itself.
-	 * @return A copy of the LWT message.
+	 * Gets the LWT message as a message object.
+	 * @return A pointer to a copy of the LWT message.
 	 */
 	const_message_ptr get_message() const {
-		return make_message(topic_, payload_, opts_.qos, opts_.retained);
+		return message::create(topic_, payload_, opts_.qos, opts_.retained);
 	}
 	/**
 	 * Sets the LWT message topic name.

@@ -81,7 +81,7 @@ private:
 
 public:
 	/**
-	 * Default constructor created a null reference.
+	 * Default constructor creates a null reference.
 	 */
 	buffer_ref() =default;
 	/**
@@ -225,32 +225,32 @@ public:
 	 */
 	bool empty() const { return !data_ || data_->empty(); }
 	/**
-	 * Get a const pointer to the data buffer.
+	 * Gets a const pointer to the data buffer.
 	 * @return A pointer to the data buffer.
 	 */
 	const value_type* data() const { return data_->data(); }
 	/**
-	 * Get the size of the data buffer.
+	 * Gets the size of the data buffer.
 	 * @return The size of the data buffer.
 	 */
 	size_t size() const { return data_->size(); }
 	/**
-	 * Get the size of the data buffer.
+	 * Gets the size of the data buffer.
 	 * @return The size of the data buffer.
 	 */
 	size_t length() const { return data_->length(); }
 	/**
-	 * Get the data buffer as a string.
+	 * Gets the data buffer as a string.
 	 * @return The data buffer as a string.
 	 */
 	const blob& str() const { return *data_; }
 	/**
-	 * Get the data buffer as a string.
+	 * Gets the data buffer as a string.
 	 * @return The data buffer as a string.
 	 */
 	const blob& to_string() const { return str(); }
 	/**
-	 * Get the data buffer as NUL-terminated C string.
+	 * Gets the data buffer as NUL-terminated C string.
 	 * Note that the reference must be set to call this function.
 	 * @return The data buffer as a string.
 	 */

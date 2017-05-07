@@ -41,9 +41,9 @@ namespace mqtt {
  * (try_get) and bounded-time blocking (try_get_for, try_get_until).
  * @par
  * The default queue has a capacity that is unbounded in the practical
- * sense, limited by the system RAM. In this mode the object will not block
- * when placing values into the queue. A capacity can bet set with the
- * construtcor or, at any time later by calling the capacity(size_type)
+ * sense, limited by available memory. In this mode the object will not
+ * block when placing values into the queue. A capacity can bet set with the
+ * construtor or, at any time later by calling the @ref capacity(size_type)
  * method. Using this latter method, the capacity can be set to an amount
  * smaller than the current size of the queue. In that case all put's to the
  * queue will block until the number of items are removed from the queue to
