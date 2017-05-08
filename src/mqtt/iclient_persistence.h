@@ -26,7 +26,8 @@
 
 #include "MQTTAsync.h"
 #include "mqtt/types.h"
-#include "mqtt/ipersistable.h"
+#include "mqtt/buffer_view.h"
+#include "mqtt/string_collection.h"
 #include <vector>
 
 namespace mqtt {
@@ -52,11 +53,10 @@ namespace mqtt {
  */
 class iclient_persistence
 {
-	friend class iasync_client;
+	friend class async_client;
+	friend class iclient_persistence_test;
 
-public:
-
-	/** C-callbacks  */
+	/** Callbacks from the C library */
 	static int persistence_open(void** handle, const char* clientID, const char* serverURI, void* context);
 	static int persistence_close(void* handle);
 	static int persistence_put(void* handle, char* key, int bufcount, char* buffers[], int buflens[]);
@@ -95,21 +95,21 @@ public:
 	 */
 	virtual bool contains_key(const string& key) =0;
 	/**
-	 * Gets the specified data out of the persistent store.
-	 * @param key
-	 * @return persistable
+	 * Returns a collection of keys in this persistent data store.
 	 */
-	virtual ipersistable_ptr get(const string& key) const =0;
-	/**
-	 * Returns an Enumeration over the keys in this persistent data store.
-	 */
-	virtual std::vector<string> keys() const =0;
+	virtual const string_collection& keys() const =0;
 	/**
 	 * Puts the specified data into the persistent store.
 	 * @param key
 	 * @param persistable
 	 */
-	virtual void put(const string& key, ipersistable_ptr persistable) =0;
+	virtual void put(const string& key, const std::vector<string_view>& bufs) =0;
+	/**
+	 * Gets the specified data out of the persistent store.
+	 * @param key
+	 * @return persistable
+	 */
+	virtual string_view get(const string& key) const =0;
 	/**
 	 * Remove the data for the specified key.
 	 * @param key

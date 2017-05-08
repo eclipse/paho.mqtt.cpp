@@ -58,8 +58,8 @@ int main(int argc, char* argv[])
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::topic_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::exception_test );
 
-	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::async_client_test );
-	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::client_test );
+//	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::async_client_test );
+//	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::client_test );
 
 	TextUi::TestRunner runner;
 	TestFactoryRegistry &registry = TestFactoryRegistry::getRegistry();

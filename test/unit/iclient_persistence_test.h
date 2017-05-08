@@ -28,8 +28,6 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "mqtt/iclient_persistence.h"
-
-#include "dummy_persistable.h"
 #include "dummy_client_persistence.h"
 
 namespace mqtt {
@@ -46,35 +44,65 @@ class iclient_persistence_test : public CppUnit::TestFixture
 	CPPUNIT_TEST( test_persistence_put_1_buffer );
 	CPPUNIT_TEST( test_persistence_put_2_buffers );
 	CPPUNIT_TEST( test_persistence_put_3_buffers );
-	CPPUNIT_TEST( test_persistence_put_3_empty_buffers );
+	CPPUNIT_TEST( test_persistence_put_empty_buffers );
 	CPPUNIT_TEST( test_persistence_get );
 	CPPUNIT_TEST( test_persistence_remove );
 	CPPUNIT_TEST( test_persistence_keys );
 	CPPUNIT_TEST( test_persistence_clear );
-	CPPUNIT_TEST( test_persistence_containskey );
 
 	CPPUNIT_TEST_SUITE_END();
 
-	using dp = mqtt::test::dummy_persistable;
+	const char* CLIENT_ID = "clientid";
+	const char* SERVER_URI = "serveruri";
+	const char* KEY = "key";
+	const char* INVALID_KEY = "invalid_key";
+
+	const char* PAYLOAD = "some random data";
+	const size_t PAYLOAD_LEN = strlen(PAYLOAD);
+
+	const char* PAYLOAD2 = "some other random data";
+	const size_t PAYLOAD2_LEN = strlen(PAYLOAD2);
+
+	const char* PAYLOAD3 = "some completely random data";
+	const size_t PAYLOAD3_LEN = strlen(PAYLOAD3);
+
 	using dcp = mqtt::test::dummy_client_persistence;
 
-	mqtt::test::dummy_client_persistence cli_per;
+	dcp per_;
+	void* handle_;
 
 public:
-	void setUp() {}
-	void tearDown() {}
+	void setUp() {
+		void* context = static_cast<void*>(&per_);
+		dcp::persistence_open(&handle_, CLIENT_ID, SERVER_URI, context);
+
+		// Put no buffer
+		int bufcount = 3;
+		const char* bufs[] = { PAYLOAD, PAYLOAD2, PAYLOAD3 };
+		int buflens[] = { int(PAYLOAD_LEN), int(PAYLOAD2_LEN), int(PAYLOAD3_LEN) };
+
+		dcp::persistence_put(handle_, const_cast<char*>(KEY), bufcount,
+							 const_cast<char**>(bufs), buflens);
+	}
+	void tearDown() {
+		dcp::persistence_clear(handle_);
+		dcp::persistence_close(handle_);
+	}
 
 // ----------------------------------------------------------------------
 // Test static method persistence_open()
 // ----------------------------------------------------------------------
 
 	void test_persistence_open() {
-		void* context = static_cast<void*>(&cli_per);
+		dcp per;
 		void* handle = nullptr;
-		CPPUNIT_ASSERT_EQUAL(MQTTCLIENT_PERSISTENCE_ERROR, dcp::persistence_open(&handle, dcp::CLIENT_ID, "", context));
-		CPPUNIT_ASSERT_EQUAL(MQTTCLIENT_PERSISTENCE_ERROR, dcp::persistence_open(&handle, "", dcp::SERVER_URI, context));
-		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS, dcp::persistence_open(&handle, dcp::CLIENT_ID, dcp::SERVER_URI, context));
-		CPPUNIT_ASSERT_EQUAL(handle, context);
+
+		CPPUNIT_ASSERT_EQUAL(MQTTCLIENT_PERSISTENCE_ERROR,
+							 dcp::persistence_open(&handle, CLIENT_ID, SERVER_URI, nullptr));
+
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS,
+							 dcp::persistence_open(&handle, CLIENT_ID, SERVER_URI, &per));
+		CPPUNIT_ASSERT_EQUAL(handle, static_cast<void*>(&per));
 	}
 
 // ----------------------------------------------------------------------
@@ -82,7 +110,15 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_persistence_close() {
-		void* handle = static_cast<void*>(&cli_per);
+		dcp per;
+
+		CPPUNIT_ASSERT_EQUAL(MQTTCLIENT_PERSISTENCE_ERROR,
+							 dcp::persistence_close(nullptr));
+
+		void* context = static_cast<void*>(&per);
+		void* handle = nullptr;
+		dcp::persistence_open(&handle, CLIENT_ID, SERVER_URI, context);
+
 		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS, dcp::persistence_close(handle));
 	}
 
@@ -91,57 +127,77 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_persistence_put_0_buffer() {
-		void* handle = static_cast<void*>(&cli_per);
+		dcp per;
+		void* handle;
+		dcp::persistence_open(&handle, CLIENT_ID, SERVER_URI, &per);
 
 		// Put no buffer
 		int bufcount = 0;
-		const char* buffers[] = { dp::PAYLOAD };
-		int buflens[] = { static_cast<int>(strlen(buffers[0])) };
-		CPPUNIT_ASSERT_EQUAL(MQTTCLIENT_PERSISTENCE_ERROR, dcp::persistence_put(handle, const_cast<char*>(dcp::KEY_INVALID), bufcount, const_cast<char**>(buffers), buflens));
-		CPPUNIT_ASSERT_EQUAL(MQTTCLIENT_PERSISTENCE_ERROR, dcp::persistence_put(handle, const_cast<char*>(dcp::KEY_VALID), bufcount, const_cast<char**>(buffers), buflens));
+		const char* bufs[] = { PAYLOAD };
+		int buflens[] = { int(PAYLOAD_LEN) };
+
+		CPPUNIT_ASSERT_EQUAL(MQTTCLIENT_PERSISTENCE_ERROR,
+							 dcp::persistence_put(handle, const_cast<char*>(KEY), bufcount,
+												  const_cast<char**>(bufs), buflens));
 	}
 
 	void test_persistence_put_1_buffer() {
-		void* handle = static_cast<void*>(&cli_per);
+		dcp per;
+		void* handle;
+		dcp::persistence_open(&handle, CLIENT_ID, SERVER_URI, &per);
 
-		// Put one buffer
+		// Put no buffer
 		int bufcount = 1;
-		const char* buffers[] = { dp::PAYLOAD };
-		int buflens[] = { static_cast<int>(strlen(buffers[0])) };
-		CPPUNIT_ASSERT_EQUAL(MQTTCLIENT_PERSISTENCE_ERROR, dcp::persistence_put(handle, const_cast<char*>(dcp::KEY_INVALID), bufcount, const_cast<char**>(buffers), buflens));
-		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS, dcp::persistence_put(handle, const_cast<char*>(dcp::KEY_VALID), bufcount, const_cast<char**>(buffers), buflens));
+		const char* bufs[] = { PAYLOAD };
+		int buflens[] = { int(PAYLOAD_LEN) };
+
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS,
+							 dcp::persistence_put(handle, const_cast<char*>(KEY), bufcount,
+												  const_cast<char**>(bufs), buflens));
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS,
+							 dcp::persistence_containskey(handle, const_cast<char*>(KEY)));
+		CPPUNIT_ASSERT_EQUAL(MQTTCLIENT_PERSISTENCE_ERROR,
+							 dcp::persistence_containskey(handle, const_cast<char*>(INVALID_KEY)));
 	}
 
 	void test_persistence_put_2_buffers() {
-		void* handle = static_cast<void*>(&cli_per);
+		dcp per;
+		void* handle;
+		dcp::persistence_open(&handle, CLIENT_ID, SERVER_URI, &per);
 
-		// Put two buffers
+		// Put no buffer
 		int bufcount = 2;
-		const char* buffers[] = { dp::PAYLOAD, dp::PAYLOAD };
-		int buflens[] = { static_cast<int>(strlen(buffers[0])), static_cast<int>(strlen(buffers[1])) };
-		CPPUNIT_ASSERT_EQUAL(MQTTCLIENT_PERSISTENCE_ERROR, dcp::persistence_put(handle, const_cast<char*>(dcp::KEY_INVALID), bufcount, const_cast<char**>(buffers), buflens));
-		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS, dcp::persistence_put(handle, const_cast<char*>(dcp::KEY_VALID), bufcount, const_cast<char**>(buffers), buflens));
+		const char* bufs[] = { PAYLOAD, PAYLOAD2 };
+		int buflens[] = { int(PAYLOAD_LEN), int(PAYLOAD2_LEN) };
+
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS,
+							 dcp::persistence_put(handle, const_cast<char*>(KEY), bufcount,
+												  const_cast<char**>(bufs), buflens));
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS,
+							 dcp::persistence_containskey(handle, const_cast<char*>(KEY)));
+		CPPUNIT_ASSERT_EQUAL(MQTTCLIENT_PERSISTENCE_ERROR,
+							 dcp::persistence_containskey(handle, const_cast<char*>(INVALID_KEY)));
 	}
 
 	void test_persistence_put_3_buffers() {
-		void* handle = static_cast<void*>(&cli_per);
-
-		// Put three buffers
-		int bufcount = 3;
-		const char* buffers[] = { dp::PAYLOAD, dp::PAYLOAD, dp::PAYLOAD };
-		int buflens[] = { static_cast<int>(strlen(buffers[0])), static_cast<int>(strlen(buffers[1])), static_cast<int>(strlen(buffers[2])) };
-		CPPUNIT_ASSERT_EQUAL(MQTTCLIENT_PERSISTENCE_ERROR, dcp::persistence_put(handle, const_cast<char*>(dcp::KEY_INVALID), bufcount, const_cast<char**>(buffers), buflens));
-		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS, dcp::persistence_put(handle, const_cast<char*>(dcp::KEY_VALID), bufcount, const_cast<char**>(buffers), buflens));
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS,
+							 dcp::persistence_containskey(handle_, const_cast<char*>(KEY)));
+		CPPUNIT_ASSERT_EQUAL(MQTTCLIENT_PERSISTENCE_ERROR,
+							 dcp::persistence_containskey(handle_, const_cast<char*>(INVALID_KEY)));
 	}
 
-	void test_persistence_put_3_empty_buffers() {
-		void* handle = static_cast<void*>(&cli_per);
+	void test_persistence_put_empty_buffers() {
+		dcp per;
+		void* handle;
+		dcp::persistence_open(&handle, CLIENT_ID, SERVER_URI, &per);
 
 		// Put three empty buffers
 		int bufcount = 3;
 		const char* buffers[] = { "", "", "" };
 		int buflens[] = { 0, 0, 0 };
-		CPPUNIT_ASSERT_EQUAL(MQTTCLIENT_PERSISTENCE_ERROR, dcp::persistence_put(handle, const_cast<char*>(dcp::KEY_VALID), bufcount, const_cast<char**>(buffers), buflens));
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS,
+							 dcp::persistence_put(handle, const_cast<char*>(KEY),
+												  bufcount, const_cast<char**>(buffers), buflens));
 	}
 
 // ----------------------------------------------------------------------
@@ -149,15 +205,23 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_persistence_get() {
-		void* handle = static_cast<void*>(&cli_per);
-		char* buffer = nullptr;
+		char* buf = nullptr;
 		int buflen = 0;
-		CPPUNIT_ASSERT_EQUAL(MQTTCLIENT_PERSISTENCE_ERROR, dcp::persistence_get(handle, const_cast<char*>(dcp::KEY_INVALID), &buffer, &buflen));
-		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS, dcp::persistence_get(handle, const_cast<char*>(dcp::KEY_VALID), &buffer, &buflen));
-		std::string header_payload = dp::HEADER;
-		header_payload += dp::PAYLOAD;
-		CPPUNIT_ASSERT_EQUAL(static_cast<int>(header_payload.size()), buflen);
-		CPPUNIT_ASSERT(std::equal(buffer, buffer + buflen, header_payload.c_str()));
+		CPPUNIT_ASSERT_EQUAL(MQTTCLIENT_PERSISTENCE_ERROR,
+							 dcp::persistence_get(handle_, const_cast<char*>(INVALID_KEY), &buf, &buflen));
+		CPPUNIT_ASSERT_EQUAL(0, buflen);
+
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS,
+							 dcp::persistence_get(handle_, const_cast<char*>(KEY), &buf, &buflen));
+
+		int n = PAYLOAD_LEN + PAYLOAD2_LEN + PAYLOAD3_LEN;
+		string str { PAYLOAD };
+		str += PAYLOAD2;
+		str += PAYLOAD3;
+
+		CPPUNIT_ASSERT_EQUAL(n, buflen);
+		CPPUNIT_ASSERT(buf != nullptr);
+		CPPUNIT_ASSERT(!memcmp(str.data(), buf, n));
 	}
 
 // ----------------------------------------------------------------------
@@ -165,9 +229,14 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_persistence_remove() {
-		void* handle = static_cast<void*>(&cli_per);
-		CPPUNIT_ASSERT_EQUAL(MQTTCLIENT_PERSISTENCE_ERROR, dcp::persistence_remove(handle, const_cast<char*>(dcp::KEY_INVALID)));
-		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS, dcp::persistence_remove(handle, const_cast<char*>(dcp::KEY_VALID)));
+		CPPUNIT_ASSERT_EQUAL(MQTTCLIENT_PERSISTENCE_ERROR,
+							 dcp::persistence_remove(handle_, const_cast<char*>(INVALID_KEY)));
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS,
+							 dcp::persistence_containskey(handle_, const_cast<char*>(KEY)));
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS,
+							 dcp::persistence_remove(handle_, const_cast<char*>(KEY)));
+		CPPUNIT_ASSERT_EQUAL(MQTTCLIENT_PERSISTENCE_ERROR,
+							 dcp::persistence_containskey(handle_, const_cast<char*>(KEY)));
 	}
 
 // ----------------------------------------------------------------------
@@ -175,12 +244,14 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_persistence_keys() {
-		void* handle = static_cast<void*>(&cli_per);
 		char** keys = nullptr;
 		int nkeys = 0;
-		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS, dcp::persistence_keys(handle, &keys, &nkeys));
+
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS,
+							 dcp::persistence_keys(handle_, &keys, &nkeys));
 		CPPUNIT_ASSERT_EQUAL(1, nkeys);
-		CPPUNIT_ASSERT(std::equal(keys[0], keys[0] + strlen(keys[0]), dcp::KEY_VALID));
+		CPPUNIT_ASSERT_EQUAL(std::string(KEY), std::string(keys[0]));
+		//CPPUNIT_ASSERT(!strcmp(KEY, keys[0]));
 	}
 
 // ----------------------------------------------------------------------
@@ -188,18 +259,18 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_persistence_clear() {
-		void* handle = static_cast<void*>(&cli_per);
-		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS, dcp::persistence_clear(handle));
-	}
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS,
+							 dcp::persistence_containskey(handle_, const_cast<char*>(KEY)));
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS, dcp::persistence_clear(handle_));
+		CPPUNIT_ASSERT_EQUAL(MQTTCLIENT_PERSISTENCE_ERROR,
+							 dcp::persistence_containskey(handle_, const_cast<char*>(KEY)));
 
-// ----------------------------------------------------------------------
-// Test static method persistence_containskey()
-// ----------------------------------------------------------------------
+		char** keys = nullptr;
+		int nkeys = -1;
 
-	void test_persistence_containskey() {
-		void* handle = static_cast<void*>(&cli_per);
-		CPPUNIT_ASSERT_EQUAL(MQTTCLIENT_PERSISTENCE_ERROR, dcp::persistence_containskey(handle, const_cast<char*>(dcp::KEY_INVALID)));
-		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS, dcp::persistence_containskey(handle, const_cast<char*>(dcp::KEY_VALID)));
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_SUCCESS,
+							 dcp::persistence_keys(handle_, &keys, &nkeys));
+		CPPUNIT_ASSERT_EQUAL(0, nkeys);
 	}
 
 };
@@ -209,3 +280,4 @@ public:
 }
 
 #endif		//  __mqtt_iclient_persistence_test_h
+

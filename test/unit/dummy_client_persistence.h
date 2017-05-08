@@ -20,87 +20,76 @@
 #ifndef __mqtt_dummy_client_persistence_h
 #define __mqtt_dummy_client_persistence_h
 
-#include <string>
-#include <stdexcept>
-
 #include "mqtt/iclient_persistence.h"
-
-#include "dummy_persistable.h"
-
 
 namespace mqtt {
 namespace test {
 
 /////////////////////////////////////////////////////////////////////////////
 
-class dummy_client_persistence : public mqtt::iclient_persistence
+// Dummy persistence is a working in-memory persistence class.
+class dummy_client_persistence : virtual public mqtt::iclient_persistence
 {
+	// Whether the store is open
+	bool open_;
+
+	// Use an STL map to store shared persistence pointers
+	// against string keys.
+	std::map<std::string, std::string> store_;
+
 public:
-	static const char* CLIENT_ID;
-	static const char* SERVER_URI;
-	static const char* KEY_VALID;
-	static const char* KEY_INVALID;
+	dummy_client_persistence() : open_(false) {}
 
+	// "Open" the store
 	void open(const std::string& clientId, const std::string& serverURI) override {
-		if (clientId != CLIENT_ID) {
-			throw std::invalid_argument{clientId};
-		}
-		if (serverURI != SERVER_URI) {
-			throw std::invalid_argument{serverURI};
-		}
+		open_ = true;
 	}
 
-	void close() override {
-	}
+	// Close the persistent store that was previously opened.
+	void close() override { open_ = false; }
 
-	void clear() override {
-	}
+	// Clears persistence, so that it no longer contains any persisted data.
+	void clear() override { store_.clear(); }
 
 	// Returns whether or not data is persisted using the specified key.
-	bool contains_key(const std::string &key) override {
-		return key == KEY_VALID;
+	bool contains_key(const std::string& key) override {
+		return store_.find(key) != store_.end();
 	}
 
-	// Gets the specified data out of the persistent store.
-	mqtt::ipersistable_ptr get(const std::string& key) const override {
-		if (key != KEY_VALID) {
-			throw std::invalid_argument{key};
-		}
-		return mqtt::ipersistable_ptr{new dummy_persistable};
-	}
-	/**
-	 * Returns the keys in this persistent data store.
-	 */
-	std::vector<std::string> keys() const override {
-		return std::vector<std::string>{ KEY_VALID };
+	// Returns the keys in this persistent data store.
+	// This could be more efficient, but you get the point.
+	const mqtt::string_collection& keys() const override {
+		static mqtt::string_collection ks;
+		ks.clear();
+		for (const auto& k : store_)
+			ks.push_back(k.first);
+		return ks;
 	}
 
 	// Puts the specified data into the persistent store.
-	void put(const std::string& key, mqtt::ipersistable_ptr persistable) override {
-		if (key != KEY_VALID) {
-			throw std::invalid_argument{key};
-		}
-		const std::string PAYLOAD { dummy_persistable::PAYLOAD };
-		const std::string payload ( reinterpret_cast<const char*>(persistable->get_payload_bytes()), persistable->get_payload_length() );
-		// NOTE: compare sub string, not the whole string. Because the
-		// the "PAYLOAD" string might repeat N times using the method
-		// mqtt::iclient_persistence::persistence_put()
-		if (!std::equal(PAYLOAD.begin(), PAYLOAD.end(), payload.begin())) {
-			throw std::invalid_argument{key};
-		}
+	void put(const std::string& key, const std::vector<mqtt::string_view>& bufs) override {
+		std::string str;
+		for (const auto& b : bufs)
+			str += b.str();
+		store_[key] = std::move(str);
 	}
 
-	void remove(const std::string &key) override {
-		if (key != KEY_VALID) {
-			throw std::invalid_argument{key};
-		}
+	// Gets the specified data out of the persistent store.
+	mqtt::string_view get(const std::string& key) const override {
+		auto p = store_.find(key);
+		if (p == store_.end())
+			throw mqtt::persistence_exception();
+		return mqtt::string_view(p->second);
+	}
+
+	// Remove the data for the specified key.
+	void remove(const std::string& key) override {
+		auto p = store_.find(key);
+		if (p == store_.end())
+			throw mqtt::persistence_exception();
+		store_.erase(p);
 	}
 };
-
-const char* dummy_client_persistence::CLIENT_ID { "CLIENT_ID" };
-const char* dummy_client_persistence::SERVER_URI { "SERVER_URI" };
-const char* dummy_client_persistence::KEY_VALID { "KEY_VALID" };
-const char* dummy_client_persistence::KEY_INVALID { "KEY_INVALID" };
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace test

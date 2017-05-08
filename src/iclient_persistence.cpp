@@ -24,54 +24,6 @@
 namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
-
-// This is an internal class for wrapping a buffer into a persistable type.
-// Note that it does not copy the buffer or take possession of it, and thus
-// is only useful for a subset of circumstances where the buffer is
-// guaranteed to live longer than the wrapper object, and performance is
-// important.
-
-class persistence_wrapper : virtual public ipersistable
-{
-	const binary hdr_;
-	const binary payload_;
-
-public:
-	persistence_wrapper(const void* payload, size_t payloadlen) 
-			: payload_(static_cast<const byte*>(payload), 
-					   static_cast<const byte*>(payload) + payloadlen) {}
-	persistence_wrapper(const binary& payload)
-			: payload_(payload) {}
-	persistence_wrapper(const void* hdr, size_t hdrlen,
-						const void* payload, size_t payloadlen)
-			: hdr_(static_cast<const byte*>(hdr), 
-				   static_cast<const byte*>(hdr) + hdrlen),
-				payload_(static_cast<const byte*>(payload), 
-						 static_cast<const byte*>(payload) + payloadlen) {}
-	persistence_wrapper(const binary& hdr, const binary& payload)
-			: hdr_(hdr), payload_(payload) {}
-
-	const byte* get_header_bytes() const override {
-		return reinterpret_cast<const byte*>(hdr_.data());
-	}
-	size_t get_header_length() const override { return hdr_.size(); }
-	size_t get_header_offset() const override { return 0; }
-
-	const byte* get_payload_bytes() const override {
-		return reinterpret_cast<const byte *>(payload_.data());
-	}
-	size_t get_payload_length() const override { return payload_.size(); }
-	size_t get_payload_offset() const override { return 0; }
-
-	std::vector<byte> get_header_byte_arr() const override {
-		return std::vector<byte>(hdr_.data(), hdr_.data()+hdr_.size());
-	}
-	std::vector<byte> get_payload_byte_arr() const override {
-		return std::vector<byte>(payload_.data(), payload_.data()+payload_.size());
-	}
-};
-
-/////////////////////////////////////////////////////////////////////////////
 // Functions to transition C persistence calls to the C++ persistence object.
 
 // Upon the call to persistence_open(), the 'context' has the address of the
@@ -82,7 +34,7 @@ int iclient_persistence::persistence_open(void** handle, const char* clientID,
 										  const char* serverURI, void* context)
 {
 	try {
-		if (context) {
+		if (handle && clientID && serverURI && context) {
 			static_cast<iclient_persistence*>(context)->open(clientID, serverURI);
 			*handle = context;
 			return MQTTASYNC_SUCCESS;
@@ -110,24 +62,11 @@ int iclient_persistence::persistence_put(void* handle, char* key, int bufcount,
 										 char* buffers[], int buflens[])
 {
 	try {
-		if (handle && bufcount > 0) {
-			ipersistable_ptr p;
-			if (bufcount == 1)
-				p = std::make_shared<persistence_wrapper>(buffers[0], buflens[0]);
-			else if (bufcount == 2)
-				p = std::make_shared<persistence_wrapper>(buffers[0], buflens[0],
-														  buffers[1], buflens[1]);
-			else {
-				string buf;
-				for (int i=0; i<bufcount; ++i) {
-					if (buffers[i] && buflens[i] > 0)
-						buf.append(buffers[i], buflens[i]);
-				}
-				if (buf.empty())	// No data!
-					return MQTTCLIENT_PERSISTENCE_ERROR;
-				p = std::make_shared<persistence_wrapper>(&buf[0], buf.size());
-			}
-			static_cast<iclient_persistence*>(handle)->put(key, p);
+		if (handle && bufcount > 0 && buffers && buflens) {
+			std::vector<string_view> vec;
+			for (int i=0; i<bufcount; ++i)
+				vec.push_back(string_view(buffers[i], buflens[i]));
+			static_cast<iclient_persistence*>(handle)->put(key, vec);
 			return MQTTASYNC_SUCCESS;
 		}
 	}
@@ -140,21 +79,10 @@ int iclient_persistence::persistence_get(void* handle, char* key,
 										 char** buffer, int* buflen)
 {
 	try {
-		if (handle) {
-			ipersistable_ptr p = static_cast<iclient_persistence*>(handle)->get(key);
-
-			size_t	hdrlen = p->get_header_length(),
-					payloadlen = p->get_payload_length();
-
-			if (!p->get_header_bytes()) hdrlen = 0;
-			if (!p->get_payload_bytes()) payloadlen = 0;
-
-			// TODO: Check range
-			*buflen = static_cast<int>(hdrlen + payloadlen);
-			char* buf = static_cast<char*>(malloc(*buflen));
-			std::memcpy(buf, p->get_header_bytes(), hdrlen);
-			std::memcpy(buf+hdrlen, p->get_payload_bytes(), payloadlen);
-			*buffer = buf;
+		if (handle && key && buffer && buflen) {
+			auto sv = static_cast<iclient_persistence*>(handle)->get(key);
+			*buffer = const_cast<char*>(sv.data());
+			*buflen = (int) sv.length();
 			return MQTTASYNC_SUCCESS;
 		}
 	}
@@ -166,7 +94,7 @@ int iclient_persistence::persistence_get(void* handle, char* key,
 int iclient_persistence::persistence_remove(void* handle, char* key)
 {
 	try {
-		if (handle) {
+		if (handle && key) {
 			static_cast<iclient_persistence*>(handle)->remove(key);
 			return MQTTASYNC_SUCCESS;
 		}
@@ -180,21 +108,10 @@ int iclient_persistence::persistence_keys(void* handle, char*** keys, int* nkeys
 {
 	try {
 		if (handle && keys && nkeys) {
-			std::vector<string> k(
-				static_cast<iclient_persistence*>(handle)->keys());
+			auto& k = static_cast<iclient_persistence*>(handle)->keys();
 			size_t n = k.size();
-			*nkeys = n;		// TODO: Check range
-			if (n == 0)
-				*keys = nullptr;
-			else {
-				*keys = static_cast<char**>(malloc(n*sizeof(char*)));
-				for (size_t i=0; i<n; ++i) {
-					size_t len = k[i].size();
-					(*keys)[i] = static_cast<char*>(malloc(len+1));
-					std::memcpy((*keys)[i], k[i].data(), len);
-					(*keys)[i][len] = '\0';
-				}
-			}
+			*nkeys = n;
+			*keys = (n == 0) ? nullptr : const_cast<char**>(k.c_arr());
 			return MQTTASYNC_SUCCESS;
 		}
 	}
@@ -219,7 +136,7 @@ int iclient_persistence::persistence_clear(void* handle)
 int iclient_persistence::persistence_containskey(void* handle, char* key)
 {
 	try {
-		if (handle &&
+		if (handle && key &&
 				static_cast<iclient_persistence*>(handle)->contains_key(key))
 			return MQTTASYNC_SUCCESS;
 	}

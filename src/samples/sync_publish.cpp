@@ -25,7 +25,6 @@
 #include <vector>
 #include <cstring>
 #include "mqtt/client.h"
-#include "mqtt/ipersistable.h"
 
 const std::string ADDRESS("tcp://localhost:1883");
 const std::string CLIENTID("SyncPublisher");
@@ -48,7 +47,7 @@ class sample_mem_persistence : virtual public mqtt::iclient_persistence
 
 	// Use an STL map to store shared persistence pointers
 	// against string keys.
-	std::map<std::string, mqtt::ipersistable_ptr> store_;
+	std::map<std::string, std::string> store_;
 
 public:
 	sample_mem_persistence() : open_(false) {}
@@ -77,8 +76,27 @@ public:
 		return store_.find(key) != store_.end();
 	}
 
+	// Returns the keys in this persistent data store.
+	const mqtt::string_collection& keys() const override {
+		static mqtt::string_collection ks;
+		ks.clear();
+		for (const auto& k : store_)
+			ks.push_back(k.first);
+		return ks;
+	}
+
+	// Puts the specified data into the persistent store.
+	void put(const std::string& key, const std::vector<mqtt::string_view>& bufs) override {
+		std::cout << "[Persisting data with key '"
+			<< key << "']" << std::endl;
+		std::string str;
+		for (const auto& b : bufs)
+			str += b.str();
+		store_[key] = std::move(str);
+	}
+
 	// Gets the specified data out of the persistent store.
-	mqtt::ipersistable_ptr get(const std::string& key) const override {
+	mqtt::string_view get(const std::string& key) const override {
 		std::cout << "[Searching persistence for key '"
 			<< key << "']" << std::endl;
 		auto p = store_.find(key);
@@ -87,24 +105,7 @@ public:
 		std::cout << "[Found persistence data for key '"
 			<< key << "']" << std::endl;
 
-		return p->second;
-	}
-	/**
-	 * Returns the keys in this persistent data store.
-	 */
-	std::vector<std::string> keys() const override {
-		std::vector<std::string> ks;
-		for (const auto& k : store_)
-			ks.push_back(k.first);
-		return ks;
-	}
-
-	// Puts the specified data into the persistent store.
-	void put(const std::string& key, mqtt::ipersistable_ptr persistable) override {
-		std::cout << "[Persisting data with key '"
-			<< key << "']" << std::endl;
-
-		store_[key] = persistable;
+		return mqtt::string_view(p->second);
 	}
 
 	// Remove the data for the specified key.
