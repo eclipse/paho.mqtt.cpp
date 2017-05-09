@@ -1,3 +1,16 @@
+// sync_publish.cpp
+//
+// This is a Paho MQTT C++ client, sample application.
+//
+// It's an example of how to send messages as an MQTT publisher using the
+// C++ synchronous client interface.
+//
+// The sample demonstrates:
+//  - Connecting to an MQTT server/broker
+//  - Publishing messages
+//  - User-defined persistence
+//
+
 /*******************************************************************************
  * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
  *
@@ -14,10 +27,6 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
-// This is a Paho C++ sample application for the synchronous (blocking) API.
-// It also demonstrates the use of custom message persistence, in this case
-// creating an in-memory store.
-
 #include <iostream>
 #include <cstdlib>
 #include <string>
@@ -26,11 +35,11 @@
 #include <cstring>
 #include "mqtt/client.h"
 
-const std::string ADDRESS("tcp://localhost:1883");
-const std::string CLIENTID("SyncPublisher");
-const std::string TOPIC("hello");
+const std::string SERVER_ADDRESS { "tcp://localhost:1883" };
+const std::string CLIENT_ID { "sync_publish_cpp" };
+const std::string TOPIC { "hello" };
 
-const std::string PAYLOAD1("Hello World!");
+const std::string PAYLOAD1 { "Hello World!" };
 
 const char* PAYLOAD2 = "Hi there!";
 const char* PAYLOAD3 = "Is anyone listening?";
@@ -38,8 +47,8 @@ const char* PAYLOAD3 = "Is anyone listening?";
 const int QOS = 1;
 
 /////////////////////////////////////////////////////////////////////////////
-
 // Example of a simple, in-memory persistence class.
+
 class sample_mem_persistence : virtual public mqtt::iclient_persistence
 {
 	// Whether the store is open
@@ -120,23 +129,22 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////
+// Class to receive callbacks
 
-class callback : public virtual mqtt::callback
+class user_callback : public virtual mqtt::callback
 {
-public:
 	void connection_lost(const std::string& cause) override {
 		std::cout << "\nConnection lost" << std::endl;
 		if (!cause.empty())
 			std::cout << "\tcause: " << cause << std::endl;
 	}
 
-	// We're not subscrived to anything, so this should never be called.
-	void message_arrived(mqtt::const_message_ptr) override {}
-
 	void delivery_complete(mqtt::delivery_token_ptr tok) override {
 		std::cout << "\n\t[Delivery complete for token: "
 			<< (tok ? tok->get_message_id() : -1) << "]" << std::endl;
 	}
+
+public:
 };
 
 // --------------------------------------------------------------------------
@@ -145,9 +153,9 @@ int main(int argc, char* argv[])
 {
 	std::cout << "Initialzing..." << std::endl;
 	sample_mem_persistence persist;
-	mqtt::client client(ADDRESS, CLIENTID, &persist);
+	mqtt::client client(SERVER_ADDRESS, CLIENT_ID, &persist);
 
-	callback cb;
+	user_callback cb;
 	client.set_callback(cb);
 
 	mqtt::connect_options connOpts;
@@ -171,7 +179,7 @@ int main(int argc, char* argv[])
 		// Now try with itemized publish.
 
 		std::cout << "\nSending next message..." << std::endl;
-		client.publish(TOPIC, PAYLOAD2, strlen(PAYLOAD2)+1, 0, false);
+		client.publish(TOPIC, PAYLOAD2, strlen(PAYLOAD2)+1);
 		std::cout << "...OK" << std::endl;
 
 		// Now try with a listener, no token, and non-heap message

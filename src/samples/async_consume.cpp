@@ -1,3 +1,17 @@
+// async_consume.cpp
+//
+// This is a Paho MQTT C++ client, sample application.
+//
+// This application is an MQTT consumer/subscriber using the C++
+// asynchronous client interface, employing the  to receive messages
+// and status updates.
+//
+// The sample demonstrates:
+//  - Connecting to an MQTT server/broker.
+//  - Subscribing to a topic
+//  - Receiving messages through the synchronous queuing API
+//
+
 /*******************************************************************************
  * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
  *
@@ -25,9 +39,9 @@
 
 using namespace std;
 
-const string ADDRESS	{ "tcp://localhost:1883" };
-const string CLIENT_ID	{ "async_consumer" };
-const string TOPIC 		{ "hello" };
+const string SERVER_ADDRESS	{ "tcp://localhost:1883" };
+const string CLIENT_ID		{ "async_consume" };
+const string TOPIC 			{ "hello" };
 
 const int  QOS = 1;
 
@@ -39,7 +53,7 @@ int main(int argc, char* argv[])
 	connOpts.set_keep_alive_interval(20);
 	connOpts.set_clean_session(true);
 
-	mqtt::async_client cli(ADDRESS, CLIENT_ID);
+	mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
 
 	try {
 		cout << "Connecting to the MQTT server..." << flush;

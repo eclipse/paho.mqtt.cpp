@@ -1,3 +1,28 @@
+// ssl_publish.cpp
+//
+// This is a Paho MQTT C++ client, sample application.
+//
+// It's an example of how to connect to an MQTT broker securely, and then
+// send messages as an MQTT publisher using the C++ asynchronous client
+// interface.
+//
+// The sample demonstrates:
+//  - Connecting to an MQTT server/broker securely
+//  - Setting SSL/TLS options
+//  - Last will and testament
+//  - Publishing messages
+//  - Using asynchronous tokens
+//  - Implementing callbacks and action listeners
+//
+// We can test this using mosquitto configured with certificates in the
+// Paho C library. The C library has an SSL/TSL test suite, and we can use
+// that to test:
+//     mosquitto -c paho.mqtt.c/test/tls-testing/mosquitto.conf
+//
+// Then use the file "test-root-ca.crt" from that directory
+// (paho.mqtt.c/test/tls-testing) for the trust store for this program.
+//
+
 /*******************************************************************************
  * Copyright (c) 2013-2017 Frank Pagliughi <fpagliughi@mindspring.com>
  *
@@ -14,15 +39,6 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
-// We can test this using mosquitto configured with certificates in the
-// Paho C library. The C library has an SSL/TSL test suite, and we can use
-// that to test:
-//     mosquitto -c paho.mqtt.c/test/tls-testing/mosquitto.conf
-//
-// Then use the file "test-root-ca.crt" from that directory
-// (paho.mqtt.c/test/tls-testing) for the trust store for this program.
-//
-
 #include <iostream>
 #include <cstdlib>
 #include <string>
@@ -30,10 +46,10 @@
 #include <cstring>
 #include "mqtt/async_client.h"
 
-const std::string DFLT_ADDRESS {"ssl://localhost:18885"};
-const std::string DFLT_CLIENT_ID {"CppAsyncPublisherSSL"};
+const std::string DFLT_SERVER_ADDRESS	{ "ssl://localhost:18885" };
+const std::string DFLT_CLIENT_ID		{ "ssl_publish_cpp" };
 
-const std::string TOPIC {"hello"};
+const std::string TOPIC { "hello" };
 
 const char* PAYLOAD1 = "Hello World!";
 const char* PAYLOAD2 = "Hi there!";
@@ -57,9 +73,6 @@ public:
 			std::cout << "\tcause: " << cause << std::endl;
 	}
 
-	// We're not subscribed to anything, so this should never be called.
-	void message_arrived(mqtt::const_message_ptr msg) override {}
-
 	void delivery_complete(mqtt::delivery_token_ptr tok) override {
 		std::cout << "\tDelivery complete for token: "
 			<< (tok ? tok->get_message_id() : -1) << std::endl;
@@ -72,7 +85,7 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-	string	address  = (argc > 1) ? string(argv[1]) : DFLT_ADDRESS,
+	string	address  = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS,
 			clientID = (argc > 2) ? string(argv[2]) : DFLT_CLIENT_ID;
 
 	cout << "Initializing for server '" << address << "'..." << endl;
@@ -116,13 +129,6 @@ int main(int argc, char* argv[])
 		pubtok = client.publish(TOPIC, PAYLOAD2, strlen(PAYLOAD2), QOS, false);
 		pubtok->wait_for(TIMEOUT);
 		cout << "  ...OK" << endl;
-
-
-		// Double check that there are no pending tokens
-
-		vector<mqtt::delivery_token_ptr> toks = client.get_pending_delivery_tokens();
-		if (!toks.empty())
-			cout << "Error: There are pending delivery tokens!" << endl;
 
 		// Disconnect
 		cout << "\nDisconnecting..." << endl;

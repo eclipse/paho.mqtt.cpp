@@ -1,7 +1,19 @@
 // sync_consume.cpp
 //
-// This is a Paho MQTT C++ sample application for synchronous consumption
-// of incoming
+// This is a Paho MQTT C++ client, sample application.
+//
+// This application is an MQTT consumer/subscriber using the C++ synchronous
+// client interface, which uses the queuing API to receive messages.
+//
+// The sample demonstrates:
+//  - Connecting to an MQTT server/broker
+//  - Subscribing to multiple topics
+//  - Receiving messages through the queueing consumer API
+//  - Recieving and acting upon commands via MQTT topics
+//  - Manual reconnects
+//  - Using a persistent (non-clean) session
+//
+
 /*******************************************************************************
  * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
  *
@@ -30,8 +42,8 @@
 using namespace std;
 using namespace std::chrono;
 
-const string ADDRESS	{ "tcp://localhost:1883" };
-const string CLIENT_ID	{ "sync_consumer" };
+const string SERVER_ADDRESS	{ "tcp://localhost:1883" };
+const string CLIENT_ID		{ "sync_consume_cpp" };
 
 // --------------------------------------------------------------------------
 // Simple function to manually reconect a client.
@@ -60,10 +72,10 @@ int main(int argc, char* argv[])
 	connOpts.set_keep_alive_interval(20);
 	connOpts.set_clean_session(true);
 
-	mqtt::client cli(ADDRESS, CLIENT_ID);
+	mqtt::client cli(SERVER_ADDRESS, CLIENT_ID);
 
 	const vector<string> TOPICS { "data/#", "command" };
-	const vector<int> QOS { 1, 1 };
+	const vector<int> QOS { 0, 1 };
 
 	try {
 		cout << "Connecting to the MQTT server..." << flush;

@@ -1,3 +1,18 @@
+// async_publish.cpp
+//
+// This is a Paho MQTT C++ client, sample application.
+//
+// It's an example of how to send messages as an MQTT publisher using the
+// C++ asynchronous client interface.
+//
+// The sample demonstrates:
+//  - Connecting to an MQTT server/broker
+//  - Publishing messages
+//  - Last will and testament
+//  - Using asynchronous tokens
+//  - Implementing callbacks and action listeners
+//
+
 /*******************************************************************************
  * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
  *
@@ -25,10 +40,10 @@
 
 using namespace std;
 
-const std::string DFLT_ADDRESS {"tcp://localhost:1883"};
-const std::string DFLT_CLIENT_ID {"AsyncPublisher"};
+const std::string DFLT_SERVER_ADDRESS	{ "tcp://localhost:1883" };
+const std::string DFLT_CLIENT_ID		{ "async_publish" };
 
-const string TOPIC {"hello"};
+const string TOPIC { "hello" };
 
 const char* PAYLOAD1 = "Hello World!";
 const char* PAYLOAD2 = "Hi there!";
@@ -54,9 +69,6 @@ public:
 		if (!cause.empty())
 			cout << "\tcause: " << cause << endl;
 	}
-
-	// We're not subscribed to anything, so this should never be called.
-	void message_arrived(mqtt::const_message_ptr msg) override {}
 
 	void delivery_complete(mqtt::delivery_token_ptr tok) override {
 		cout << "\tDelivery complete for token: "
@@ -111,7 +123,7 @@ public:
 
 int main(int argc, char* argv[])
 {
-	string	address  = (argc > 1) ? string(argv[1]) : DFLT_ADDRESS,
+	string	address  = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS,
 			clientID = (argc > 2) ? string(argv[2]) : DFLT_CLIENT_ID;
 
 	cout << "Initializing for server '" << address << "'..." << endl;
@@ -176,7 +188,7 @@ int main(int argc, char* argv[])
 
 		// Double check that there are no pending tokens
 
-		vector<mqtt::delivery_token_ptr> toks = client.get_pending_delivery_tokens();
+		auto toks = client.get_pending_delivery_tokens();
 		if (!toks.empty())
 			cout << "Error: There are pending delivery tokens!" << endl;
 

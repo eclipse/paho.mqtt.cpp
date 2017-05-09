@@ -33,8 +33,7 @@
 using namespace std;
 using namespace std::chrono;
 
-const std::string DFLT_ADDRESS {"tcp://localhost:1883"};
-const std::string CLIENT_ID {"pub_speed_test"};
+const std::string DFLT_SERVER_ADDRESS { "tcp://localhost:1883" };
 
 const size_t	DFLT_PAYLOAD_SIZE = 1024;
 const int		DFLT_N_MSG = 1000,
@@ -74,17 +73,19 @@ void token_wait_func()
 
 int main(int argc, char* argv[])
 {
-	string	address  = (argc > 1) ? string(argv[1]) : DFLT_ADDRESS;
+	string	address  = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS;
 	int		nMsg = (argc > 2) ? atoi(argv[2]) : DFLT_N_MSG;
 	size_t	msgSz = (size_t) ((argc > 3) ? atol(argv[3]) : DFLT_PAYLOAD_SIZE);
 	int		qos = (argc > 4) ? atoi(argv[4]) : DFLT_QOS;
 
 	cout << "Initializing for server '" << address << "'..." << flush;
-	mqtt::async_client cli(address, CLIENT_ID);
+	mqtt::async_client cli(address, "");
 
-	mqtt::connect_options connOpts;
 	mqtt::message willmsg(TOPIC, LWT_PAYLOAD, 1, true);
 	mqtt::will_options will(willmsg);
+
+	mqtt::connect_options connOpts;
+	connOpts.set_clean_session(true);
 	connOpts.set_will(will);
 
 	// Create a payload
