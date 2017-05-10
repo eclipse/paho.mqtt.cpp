@@ -80,6 +80,7 @@ pkgincludedir = $(includedir)/mqtt
 
 pkginclude_HEADERS  = src/mqtt/async_client.h
 pkginclude_HEADERS += src/mqtt/buffer_ref.h
+pkginclude_HEADERS += src/mqtt/buffer_view.h
 pkginclude_HEADERS += src/mqtt/callback.h
 pkginclude_HEADERS += src/mqtt/client.h
 pkginclude_HEADERS += src/mqtt/connect_options.h
@@ -89,7 +90,6 @@ pkginclude_HEADERS += src/mqtt/exception.h
 pkginclude_HEADERS += src/mqtt/iaction_listener.h
 pkginclude_HEADERS += src/mqtt/iasync_client.h
 pkginclude_HEADERS += src/mqtt/iclient_persistence.h
-pkginclude_HEADERS += src/mqtt/ipersistable.h
 pkginclude_HEADERS += src/mqtt/message.h
 pkginclude_HEADERS += src/mqtt/response_options.h
 pkginclude_HEADERS += src/mqtt/thread_queue.h

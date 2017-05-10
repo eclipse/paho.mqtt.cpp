@@ -14,5 +14,5 @@
 PAHO_C_DIR=$(readlink -e ../paho.mqtt.c)
 
 export DEVELOP=1
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${PAHO_C_LIB}/build/output:${PWD}/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${PAHO_C_DIR}/build/output:${PWD}/lib
 

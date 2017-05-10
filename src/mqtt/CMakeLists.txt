@@ -20,6 +20,7 @@
 set(COMMON_HDR
     async_client.h
     buffer_ref.h
+    buffer_view.h
     callback.h
     client.h
     connect_options.h
@@ -29,7 +30,6 @@ set(COMMON_HDR
     iaction_listener.h
     iasync_client.h
     iclient_persistence.h
-    ipersistable.h
     message.h
     response_options.h
     string_collection.h
