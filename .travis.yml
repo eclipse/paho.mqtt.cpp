@@ -8,16 +8,7 @@ os: linux
 
 install:
   # Install Paho MQTT C (Need only paho-mqtt3a and paho-mqtt3as)
-  - git clone https://github.com/eclipse/paho.mqtt.c.git
-  - cd paho.mqtt.c
-  - git checkout -t origin/develop
-  - mkdir build_cmake
-  - cd build_cmake
-  - cmake -DCMAKE_INSTALL_PREFIX=/tmp/paho-c -DPAHO_WITH_SSL=ON ..
-  - make
-  - sudo make install
-  - cd ../..
-  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/tmp/paho-c/lib
+  - ./install_paho_mqtt_c.sh
 
 addons:
   apt:
@@ -150,14 +141,16 @@ matrix:
 
 script:
   # Test Makefile building
-  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && make clean && make CXX=$COMPILER PAHO_C_INC_DIR=/tmp/paho-c/include/ PAHO_C_LIB_DIR=/tmp/paho-c/lib PAHO_CPP_INC_DIR=../../src PAHO_CPP_LIB_DIR=../../lib check
-  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && make clean && make CXX=$COMPILER PAHO_C_INC_DIR=/tmp/paho-c/include/ PAHO_C_LIB_DIR=/tmp/paho-c/lib PAHO_CPP_INC_DIR=../../src PAHO_CPP_LIB_DIR=../../lib SSL=1 check
+  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && make CXX=$COMPILER VERBOSE=1 && sudo make install && make CXX=$COMPILER VERBOSE=1 check
+  - make clean && sudo make uninstall && pushd test/unit && make clean && popd
+  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && make CXX=$COMPILER VERBOSE=1 SSL=0 && sudo make install && make CXX=$COMPILER VERBOSE=1 SSL=0 check
+  - make clean && sudo make uninstall && pushd test/unit && make clean && popd
   # Test CMake building
-  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && rm -rf build_cmake && mkdir build_cmake && cd build_cmake && cmake -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_INSTALL_PREFIX=/tmp/paho-cpp -DPAHO_MQTT_C_PATH=/tmp/paho-c -DPAHO_BUILD_SAMPLES=ON -DPAHO_BUILD_STATIC=ON -DPAHO_BUILD_DOCUMENTATION=OFF -DPAHO_WITH_SSL=OFF .. && make && make install; cd ..
-  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && rm -rf build_cmake && mkdir build_cmake && cd build_cmake && cmake -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_INSTALL_PREFIX=/tmp/paho-cpp -DPAHO_MQTT_C_PATH=/tmp/paho-c -DPAHO_BUILD_SAMPLES=ON -DPAHO_BUILD_STATIC=ON -DPAHO_BUILD_DOCUMENTATION=ON  -DPAHO_WITH_SSL=ON  .. && make && make install; cd ..
+  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && rm -rf build_cmake && mkdir build_cmake && pushd build_cmake && cmake -DCMAKE_CXX_COMPILER=$COMPILER -DPAHO_BUILD_SAMPLES=ON -DPAHO_BUILD_STATIC=ON -DPAHO_BUILD_DOCUMENTATION=OFF -DPAHO_WITH_SSL=OFF .. && make && sudo make install; popd
+  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && rm -rf build_cmake && mkdir build_cmake && pushd build_cmake && cmake -DCMAKE_CXX_COMPILER=$COMPILER -DPAHO_BUILD_SAMPLES=ON -DPAHO_BUILD_STATIC=ON -DPAHO_BUILD_DOCUMENTATION=ON  -DPAHO_WITH_SSL=ON  .. && make && sudo make install; popd
   # Test Autotools building
-  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && ./bootstrap && rm -rf build_autotools/ && mkdir build_autotools/ && cd build_autotools/ && ../configure CXX=$COMPILER --with-paho-mqtt-c=/tmp/paho-c/ --enable-samples=yes --enable-static=yes --enable-doc=no  --with-ssl=no  && make && make check; cat test-suite.log; cd -
-  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && ./bootstrap && rm -rf build_autotools/ && mkdir build_autotools/ && cd build_autotools/ && ../configure CXX=$COMPILER --with-paho-mqtt-c=/tmp/paho-c/ --enable-samples=yes --enable-static=yes --enable-doc=yes --with-ssl=yes && make && make check; cat test-suite.log; cd -
+  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && ./bootstrap && rm -rf build_autotools/ && mkdir build_autotools/ && pushd build_autotools/ && ../configure CXX=$COMPILER --enable-samples=yes --enable-static=yes --enable-doc=no  --with-ssl=no  && make && make check; cat test-suite.log; popd
+  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && ./bootstrap && rm -rf build_autotools/ && mkdir build_autotools/ && pushd build_autotools/ && ../configure CXX=$COMPILER --enable-samples=yes --enable-static=yes --enable-doc=yes --with-ssl=yes && make && make check; cat test-suite.log; popd
   # Static Analysis
   - cppcheck --enable=all --std=c++11 --force --quiet src/*.cpp
 

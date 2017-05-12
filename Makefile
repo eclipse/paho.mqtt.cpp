@@ -24,6 +24,8 @@ INSTALL_DATA =  $(INSTALL) -m 644
 
 SRC_DIR ?= src
 INC_DIR ?= src
+HDR_DIR ?= $(INC_DIR)/mqtt
+
 TEST_DIR ?= test
 
 LIB_DIR ?= $(CROSS_COMPILE)lib
@@ -47,10 +49,10 @@ INC_DIRS += $(INC_DIR) $(PAHO_C_INC_DIR)
 _MK_OBJ_DIR := $(shell mkdir -p $(OBJ_DIR))
 _MK_LIB_DIR := $(shell mkdir -p $(LIB_DIR))
 
-PREFIX ?= /usr/local
-EXEC_PREFIX ?= $(PREFIX)
+prefix ?= /usr/local
+exec_prefix ?= $(prefix)
 
-includedir = $(prefix)/include
+includedir = $(prefix)/include/mqtt
 libdir = $(exec_prefix)/lib
 
 # ----- Definitions for the shared library -----
@@ -70,6 +72,7 @@ TGT = $(LIB_DIR)/$(LIB)
 # ----- Sources -----
 
 SRCS += $(notdir $(wildcard $(SRC_DIR)/*.cpp))
+HDRS += $(notdir $(wildcard $(HDR_DIR)/*.h))
 
 ifdef SRC_IGNORE
   SRCS := $(filter-out $(SRC_IGNORE),$(SRCS))
@@ -124,7 +127,7 @@ endif
 # ----- C++ Dependencies -----
 
 DEPFLAGS = -MT $@ -MMD -MP -MF $(OBJ_DIR)/$*.Tdep
-POST_COMPILE = mv -f $(OBJ_DIR)/$*.Tdep $(OBJ_DIR)/$*.dep
+POST_COMPILE = mv -f $(OBJ_DIR)/$*.Tdep $(OBJ_DIR)/$*.dep ; touch $@
 
 COMPILE.cpp = $(CXX) $(DEPFLAGS) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
 
@@ -163,6 +166,7 @@ dump:
 	@echo CXX=$(CXX)
 	@echo COMPILE.cpp=$(COMPILE.cpp)
 	@echo SRCS=$(SRCS)
+	@echo HDRS=$(HDRS)
 	@echo OBJS=$(OBJS)
 	@echo DEPS:$(DEPS)
 	@echo LIB_DEPS=$(LIB_DEPS)
@@ -177,11 +181,11 @@ distclean: clean
 	$(QUIET) rm -rf $(OBJ_DIR) $(LIB_DIR)
 
 .PHONY: samples
-samples: $(SRC_DIR)/samples $(LIB_DIR)/$(LIB_LINK)
-	$(MAKE) -C $<
+samples: $(SRC_DIR)/samples
+	$(QUIET) $(MAKE) -C $<
 
 .PHONY: check
-check: $(TEST_DIR)/unit $(LIB_DIR)/$(LIB_LINK)
+check: $(TEST_DIR)/unit
 	$(QUIET) $(MAKE) -C $< clean
 	$(QUIET) $(MAKE) -C $< run
 
@@ -204,14 +208,18 @@ strip_options:
 install-strip: $(TGT) strip_options install
 
 install: $(TGT)
+	mkdir -p $(DESTDIR)${includedir}
+	mkdir -p $(DESTDIR)${libdir}
+	for fil in $(HDRS) ; do $(INSTALL_DATA) ${INSTALL_OPTS} $(HDR_DIR)/$${fil} $(DESTDIR)${includedir} ; done
 	$(INSTALL_DATA) ${INSTALL_OPTS} ${TGT} $(DESTDIR)${libdir}
 	ln -s $(DESTDIR)${libdir}/$(LIB) $(DESTDIR)${libdir}/$(LIB_MAJOR_LINK)
 	ln -s $(DESTDIR)${libdir}/$(LIB_MAJOR_LINK) $(DESTDIR)${libdir}/$(LIB_LINK)
 
 uninstall:
-	rm $(DESTDIR)${libdir}/${LIB}
-	rm $(DESTDIR)${libdir}/$(LIB_MAJOR_LINK)
-	rm $(DESTDIR)${libdir}/$(LIB_LINK)
+	rm -rf $(DESTDIR)${includedir}
+	rm -f $(DESTDIR)${libdir}/${LIB}
+	rm -f $(DESTDIR)${libdir}/$(LIB_MAJOR_LINK)
+	rm -f $(DESTDIR)${libdir}/$(LIB_LINK)
 
 # ----- Header dependencies -----
 
