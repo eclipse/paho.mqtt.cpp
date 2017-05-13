@@ -219,7 +219,7 @@ public:
 	 * @param retained Tell the broker to keep the LWT message after send to
 	 *  			   subscribers.
 	 */
-	void set_retained(bool retained) { opts_.retained = retained ? (!0) : 0; }
+	void set_retained(bool retained) { opts_.retained = to_int(retained); }
 };
 
 /** Shared pointer to a will options object. */

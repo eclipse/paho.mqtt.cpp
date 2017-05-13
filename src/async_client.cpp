@@ -163,7 +163,7 @@ int async_client::on_message_arrived(void* context, char* topicName, int topicLe
 
 	// TODO: Should the user code determine the return value?
 	// The Java version does doesn't seem to...
-	return (!0);
+	return to_int(true);
 }
 
 // Callback to indicate that a message was delivered to the server.

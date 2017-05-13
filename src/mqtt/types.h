@@ -94,6 +94,22 @@ long to_milliseconds_count(const std::chrono::duration<Rep, Period>& dur) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+// Misc
+
+/**
+ * Converts an into to a bool.
+ * @param n An integer.
+ * @return @em true if n not equal to zero, @em false otherwise
+ */
+inline bool to_bool(int n) { return n != 0; }
+/**
+ * Converts the boolean into a C integer true/false value.
+ * @param b A boolean
+ * @return Zero if b is false, non-zero if b is true.
+ */
+inline int to_int(bool b) { return b ? (!0) : 0; }
+
+/////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
 }
 

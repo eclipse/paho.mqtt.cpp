@@ -132,7 +132,7 @@ void ssl_options::set_enabled_cipher_suites(const string& enabledCipherSuites)
 
 void ssl_options::set_enable_server_cert_auth(bool enableServerCertAuth)
 {
-	opts_.enableServerCertAuth = enableServerCertAuth ? (!0) : 0;
+	opts_.enableServerCertAuth = to_int(enableServerCertAuth);
 }
 
 /////////////////////////////////////////////////////////////////////////////

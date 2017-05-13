@@ -336,7 +336,7 @@ public:
 	 * Determines if this client is currently connected to the server.
 	 * @return true if connected, false otherwise.
 	 */
-	bool is_connected() const override { return MQTTAsync_isConnected(cli_) != 0; }
+	bool is_connected() const override { return to_bool(MQTTAsync_isConnected(cli_)); }
 	/**
 	 * Publishes a message to a topic on the server
 	 * @param topic The topic to deliver the message to

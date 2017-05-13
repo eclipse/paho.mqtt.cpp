@@ -172,7 +172,7 @@ public:
 	 * @return bool
 	 */
 	bool get_enable_server_cert_auth() const {
-		return opts_.enableServerCertAuth != 0;
+		return to_bool(opts_.enableServerCertAuth);
 	}
 	/**
 	 * Sets the file containing the public digital certificates trusted by

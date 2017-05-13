@@ -200,7 +200,7 @@ public:
 	 * across reconnects.
 	 * @return bool
 	 */
-	bool is_clean_session() const { return opts_.cleansession != 0; }
+	bool is_clean_session() const { return to_bool(opts_.cleansession); }
 	/**
 	 * Gets the token used as the callback context.
 	 * @return The delivery token used as the callback context.
@@ -230,7 +230,7 @@ public:
 	 * @return @em true if configured for automatic reconnect, @em false if
 	 *  	   not.
 	 */
-	bool get_automatic_reconnect() const { return opts_.automaticReconnect != 0; }
+	bool get_automatic_reconnect() const { return to_bool(opts_.automaticReconnect); }
 	/**
 	 * Gets the minimum retry interval for automatic reconnect.
 	 * @return The minimum retry interval for automatic reconnect, in
@@ -254,7 +254,7 @@ public:
 	 * @param cleanSession
 	 */
 	void set_clean_session(bool cleanSession) {
-		opts_.cleansession = cleanSession ? (!0) : 0;
+		opts_.cleansession = to_int(cleanSession);
 	}
 	/**
 	 * Sets the connection timeout value.
