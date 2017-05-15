@@ -41,8 +41,7 @@ namespace mqtt {
 class ssl_options
 {
 	/** The default C struct */
-	static constexpr MQTTAsync_SSLOptions
-				DFLT_C_STRUCT MQTTAsync_SSLOptions_initializer;
+	static const MQTTAsync_SSLOptions DFLT_C_STRUCT ;
 
 	/** The underlying C SSL options */
 	MQTTAsync_SSLOptions opts_;

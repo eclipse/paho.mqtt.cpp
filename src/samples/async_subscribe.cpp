@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
 		std::cout << "Connecting to the MQTT server..." << std::flush;
 		client.connect(connOpts, nullptr, cb);
 	}
-	catch (const mqtt::exception& exc) {
+	catch (const mqtt::exception&) {
 		std::cerr << "\nERROR: Unable to connect to MQTT server: '"
 			<< SERVER_ADDRESS << "'" << std::endl;
 		return 1;

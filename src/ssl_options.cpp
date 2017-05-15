@@ -23,7 +23,7 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-constexpr MQTTAsync_SSLOptions ssl_options::DFLT_C_STRUCT;
+const MQTTAsync_SSLOptions ssl_options::DFLT_C_STRUCT = MQTTAsync_SSLOptions_initializer;
 
 ssl_options::ssl_options() : opts_(DFLT_C_STRUCT)
 {

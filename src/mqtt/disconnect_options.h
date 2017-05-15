@@ -37,8 +37,7 @@ namespace mqtt {
 class disconnect_options
 {
 	/** The default C struct */
-	static constexpr MQTTAsync_disconnectOptions
-				DFLT_C_STRUCT MQTTAsync_disconnectOptions_initializer;
+	static const MQTTAsync_disconnectOptions DFLT_C_STRUCT;
 
 	/** The underlying C disconnect options */
 	MQTTAsync_disconnectOptions opts_;

@@ -51,7 +51,7 @@ class will_options
 	/** The defalut retained flag for LWT, if unspecified */
 	static constexpr bool DFLT_RETAINED = false;
 	/** A default C struct to support re-initializing variables */
-	static constexpr MQTTAsync_willOptions DFLT_C_STRUCT MQTTAsync_willOptions_initializer;
+	static const MQTTAsync_willOptions DFLT_C_STRUCT;
 
 	/** The underlying C LWT options */
 	MQTTAsync_willOptions opts_;
@@ -192,7 +192,7 @@ public:
 	 * @return A pointer to a copy of the LWT message.
 	 */
 	const_message_ptr get_message() const {
-		return message::create(topic_, payload_, opts_.qos, opts_.retained);
+		return message::create(topic_, payload_, opts_.qos, to_bool(opts_.retained));
 	}
 	/**
 	 * Sets the LWT message topic name.

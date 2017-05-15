@@ -27,7 +27,8 @@ namespace mqtt {
 
 constexpr int message::DFLT_QOS;
 constexpr bool message::DFLT_RETAINED;
-constexpr MQTTAsync_message message::DFLT_C_STRUCT;
+
+const MQTTAsync_message message::DFLT_C_STRUCT = MQTTAsync_message_initializer;
 
 const string message::EMPTY_STR;
 const binary message::EMPTY_BIN;

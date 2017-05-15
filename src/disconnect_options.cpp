@@ -8,7 +8,7 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-constexpr MQTTAsync_disconnectOptions disconnect_options::DFLT_C_STRUCT;
+const MQTTAsync_disconnectOptions disconnect_options::DFLT_C_STRUCT = MQTTAsync_disconnectOptions_initializer;
 
 disconnect_options::disconnect_options() : opts_(DFLT_C_STRUCT)
 {

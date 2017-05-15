@@ -46,8 +46,7 @@ namespace mqtt {
 class connect_options
 {
 	/** The default C struct */
-	static constexpr MQTTAsync_connectOptions
-				DFLT_C_STRUCT MQTTAsync_connectOptions_initializer;
+	static const MQTTAsync_connectOptions DFLT_C_STRUCT ;
 
 	/** The underlying C connection options */
 	MQTTAsync_connectOptions opts_;

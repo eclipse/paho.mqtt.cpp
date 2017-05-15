@@ -59,7 +59,7 @@ public:
 
 private:
 	/** Initializer for the C struct (from the C library) */
-	static constexpr MQTTAsync_message DFLT_C_STRUCT MQTTAsync_message_initializer;
+	static const MQTTAsync_message DFLT_C_STRUCT;
 
 	/** An instance of an empty string (for performance)  */
 	static const string EMPTY_STR;
