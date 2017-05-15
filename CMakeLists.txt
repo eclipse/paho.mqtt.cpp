@@ -17,13 +17,10 @@
 ## Note: on OS X you should install XCode and the associated command-line tools
 
 ## cmake flags
-cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
 ## project name
-project("paho-mqtt-cpp")
-
-## project language
-enable_language(CXX)
+project("paho-mqtt-cpp" LANGUAGES CXX)
 
 ## library name
 set(PAHO_MQTT_CPP paho-mqttpp3)
@@ -48,6 +45,8 @@ SET(PAHO_WITH_SSL TRUE CACHE BOOL "Flag that defines whether to build ssl-enable
 
 ## build flags
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 ## build directories
 
