@@ -44,10 +44,28 @@ set(PAHO_BUILD_SAMPLES FALSE CACHE BOOL "Build sample programs")
 set(PAHO_BUILD_DOCUMENTATION FALSE CACHE BOOL "Create and install the HTML based API documentation (requires Doxygen)")
 set(PAHO_MQTT_C_PATH "" CACHE PATH "Add a path to paho.mqtt.c library and headers")
 set(PAHO_MQTT_C paho-mqtt3a)
-SET(PAHO_WITH_SSL TRUE CACHE BOOL "Flag that defines whether to build ssl-enabled binaries too. ")
+set(PAHO_WITH_SSL TRUE CACHE BOOL "Flag that defines whether to build ssl-enabled binaries too. ")
 
 ## build flags
-set(CMAKE_CXX_STANDARD 11)
+## for GCC
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # GCC versions older than 4.8 do not compile the code
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)
+        message(FATAL_ERROR "Minimum GCC version required is 4.8")
+    # GCC versions prior to 6.1 require -std=c++11
+    elseif (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.1)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    endif()
+# for Clang
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    # Clang versions older than 3.3 do not compile the code
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.3)
+        message(FATAL_ERROR "Minimum Clang version required is 3.3")
+    # Clang versions prior to 5.0 require -std=c++11
+    elseif (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    endif()
+endif()
 
 ## build directories
 
