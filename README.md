@@ -1,10 +1,6 @@
 # Eclipse Paho MQTT C++ client library
 
-## DEVELOPMENT Branch for the v1.0 Release
-
-**This branch is currently unstable and is tracking the Paho C library's _develop_ branch which is also unstable. Proceed with caution!**
-
-This is the _develop_ branch of the Paho C++ library, destined to be the v1.0 release of the library with the overall Paho 1.3 group, targeted for June 2017. 
+This is the latest development code for the Paho C++ library, destined to be the v1.0 release of the library with the overall Paho 1.3 group, targeted for June 2017. 
 
 As such it requires the version of the Paho C library which is also currently under development, and available in the _develop_ branch of that library on GitHub:
 https://github.com/eclipse/paho.mqtt.c/tree/develop
@@ -38,9 +34,9 @@ On Unix systems CMake creates Makefiles.
 ##### Build requirements
 
 The build process currently supports a number of Unix and Linux flavors. The build process requires the following tools:
-  * CMake (http://cmake.org)
-  * GNU Make (https://www.gnu.org/software/make/), and
-  * GCC (https://gcc.gnu.org/).
+  * CMake (cmake.org)
+  * GNU Make (www.gnu.org/software/make)
+  * GCC (gcc.gnu.org)
 
 On Debian based systems this would mean that the following packages have to be installed:
 
@@ -109,8 +105,8 @@ On Windows systems CMake creates Visual Studio project files.
 ##### Build requirements
 
 The build process currently supports a number Windows versions. The build process requires the following tools:
-  * CMake GUI (http://cmake.org), and
-  * Visual Studio (https://www.visualstudio.com/).
+  * CMake GUI (cmake.org)
+  * Visual Studio (www.visualstudio.com)
 
 ##### Build instructions
 
@@ -154,11 +150,11 @@ The GNU Build System is the preferred building system on POSIX-compliant systems
 #### Build requirements
 
 The build process supports any POSIX-compliant system. The following tools must be installed:
-  * Autoconf (http://www.gnu.org/software/autoconf/)
-  * Automake (http://www.gnu.org/software/automake/)
-  * Libtool (http://www.gnu.org/software/libtool/)
-  * GNU Make (https://www.gnu.org/software/make/)
-  * GCC (https://gcc.gnu.org/) or Clang/LLVM (http://clang.llvm.org/).
+  * Autoconf (www.gnu.org/software/autoconf)
+  * Automake (www.gnu.org/software/automake)
+  * Libtool (www.gnu.org/software/libtool)
+  * GNU Make (www.gnu.org/software/make)
+  * GCC (gcc.gnu.org) or Clang/LLVM (clang.llvm.org).
 
 You can instruct Autotools to use another compiler besides the one default by the system:
 

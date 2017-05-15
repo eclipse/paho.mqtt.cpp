@@ -59,7 +59,7 @@ libdir = $(exec_prefix)/lib
 
 LIB_BASE  ?= $(MODULE)
 LIB_MAJOR ?= 0
-LIB_MINOR ?= 5
+LIB_MINOR ?= 9
 LIB_PATCH ?= 0
 
 LIB_LINK = lib$(LIB_BASE).so
