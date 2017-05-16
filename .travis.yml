@@ -146,8 +146,8 @@ script:
   - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && make CXX=$COMPILER VERBOSE=1 SSL=0 && sudo make install && make CXX=$COMPILER VERBOSE=1 SSL=0 check
   - make clean && sudo make uninstall && pushd test/unit && make clean && popd
   # Test CMake building
-  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && rm -rf build_cmake && mkdir build_cmake && pushd build_cmake && cmake -DCMAKE_CXX_COMPILER=$COMPILER -DPAHO_BUILD_SAMPLES=ON -DPAHO_BUILD_STATIC=ON -DPAHO_BUILD_DOCUMENTATION=OFF -DPAHO_WITH_SSL=OFF .. && make && sudo make install; popd
-  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && rm -rf build_cmake && mkdir build_cmake && pushd build_cmake && cmake -DCMAKE_CXX_COMPILER=$COMPILER -DPAHO_BUILD_SAMPLES=ON -DPAHO_BUILD_STATIC=ON -DPAHO_BUILD_DOCUMENTATION=ON  -DPAHO_WITH_SSL=ON  .. && make && sudo make install; popd
+  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && rm -rf build_cmake && mkdir build_cmake && pushd build_cmake && cmake -DCMAKE_CXX_COMPILER=$COMPILER -DPAHO_BUILD_SAMPLES=ON -DPAHO_BUILD_STATIC=ON -DPAHO_BUILD_DOCUMENTATION=OFF .. && make && sudo make install; popd
+  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && rm -rf build_cmake && mkdir build_cmake && pushd build_cmake && cmake -DCMAKE_CXX_COMPILER=$COMPILER -DPAHO_BUILD_SAMPLES=ON -DPAHO_BUILD_STATIC=ON -DPAHO_BUILD_DOCUMENTATION=ON  -DPAHO_MQTT_C_PATH=/tmp/paho-c-with-ssl .. && make && sudo make install; popd
   # Test Autotools building
   - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && ./bootstrap && rm -rf build_autotools/ && mkdir build_autotools/ && pushd build_autotools/ && ../configure CXX=$COMPILER --enable-samples=yes --enable-static=no  --enable-doc=no  && make && make check; cat test-suite.log; popd
   - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && ./bootstrap && rm -rf build_autotools/ && mkdir build_autotools/ && pushd build_autotools/ && ../configure CXX=$COMPILER --enable-samples=yes --enable-static=yes --enable-doc=yes --with-paho-mqtt-c=/tmp/paho-c-with-ssl && make && make check; cat test-suite.log; popd

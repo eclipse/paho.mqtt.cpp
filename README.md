@@ -60,7 +60,6 @@ PAHO_MQTT_C_PATH | "" | Add a path paho.mqtt.c library and headers
 PAHO_BUILD_STATIC | FALSE | Whether to build the static library
 PAHO_BUILD_DOCUMENTATION | FALSE | Create and install the HTML based API documentation (requires Doxygen)
 PAHO_BUILD_SAMPLES | FALSE | Build sample programs
-PAHO_WITH_SSL | TRUE | Flag that defines whether to build ssl-enabled binaries too
 
 Using these variables CMake can be used to generate your Makefiles. The out-of-source build is the default on CMake. Therefore it is recommended to invoke all build commands inside your chosen build directory.
 
