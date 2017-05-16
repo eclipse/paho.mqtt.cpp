@@ -141,7 +141,7 @@ matrix:
 
 script:
   # Test Makefile building
-  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && make CXX=$COMPILER VERBOSE=1 && sudo make install && make CXX=$COMPILER VERBOSE=1 check
+  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && make CXX=$COMPILER VERBOSE=1 PAHO_C_LIB_DIR=/tmp/paho-c-with-ssl/lib && sudo make install && make CXX=$COMPILER VERBOSE=1 PAHO_C_LIB_DIR=/tmp/paho-c-with-ssl/lib check
   - make clean && sudo make uninstall && pushd test/unit && make clean && popd
   - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && make CXX=$COMPILER VERBOSE=1 SSL=0 && sudo make install && make CXX=$COMPILER VERBOSE=1 SSL=0 check
   - make clean && sudo make uninstall && pushd test/unit && make clean && popd
@@ -149,8 +149,8 @@ script:
   - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && rm -rf build_cmake && mkdir build_cmake && pushd build_cmake && cmake -DCMAKE_CXX_COMPILER=$COMPILER -DPAHO_BUILD_SAMPLES=ON -DPAHO_BUILD_STATIC=ON -DPAHO_BUILD_DOCUMENTATION=OFF -DPAHO_WITH_SSL=OFF .. && make && sudo make install; popd
   - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && rm -rf build_cmake && mkdir build_cmake && pushd build_cmake && cmake -DCMAKE_CXX_COMPILER=$COMPILER -DPAHO_BUILD_SAMPLES=ON -DPAHO_BUILD_STATIC=ON -DPAHO_BUILD_DOCUMENTATION=ON  -DPAHO_WITH_SSL=ON  .. && make && sudo make install; popd
   # Test Autotools building
-  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && ./bootstrap && rm -rf build_autotools/ && mkdir build_autotools/ && pushd build_autotools/ && ../configure CXX=$COMPILER --enable-samples=yes --enable-static=yes --enable-doc=no  --with-ssl=no  && make && make check; cat test-suite.log; popd
-  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && ./bootstrap && rm -rf build_autotools/ && mkdir build_autotools/ && pushd build_autotools/ && ../configure CXX=$COMPILER --enable-samples=yes --enable-static=yes --enable-doc=yes --with-ssl=yes && make && make check; cat test-suite.log; popd
+  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && ./bootstrap && rm -rf build_autotools/ && mkdir build_autotools/ && pushd build_autotools/ && ../configure CXX=$COMPILER --enable-samples=yes --enable-static=no  --enable-doc=no  && make && make check; cat test-suite.log; popd
+  - if [ "$COMPILER" == "" ]; then COMPILER=g++; fi && ./bootstrap && rm -rf build_autotools/ && mkdir build_autotools/ && pushd build_autotools/ && ../configure CXX=$COMPILER --enable-samples=yes --enable-static=yes --enable-doc=yes --with-paho-mqtt-c=/tmp/paho-c-with-ssl && make && make check; cat test-suite.log; popd
   # Static Analysis
   - cppcheck --enable=all --std=c++11 --force --quiet src/*.cpp
 
