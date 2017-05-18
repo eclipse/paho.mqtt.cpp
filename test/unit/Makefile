@@ -58,8 +58,10 @@ else
 endif
 
 ifdef COVERAGE
-  CXXFLAGS += -fprofile-arcs -ftest-coverage
-  LDFLAGS += -fprofile-arcs -pg -lgcov
+  # Disable coverage for clang due the segmentation fault caused by
+  # the Bug 20530 [https://bugs.llvm.org//show_bug.cgi?id=20530]
+  CXXFLAGS += $(if $(findstring clang++,$(CXX)), , -fprofile-arcs -ftest-coverage)
+  LDFLAGS += $(if $(findstring clang++,$(CXX)), , -fprofile-arcs -pg -lgcov)
 endif
 
 LDLIBS += -L$(PAHO_CPP_LIB_DIR) -lpaho-mqttpp3
