@@ -138,7 +138,6 @@ public:
 				 int qos=DFLT_QOS, bool retained=DFLT_QOS);
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
-	 * @param top The LWT message is published to the this topic.
 	 * @param msg The message that is published to the Will Topic.
 	 */
 	will_options(const message& msg);

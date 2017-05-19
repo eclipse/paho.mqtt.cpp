@@ -200,6 +200,10 @@ coverage:
 	genhtml coverage.info -o $(COV_DIR)
 	firefox $(COV_DIR)/index.html
 
+.PHONY: doc
+doc:
+	doxygen
+
 # ----- Installation targets -----
 
 strip_options:

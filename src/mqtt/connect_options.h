@@ -197,7 +197,7 @@ public:
 	/**
 	 * Returns whether the server should remember state for the client
 	 * across reconnects.
-	 * @return bool
+	 * @return @em true if requesting a clean session, @em false if not.
 	 */
 	bool is_clean_session() const { return to_bool(opts_.cleansession); }
 	/**
@@ -206,12 +206,11 @@ public:
 	 */
 	token_ptr get_token() const { return tok_; }
 	/**
-	 * Sets the list of servers to which the client will connect.
-	 * @param serverURIs A pointer to a collection of server URI's. Each
-	 *  				 entry should be of the form @em
-	 *  				 protocol://host:port where @em protocol must be
-	 *  				 @em tcp or @em ssl. For @emhost, you can specify
-	 *  				 either an IP address or a domain name.
+	 * Gets the list of servers to which the client will connect.
+	 * @return A collection of server URI's. Each entry should be of the
+	 *  	   form @em protocol://host:port where @em protocol must be tcp
+	 *  	   or @em ssl. For @em host, you can specify either an IP
+	 *  	   address or a domain name.
 	 */
 	const_string_collection_ptr get_servers() const { return serverURIs_; }
 	/**
@@ -334,7 +333,7 @@ public:
 	 * @param serverURIs A pointer to a collection of server URI's. Each
 	 *  				 entry should be of the form @em
 	 *  				 protocol://host:port where @em protocol must be
-	 *  				 @em tcp or @em ssl. For @emhost, you can specify
+	 *  				 @em tcp or @em ssl. For @em host, you can specify
 	 *  				 either an IP address or a domain name.
 	 */
 	void set_servers(const_string_collection_ptr serverURIs);
@@ -365,7 +364,6 @@ public:
 	void set_automatic_reconnect(int minRetryInterval, int maxRetryInterval);
 	/**
 	 * Enable or disable automatic reconnects.
-	 * @param on Whether to turn reconnects on or off
 	 * @param minRetryInterval Minimum retry interval. Doubled on each
 	 *  					   failed retry.
 	 * @param maxRetryInterval Maximum retry interval. The doubling stops

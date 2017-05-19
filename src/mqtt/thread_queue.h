@@ -93,7 +93,15 @@ private:
 	using unique_guard = std::unique_lock<std::mutex>;
 
 public:
+	/**
+	 * Constructs a queue with the maximum capacity.
+	 */
 	thread_queue() : cap_(MAX_CAPACITY) {}
+	/**
+	 * Constructs a queue with the specified capacity.
+	 * @param cap The maximum number of items that can be placed in the
+	 *  		  queue.
+	 */
 	explicit thread_queue(size_t cap) : cap_(cap) {}
 	/**
 	 * Determine if the queue is empty.

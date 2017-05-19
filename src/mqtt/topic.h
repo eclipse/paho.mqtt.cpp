@@ -60,6 +60,8 @@ public:
 	 * Construct an MQTT topic destination for messages.
 	 * @param cli Client to which the topic is attached
 	 * @param name The topic string
+	 * @param qos The default QoS for publishing.
+	 * @param retained The default retained flag for the topic.
 	 */
 	topic(iasync_client& cli, const string& name,
 		  int qos=message::DFLT_QOS, bool retained=message::DFLT_RETAINED)

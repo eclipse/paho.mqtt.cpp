@@ -44,9 +44,12 @@
 
 namespace mqtt {
 
-const uint32_t	VERSION = 0x00050000;
-const string	VERSION_STR("mqttpp v. 0.5"),
-				COPYRIGHT("Copyright (c) 2013-2016 Frank Pagliughi");
+/** The version number for the client library. */
+const uint32_t VERSION = 0x00090000;
+/** The version string for the client library  */
+const string VERSION_STR("Paho MQTT C++ (mqttpp) v. 0.9");
+/** Copyright notice for the client library */
+const string COPYRIGHT("Copyright (c) 2013-2017 Frank Pagliughi");
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -159,6 +162,8 @@ public:
 	 *  				as a URI.
 	 * @param clientId a client identifier that is unique on the server
 	 *  			   being connected to
+	 * @param maxBufferedMessages the maximum number of messages allowed to
+	 *  						  be buffered while not connected
 	 * @param persistence The user persistence structure. If this is null,
 	 *  				  then no persistence is used.
 	 */
@@ -380,10 +385,6 @@ public:
 	 * Publishes a message to a topic on the server
 	 * @param topic The topic to deliver the message to
 	 * @param payload the bytes to use as the message payload
-	 * @param qos the Quality of Service to deliver the message at. Valid
-	 *  		  values are 0, 1 or 2.
-	 * @param retained whether or not this message should be retained by the
-	 *  			   server.
 	 * @return token used to track and wait for the publish to complete. The
 	 *  	   token will be passed to callback methods if set.
 	 */
@@ -565,7 +566,7 @@ public:
 	const_message_ptr consume_message() { return que_->get(); }
 	/**
 	 * Try to read the next message from the queue without blocking.
-	 * @param val Pointer to the value to receive the message
+	 * @param msg Pointer to the value to receive the message
 	 * @return @em true is a message was read, @em false if no message was
 	 *  	   available.
 	 */
@@ -574,7 +575,7 @@ public:
 	}
 	/**
 	 * Waits a limited time for a message to arrive.
-	 * @param val Pointer to the value to receive the message
+	 * @param msg Pointer to the value to receive the message
 	 * @param relTime The maximum amount of time to wait for a message.
 	 * @return @em true if a message was read, @em false if a timeout
 	 *  	   occurred.
@@ -586,7 +587,7 @@ public:
 	}
 	/**
 	 * Waits until a specific time for a message to occur.
-	 * @param val Pointer to the value to receive the message
+	 * @param msg Pointer to the value to receive the message
 	 * @param absTime The time point to wait until, before timing out.
 	 * @return @em true if a message was read, @em false if a timeout
 	 *  	   occurred.
