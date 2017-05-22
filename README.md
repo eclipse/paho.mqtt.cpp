@@ -204,6 +204,7 @@ Option | Default Value | Description
  --[en/dis]able-samples | no | Build sample programs
  --[en/dis]able-doc | no | Build documentation
  --[en/dis]able-peak-warnings | no | Compile with peak warnings level
+ --[en/dis]able-coverage | no | Extra code to measure code coverage
  --with-paho-mqtt-c |  | Path to a non-standard Paho MQTT C library
  --with[out]-ssl | with | Build with OpenSSL support
 

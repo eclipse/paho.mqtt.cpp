@@ -143,6 +143,23 @@ AS_IF([test "x$enable_peak_warnings" = "xyes"], [
 ])
 
 
+# Code coverage
+AC_ARG_ENABLE(
+	[coverage],
+	AS_HELP_STRING(
+		[--enable-coverage=@<:@yes/no@:>@],
+		[enable code coverage @<:@default=no@:>@]
+	),
+	,
+	enable_coverage=no
+)
+
+AS_IF([test "x$enable_coverage" = "xyes"], [
+	CXXFLAGS="$CXXFLAGS -fprofile-arcs -ftest-coverage"
+	LDFLAGS="$LDFLAGS -fprofile-arcs -pg -lgcov"
+])
+
+
 # Add Paho MQTT C path
 AC_ARG_WITH(
 	[paho-mqtt-c],
@@ -209,6 +226,7 @@ echo "            Build as static library : $enable_static"
 echo "                      Build samples : $enable_samples"
 echo "                Build documentation : $enable_doc"
 echo "          Enable peak warning level : $enable_peak_warnings"
+echo "               Enable code coverage : $enable_coverage"
 echo "                   With Paho MQTT C : $with_paho_mqtt_c"
 echo "               With OpenSSL library : $with_ssl"
 echo "                      With CPPFLAGS : $CPPFLAGS"
