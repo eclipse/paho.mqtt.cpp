@@ -197,7 +197,7 @@ cppcheck:
 
 .PHONY: coverage
 coverage:
-	$(MAKE) COVERAGE=1 test
+	$(MAKE) COVERAGE=1 check
 	lcov --directory $(OBJ_DIR) --base-directory ./ --capture --output-file coverage.info
 	genhtml coverage.info -o $(COV_DIR)
 	firefox $(COV_DIR)/index.html
