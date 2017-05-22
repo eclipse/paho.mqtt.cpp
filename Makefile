@@ -186,6 +186,8 @@ samples: $(SRC_DIR)/samples
 
 .PHONY: check
 check: $(TEST_DIR)/unit
+	$(QUIET) $(MAKE) clean
+	$(QUIET) $(MAKE) all
 	$(QUIET) $(MAKE) -C $< clean
 	$(QUIET) $(MAKE) -C $< run
 
