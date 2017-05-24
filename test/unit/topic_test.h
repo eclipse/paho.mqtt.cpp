@@ -39,6 +39,8 @@ class topic_test : public CppUnit::TestFixture
 
 	CPPUNIT_TEST( test_basic_ctor );
 	CPPUNIT_TEST( test_full_ctor );
+	CPPUNIT_TEST( test_set_qos );
+	CPPUNIT_TEST( test_set_retained );
 	CPPUNIT_TEST( test_publish_basic_c_arr );
 	CPPUNIT_TEST( test_publish_full_c_arr );
 	CPPUNIT_TEST( test_publish_basic_binary );
@@ -52,6 +54,9 @@ class topic_test : public CppUnit::TestFixture
 	const std::string TOPIC { "topic_name" };
 	const int QOS = 1;
 	const bool RETAINED = true;
+
+	const int BAD_LOW_QOS  = -1;
+	const int BAD_HIGH_QOS =  3;
 
 	const char* BUF = "Hello there";
 	const size_t N = std::strlen(BUF);
@@ -86,6 +91,42 @@ public:
 
 		CPPUNIT_ASSERT_EQUAL(TOPIC, topic.get_name());
 		CPPUNIT_ASSERT_EQUAL(QOS, topic.get_qos());
+		CPPUNIT_ASSERT_EQUAL(RETAINED, topic.get_retained());
+	}
+
+// ----------------------------------------------------------------------
+// Test set qos
+// ----------------------------------------------------------------------
+
+	void test_set_qos() {
+		mqtt::topic topic{ cli, TOPIC };
+
+		CPPUNIT_ASSERT_EQUAL(DFLT_QOS, topic.get_qos());
+		topic.set_qos(QOS);
+		CPPUNIT_ASSERT_EQUAL(QOS, topic.get_qos());
+
+		try {
+			topic.set_qos(BAD_LOW_QOS);
+			CPPUNIT_FAIL("topic should not accept bad (low) QOS");
+		}
+		catch (...) {}
+
+		try {
+			topic.set_qos(BAD_HIGH_QOS);
+			CPPUNIT_FAIL("topic should not accept bad (low) QOS");
+		}
+		catch (...) {}
+	}
+
+// ----------------------------------------------------------------------
+// Test set retained
+// ----------------------------------------------------------------------
+
+	void test_set_retained() {
+		mqtt::topic topic{ cli, TOPIC };
+
+		CPPUNIT_ASSERT_EQUAL(DFLT_RETAINED, topic.get_retained());
+		topic.set_retained(RETAINED);
 		CPPUNIT_ASSERT_EQUAL(RETAINED, topic.get_retained());
 	}
 

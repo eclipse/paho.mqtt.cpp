@@ -100,6 +100,19 @@ public:
 	 */
 	bool get_retained() const { return retained_; }
 	/**
+	 * Sets the default quality of service for this topic.
+	 * @param qos The default quality of service for this topic.
+	 */
+	void set_qos(int qos) { 
+		message::validate_qos(qos);
+		qos_ = qos; 
+	}
+	/**
+	 * Sets the default retained flag used for this topic.
+	 * @param retained The default retained flag used for this topic.
+	 */
+	void set_retained(bool retained) { retained_ = retained; }
+	/**
 	 * Publishes a message on the topic using the default QoS and retained
 	 * flag.
 	 * @param payload the bytes to use as the message payload
