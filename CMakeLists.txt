@@ -41,7 +41,54 @@ set(PAHO_BUILD_SAMPLES FALSE CACHE BOOL "Build sample programs")
 set(PAHO_BUILD_DOCUMENTATION FALSE CACHE BOOL "Create and install the HTML based API documentation (requires Doxygen)")
 set(PAHO_MQTT_C_PATH "" CACHE PATH "Add a path to paho.mqtt.c library and headers")
 set(PAHO_MQTT_C paho-mqtt3a)
-SET(PAHO_WITH_SSL TRUE CACHE BOOL "Flag that defines whether to build ssl-enabled binaries too. ")
+
+## extract Paho MQTT C include directory
+get_filename_component(PAHO_MQTT_C_DEV_INC_DIR ${PAHO_MQTT_C_PATH}/src ABSOLUTE)
+get_filename_component(PAHO_MQTT_C_STD_INC_DIR ${PAHO_MQTT_C_PATH}/include ABSOLUTE)
+set(PAHO_MQTT_C_INC_DIR
+    ${PAHO_MQTT_C_DEV_INC_DIR}
+    ${PAHO_MQTT_C_STD_INC_DIR})
+
+## extract Paho MQTT C library directory
+get_filename_component(PAHO_MQTT_C_DEV_LIB_DIR ${PAHO_MQTT_C_PATH}/build/output ABSOLUTE)
+get_filename_component(PAHO_MQTT_C_STD_LIB_DIR ${PAHO_MQTT_C_PATH}/lib ABSOLUTE)
+get_filename_component(PAHO_MQTT_C_STD64_LIB_DIR ${PAHO_MQTT_C_PATH}/lib64 ABSOLUTE)
+set(PAHO_MQTT_C_LIB_DIR
+    ${PAHO_MQTT_C_DEV_LIB_DIR}
+    ${PAHO_MQTT_C_STD_LIB_DIR}
+    ${PAHO_MQTT_C_STD64_LIB_DIR})
+
+## extract Paho MQTT C binary directory (Windows may place libraries there)
+get_filename_component(PAHO_MQTT_C_BIN_DIR ${PAHO_MQTT_C_PATH}/bin ABSOLUTE)
+
+## try to find the Paho MQTT C library with SSL support
+find_library(PAHO_MQTT_C_LIB
+    NAMES paho-mqtt3as
+          mqtt3as
+    PATHS ${PAHO_MQTT_C_LIB_DIR}
+          ${PAHO_MQTT_C_BIN_DIR})
+
+if(${PAHO_MQTT_C_LIB} STREQUAL "PAHO_MQTT_C_LIB-NOTFOUND")
+    ## try to find the Paho MQTT C library without SSL support
+    find_library(PAHO_MQTT_C_LIB
+        NAMES paho-mqtt3a
+              mqtt
+              paho-mqtt
+              mqtt3
+              paho-mqtt3
+              mqtt3a
+        PATHS ${PAHO_MQTT_C_LIB_DIR}
+              ${PAHO_MQTT_C_BIN_DIR})
+
+    if(${PAHO_MQTT_C_LIB} STREQUAL "PAHO_MQTT_C_LIB-NOTFOUND")
+        message(FATAL_ERROR "Could not find Paho MQTT C library")
+    else()
+        set(PAHO_WITH_SSL FALSE CACHE BOOL "Flag that defines whether to build ssl-enabled binaries too. ")
+    endif()
+else()
+    find_package(OpenSSL REQUIRED)
+    set(PAHO_WITH_SSL TRUE CACHE BOOL "Flag that defines whether to build ssl-enabled binaries too. ")
+endif()
 
 ## build flags
 set(CMAKE_CXX_STANDARD 11)

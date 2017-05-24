@@ -60,7 +60,6 @@ PAHO_MQTT_C_PATH | "" | Add a path paho.mqtt.c library and headers
 PAHO_BUILD_STATIC | FALSE | Whether to build the static library
 PAHO_BUILD_DOCUMENTATION | FALSE | Create and install the HTML based API documentation (requires Doxygen)
 PAHO_BUILD_SAMPLES | FALSE | Build sample programs
-PAHO_WITH_SSL | TRUE | Flag that defines whether to build ssl-enabled binaries too
 
 Using these variables CMake can be used to generate your Makefiles. The out-of-source build is the default on CMake. Therefore it is recommended to invoke all build commands inside your chosen build directory.
 
@@ -205,7 +204,8 @@ Option | Default Value | Description
  --[en/dis]able-doc | no | Build documentation
  --[en/dis]able-peak-warnings | no | Compile with peak warnings level
  --with-paho-mqtt-c |  | Path to a non-standard Paho MQTT C library
- --with[out]-ssl | with | Build with OpenSSL support
+
+The SSL support is automatically decided based on the Paho MQTT C available.
 
 For example, in order to build only the static library:
 (under the assumption that "$PAHO_DIR" points to the directory which contains the paho.mqtt.c source tree)
