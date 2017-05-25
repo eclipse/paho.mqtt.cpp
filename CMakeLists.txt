@@ -25,6 +25,10 @@ project("paho-mqtt-cpp" LANGUAGES CXX)
 ## library name
 set(PAHO_MQTT_CPP paho-mqttpp3)
 
+## build modules
+set(CMAKE_SCRIPTS "${CMAKE_SOURCE_DIR}/cmake")
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
+
 ## build settings
 set(PAHO_VERSION_MAJOR 0)
 set(PAHO_VERSION_MINOR 9)
@@ -43,10 +47,20 @@ set(PAHO_MQTT_C_PATH "" CACHE PATH "Add a path to paho.mqtt.c library and header
 set(PAHO_MQTT_C paho-mqtt3a)
 SET(PAHO_WITH_SSL TRUE CACHE BOOL "Flag that defines whether to build ssl-enabled binaries too. ")
 
+include(CMakePahoMqttC)
+
 ## build flags
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+## Paho MQTT C++ include directory
+get_filename_component(PAHO_MQTT_CPP_INC_DIR ${CMAKE_SOURCE_DIR}/src ABSOLUTE)
+include_directories(${PAHO_MQTT_CPP_INC_DIR})
+
+## Paho MQTT C++ library directory
+get_filename_component(PAHO_MQTT_CPP_LIB_DIR ${CMAKE_BINARY_DIR}/src ABSOLUTE)
+link_directories(${PAHO_MQTT_CPP_LIB_DIR})
 
 ## build directories
 
