@@ -8,7 +8,7 @@ os: linux
 
 install:
   # Install Paho MQTT C (Need only paho-mqtt3a and paho-mqtt3as)
-  - ./install_paho_mqtt_c.sh
+  - ./travis_install_paho_mqtt_c.sh
 
 addons:
   apt:
