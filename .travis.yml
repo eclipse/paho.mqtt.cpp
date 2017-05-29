@@ -7,6 +7,8 @@ dist: trusty
 os: linux
 
 install:
+  # Install Google Test
+  - ./travis_install_googletest.sh
   # Install Paho MQTT C (Need only paho-mqtt3a and paho-mqtt3as)
   - ./install_paho_mqtt_c.sh
 
@@ -17,7 +19,6 @@ addons:
       - sourceline: 'ppa:mosquitto-dev/mosquitto-ppa'
     packages:
       - cppcheck
-      - libcppunit-dev
       - git
       - cmake
       - cmake-data
@@ -37,7 +38,6 @@ matrix:
           packages:
             - g++-4.8
             - cppcheck
-            - libcppunit-dev
             - git
             - cmake
             - cmake-data
@@ -55,7 +55,6 @@ matrix:
           packages:
             - g++-4.9
             - cppcheck
-            - libcppunit-dev
             - git
             - cmake
             - cmake-data
@@ -73,7 +72,6 @@ matrix:
           packages:
             - g++-5
             - cppcheck
-            - libcppunit-dev
             - git
             - cmake
             - cmake-data
@@ -91,7 +89,6 @@ matrix:
           packages:
             - g++-6
             - cppcheck
-            - libcppunit-dev
             - git
             - cmake
             - cmake-data
@@ -110,7 +107,6 @@ matrix:
           packages:
             - clang-3.6
             - cppcheck
-            - libcppunit-dev
             - git
             - cmake
             - cmake-data
@@ -129,7 +125,6 @@ matrix:
           packages:
             - clang-3.8
             - cppcheck
-            - libcppunit-dev
             - git
             - cmake
             - cmake-data

@@ -20,6 +20,8 @@
 #ifndef __mqtt_dummy_client_persistence_h
 #define __mqtt_dummy_client_persistence_h
 
+#include <map>
+
 #include "mqtt/iclient_persistence.h"
 
 namespace mqtt {

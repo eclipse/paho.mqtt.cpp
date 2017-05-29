@@ -15,6 +15,7 @@
  *
  * Contributors:
  *    Frank Pagliughi - initial implementation and documentation
+ *    Guilherme M. Ferreira - changed test framework from CppUnit to GTest
  *******************************************************************************/
 
 #ifndef __mqtt_buffer_ref_test_h
@@ -23,37 +24,15 @@
 #include "mqtt/buffer_ref.h"
 #include <cstring>
 
-#include <cppunit/ui/text/TestRunner.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include <gtest/gtest.h>
 
 namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-class buffer_ref_test : public CppUnit::TestFixture
+class buffer_ref_test : public ::testing::Test
 {
-	CPPUNIT_TEST_SUITE( buffer_ref_test );
-
-	CPPUNIT_TEST( test_dflt_ctor );
-	CPPUNIT_TEST( test_str_copy_ctor );
-	CPPUNIT_TEST( test_str_move_ctor );
-	CPPUNIT_TEST( test_cstr_ctor );
-	CPPUNIT_TEST( test_ptr_copy_ctor );
-	CPPUNIT_TEST( test_ptr_move_ctor );
-	CPPUNIT_TEST( test_copy_ctor );
-	CPPUNIT_TEST( test_move_ctor );
-	CPPUNIT_TEST( test_copy_assignment );
-	CPPUNIT_TEST( test_move_assignment );
-	CPPUNIT_TEST( test_str_copy_assignment );
-	CPPUNIT_TEST( test_str_move_assignment );
-	CPPUNIT_TEST( test_cstr_assignment );
-	CPPUNIT_TEST( test_ptr_copy_assignment );
-	CPPUNIT_TEST( test_ptr_move_assignment );
-	CPPUNIT_TEST( test_reset );
-
-
-	CPPUNIT_TEST_SUITE_END();
-
+protected:
 	const string EMPTY_STR;
 
 	const string STR { "Some random string" };
@@ -65,217 +44,216 @@ class buffer_ref_test : public CppUnit::TestFixture
 public:
 	void setUp() {}
 	void tearDown() {}
+};
 
 // ----------------------------------------------------------------------
 // Test the default constructor
 // ----------------------------------------------------------------------
 
-	void test_dflt_ctor() {
-		string_ref sr;
+TEST_F(buffer_ref_test, test_dflt_ctor) {
+	string_ref sr;
 
-		CPPUNIT_ASSERT(!sr);
-		CPPUNIT_ASSERT(sr.empty());
-	}
+	EXPECT_FALSE(sr);
+	EXPECT_TRUE(sr.empty());
+}
 
 // ----------------------------------------------------------------------
 // Test the string copy constructor
 // ----------------------------------------------------------------------
 
-	void test_str_copy_ctor() {
-		string_ref sr(STR);
-		CPPUNIT_ASSERT_EQUAL(STR, sr.str());
-	}
+TEST_F(buffer_ref_test, test_str_copy_ctor) {
+	string_ref sr(STR);
+	EXPECT_EQ(STR, sr.str());
+}
 
 // ----------------------------------------------------------------------
 // Test the string move constructor
 // ----------------------------------------------------------------------
 
-	void test_str_move_ctor() {
-		string str(STR);
-		string_ref sr(std::move(str));
+TEST_F(buffer_ref_test, test_str_move_ctor) {
+	string str(STR);
+	string_ref sr(std::move(str));
 
-		CPPUNIT_ASSERT_EQUAL(STR, sr.str());
-		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, str);
-	}
+	EXPECT_EQ(STR, sr.str());
+	EXPECT_EQ(EMPTY_STR, str);
+}
 
 // ----------------------------------------------------------------------
 // Test the c-string constructor
 // ----------------------------------------------------------------------
 
-	void test_cstr_ctor() {
-		string_ref sr(CSTR);
+TEST_F(buffer_ref_test, test_cstr_ctor) {
+	string_ref sr(CSTR);
 
-		CPPUNIT_ASSERT_EQUAL(CSTR_LEN, strlen(sr.c_str()));
-		CPPUNIT_ASSERT(!strcmp(CSTR, sr.c_str()));
-	}
+	EXPECT_EQ(CSTR_LEN, strlen(sr.c_str()));
+	EXPECT_STRCASEEQ(CSTR, sr.c_str());
+}
 
 // ----------------------------------------------------------------------
 // Test the pointer copy constructor
 // ----------------------------------------------------------------------
 
-	void test_ptr_copy_ctor() {
-		string_ptr sp(new string(STR));
-		string_ref sr(sp);
+TEST_F(buffer_ref_test, test_ptr_copy_ctor) {
+	string_ptr sp(new string(STR));
+	string_ref sr(sp);
 
-		CPPUNIT_ASSERT_EQUAL(STR, sr.str());
-	}
+	EXPECT_EQ(STR, sr.str());
+}
 
 // ----------------------------------------------------------------------
 // Test the pointer move constructor
 // ----------------------------------------------------------------------
 
-	void test_ptr_move_ctor() {
-		string_ptr sp(new string(STR));
-		string_ref sr(std::move(sp));
+TEST_F(buffer_ref_test, test_ptr_move_ctor) {
+	string_ptr sp(new string(STR));
+	string_ref sr(std::move(sp));
 
-		CPPUNIT_ASSERT_EQUAL(STR, sr.str());
+	EXPECT_EQ(STR, sr.str());
 
-		CPPUNIT_ASSERT(!sp);
-	}
+	EXPECT_FALSE(sp);
+}
 
 // ----------------------------------------------------------------------
 // Test the copy constructor
 // ----------------------------------------------------------------------
 
-	void test_copy_ctor() {
-		string_ref orgSR(STR);
-		string_ref sr(orgSR);
+TEST_F(buffer_ref_test, test_copy_ctor) {
+	string_ref orgSR(STR);
+	string_ref sr(orgSR);
 
-		CPPUNIT_ASSERT_EQUAL(STR, sr.str());
-		CPPUNIT_ASSERT_EQUAL(orgSR.ptr().get(), sr.ptr().get());
-		CPPUNIT_ASSERT_EQUAL(2L, sr.ptr().use_count());
-	}
+	EXPECT_EQ(STR, sr.str());
+	EXPECT_EQ(orgSR.ptr().get(), sr.ptr().get());
+	EXPECT_EQ(2L, sr.ptr().use_count());
+}
 
 // ----------------------------------------------------------------------
 // Test the move constructor
 // ----------------------------------------------------------------------
 
-	void test_move_ctor() {
-		string_ref orgSR(STR);
-		string_ref sr(std::move(orgSR));
+TEST_F(buffer_ref_test, test_move_ctor) {
+	string_ref orgSR(STR);
+	string_ref sr(std::move(orgSR));
 
-		CPPUNIT_ASSERT_EQUAL(STR, sr.str());
+	EXPECT_EQ(STR, sr.str());
 
-		CPPUNIT_ASSERT(!orgSR);
-		CPPUNIT_ASSERT_EQUAL(1L, sr.ptr().use_count());
-	}
+	EXPECT_FALSE(orgSR);
+	EXPECT_EQ(1L, sr.ptr().use_count());
+}
 
 // ----------------------------------------------------------------------
 // Test the copy assignment
 // ----------------------------------------------------------------------
 
-	void test_copy_assignment() {
-		string_ref sr, orgSR(STR);
+TEST_F(buffer_ref_test, test_copy_assignment) {
+	string_ref sr, orgSR(STR);
 
-		sr = orgSR;
+	sr = orgSR;
 
-		CPPUNIT_ASSERT_EQUAL(STR, sr.str());
-		CPPUNIT_ASSERT_EQUAL(orgSR.ptr().get(), sr.ptr().get());
-		CPPUNIT_ASSERT_EQUAL(2L, sr.ptr().use_count());
+	EXPECT_EQ(STR, sr.str());
+	EXPECT_EQ(orgSR.ptr().get(), sr.ptr().get());
+	EXPECT_EQ(2L, sr.ptr().use_count());
 
-		// Test for true copy
-		orgSR = EMPTY_STR;
-		CPPUNIT_ASSERT_EQUAL(STR, sr.str());
-	}
+	// Test for true copy
+	orgSR = EMPTY_STR;
+	EXPECT_EQ(STR, sr.str());
+}
 
 // ----------------------------------------------------------------------
 // Test the move assignment
 // ----------------------------------------------------------------------
 
-	void test_move_assignment() {
-		string_ref sr, orgSR(STR);
+TEST_F(buffer_ref_test, test_move_assignment) {
+	string_ref sr, orgSR(STR);
 
-		sr = std::move(orgSR);
+	sr = std::move(orgSR);
 
-		CPPUNIT_ASSERT_EQUAL(STR, sr.str());
+	EXPECT_EQ(STR, sr.str());
 
-		CPPUNIT_ASSERT(!orgSR);
-		CPPUNIT_ASSERT_EQUAL(1L, sr.ptr().use_count());
-	}
+	EXPECT_FALSE(orgSR);
+	EXPECT_EQ(1L, sr.ptr().use_count());
+}
 
 // ----------------------------------------------------------------------
 // Test the string copy assignment
 // ----------------------------------------------------------------------
 
-	void test_str_copy_assignment() {
-		string str(STR);
-		string_ref sr;
+TEST_F(buffer_ref_test, test_str_copy_assignment) {
+	string str(STR);
+	string_ref sr;
 
-		sr = str;
-		CPPUNIT_ASSERT_EQUAL(STR, sr.str());
+	sr = str;
+	EXPECT_EQ(STR, sr.str());
 
-		str = EMPTY_STR;
-		CPPUNIT_ASSERT_EQUAL(STR, sr.str());
-	}
+	str = EMPTY_STR;
+	EXPECT_EQ(STR, sr.str());
+}
 
 // ----------------------------------------------------------------------
 // Test the string move assignment
 // ----------------------------------------------------------------------
 
-	void test_str_move_assignment() {
-		string str(STR);
-		string_ref sr;
+TEST_F(buffer_ref_test, test_str_move_assignment) {
+	string str(STR);
+	string_ref sr;
 
-		sr = std::move(str);
-		CPPUNIT_ASSERT_EQUAL(STR, sr.str());
+	sr = std::move(str);
+	EXPECT_EQ(STR, sr.str());
 
-		CPPUNIT_ASSERT_EQUAL(EMPTY_STR, str);
-		CPPUNIT_ASSERT_EQUAL(1L, sr.ptr().use_count());
-	}
+	EXPECT_EQ(EMPTY_STR, str);
+	EXPECT_EQ(1L, sr.ptr().use_count());
+}
 
 // ----------------------------------------------------------------------
 // Test the c-string assignment
 // ----------------------------------------------------------------------
 
-	void test_cstr_assignment() {
-		string_ref sr;
-		sr = CSTR;
+TEST_F(buffer_ref_test, test_cstr_assignment) {
+	string_ref sr;
+	sr = CSTR;
 
-		CPPUNIT_ASSERT_EQUAL(CSTR_LEN, strlen(sr.c_str()));
-		CPPUNIT_ASSERT(!strcmp(CSTR, sr.c_str()));
-	}
+	EXPECT_EQ(CSTR_LEN, strlen(sr.c_str()));
+	EXPECT_STRCASEEQ(CSTR, sr.c_str());
+}
 
 // ----------------------------------------------------------------------
 // Test the pointer copy assignment
 // ----------------------------------------------------------------------
 
-	void test_ptr_copy_assignment() {
-		string_ptr sp(new string(STR));
-		string_ref sr;
+TEST_F(buffer_ref_test, test_ptr_copy_assignment) {
+	string_ptr sp(new string(STR));
+	string_ref sr;
 
-		sr = sp;
+	sr = sp;
 
-		CPPUNIT_ASSERT_EQUAL(STR, sr.str());
-	}
+	EXPECT_EQ(STR, sr.str());
+}
 
 // ----------------------------------------------------------------------
 // Test the pointer move assignment
 // ----------------------------------------------------------------------
 
-	void test_ptr_move_assignment() {
-		string_ptr sp(new string(STR));
-		string_ref sr;
+TEST_F(buffer_ref_test, test_ptr_move_assignment) {
+	string_ptr sp(new string(STR));
+	string_ref sr;
 
-		sr = std::move(sp);
+	sr = std::move(sp);
 
-		CPPUNIT_ASSERT_EQUAL(STR, sr.str());
+	EXPECT_EQ(STR, sr.str());
 
-		CPPUNIT_ASSERT(!sp);
-	}
+	EXPECT_FALSE(sp);
+}
 
 // ----------------------------------------------------------------------
 // Test the reset
 // ----------------------------------------------------------------------
 
-	void test_reset() {
-		string_ref sr(STR);
+TEST_F(buffer_ref_test, test_reset) {
+	string_ref sr(STR);
 
-		sr.reset();
-		CPPUNIT_ASSERT(!sr);
-		CPPUNIT_ASSERT(sr.empty());
-	}
-
-};
+	sr.reset();
+	EXPECT_FALSE(sr);
+	EXPECT_TRUE(sr.empty());
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
