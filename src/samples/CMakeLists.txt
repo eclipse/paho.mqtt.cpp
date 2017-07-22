@@ -22,6 +22,13 @@
 
 ## Note: on OS X you should install XCode and the associated command-line tools
 
+## --- Library dependencies ---
+
+if(NOT WIN32)
+    set(LIBS_THREADING pthread)
+endif()
+
+
 ## Paho MQTT C include directory
 get_filename_component(PAHO_MQTT_C_DEV_INC_DIR ${PAHO_MQTT_C_PATH}/src ABSOLUTE)
 get_filename_component(PAHO_MQTT_C_STD_INC_DIR ${PAHO_MQTT_C_PATH}/include ABSOLUTE)
@@ -78,7 +85,7 @@ target_link_libraries(data_publish
 target_link_libraries(pub_speed_test
     ${PAHO_MQTT_C}
     ${PAHO_MQTT_CPP}
-    pthread)
+    ${LIBS_THREADING})
 
 set(INSTALL_TARGETS
     async_publish
@@ -110,3 +117,4 @@ install(TARGETS ${INSTALL_TARGETS}
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
 )
+
