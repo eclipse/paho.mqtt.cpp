@@ -1,3 +1,10 @@
+# CMakeLists.txt
+#
+# CMake file for the Paho C++ core library.
+#
+# This is part of the Paho MQTT C++ client library.
+#
+
 #*******************************************************************************
 #  Copyright (c) 2016
 # 
