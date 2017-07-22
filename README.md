@@ -1,20 +1,13 @@
 # Eclipse Paho MQTT C++ client library
 
-This is the latest development code for the Paho C++ library, destined to be the v1.0 release of the library with the overall Paho 1.3 group, targeted for June 2017. 
 
-As such it requires the version of the Paho C library which is also currently under development, and available in the _develop_ branch of that library on GitHub:
-https://github.com/eclipse/paho.mqtt.c/tree/develop
-
-_This will not compile against the current release version of the Paho C library!_
-
-## Description
-This repository contains the source code for the [Eclipse Paho](http://eclipse.org/paho) MQTT C++ client library on memory managed operating systems such as Linux/Posix and Windows.
+This repository contains the source code for the [Eclipse Paho](http://eclipse.org/paho) MQTT C++ client library on memory-managed operating systems such as Linux/Posix and Windows.
 
 This code builds a library which enables C++11 applications to connect to an [MQTT](http://mqtt.org) broker to publish messages, and to subscribe to topics and receive published messages.
 
 Both synchronous and asynchronous modes of operation are supported.
 
-This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) by Ian Craggs, et al.
+This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) by Ian Craggs, et al., specifically version 1.2.0 (Paho Release 1.3) or possibly later.
 
 ## Building from source
 
@@ -57,10 +50,11 @@ Before compiling, determine the value of some variables in order to configure fe
 Variable | Default Value | Description
 ------------ | ------------- | -------------
 PAHO_MQTT_C_PATH | "" | Add a path paho.mqtt.c library and headers
-PAHO_BUILD_STATIC | FALSE | Whether to build the static library
+PAHO_BUILD_SHARED | TRUE (Linux), FALSE (Win32) | Whether to build the shared library
+PAHO_BUILD_STATIC | FALSE (Linux), TRUE (Win32) | Whether to build the static library
 PAHO_BUILD_DOCUMENTATION | FALSE | Create and install the HTML based API documentation (requires Doxygen)
 PAHO_BUILD_SAMPLES | FALSE | Build sample programs
-PAHO_WITH_SSL | TRUE | Flag that defines whether to build ssl-enabled binaries too
+PAHO_WITH_SSL | TRUE (Linux), FALSE (Win32) | Flag that defines whether to build ssl-enabled binaries too
 
 Using these variables CMake can be used to generate your Makefiles. The out-of-source build is the default on CMake. Therefore it is recommended to invoke all build commands inside your chosen build directory.
 

@@ -7,8 +7,6 @@ install:
 
     cd paho.mqtt.c
 
-    git checkout -t origin/develop
-
     mkdir build_cmake
 
     cd build_cmake
