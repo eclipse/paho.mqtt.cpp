@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 /// @file types.h
-/// Basic types for the Paho MQTT C++ library.
+/// Basic types and type conversions for the Paho MQTT C++ library.
 /// @date May 17, 2015 @author Frank Pagliughi
 /////////////////////////////////////////////////////////////////////////////
 
@@ -38,7 +38,7 @@ using byte = uint8_t;
 
 /** An mqtt string is just a std::string */
 using string = std::string;
-/** A binary blob of data */
+/** A binary blob of data is, umm, just a string too! */
 using binary = std::string;		//std::basic_string<byte>;
 
 /** Smart/shared pointer to a const string */

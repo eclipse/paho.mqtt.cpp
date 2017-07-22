@@ -41,6 +41,8 @@ class exception_test : public CppUnit::TestFixture
 
 	CPPUNIT_TEST_SUITE_END();
 
+	const std::string msg { "Some MQTT error" };
+
 public:
 	void setUp() {}
 	void tearDown() {}
@@ -65,9 +67,8 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_get_message() {
-		std::string msg1 { "MQTT exception -1" };
-		mqtt::exception ex1(MQTTASYNC_FAILURE, msg1);
-		CPPUNIT_ASSERT_EQUAL(msg1, ex1.get_message());
+		mqtt::exception ex(MQTTASYNC_FAILURE, msg);
+		CPPUNIT_ASSERT_EQUAL(msg, ex.get_message());
 	}
 
 // ----------------------------------------------------------------------
@@ -86,7 +87,6 @@ public:
 	void test_to_str() {
 		mqtt::exception ex1(MQTTASYNC_FAILURE);
 		std::string msg1 { "MQTT error [-1]" };
-
 		CPPUNIT_ASSERT_EQUAL(msg1, ex1.to_string());
 	}
 
@@ -97,7 +97,6 @@ public:
 	void test_what() {
 		mqtt::exception ex1(MQTTASYNC_FAILURE);
 		const char *msg1 = "MQTT error [-1]";
-
 		CPPUNIT_ASSERT(!strcmp(msg1, ex1.what()));
 	}
 

@@ -1,6 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
 /// @file thread_queue.h
-/// Implementation of the class 'thread_queue'
+/// Implementation of the template class 'thread_queue', a thread-safe,
+/// blocking queue for passing data between threads, safe for use with smart
+/// pointers.
 /// @date 09-Jan-2017
 /////////////////////////////////////////////////////////////////////////////
 
