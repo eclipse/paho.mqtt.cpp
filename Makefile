@@ -58,8 +58,8 @@ libdir = $(exec_prefix)/lib
 # ----- Definitions for the shared library -----
 
 LIB_BASE  ?= $(MODULE)
-LIB_MAJOR ?= 0
-LIB_MINOR ?= 9
+LIB_MAJOR ?= 1
+LIB_MINOR ?= 0
 LIB_PATCH ?= 0
 
 LIB_LINK = lib$(LIB_BASE).so
