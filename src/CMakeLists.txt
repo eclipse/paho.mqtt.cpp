@@ -79,9 +79,9 @@ if(PAHO_BUILD_SHARED)
 
     ## install the shared library
     install(TARGETS ${PAHO_MQTT_CPP}
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin)
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
 
 ## --- Build static version of the library, if requested ---
@@ -95,8 +95,8 @@ if(PAHO_BUILD_STATIC)
 
     ## install the static library
     install(TARGETS ${PAHO_MQTT_CPP_STATIC}
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib)
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
     ## Static lib has same name as shared lib
     set_target_properties(${PAHO_MQTT_CPP_STATIC} PROPERTIES OUTPUT_NAME ${PAHO_MQTT_CPP})
