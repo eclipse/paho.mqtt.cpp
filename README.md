@@ -67,6 +67,8 @@ $ mkdir build
 $ cd build
 $ cmake -DPAHO_BUILD_DOCUMENTATION=TRUE -DPAHO_BUILD_SAMPLES=TRUE -DPAHO_MQTT_C_PATH=../../paho.mqtt.c ..
 $ make
+$ sudo make install
+$ sudo ldconfig
 ```
 
 or
