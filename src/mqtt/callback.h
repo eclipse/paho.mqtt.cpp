@@ -52,7 +52,10 @@ public:
 	virtual ~callback() {}
 
 	/**
-	 * This method is called when the client is connected.
+	 * This method is called when the client is connected. 
+	 * Note that, in response to an initial connect(), the token from the 
+	 * connect call is also signaled with an on_success(). That occurs just 
+	 * before this is called. 
 	 * @param cause
 	 */
 	virtual void connected(const string& cause) {}

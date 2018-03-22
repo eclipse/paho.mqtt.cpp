@@ -31,6 +31,7 @@
 namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
+// Constructors
 
 async_client::async_client(const string& serverURI, const string& clientId,
 						   const string& persistDir)
@@ -106,23 +107,27 @@ async_client::~async_client()
 // Class static callbacks.
 // These are the callbacks directly from the C-lib. In each case the
 // 'context' should be the address of the async_client object that
-// registered the callback.
+// registered the callback. 
 
+
+// Callback for MQTTAsync_setConnected()
+// This is installed with the normall callbacks and with a call to 
+// reconnect() to indicate that it succeeded. It is called after the token 
+// is notified of success on a normal connect with callbacks. 
 void async_client::on_connected(void* context, char* cause)
 {
 	if (context) {
 		async_client* cli = static_cast<async_client*>(context);
 		callback* cb = cli->userCallback_;
-		token_ptr tok = cli->connTok_;
 
 		if (cb)
 			cb->connected(cause ? string(cause) : string());
-
-		if (tok)
-			token::on_success(tok.get(), nullptr);
 	}
 }
 
+// Callback for when the connection is lost.
+// This is called from the MQTTAsync_connectionLost registered via 
+// MQTTAsync_setCallbacks(). 
 void async_client::on_connection_lost(void *context, char *cause)
 {
 	if (context) {
@@ -138,6 +143,9 @@ void async_client::on_connection_lost(void *context, char *cause)
 	}
 }
 
+// Callback for when a subscribed message arrives.
+// This is called from the MQTTAsync_messageArrived registered via 
+// MQTTAsync_setCallbacks(). 
 int async_client::on_message_arrived(void* context, char* topicName, int topicLen,
 									 MQTTAsync_message* msg)
 {
