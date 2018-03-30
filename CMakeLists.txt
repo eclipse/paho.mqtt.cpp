@@ -87,3 +87,4 @@ elseif(UNIX)
 endif()
 
 include(CPack)
+add_subdirectory(cmake)
