@@ -122,6 +122,7 @@ public:
 	 * @param clientId a client identifier that is unique on the server
 	 *  			   being connected to
 	 * @param persistDir The directory to use for persistence data
+	 * @throw exception if an argument is invalid
 	 */
 	async_client(const string& serverURI, const string& clientId,
 				 const string& persistDir);
@@ -136,6 +137,7 @@ public:
 	 *  			   being connected to
 	 * @param persistence The user persistence structure. If this is null,
 	 *  				  then no persistence is used.
+	 * @throw exception if an argument is invalid
 	 */
 	async_client(const string& serverURI, const string& clientId,
 				 iclient_persistence* persistence=nullptr);
@@ -150,6 +152,7 @@ public:
 	 * @param maxBufferedMessages the maximum number of messages allowed to
 	 *  						  be buffered while not connected
 	 * @param persistDir The directory to use for persistence data
+	 * @throw exception if an argument is invalid
 	 */
 	async_client(const string& serverURI, const string& clientId,
 				 int maxBufferedMessages, const string& persistDir);
@@ -166,6 +169,7 @@ public:
 	 *  						  be buffered while not connected
 	 * @param persistence The user persistence structure. If this is null,
 	 *  				  then no persistence is used.
+	 * @throw exception if an argument is invalid
 	 */
 	async_client(const string& serverURI, const string& clientId,
 				 int maxBufferedMessages, iclient_persistence* persistence=nullptr);
