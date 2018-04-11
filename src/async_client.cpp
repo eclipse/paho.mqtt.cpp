@@ -155,7 +155,9 @@ int async_client::on_message_arrived(void* context, char* topicName, int topicLe
 		consumer_queue_type& que = cli->que_;
 
 		if (cb || que) {
-			string topic(topicName, topicName+topicLen);
+			size_t len = (topicLen == 0) ? strlen(topicName) : size_t(topicLen);
+
+			string topic(topicName, topicName+len);
 			auto m = message::create(std::move(topic), *msg);
 
 			if (cb)

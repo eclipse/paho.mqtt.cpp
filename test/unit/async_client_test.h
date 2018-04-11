@@ -51,8 +51,9 @@ class async_client_test : public CppUnit::TestFixture
 	CPPUNIT_TEST( test_connect_2_args );
 	CPPUNIT_TEST( test_connect_3_args );
 	CPPUNIT_TEST( test_connect_3_args_failure );
+	CPPUNIT_TEST( test_connect_uninitialized_ssl );
 
-	CPPUNIT_TEST( test_disconnect_0_arg );
+    CPPUNIT_TEST( test_disconnect_0_arg );
 	CPPUNIT_TEST( test_disconnect_1_arg );
 	CPPUNIT_TEST( test_disconnect_1_arg_failure );
 	CPPUNIT_TEST( test_disconnect_2_args );
@@ -97,9 +98,10 @@ class async_client_test : public CppUnit::TestFixture
 		const std::string GOOD_SERVER_URI { "tcp://m2m.eclipse.org:1883" };
 	#else
 		const std::string GOOD_SERVER_URI { "tcp://localhost:1883" };
+		const std::string GOOD_SSL_SERVER_URI { "ssl://localhost:18885" };
 	#endif
 	const std::string BAD_SERVER_URI  { "one://invalid.address" };
-	const std::string CLIENT_ID { "async_client_unit_test" };
+	const std::string CLIENT_ID { "" }; // { "async_client_unit_test" };
 	const std::string PERSISTENCE_DIR { "/tmp" };
 	const std::string TOPIC { "TOPIC" };
 	const int GOOD_QOS { 0 };
@@ -237,21 +239,43 @@ public:
 		wo.set_qos(BAD_QOS); // Invalid QoS causes connection failure
 		co.set_will(wo);
 		mqtt::test::dummy_action_listener listener;
-		int reason_code = MQTTASYNC_SUCCESS;
+		int reasonCode = MQTTASYNC_SUCCESS;
 		try {
 			token_conn = cli.connect(co, &CONTEXT, listener);
 			CPPUNIT_ASSERT(token_conn);
 			token_conn->wait();
 		}
 		catch (mqtt::exception& ex) {
-			reason_code = ex.get_reason_code();
+			reasonCode = ex.get_reason_code();
 		}
 		CPPUNIT_ASSERT(nullptr == token_conn);
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
-		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_BAD_QOS, reason_code);
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_BAD_QOS, reasonCode);
 		// TODO Why listener.on_failure() is not called?
 		//CPPUNIT_ASSERT(listener.on_failure_called);
 	}
+
+    // An improperly initialized SSL connect request should fail gracefully
+    void test_connect_uninitialized_ssl() {
+        mqtt::async_client cli { GOOD_SSL_SERVER_URI, CLIENT_ID };
+
+        mqtt::connect_options opts;
+        opts.set_keep_alive_interval(10);
+        opts.set_clean_session(true);
+        // Note that we're not setting SSL options.
+
+        mqtt::token_ptr tok;
+		int reasonCode = MQTTASYNC_SUCCESS;
+
+        try {
+            tok = cli.connect(opts);
+            tok->wait();
+        }
+		catch (mqtt::exception& ex) {
+			reasonCode = ex.get_reason_code();
+		}
+        CPPUNIT_ASSERT(reasonCode != MQTTASYNC_SUCCESS);
+    }
 
 //----------------------------------------------------------------------
 // Test async_client::disconnect()
