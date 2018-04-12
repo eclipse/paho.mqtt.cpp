@@ -23,7 +23,7 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-constexpr MQTTAsync_SSLOptions ssl_options::DFLT_C_STRUCT;
+const MQTTAsync_SSLOptions ssl_options::DFLT_C_STRUCT = MQTTAsync_SSLOptions_initializer;
 
 ssl_options::ssl_options() : opts_(DFLT_C_STRUCT)
 {
@@ -132,7 +132,7 @@ void ssl_options::set_enabled_cipher_suites(const string& enabledCipherSuites)
 
 void ssl_options::set_enable_server_cert_auth(bool enableServerCertAuth)
 {
-	opts_.enableServerCertAuth = enableServerCertAuth ? (!0) : 0;
+	opts_.enableServerCertAuth = to_int(enableServerCertAuth);
 }
 
 /////////////////////////////////////////////////////////////////////////////

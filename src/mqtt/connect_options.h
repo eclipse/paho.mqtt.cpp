@@ -46,8 +46,7 @@ namespace mqtt {
 class connect_options
 {
 	/** The default C struct */
-	static constexpr MQTTAsync_connectOptions
-				DFLT_C_STRUCT MQTTAsync_connectOptions_initializer;
+	static const MQTTAsync_connectOptions DFLT_C_STRUCT ;
 
 	/** The underlying C connection options */
 	MQTTAsync_connectOptions opts_;
@@ -198,21 +197,20 @@ public:
 	/**
 	 * Returns whether the server should remember state for the client
 	 * across reconnects.
-	 * @return bool
+	 * @return @em true if requesting a clean session, @em false if not.
 	 */
-	bool is_clean_session() const { return opts_.cleansession != 0; }
+	bool is_clean_session() const { return to_bool(opts_.cleansession); }
 	/**
 	 * Gets the token used as the callback context.
 	 * @return The delivery token used as the callback context.
 	 */
 	token_ptr get_token() const { return tok_; }
 	/**
-	 * Sets the list of servers to which the client will connect.
-	 * @param serverURIs A pointer to a collection of server URI's. Each
-	 *  				 entry should be of the form @em
-	 *  				 protocol://host:port where @em protocol must be
-	 *  				 @em tcp or @em ssl. For @emhost, you can specify
-	 *  				 either an IP address or a domain name.
+	 * Gets the list of servers to which the client will connect.
+	 * @return A collection of server URI's. Each entry should be of the
+	 *  	   form @em protocol://host:port where @em protocol must be tcp
+	 *  	   or @em ssl. For @em host, you can specify either an IP
+	 *  	   address or a domain name.
 	 */
 	const_string_collection_ptr get_servers() const { return serverURIs_; }
 	/**
@@ -230,7 +228,7 @@ public:
 	 * @return @em true if configured for automatic reconnect, @em false if
 	 *  	   not.
 	 */
-	bool get_automatic_reconnect() const { return opts_.automaticReconnect != 0; }
+	bool get_automatic_reconnect() const { return to_bool(opts_.automaticReconnect); }
 	/**
 	 * Gets the minimum retry interval for automatic reconnect.
 	 * @return The minimum retry interval for automatic reconnect, in
@@ -254,7 +252,7 @@ public:
 	 * @param cleanSession
 	 */
 	void set_clean_session(bool cleanSession) {
-		opts_.cleansession = cleanSession ? (!0) : 0;
+		opts_.cleansession = to_int(cleanSession);
 	}
 	/**
 	 * Sets the connection timeout value.
@@ -335,7 +333,7 @@ public:
 	 * @param serverURIs A pointer to a collection of server URI's. Each
 	 *  				 entry should be of the form @em
 	 *  				 protocol://host:port where @em protocol must be
-	 *  				 @em tcp or @em ssl. For @emhost, you can specify
+	 *  				 @em tcp or @em ssl. For @em host, you can specify
 	 *  				 either an IP address or a domain name.
 	 */
 	void set_servers(const_string_collection_ptr serverURIs);
@@ -366,7 +364,6 @@ public:
 	void set_automatic_reconnect(int minRetryInterval, int maxRetryInterval);
 	/**
 	 * Enable or disable automatic reconnects.
-	 * @param on Whether to turn reconnects on or off
 	 * @param minRetryInterval Minimum retry interval. Doubled on each
 	 *  					   failed retry.
 	 * @param maxRetryInterval Maximum retry interval. The doubling stops

@@ -128,6 +128,16 @@ public:
 		CPPUNIT_ASSERT_EQUAL(CLIENT_ID, cli.get_client_id());
 	}
 
+	void test_user_constructor_2_string_args_failure() {
+		int reason_code = MQTTASYNC_SUCCESS;
+		try {
+			mqtt::async_client cli { BAD_SERVER_URI, CLIENT_ID };
+		} catch (mqtt::exception& ex) {
+			reason_code = ex.get_reason_code();
+		}
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_BAD_PROTOCOL, reason_code);
+	}
+
 	void test_user_constructor_3_string_args() {
 		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID, PERSISTENCE_DIR };
 
@@ -179,7 +189,7 @@ public:
 	}
 
 	void test_connect_1_arg_failure() {
-		mqtt::async_client cli { BAD_SERVER_URI, CLIENT_ID };
+		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::token_ptr token_conn { nullptr };
@@ -228,7 +238,7 @@ public:
 	}
 
 	void test_connect_3_args_failure() {
-		mqtt::async_client cli { BAD_SERVER_URI, CLIENT_ID };
+		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::token_ptr token_conn { nullptr };
@@ -288,7 +298,7 @@ public:
 	}
 
 	void test_disconnect_1_arg_failure() {
-		mqtt::async_client cli { BAD_SERVER_URI, CLIENT_ID };
+		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::token_ptr token_disconn { nullptr };
@@ -339,7 +349,7 @@ public:
 	}
 
 	void test_disconnect_3_args_failure() {
-		mqtt::async_client cli { BAD_SERVER_URI, CLIENT_ID };
+		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::token_ptr token_disconn { nullptr };
@@ -495,7 +505,7 @@ public:
 	}
 
 	void test_publish_2_args_failure() {
-		mqtt::async_client cli { BAD_SERVER_URI, CLIENT_ID };
+		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		int reason_code = MQTTASYNC_SUCCESS;
@@ -534,7 +544,7 @@ public:
 	}
 
 	void test_publish_4_args_failure() {
-		mqtt::async_client cli { BAD_SERVER_URI, CLIENT_ID };
+		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		int reason_code = MQTTASYNC_SUCCESS;
@@ -633,7 +643,7 @@ public:
 	}
 
 	void test_subscribe_single_topic_2_args_failure() {
-		mqtt::async_client cli { BAD_SERVER_URI, CLIENT_ID };
+		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		int reason_code = MQTTASYNC_SUCCESS;
@@ -670,7 +680,7 @@ public:
 	}
 
 	void test_subscribe_single_topic_4_args_failure() {
-		mqtt::async_client cli { BAD_SERVER_URI, CLIENT_ID };
+		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		int reason_code = MQTTASYNC_SUCCESS;
@@ -705,7 +715,7 @@ public:
 	}
 
 	void test_subscribe_many_topics_2_args_failure() {
-		mqtt::async_client cli { BAD_SERVER_URI, CLIENT_ID };
+		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		try {
@@ -751,7 +761,7 @@ public:
 	}
 
 	void test_subscribe_many_topics_4_args_failure() {
-		mqtt::async_client cli { BAD_SERVER_URI, CLIENT_ID };
+		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::test::dummy_action_listener listener;
@@ -799,7 +809,7 @@ public:
 	}
 
 	void test_unsubscribe_single_topic_1_arg_failure() {
-		mqtt::async_client cli { BAD_SERVER_URI, CLIENT_ID };
+		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		int reason_code = MQTTASYNC_SUCCESS;
@@ -836,7 +846,7 @@ public:
 	}
 
 	void test_unsubscribe_single_topic_3_args_failure() {
-		mqtt::async_client cli { BAD_SERVER_URI, CLIENT_ID };
+		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		int reason_code = MQTTASYNC_SUCCESS;
@@ -872,7 +882,7 @@ public:
 	}
 
 	void test_unsubscribe_many_topics_1_arg_failure() {
-		mqtt::async_client cli { BAD_SERVER_URI, CLIENT_ID };
+		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		int reason_code = MQTTASYNC_SUCCESS;
@@ -909,7 +919,7 @@ public:
 	}
 
 	void test_unsubscribe_many_topics_3_args_failure() {
-		mqtt::async_client cli { BAD_SERVER_URI, CLIENT_ID };
+		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
 		mqtt::test::dummy_action_listener listener;

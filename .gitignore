@@ -1,4 +1,5 @@
 lib/
+obj/
 \.hg/
 \.hgignore
 \.hgtags

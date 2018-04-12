@@ -56,10 +56,14 @@ async_client::async_client(const string& serverURI, const string& clientId,
 		opts->maxBufferedMessages = maxBufferedMessages;
 	}
 
-	MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
+	auto rc = MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
 								MQTTCLIENT_PERSISTENCE_DEFAULT,
 								const_cast<char*>(persistDir.c_str()),
 								opts.get());
+
+	if (rc != 0) {
+		throw exception(rc);
+	}
 }
 
 async_client::async_client(const string& serverURI, const string& clientId,
@@ -163,7 +167,7 @@ int async_client::on_message_arrived(void* context, char* topicName, int topicLe
 
 	// TODO: Should the user code determine the return value?
 	// The Java version does doesn't seem to...
-	return (!0);
+	return to_int(true);
 }
 
 // Callback to indicate that a message was delivered to the server.

@@ -38,7 +38,7 @@ namespace mqtt {
 class client : private callback
 {
 	/** An arbitrary, but relatively long timeout */
-	static constexpr auto DFLT_TIMEOUT = std::chrono::minutes(5);
+	static const std::chrono::minutes DFLT_TIMEOUT;
 	/** The default quality of service */
 	static constexpr int DFLT_QOS = 1;
 
@@ -126,6 +126,8 @@ public:
 	 *  				as a URI.
 	 * @param clientId a client identifier that is unique on the server
 	 *  			   being connected to
+	 * @param maxBufferedMessages the maximum number of messages allowed to
+	 *  						  be buffered while not connected
 	 * @param persistence The user persistence structure. If this is null,
 	 *  				  then no persistence is used.
 	 */
@@ -220,7 +222,8 @@ public:
 	virtual topic get_topic(const string& top) { return topic(cli_, top); }
 	/**
 	 * Determines if this client is currently connected to the server.
-	 * @return bool
+	 * @return @em true if the client is currently connected, @em false if
+	 *  	   not.
 	 */
 	virtual bool is_connected() const { return cli_.is_connected(); }
 
@@ -230,8 +233,8 @@ public:
 	 * @param top The topic to publish
 	 * @param payload The data to publish
 	 * @param n The size in bytes of the data
-	 * @param qos
-	 * @param retained
+	 * @param qos The QoS for message delivery
+	 * @param retained Whether the broker should retain the message
 	 */
 	virtual void publish(string_ref top, const void* payload, size_t n,
 						 int qos, bool retained) {
@@ -242,14 +245,13 @@ public:
 	 * delivered.
 	 * @param top The topic to publish
 	 * @param payload The data to publish
-	 * @param retained
+	 * @param n The size in bytes of the data
 	 */
 	virtual void publish(string_ref top, const void* payload, size_t n) {
 		cli_.publish(std::move(top), payload, n)->wait_for(timeout_);
 	}
 	/**
 	 * Publishes a message to a topic on the server.
-	 * @param top The topic to publish on
 	 * @param msg The message
 	 */
 	virtual void publish(const_message_ptr msg) {
@@ -260,7 +262,6 @@ public:
 	 * This version will not timeout since that could leave the library with
 	 * a reference to memory that could disappear while the library is still
 	 * using it.
-	 * @param top The topic to publish on
 	 * @param msg The message
 	 */
 	virtual void publish(const message& msg) {
@@ -274,7 +275,7 @@ public:
 	virtual void set_callback(callback& cb);
 	/**
 	 * Set the maximum time to wait for an action to complete.
-	 * @param timeoutMS
+	 * @param timeoutMS The timeout in milliseconds
 	 */
 	virtual void set_timeout(int timeoutMS) {
 		timeout_ = std::chrono::milliseconds(timeoutMS);
@@ -351,7 +352,7 @@ public:
 	const_message_ptr consume_message() { return cli_.consume_message(); }
 	/**
 	 * Try to read the next message from the queue without blocking.
-	 * @param val Pointer to the value to receive the message
+	 * @param msg Pointer to the value to receive the message
 	 * @return @em true is a message was read, @em false if no message was
 	 *  	   available.
 	 */
@@ -360,7 +361,7 @@ public:
 	}
 	/**
 	 * Waits a limited time for a message to arrive.
-	 * @param val Pointer to the value to receive the message
+	 * @param msg Pointer to the value to receive the message
 	 * @param relTime The maximum amount of time to wait for a message.
 	 * @return @em true if a message was read, @em false if a timeout
 	 *  	   occurred.
@@ -372,7 +373,7 @@ public:
 	}
 	/**
 	 * Waits until a specific time for a message to occur.
-	 * @param val Pointer to the value to receive the message
+	 * @param msg Pointer to the value to receive the message
 	 * @param absTime The time point to wait until, before timing out.
 	 * @return @em true if a message was read, @em false if a timeout
 	 *  	   occurred.

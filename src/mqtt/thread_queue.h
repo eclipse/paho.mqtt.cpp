@@ -1,6 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
 /// @file thread_queue.h
-/// Implementation of the class 'thread_queue'
+/// Implementation of the template class 'thread_queue', a thread-safe,
+/// blocking queue for passing data between threads, safe for use with smart
+/// pointers.
 /// @date 09-Jan-2017
 /////////////////////////////////////////////////////////////////////////////
 
@@ -93,7 +95,15 @@ private:
 	using unique_guard = std::unique_lock<std::mutex>;
 
 public:
+	/**
+	 * Constructs a queue with the maximum capacity.
+	 */
 	thread_queue() : cap_(MAX_CAPACITY) {}
+	/**
+	 * Constructs a queue with the specified capacity.
+	 * @param cap The maximum number of items that can be placed in the
+	 *  		  queue.
+	 */
 	explicit thread_queue(size_t cap) : cap_(cap) {}
 	/**
 	 * Determine if the queue is empty.

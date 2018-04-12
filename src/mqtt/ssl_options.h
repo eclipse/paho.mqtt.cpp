@@ -41,8 +41,7 @@ namespace mqtt {
 class ssl_options
 {
 	/** The default C struct */
-	static constexpr MQTTAsync_SSLOptions
-				DFLT_C_STRUCT MQTTAsync_SSLOptions_initializer;
+	static const MQTTAsync_SSLOptions DFLT_C_STRUCT ;
 
 	/** The underlying C SSL options */
 	MQTTAsync_SSLOptions opts_;
@@ -172,7 +171,7 @@ public:
 	 * @return bool
 	 */
 	bool get_enable_server_cert_auth() const {
-		return opts_.enableServerCertAuth != 0;
+		return to_bool(opts_.enableServerCertAuth);
 	}
 	/**
 	 * Sets the file containing the public digital certificates trusted by

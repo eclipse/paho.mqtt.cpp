@@ -22,7 +22,7 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-constexpr MQTTAsync_connectOptions connect_options::DFLT_C_STRUCT;
+const MQTTAsync_connectOptions connect_options::DFLT_C_STRUCT = MQTTAsync_connectOptions_initializer;
 
 connect_options::connect_options() : opts_(DFLT_C_STRUCT)
 {

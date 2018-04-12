@@ -21,7 +21,7 @@
 
 namespace mqtt {
 
-constexpr MQTTAsync_willOptions will_options::DFLT_C_STRUCT;
+const MQTTAsync_willOptions will_options::DFLT_C_STRUCT = MQTTAsync_willOptions_initializer;
 
 /////////////////////////////////////////////////////////////////////////////
 

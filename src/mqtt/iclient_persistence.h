@@ -78,6 +78,10 @@ public:
 	virtual ~iclient_persistence() {}
 	/**
 	 * Initialize the persistent store.
+	 * This uses the client ID and server name to create a unique location
+	 * for the data store.
+	 * @param clientId The identifier string for the client.
+	 * @param serverURI The server to which the client is connected.
 	 */
 	virtual void open(const string& clientId, const string& serverURI) =0;
 	/**
@@ -90,29 +94,30 @@ public:
 	virtual void clear() =0;
 	/**
 	 * Returns whether or not data is persisted using the specified key.
-	 * @param key
-	 * @return bool
+	 * @param key The key to find
+	 * @return @em true if the key exists, @em false if not.
 	 */
 	virtual bool contains_key(const string& key) =0;
 	/**
 	 * Returns a collection of keys in this persistent data store.
+	 * @return A collection of strings representing the keys in the store.
 	 */
 	virtual const string_collection& keys() const =0;
 	/**
 	 * Puts the specified data into the persistent store.
-	 * @param key
-	 * @param persistable
+	 * @param key The key.
+	 * @param bufs The data to store
 	 */
 	virtual void put(const string& key, const std::vector<string_view>& bufs) =0;
 	/**
 	 * Gets the specified data out of the persistent store.
-	 * @param key
-	 * @return persistable
+	 * @param key The key
+	 * @return A const view of the data associated with the key.
 	 */
 	virtual string_view get(const string& key) const =0;
 	/**
 	 * Remove the data for the specified key.
-	 * @param key
+	 * @param key The key
 	 */
 	virtual void remove(const string& key) =0;
 };

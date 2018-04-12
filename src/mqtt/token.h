@@ -180,6 +180,10 @@ public:
 	 * Constructs a token object.
 	 * @param cli The client that created the token.
 	 * @param topic The topic assiciated with the token
+	 * @param userContext optional object used to pass context to the
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param cb callback listener that will be notified when subscribe has
+	 *  		 completed
 	 */
 	token(iasync_client& cli, const string& topic,
 		  void* userContext, iaction_listener& cb);
@@ -193,6 +197,10 @@ public:
 	 * Constructs a token object.
 	 * @param cli The client that created the token.
 	 * @param topics The topics associated with the token
+	 * @param userContext optional object used to pass context to the
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param cb callback listener that will be notified when subscribe has
+	 *  		 completed
 	 */
 	token(iasync_client& cli, const_string_collection_ptr topics,
 		  void* userContext, iaction_listener& cb);
@@ -237,6 +245,10 @@ public:
 	 * Constructs a token object.
 	 * @param cli The client that created the token.
 	 * @param topic The topic assiciated with the token
+	 * @param userContext optional object used to pass context to the
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param cb callback listener that will be notified when subscribe has
+	 *  		 completed
 	 */
 	static ptr_t create(iasync_client& cli, const string& topic,
 						void* userContext, iaction_listener& cb) {
@@ -254,6 +266,10 @@ public:
 	 * Constructs a token object.
 	 * @param cli The client that created the token.
 	 * @param topics The topics associated with the token
+	 *
+	 * @param userContext optional object used to pass context to the
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param cb callback listener that will be notified when subscribe has
 	 */
 	static ptr_t create(iasync_client& cli, const_string_collection_ptr topics,
 						void* userContext, iaction_listener& cb) {
@@ -292,6 +308,7 @@ public:
 	}
 	/**
 	 * Retrieve the context associated with an action.
+	 * @return The context associated with an action.
 	 */
 	virtual void* get_user_context() const {
 		guard g(lock_);
@@ -319,7 +336,8 @@ public:
 	}
 	/**
 	 * Store some context associated with an action.
-	 * @param userContext
+	 * @param userContext optional object used to pass context to the
+	 *  				  callback. Use @em nullptr if not required.
 	 */
 	virtual void set_user_context(void* userContext) {
 		guard g(lock_);

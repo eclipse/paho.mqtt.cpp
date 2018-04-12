@@ -51,7 +51,7 @@ class will_options
 	/** The defalut retained flag for LWT, if unspecified */
 	static constexpr bool DFLT_RETAINED = false;
 	/** A default C struct to support re-initializing variables */
-	static constexpr MQTTAsync_willOptions DFLT_C_STRUCT MQTTAsync_willOptions_initializer;
+	static const MQTTAsync_willOptions DFLT_C_STRUCT;
 
 	/** The underlying C LWT options */
 	MQTTAsync_willOptions opts_;
@@ -138,7 +138,6 @@ public:
 				 int qos=DFLT_QOS, bool retained=DFLT_QOS);
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
-	 * @param top The LWT message is published to the this topic.
 	 * @param msg The message that is published to the Will Topic.
 	 */
 	will_options(const message& msg);
@@ -192,7 +191,7 @@ public:
 	 * @return A pointer to a copy of the LWT message.
 	 */
 	const_message_ptr get_message() const {
-		return message::create(topic_, payload_, opts_.qos, opts_.retained);
+		return message::create(topic_, payload_, opts_.qos, to_bool(opts_.retained));
 	}
 	/**
 	 * Sets the LWT message topic name.
@@ -219,7 +218,7 @@ public:
 	 * @param retained Tell the broker to keep the LWT message after send to
 	 *  			   subscribers.
 	 */
-	void set_retained(bool retained) { opts_.retained = retained ? (!0) : 0; }
+	void set_retained(bool retained) { opts_.retained = to_int(retained); }
 };
 
 /** Shared pointer to a will options object. */

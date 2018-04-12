@@ -57,6 +57,7 @@ public:
 	/**
 	 * Creates an MQTT exception.
 	 * @param code The error code from the C library.
+	 * @param msg The text message for the error.
 	 */
 	exception(int code, const string& msg) :
 		 std::runtime_error("MQTT error ["+std::to_string(code)+"]: "+msg),
@@ -85,10 +86,26 @@ public:
 class persistence_exception : public exception
 {
 public:
+	/**
+	 * Creates an MQTT persistence exception.
+	 */
 	persistence_exception() : exception(MQTTCLIENT_PERSISTENCE_ERROR) {}
+	/**
+	 * Creates an MQTT persistence exception.
+	 * @param code The error code from the C library.
+	 */
 	explicit persistence_exception(int code) : exception(code) {}
+	/**
+	 * Creates an MQTT persistence exception.
+	 * @param msg The text message for the error.
+	 */
 	explicit persistence_exception(const string& msg)
 				: exception(MQTTCLIENT_PERSISTENCE_ERROR, msg) {}
+	/**
+	 * Creates an MQTT persistence exception.
+	 * @param code The error code
+	 * @param msg The text message for the error.
+	 */
 	persistence_exception(int code, const string& msg)
 				: exception(code, msg) {}
 };
@@ -102,7 +119,16 @@ public:
 class security_exception : public exception
 {
 public:
+	/**
+	 * Creates an MQTT security exception
+	 * @param code The error code.
+	 */
 	explicit security_exception(int code) : exception(code) {}
+	/**
+	 * Creates an MQTT security exception
+	 * @param code The error code.
+	 * @param msg The text message for the error.
+	 */
 	security_exception(int code, const string& msg) : exception(code, msg) {}
 };
 

@@ -59,7 +59,7 @@ public:
 
 private:
 	/** Initializer for the C struct (from the C library) */
-	static constexpr MQTTAsync_message DFLT_C_STRUCT MQTTAsync_message_initializer;
+	static const MQTTAsync_message DFLT_C_STRUCT;
 
 	/** An instance of an empty string (for performance)  */
 	static const string EMPTY_STR;
@@ -81,7 +81,7 @@ private:
 	 * Set the dup flag in the underlying message
 	 * @param dup
 	 */
-	void set_duplicate(bool dup) { msg_.dup = (dup) ? (!0) : 0; }
+	void set_duplicate(bool dup) { msg_.dup = to_int(dup); }
 
 public:
 	/** Smart/shared pointer to this class. */
@@ -269,14 +269,14 @@ public:
 	 * @return true this message might be a duplicate of one which
 	 * has already been received, false otherwise
 	 */
-	bool is_duplicate() const { return msg_.dup != 0; }
+	bool is_duplicate() const { return to_bool(msg_.dup); }
 	/**
 	 * Returns whether or not this message should be/was retained by the
 	 * server.
 	 * @return true if this message should be/was retained by the
 	 * server, false otherwise.
 	 */
-	bool is_retained() const { return msg_.retained != 0; }
+	bool is_retained() const { return to_bool(msg_.retained); }
 	/**
 	 * Sets the payload of this message to be the specified buffer.
 	 * Note that this accepts copy or move operations:
@@ -306,7 +306,7 @@ public:
 	 * @param retained @em true if the message should be retained by the
 	 *  			   broker, @em false if not.
 	 */
-	void set_retained(bool retained) { msg_.retained = (retained) ? (!0) : 0; }
+	void set_retained(bool retained) { msg_.retained = to_int(retained); }
 	/**
 	 * Returns a string representation of this messages payload.
 	 * @return string

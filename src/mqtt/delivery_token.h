@@ -68,12 +68,6 @@ public:
 	/**
 	 * Creates a delivery token connected to a particular client.
 	 * @param cli The asynchronous client object.
-	 * @param topic The topic that the message is associated with.
-	 */
-	//delivery_token(iasync_client& cli, const string& topic) : token(cli, topic) {}
-	/**
-	 * Creates a delivery token connected to a particular client.
-	 * @param cli The asynchronous client object.
 	 * @param msg The message being tracked.
 	 */
 	delivery_token(iasync_client& cli, const_message_ptr msg)
@@ -81,7 +75,6 @@ public:
 	/**
 	 * Creates a delivery token connected to a particular client.
 	 * @param cli The asynchronous client object.
-	 * @param topic The topic that the message is associated with.
 	 * @param msg The message data.
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
@@ -110,7 +103,6 @@ public:
 	/**
 	 * Creates a delivery token connected to a particular client.
 	 * @param cli The asynchronous client object.
-	 * @param topic The topic that the message is associated with.
 	 * @param msg The message data.
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
