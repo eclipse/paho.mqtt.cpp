@@ -265,27 +265,29 @@ public:
 		//CPPUNIT_ASSERT(listener.on_failure_called);
 	}
 
-    // An improperly initialized SSL connect request should fail gracefully
-    void test_connect_uninitialized_ssl() {
-        mqtt::async_client cli { GOOD_SSL_SERVER_URI, CLIENT_ID };
-
-        mqtt::connect_options opts;
-        opts.set_keep_alive_interval(10);
-        opts.set_clean_session(true);
-        // Note that we're not setting SSL options.
-
-        mqtt::token_ptr tok;
+	// An improperly initialized SSL connect request should fail gracefully
+	void test_connect_uninitialized_ssl() {
 		int reasonCode = MQTTASYNC_SUCCESS;
+		try {
+			// Compiled against a non-SSL library should throw here.
+			mqtt::async_client cli { GOOD_SSL_SERVER_URI, CLIENT_ID };
 
-        try {
-            tok = cli.connect(opts);
-            tok->wait();
-        }
+			mqtt::connect_options opts;
+			opts.set_keep_alive_interval(10);
+			opts.set_clean_session(true);
+			// Note that we're not setting SSL options.
+
+			mqtt::token_ptr tok;
+
+			// Compiled against the SSL library should throw here
+			tok = cli.connect(opts);
+			tok->wait();
+		}
 		catch (mqtt::exception& ex) {
 			reasonCode = ex.get_reason_code();
 		}
-        CPPUNIT_ASSERT(reasonCode != MQTTASYNC_SUCCESS);
-    }
+		CPPUNIT_ASSERT(reasonCode != MQTTASYNC_SUCCESS);
+	}
 
 //----------------------------------------------------------------------
 // Test async_client::disconnect()

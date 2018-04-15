@@ -78,9 +78,11 @@ async_client::async_client(const string& serverURI, const string& clientId,
 		opts->maxBufferedMessages = maxBufferedMessages;
 	}
 
+	int rc = MQTTASYNC_SUCCESS;
+
 	if (!persistence) {
-		MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
-									MQTTCLIENT_PERSISTENCE_NONE, nullptr, opts.get());
+		rc = MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
+										 MQTTCLIENT_PERSISTENCE_NONE, nullptr, opts.get());
 	}
 	else {
 		persist_.reset(new MQTTClient_persistence {
@@ -95,12 +97,12 @@ async_client::async_client(const string& serverURI, const string& clientId,
 			&iclient_persistence::persistence_containskey
 		});
 
-		int rc = MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
-											 MQTTCLIENT_PERSISTENCE_USER, persist_.get(),
-											 opts.get());
-		if (rc != 0)
-			throw exception(rc);
+		rc = MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
+										 MQTTCLIENT_PERSISTENCE_USER, persist_.get(),
+										 opts.get());
 	}
+	if (rc != 0)
+		throw exception(rc);
 }
 
 async_client::~async_client()
