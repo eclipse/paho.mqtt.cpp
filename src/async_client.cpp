@@ -57,14 +57,13 @@ async_client::async_client(const string& serverURI, const string& clientId,
 		opts->maxBufferedMessages = maxBufferedMessages;
 	}
 
-	auto rc = MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
-								MQTTCLIENT_PERSISTENCE_DEFAULT,
-								const_cast<char*>(persistDir.c_str()),
-								opts.get());
+	int rc = MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
+										 MQTTCLIENT_PERSISTENCE_DEFAULT,
+										 const_cast<char*>(persistDir.c_str()),
+										 opts.get());
 
-	if (rc != 0) {
+	if (rc != 0)
 		throw exception(rc);
-	}
 }
 
 async_client::async_client(const string& serverURI, const string& clientId,
@@ -96,9 +95,11 @@ async_client::async_client(const string& serverURI, const string& clientId,
 			&iclient_persistence::persistence_containskey
 		});
 
-		MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
-									MQTTCLIENT_PERSISTENCE_USER, persist_.get(),
-									opts.get());
+		int rc = MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
+											 MQTTCLIENT_PERSISTENCE_USER, persist_.get(),
+											 opts.get());
+		if (rc != 0)
+			throw exception(rc);
 	}
 }
 
@@ -270,6 +271,7 @@ void async_client::disable_callbacks()
 	int rc = MQTTAsync_setCallbacks(cli_, this, nullptr,
 					[](void*,char*,int,MQTTAsync_message*) -> int {return !0;},
 					nullptr);
+					
 	if (rc != MQTTASYNC_SUCCESS)
 		throw exception(rc);
 }
