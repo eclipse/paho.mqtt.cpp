@@ -117,14 +117,18 @@ class callback : public virtual mqtt::callback,
 
 	// Re-connection failure
 	void on_failure(const mqtt::token& tok) override {
-		std::cout << "Connection failed" << std::endl;
+		std::cout << "Connection attempt failed" << std::endl;
 		if (++nretry_ > N_RETRY_ATTEMPTS)
 			exit(1);
 		reconnect();
 	}
 
-	// Re-connection success
-	void on_success(const mqtt::token& tok) override {
+	// (Re)connection success
+	// Either this or connected() can be used for callbacks.
+	void on_success(const mqtt::token& tok) override {}
+
+	// (Re)connection success
+	void connected(const std::string& cause) override {
 		std::cout << "\nConnection success" << std::endl;
 		std::cout << "\nSubscribing to topic '" << TOPIC << "'\n"
 			<< "\tfor client " << CLIENT_ID

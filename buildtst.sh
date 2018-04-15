@@ -12,7 +12,8 @@
 # is rather meant to be a quick test to use during development.
 #
 
-COMPILERS="g++-4.8 g++-4.9 g++-5 g++-6 clang++-3.6 clang++-3.8"
+#COMPILERS="g++-4.8 g++-4.9 g++-5 g++-6 clang++-3.6 clang++-3.8"
+COMPILERS="g++-5 g++-6 clang++-3.8 clang++-4.0"
 [ "$#" -gt 0 ] && COMPILERS="$@"
 
 [ -z "${BUILD_JOBS}" ] && BUILD_JOBS=4
@@ -35,7 +36,7 @@ do
             exit 2
         fi
         rm -rf tmp/*
-	printf "Running unit tests:\n"
+        printf "Running unit tests:\n"
         if ! ./mqttpp-unittest ; then
             printf "\nUnit test failed for  %s\n" "${COMPILER}"
             exit 3
