@@ -7,14 +7,17 @@ This code builds a library which enables C++11 applications to connect to an [MQ
 
 Both synchronous and asynchronous modes of operation are supported.
 
-This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) by Ian Craggs, et al., specifically version 1.2.0 (Paho Release 1.3) or possibly later.
+This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) by Ian Craggs, et al., specifically version 1.2.1 or possibly later.
 
 ## Building from source
 
 Paho MQTT C++ supports the following building systems: 
  * CMake
- * Autotools
  * GNU Make 
+ * Autotools
+ 
+ Note that CMake is the preferred, default build system.
+ The Autotools build is currently considered obsolete, and will likely be removed from the project in a future release.
 
 ### CMake
 
@@ -67,6 +70,7 @@ $ mkdir build
 $ cd build
 $ cmake -DPAHO_BUILD_DOCUMENTATION=TRUE -DPAHO_BUILD_SAMPLES=TRUE -DPAHO_MQTT_C_PATH=../../paho.mqtt.c ..
 $ make
+$ sudo make install
 ```
 
 or
@@ -76,6 +80,7 @@ $ cmake -DCMAKE_INSTALL_PREFIX=/tmp/paho-cpp -DPAHO_MQTT_C_PATH=/tmp/paho-c \
   -DPAHO_BUILD_SAMPLES:BOOL=ON -DPAHO_BUILD_STATIC:BOOL=ON \
   -DPAHO_BUILD_DOCUMENTATION:BOOL=ON
 $ make
+$ sudo make install
 ```
 
 Invoking cmake and specifying build options can also be performed using cmake-gui or ccmake (see https://cmake.org/runningcmake/). For example:
@@ -83,6 +88,7 @@ Invoking cmake and specifying build options can also be performed using cmake-gu
 ```
 $ ccmake ..
 $ make
+$ sudo make install
 ```
 
 To use another compiler:
@@ -90,6 +96,7 @@ To use another compiler:
 ```
 $ cmake -DCMAKE_CXX_COMPILER=clang++
 $ make
+$ sudo make install
 ```
 
 #### Windows
@@ -134,10 +141,13 @@ You can speed up the build on multi-core systems, by specifying parallel buid jo
 ```
 $ ./configure --parallel=4
 $ make -j4
+$ sudo make install
 ```
 
 
 ### Autotools (on Linux and Unix)
+
+_Note that the Autotools build for Paho C++ is considered obsolete and will likely be removed from the project in a future release._
 
 The GNU Build System is the preferred building system on POSIX-compliant systems.
 
@@ -189,6 +199,7 @@ Next, configure the features you want to be available in the library and build:
 ```
 $ ./configure [Options]
 $ make
+$ sudo make install
 ```
 
 Option | Default Value | Description
@@ -207,6 +218,7 @@ For example, in order to build only the static library:
 ```
 $ $PAHO_DIR/configure --disable-shared --enable-static
 $ make
+$ sudo make install
 ```
 
 #### Build instructions (development tree on systems with Autotools)
@@ -231,6 +243,7 @@ $ cd paho.mqtt.cpp
 $ ./bootstrap
 $ $PAHO_DIR/configure --with-paho-mqtt-c=$PAHO_MQTT_C_PATH
 $ make
+$ sudo make install
 ```
 
 This will use the latest Paho MQTT C headers and libraries from the local workspace (PAHO_MQTT_C_PATH).
@@ -243,13 +256,14 @@ The *dist* target generates a tarball to build on systems where Autotools isn't 
 $ make dist
 ```
 
-The command above will create the package *paho-mqtt-cpp-0.0.2.tar.gz*. This package can be compiled on systems without Autotools. Use the following commands:
+The command above will create the package *paho-mqtt-cpp-1.0.1.tar.gz*. This package can be compiled on systems without Autotools. Use the following commands:
 
 ```
-$ tar xzf paho-mqtt-cpp-0.0.2.tar.gz
-$ cd paho-mqtt-cpp-0.0.2
+$ tar xzf paho-mqtt-cpp-1.0.1.tar.gz
+$ cd paho-mqtt-cpp-1.0.1
 $ ./configure --with-paho-mqtt-c=$PAHO_MQTT_C_PATH
 $ make
+$ sudo make install
 ```
 
 #### Cross compilation
@@ -263,8 +277,10 @@ $ $PAHO_DIR/configure --host=arm-linux-gnueabi
 
 ## Example
 
-Sample applications can be found in src/samples.
+Sample applications can be found in the source repository atsrc/samples:
+https://github.com/eclipse/paho.mqtt.cpp/tree/master/src/samples
 
+This is a partial example of what a typical example might look like:
 ```
 int main(int argc, char* argv[])
 {
