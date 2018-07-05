@@ -31,13 +31,15 @@ ssl_options::ssl_options() : opts_(DFLT_C_STRUCT)
 
 ssl_options::ssl_options(const string& trustStore, const string& keyStore,
 						 const string& privateKey, const string& privateKeyPassword,
-						 const string& enabledCipherSuites, bool enableServerCertAuth)
+						 const string& enabledCipherSuites, bool enableServerCertAuth,
+						 int sslVersion)
 			: opts_(DFLT_C_STRUCT), trustStore_(trustStore), keyStore_(keyStore),
 				privateKey_(privateKey), privateKeyPassword_(privateKeyPassword),
 				enabledCipherSuites_(enabledCipherSuites)
 {
 	update_c_struct();
 	opts_.enableServerCertAuth = enableServerCertAuth;
+	opts_.sslVersion = sslVersion;
 }
 
 ssl_options::ssl_options(const ssl_options& opt)
@@ -133,6 +135,11 @@ void ssl_options::set_enabled_cipher_suites(const string& enabledCipherSuites)
 void ssl_options::set_enable_server_cert_auth(bool enableServerCertAuth)
 {
 	opts_.enableServerCertAuth = to_int(enableServerCertAuth);
+}
+
+void ssl_options::set_ssl_version(int sslVersion)
+{
+	opts_.sslVersion = sslVersion;
 }
 
 /////////////////////////////////////////////////////////////////////////////

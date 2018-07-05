@@ -67,6 +67,14 @@ class ssl_options
 	 */
 	string enabledCipherSuites_;
 
+	/** 
+	 * The SSL/TLS version to use. Specify one of MQTT_SSL_VERSION_DEFAULT (0),
+	 * MQTT_SSL_VERSION_TLS_1_0 (1), MQTT_SSL_VERSION_TLS_1_1 (2) or 
+	 * MQTT_SSL_VERSION_TLS_1_2 (3).
+	 * Only used if struct_version is >= 1.
+	 */
+	int sslVersion_;
+
 	/** The connect options has special access */
 	friend class connect_options;
 	friend class connect_options_test;
@@ -116,7 +124,8 @@ public:
 	 */
 	ssl_options(const string& trustStore, const string& keyStore,
 				const string& privateKey, const string& privateKeyPassword,
-				const string& enabledCipherSuites, bool enableServerCertAuth);
+				const string& enabledCipherSuites, bool enableServerCertAuth,
+				int sslVersion);
 	/**
 	 * Copy constructor.
 	 * @param opt The other options to copy.
@@ -174,6 +183,13 @@ public:
 		return to_bool(opts_.enableServerCertAuth);
 	}
 	/**
+	 * Returns the SSL/TLS version in use.
+	 * @return int
+	 */
+	int get_ssl_version() const {
+		return sslVersion_;
+	}
+	/**
 	 * Sets the file containing the public digital certificates trusted by
 	 * the client.
 	 * @param trustStore The file in PEM format containing the public
@@ -224,6 +240,11 @@ public:
 	 *  						  certificate
 	 */
 	void set_enable_server_cert_auth(bool enablServerCertAuth);
+	/**
+	 * Set the SSL/TLS version to use.
+	 * @param sslVersion The ssl version to use.
+	 */
+	void set_ssl_version(int sslVersion);
 };
 
 /**
