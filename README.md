@@ -265,7 +265,7 @@ $ $PAHO_DIR/configure --host=arm-linux-gnueabi
 
 Sample applications can be found in src/samples.
 
-```
+```c++
 int main(int argc, char* argv[])
 {
     sample_mem_persistence persist;
