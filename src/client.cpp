@@ -24,6 +24,9 @@
 namespace mqtt {
 
 const std::chrono::minutes client::DFLT_TIMEOUT = std::chrono::minutes(5);
+#if __cplusplus < 201703L
+constexpr int client::DFLT_QOS;
+#endif /* __cplusplus */
 
 /////////////////////////////////////////////////////////////////////////////
 
