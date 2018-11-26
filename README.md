@@ -1,4 +1,4 @@
-# Eclipse Paho MQTT C++ client library
+# Eclipse Paho MQTT C++ Client Library
 
 
 This repository contains the source code for the [Eclipse Paho](http://eclipse.org/paho) MQTT C++ client library on memory-managed operating systems such as Linux/Posix and Windows.
@@ -9,19 +9,22 @@ Both synchronous and asynchronous modes of operation are supported.
 
 This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) by Ian Craggs, et al., specifically version 1.2.1 or possibly later.
 
+## Contributing
+
+Contributions to this project are gladly welcomed. Before submitting a Pull Request, please keep two things in mind:
+
+ - This is an official Eclipse project, so it is required that all contributors sign an [Eclipse Contributor Agreement (ECA)](https://www.eclipse.org/legal/ECA.php)
+ - Please submit all Pull Requests against the _develop_ branch (not master).
+ 
+ For full details, see [CONTRIBUTING.md](https://github.com/eclipse/paho.mqtt.cpp/blob/master/CONTRIBUTING.md).
+ 
 ## Building from source
 
-Paho MQTT C++ supports the following building systems: 
- * CMake
- * GNU Make 
- * Autotools
- 
- Note that CMake is the preferred, default build system.
- The Autotools build is currently considered obsolete, and will likely be removed from the project in a future release.
+_CMake_ is now the only supported build system. For information about _autotools_, see  [DEPRECATED_BUILD.md](https://github.com/eclipse/paho.mqtt.cpp/blob/master/CONTRIBUTING.md).
 
 ### CMake
 
-CMake is a cross-platform building system suitable for Unix and non-Unix platforms, like Microsoft Windows.
+CMake is a cross-platform build system suitable for Unix and non-Unix platforms like Microsoft Windows.
 
 #### Unix and GNU/Linux
 
@@ -86,7 +89,7 @@ $ sudo make install
 Invoking cmake and specifying build options can also be performed using cmake-gui or ccmake (see https://cmake.org/runningcmake/). For example:
 
 ```
-$ ccmake ..
+$ cmake ..
 $ make
 $ sudo make install
 ```
@@ -145,143 +148,14 @@ $ sudo make install
 ```
 
 
-### Autotools (on Linux and Unix)
-
-_Note that the Autotools build for Paho C++ is considered obsolete and will likely be removed from the project in a future release._
-
-The GNU Build System is the preferred building system on POSIX-compliant systems.
-
-#### Build requirements
-
-The build process supports any POSIX-compliant system. The following tools must be installed:
-  * Autoconf (www.gnu.org/software/autoconf)
-  * Automake (www.gnu.org/software/automake)
-  * Libtool (www.gnu.org/software/libtool)
-  * GNU Make (www.gnu.org/software/make)
-  * GCC (gcc.gnu.org) or Clang/LLVM (clang.llvm.org).
-
-You can instruct Autotools to use another compiler besides the one default by the system:
-
-```
-$ $PAHO_DIR/configure CC=clang CXX=clang++
-```
-
-The library uses C++11 features, and thus requires a conforming compiler such as g++ 4.8 or above.
-The Paho MQTT C++ library can be built against the current release version of the Paho MQTT C library or the latest development tree.
-
-#### Build instructions (current release on systems with Autotools)
-
-In order to build against the release version of the Paho MQTT C library, you must download, build, and install the library as described [here](https://github.com/eclipse/paho.mqtt.c)
-
-After the Paho MQTT C library is installed on your system, clone the Paho MQTT C++ library:
-
-```
-$ git clone https://github.com/eclipse/paho.mqtt.cpp
-$ cd paho.mqtt.cpp
-```
-
-Then run the bootstrap script to create Autotools' scripts:
-
-```
-$ ./bootstrap
-```
-
-To avoid problems with the existing Makefile, build in a seperate directory
-(known as VPATH build or out-of-tree build):
-
-```
-$ mkdir mybuild && cd mybuild
-$ export PAHO_DIR=$PWD
-```
-
-Next, configure the features you want to be available in the library and build:
-
-```
-$ ./configure [Options]
-$ make
-$ sudo make install
-```
-
-Option | Default Value | Description
------------- | ------------- | -------------
- --[en/dis]able-shared | yes | Build as shared library
- --[en/dis]able-static | yes | Build as static library
- --[en/dis]able-samples | no | Build sample programs
- --[en/dis]able-doc | no | Build documentation
- --[en/dis]able-peak-warnings | no | Compile with peak warnings level
- --with-paho-mqtt-c |  | Path to a non-standard Paho MQTT C library
- --with[out]-ssl | with | Build with OpenSSL support
-
-For example, in order to build only the static library:
-(under the assumption that "$PAHO_DIR" points to the directory which contains the paho.mqtt.c source tree)
-
-```
-$ $PAHO_DIR/configure --disable-shared --enable-static
-$ make
-$ sudo make install
-```
-
-#### Build instructions (development tree on systems with Autotools)
-
-In order to build against the latest Paho MQTT C development branch, first clone the C library repository. Then checkout the *develop* branch and build in-place (you don't need to install).
-
-```
-$ git clone https://github.com/eclipse/paho.mqtt.c
-$ cd paho.mqtt.c
-$ git checkout -t origin/develop
-$ make
-$ export PAHO_MQTT_C_PATH=$PWD
-$ export LD_LIBRARY_PATH=$PWD/build/output
-$ cd ..
-```
-
-Then clone the Paho MQTT C++ library and build it, passing the path to the Paho MQTT C library:
-
-```
-$ git clone https://github.com/eclipse/paho.mqtt.cpp
-$ cd paho.mqtt.cpp
-$ ./bootstrap
-$ $PAHO_DIR/configure --with-paho-mqtt-c=$PAHO_MQTT_C_PATH
-$ make
-$ sudo make install
-```
-
-This will use the latest Paho MQTT C headers and libraries from the local workspace (PAHO_MQTT_C_PATH).
-
-#### Build instructions (on systems without Autotools)
-
-The *dist* target generates a tarball to build on systems where Autotools isn't installed. You must generate a distribution package on a system with Autotools installed:
-
-```
-$ make dist
-```
-
-The command above will create the package *paho-mqtt-cpp-1.0.1.tar.gz*. This package can be compiled on systems without Autotools. Use the following commands:
-
-```
-$ tar xzf paho-mqtt-cpp-1.0.1.tar.gz
-$ cd paho-mqtt-cpp-1.0.1
-$ ./configure --with-paho-mqtt-c=$PAHO_MQTT_C_PATH
-$ make
-$ sudo make install
-```
-
-#### Cross compilation
-
-The Autotools cross compilation is performed through *--host* option. For example, to build the library for one of the ARM platforms:
-
-```
-$ $PAHO_DIR/configure --host=arm-linux-gnueabi
-```
-
-
 ## Example
 
-Sample applications can be found in the source repository atsrc/samples:
+Sample applications can be found in the source repository at _src/samples_:
 https://github.com/eclipse/paho.mqtt.cpp/tree/master/src/samples
 
 This is a partial example of what a typical example might look like:
-```
+
+```cpp
 int main(int argc, char* argv[])
 {
     sample_mem_persistence persist;
@@ -308,6 +182,7 @@ int main(int argc, char* argv[])
         client.publish(TOPIC, PAYLOAD2, strlen(PAYLOAD2)+1, 0, false);
 
         // Disconnect
+        
         client.disconnect();
     }
     catch (const mqtt::persistence_exception& exc) {
@@ -327,7 +202,7 @@ int main(int argc, char* argv[])
 
 -----------
 
-The API organization and documentation were adapted from:
+The original API organization and documentation were adapted from:
 
 The Paho Java library
 by Dave Locke.
@@ -343,7 +218,7 @@ Copyright (c) 2012, IBM Corp
 This code requires:
 
 The Paho C library by Ian Craggs
-Copyright (c) 2013 IBM Corp.
+Copyright (c) 2013-2018, IBM Corp.
 
  All rights reserved. This program and the accompanying materials
  are made available under the terms of the Eclipse Public License v1.0
