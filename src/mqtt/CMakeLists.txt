@@ -32,6 +32,7 @@ set(COMMON_HDR
     iclient_persistence.h
     message.h
     response_options.h
+    ssl_options.h
     string_collection.h
     thread_queue.h
     token.h
@@ -39,11 +40,11 @@ set(COMMON_HDR
     types.h
     will_options.h)
 
-if(PAHO_WITH_SSL)
-    set(COMMON_HDR
-        ${COMMON_HDR}
-        ssl_options.h)
-endif()
+#if(PAHO_WITH_SSL)
+#    set(COMMON_HDR
+#        ${COMMON_HDR}
+#        ssl_options.h)
+#endif()
 
 install(
     FILES ${COMMON_HDR}
