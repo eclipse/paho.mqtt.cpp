@@ -61,9 +61,6 @@ endif()
 
 option(PAHO_BUILD_SAMPLES "Build sample programs" FALSE)
 option(PAHO_BUILD_DOCUMENTATION "Create and install the API documentation (requires Doxygen)" FALSE)
-set(PAHO_MQTT_C_PATH "" CACHE PATH "Add a path to paho.mqtt.c library and headers")
-
-set(PAHO_MQTT_C paho-mqtt3a)
 
 ## --- C++11 build flags ---
 
@@ -73,12 +70,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 ## --- Build directories ---
 
+# For the paho_mqtt_c module
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 add_subdirectory(src)
-add_subdirectory(src/mqtt)
-
-if(PAHO_BUILD_SAMPLES)
-    add_subdirectory(src/samples)
-endif()
 
 if(PAHO_BUILD_DOCUMENTATION)
     add_subdirectory(doc)
@@ -93,3 +87,4 @@ elseif(UNIX)
 endif()
 
 include(CPack)
+add_subdirectory(cmake)
