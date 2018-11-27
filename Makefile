@@ -60,7 +60,7 @@ libdir = $(exec_prefix)/lib
 LIB_BASE  ?= $(MODULE)
 LIB_MAJOR ?= 1
 LIB_MINOR ?= 0
-LIB_PATCH ?= 0
+LIB_PATCH ?= 1
 
 LIB_LINK = lib$(LIB_BASE).so
 LIB_MAJOR_LINK = $(LIB_LINK).$(LIB_MAJOR)

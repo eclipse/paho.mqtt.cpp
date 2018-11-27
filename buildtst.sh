@@ -13,7 +13,7 @@
 #
 
 #COMPILERS="g++-4.8 g++-4.9 g++-5 g++-6 clang++-3.6 clang++-3.8"
-COMPILERS="g++-5 g++-6 clang++-3.8 clang++-4.0"
+COMPILERS="g++-5 g++-6 g++-7 g++-8 clang++-3.8 clang++-4.0 clang++-5.0 clang++-6.0"
 [ "$#" -gt 0 ] && COMPILERS="$@"
 
 [ -z "${BUILD_JOBS}" ] && BUILD_JOBS=4
