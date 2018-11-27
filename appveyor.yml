@@ -27,7 +27,7 @@ build_script:
 
     "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x64
 
-    cmake -G "NMake Makefiles" -DCMAKE_INSTALL_PREFIX="C:\Temp\paho-cpp" -DPAHO_MQTT_C_PATH="C:\Temp\paho-c" -DPAHO_WITH_SSL=TRUE -DPAHO_BUILD_DOCUMENTATION=FALSE -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE=TRUE ..
+    cmake -G "NMake Makefiles" -DCMAKE_INSTALL_PREFIX="C:\Temp\paho-cpp" -DCMAKE_PREFIX_PATH="C:\Temp\paho-c" -DPAHO_WITH_SSL=TRUE -DPAHO_BUILD_DOCUMENTATION=FALSE -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE=TRUE ..
 
     nmake
 
