@@ -37,9 +37,9 @@ for COMPILER in $COMPILERS; do
             exit 1
         fi
 
-        printf "Running unit tests:\n"
+        printf "Running unit tests for %s:\n" "${COMPILER}"
         if ! ./test/unit/paho-mqttpp-test ; then
-            printf "\nUnit test failed for  %s\n" "${COMPILER}"
+            printf "\nUnit test failed for %s\n" "${COMPILER}"
             exit 3
         fi
 
