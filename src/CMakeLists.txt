@@ -25,35 +25,35 @@
 
 find_package(PahoMqttC REQUIRED)
 
-add_subdirectory(mqtt)
+# --- The headers ---
 
-if(PAHO_BUILD_SAMPLES)
-    add_subdirectory(samples)
-endif()
+add_subdirectory(mqtt)
 
 ## --- Library dependencies ---
 
-find_package(Threads)
-set(LIBS_SYSTEM Threads::Threads)
-if(WIN32)
-    string(APPEND LIBS_SYSTEM " ws2_32")
-endif()
+set (THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
+#set(LIBS_SYSTEM Threads::Threads)
+#if(WIN32)
+#    string(APPEND LIBS_SYSTEM " ws2_32")
+#endif()
 
 ## --- Use object library to optimize compilation ---
 
 add_library(paho-cpp-objs OBJECT
     async_client.cpp
-	client.cpp
-	disconnect_options.cpp
-	iclient_persistence.cpp
-	message.cpp
-	response_options.cpp
-	ssl_options.cpp
-	string_collection.cpp
-	token.cpp
-	topic.cpp
-	connect_options.cpp
-	will_options.cpp
+    client.cpp
+    disconnect_options.cpp
+    iclient_persistence.cpp
+    message.cpp
+    response_options.cpp
+    ssl_options.cpp
+    string_collection.cpp
+    token.cpp
+    topic.cpp
+    connect_options.cpp
+    will_options.cpp
 )
 
 ## install the shared library
@@ -62,7 +62,7 @@ add_library(paho-cpp-objs OBJECT
 #)
 
 if(PAHO_WITH_SSL)
-	add_definitions(-DOPENSSL)
+    add_definitions(-DOPENSSL)
 endif()
 
 # Object libraries can't use target_link_libraries in order to take advantage
@@ -146,3 +146,5 @@ if(PAHO_BUILD_STATIC)
         set_target_properties(${PAHO_MQTT_CPP_STATIC} PROPERTIES OUTPUT_NAME ${PAHO_MQTT_CPP})
     endif()
 endif()
+
+

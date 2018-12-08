@@ -24,8 +24,11 @@
 
 ## --- Library dependencies ---
 
+set (THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
 ## include directories
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+#include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 ## binary files
 add_executable(async_publish async_publish.cpp)
@@ -37,21 +40,14 @@ add_executable(data_publish data_publish.cpp)
 add_executable(pub_speed_test pub_speed_test.cpp)
 
 ## link binaries
-target_link_libraries(async_publish
-    ${PAHO_MQTT_CPP})
-target_link_libraries(async_subscribe
-    ${PAHO_MQTT_CPP})
-target_link_libraries(async_consume
-    ${PAHO_MQTT_CPP})
-target_link_libraries(sync_publish
-    ${PAHO_MQTT_CPP})
-target_link_libraries(sync_consume
-    ${PAHO_MQTT_CPP})
-target_link_libraries(data_publish
-    ${PAHO_MQTT_CPP})
-find_package(Threads)
-target_link_libraries(pub_speed_test
-    ${PAHO_MQTT_CPP}
+target_link_libraries(async_publish ${PAHO_CPP_LIB})
+target_link_libraries(async_subscribe ${PAHO_CPP_LIB})
+target_link_libraries(async_consume ${PAHO_CPP_LIB})
+target_link_libraries(sync_publish ${PAHO_CPP_LIB})
+target_link_libraries(sync_consume ${PAHO_CPP_LIB})
+target_link_libraries(data_publish ${PAHO_CPP_LIB})
+
+target_link_libraries(pub_speed_test ${PAHO_CPP_LIB}
     Threads::Threads)
 
 set(INSTALL_TARGETS
@@ -61,15 +57,15 @@ set(INSTALL_TARGETS
     sync_publish
     sync_consume
     data_publish
-    pub_speed_test)
+    pub_speed_test
+)
 
 if(PAHO_WITH_SSL)
     ## SSL binary files
     add_executable(ssl_publish ssl_publish.cpp)
 
     ## link SSL binaries
-    target_link_libraries(ssl_publish
-        ${PAHO_MQTT_CPP})
+    target_link_libraries(ssl_publish ${PAHO_CPP_LIB})
 
     set(INSTALL_TARGETS
         ${INSTALL_TARGETS}
@@ -83,3 +79,4 @@ install(TARGETS ${INSTALL_TARGETS} EXPORT PahoMqttCppSamples
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
 )
+

@@ -25,19 +25,17 @@
 ## Note: on OS X you should install XCode and the associated command-line tools
 
 ## cmake flags
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 
 ## project name
 project("paho-mqtt-cpp" 
-	VERSION "1.0.1"
-	LANGUAGES CXX
+    VERSION "1.0.1"
+    LANGUAGES CXX
 )
 
 ## library name
 set(PAHO_MQTT_CPP paho-mqttpp3)
 set(PAHO_MQTT_CPP_STATIC ${PAHO_MQTT_CPP}-static)
-
-INCLUDE(GNUInstallDirs)
 
 ## --- Build options ---
 
@@ -61,6 +59,16 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# --- System Libraries ---
+
+include(GNUInstallDirs)
+
+if(WIN32)
+    set(LIBS_SYSTEM ws2_32)
+elseif(UNIX)
+    set(LIBS_SYSTEM c stdc++)
+endif()
+
 ## --- Build directories ---
 
 # For the paho_mqtt_c module
@@ -79,6 +87,12 @@ if(PAHO_BUILD_SHARED)
     set(PAHO_CPP_LIB ${PAHO_MQTT_CPP})
 else()
     set(PAHO_CPP_LIB ${PAHO_MQTT_CPP_STATIC})
+endif()
+
+# --- Sample Apps ---
+
+if(PAHO_BUILD_SAMPLES)
+    add_subdirectory(src/samples)
 endif()
 
 # --- Unit Tests ---
