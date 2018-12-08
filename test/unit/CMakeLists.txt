@@ -21,13 +21,12 @@
 
 # --- Executable ---
 
-add_executable(test test.cpp)
+add_executable(paho-mqttpp-test test.cpp)
 
-target_link_libraries(test ${PAHO_MQTT_CPP} cppunit)
-
+target_link_libraries(paho-mqttpp-test ${PAHO_CPP_LIB} cppunit)
 
 ## install binaries
-install(TARGETS test EXPORT PahoMqttCppTests
+install(TARGETS paho-mqttpp-test EXPORT PahoMqttCppTests
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
 )

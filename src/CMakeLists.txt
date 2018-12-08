@@ -86,10 +86,10 @@ if(PAHO_BUILD_SHARED)
     # this may only be necessary for old compiler, but doesn't hurt
     set_property(TARGET paho-cpp-objs PROPERTY POSITION_INDEPENDENT_CODE ON)
 
-    add_library(${PAHO_MQTT_CPP} SHARED $<TARGET_OBJECTS:paho-cpp-objs>)
+    add_library(paho-mqttpp3 SHARED $<TARGET_OBJECTS:paho-cpp-objs>)
 
     ## add dependencies to the shared library
-    target_link_libraries(${PAHO_MQTT_CPP}
+    target_link_libraries(paho-mqttpp3
         PRIVATE ${LIBS_SYSTEM}
         PUBLIC PahoMqttC::PahoMqttC)
 
@@ -99,22 +99,22 @@ if(PAHO_BUILD_SHARED)
     # CMake Error: install(EXPORT "PahoMqttCpp" ...) includes target "paho-mqttpp3"
     #   which requires target "paho-cpp-objs" that is not in the export set.
 
-    #target_include_directories(${PAHO_MQTT_CPP} PUBLIC 
+    #target_include_directories(paho-mqttpp3 PUBLIC 
     #    $<TARGET_PROPERTY:paho-cpp-objs,INCLUDE_DIRECTORIES>
     #)
 
-    target_include_directories(${PAHO_MQTT_CPP} PUBLIC
+    target_include_directories(paho-mqttpp3 PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         $<INSTALL_INTERFACE:include>
     )
 
     ## set the shared library soname
-    set_target_properties(${PAHO_MQTT_CPP} PROPERTIES
+    set_target_properties(paho-mqttpp3 PROPERTIES
         VERSION ${PROJECT_VERSION}
         SOVERSION ${PROJECT_VERSION_MAJOR})
 
     ## install the shared library
-    install(TARGETS ${PAHO_MQTT_CPP} EXPORT PahoMqttCpp
+    install(TARGETS paho-mqttpp3 EXPORT PahoMqttCpp
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
@@ -124,26 +124,26 @@ endif()
 
 if(PAHO_BUILD_STATIC)
     ## create the static library
-    add_library(${PAHO_MQTT_CPP_STATIC} STATIC $<TARGET_OBJECTS:paho-cpp-objs>)
+    add_library(paho-mqttpp3-static STATIC $<TARGET_OBJECTS:paho-cpp-objs>)
 
     ## add dependencies to the shared library
-    target_link_libraries(${PAHO_MQTT_CPP_STATIC}
+    target_link_libraries(paho-mqttpp3-static
         PRIVATE ${LIBS_SYSTEM}
         PUBLIC PahoMqttC::PahoMqttC)
 
-    target_include_directories(${PAHO_MQTT_CPP_STATIC} PUBLIC
+    target_include_directories(paho-mqttpp3-static PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         $<INSTALL_INTERFACE:include>
     )
 
     ## install the static library
-    install(TARGETS ${PAHO_MQTT_CPP_STATIC} EXPORT PahoMqttCpp
+    install(TARGETS paho-mqttpp3-static EXPORT PahoMqttCpp
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
     ## Let the archive use the same name as the shared lib on *nix systems
     if(UNIX)
-        set_target_properties(${PAHO_MQTT_CPP_STATIC} PROPERTIES OUTPUT_NAME ${PAHO_MQTT_CPP})
+        set_target_properties(paho-mqttpp3-static PROPERTIES OUTPUT_NAME paho-mqttpp3)
     endif()
 endif()
 

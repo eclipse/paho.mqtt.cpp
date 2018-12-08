@@ -13,7 +13,7 @@
 # is a quick test to use locally during development.
 #
 
-COMPILERS="g++-5 g++-6 g++-7 g++-8 clang++-3.8 clang++-4.0 clang++-5.0 clang++-6.0"
+COMPILERS="g++-5 g++-6 g++-7 g++-8 clang++-3.9 clang++-4.0 clang++-5.0 clang++-6.0"
 [ "$#" -gt 0 ] && COMPILERS="$@"
 
 [ -z "${BUILD_JOBS}" ] && BUILD_JOBS=4
@@ -38,7 +38,7 @@ for COMPILER in $COMPILERS; do
         fi
 
         printf "Running unit tests:\n"
-        if ! ./test/unit/test ; then
+        if ! ./test/unit/paho-mqttpp-test ; then
             printf "\nUnit test failed for  %s\n" "${COMPILER}"
             exit 3
         fi

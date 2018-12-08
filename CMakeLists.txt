@@ -33,10 +33,6 @@ project("paho-mqtt-cpp"
     LANGUAGES CXX
 )
 
-## library name
-set(PAHO_MQTT_CPP paho-mqttpp3)
-set(PAHO_MQTT_CPP_STATIC ${PAHO_MQTT_CPP}-static)
-
 ## --- Build options ---
 
 if(WIN32)
@@ -84,9 +80,9 @@ endif()
 # --- Default library for samples and unit tests ---
 
 if(PAHO_BUILD_SHARED)
-    set(PAHO_CPP_LIB ${PAHO_MQTT_CPP})
+    set(PAHO_CPP_LIB paho-mqttpp3)
 else()
-    set(PAHO_CPP_LIB ${PAHO_MQTT_CPP_STATIC})
+    set(PAHO_CPP_LIB paho-mqttpp3-static)
 endif()
 
 # --- Sample Apps ---
