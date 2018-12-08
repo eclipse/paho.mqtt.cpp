@@ -28,22 +28,14 @@
 cmake_minimum_required(VERSION 3.1)
 
 ## project name
-project("paho-mqtt-cpp" LANGUAGES CXX)
+project("paho-mqtt-cpp" 
+	VERSION "1.0.1"
+	LANGUAGES CXX
+)
 
 ## library name
 set(PAHO_MQTT_CPP paho-mqttpp3)
 set(PAHO_MQTT_CPP_STATIC ${PAHO_MQTT_CPP}-static)
-
-## build settings
-set(PAHO_VERSION_MAJOR 1)
-set(PAHO_VERSION_MINOR 0)
-set(PAHO_VERSION_PATCH 1)
-
-set(CLIENT_VERSION ${PAHO_VERSION_MAJOR}.${PAHO_VERSION_MINOR}.${PAHO_VERSION_PATCH})
-
-set(CPACK_PACKAGE_VERSION_MAJOR ${PAHO_VERSION_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${PAHO_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH ${PAHO_VERSION_PATCH})
 
 INCLUDE(GNUInstallDirs)
 
@@ -60,6 +52,7 @@ else()
 endif()
 
 option(PAHO_BUILD_SAMPLES "Build sample programs" FALSE)
+option(PAHO_BUILD_TESTS "Build tests" FALSE)
 option(PAHO_BUILD_DOCUMENTATION "Create and install the API documentation (requires Doxygen)" FALSE)
 
 ## --- C++11 build flags ---
@@ -74,8 +67,24 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 add_subdirectory(src)
 
+# --- Documentation ---
+
 if(PAHO_BUILD_DOCUMENTATION)
     add_subdirectory(doc)
+endif()
+
+# --- Default library for samples and unit tests ---
+
+if(PAHO_BUILD_SHARED)
+    set(PAHO_CPP_LIB ${PAHO_MQTT_CPP})
+else()
+    set(PAHO_CPP_LIB ${PAHO_MQTT_CPP_STATIC})
+endif()
+
+# --- Unit Tests ---
+
+if(PAHO_BUILD_TESTS)
+    add_subdirectory(test/unit)
 endif()
 
 ## --- Packaging settings ---
@@ -88,3 +97,5 @@ endif()
 
 include(CPack)
 add_subdirectory(cmake)
+
+

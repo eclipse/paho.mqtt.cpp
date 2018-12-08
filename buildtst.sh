@@ -27,7 +27,7 @@ for COMPILER in $COMPILERS; do
         rm -rf buildtst-build/
         mkdir buildtst-build ; pushd buildtst-build &> /dev/null
 
-        if ! cmake -DCMAKE_CXX_COMPILER=${COMPILER} -DPAHO_WITH_SSL=ON -DPAHO_BUILD_SAMPLES=ON ${PAHO_C_SWITCH} .. ; then
+        if ! cmake -DCMAKE_CXX_COMPILER=${COMPILER} -DPAHO_WITH_SSL=ON -DPAHO_BUILD_SAMPLES=ON -DPAHO_BUILD_TESTS=ON ${PAHO_C_SWITCH} .. ; then
             printf "\nCMake configuration failed for %s\n" "${COMPILER}"
             exit 1
         fi
@@ -37,20 +37,11 @@ for COMPILER in $COMPILERS; do
             exit 1
         fi
 
-        #pushd test/unit &> /dev/null
-        #make clean
-        #if ! make CXX=${COMPILER} SSL=1 ; then
-        #    printf "\nUnit test compilation failed for %s\n" "${COMPILER}"
-        #    exit 2
-        #fi
-        #rm -rf tmp/*
-        #printf "Running unit tests:\n"
-        #if ! ./mqttpp-unittest ; then
-        #    printf "\nUnit test failed for  %s\n" "${COMPILER}"
-        #    exit 3
-        #fi
-        #make clean
-        #popd &> /dev/null
+        printf "Running unit tests:\n"
+        if ! ./test/unit/test ; then
+            printf "\nUnit test failed for  %s\n" "${COMPILER}"
+            exit 3
+        fi
 
         popd &> /dev/null
     fi

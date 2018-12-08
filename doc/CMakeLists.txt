@@ -14,8 +14,6 @@
 #     Guilherme Maciel Ferreira - initial version
 #*******************************************************************************/
 
-## Note: on OS X you should install XCode and the associated command-line tools
-
 ## documentation settings
 find_package(Doxygen)
 if(NOT DOXYGEN_FOUND)
@@ -42,3 +40,4 @@ set(DOXYTARGETS ${DOXYTARGETS} ${DOXYFILE_SRC}.target)
 add_custom_target(doc ALL DEPENDS ${DOXYTARGETS})
 
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc DESTINATION share)
+
