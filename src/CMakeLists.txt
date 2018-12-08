@@ -7,7 +7,7 @@
 
 #*******************************************************************************
 # Copyright (c) 2016-2017, Guilherme Maciel Ferreira
-# Copyright (c) 2017, Frank Pagliughi
+# Copyright (c) 2017-2018, Frank Pagliughi
 #
 #  All rights reserved. This program and the accompanying materials
 #  are made available under the terms of the Eclipse Public License v1.0
@@ -23,25 +23,25 @@
 #     Frank Pagliughi - made the shared library optional
 #*******************************************************************************/
 
-## Note: on OS X you should install XCode and the associated command-line tools
+find_package(PahoMqttC REQUIRED)
 
-## include directories
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+# --- The headers ---
+
+add_subdirectory(mqtt)
 
 ## --- Library dependencies ---
 
-if(WIN32)
-    set(LIBS_SYSTEM ws2_32)
-elseif(UNIX)
-    if(CMAKE_SYSTEM_NAME MATCHES "Linux")
-        set(LIB_DL dl)
-    endif()
-    set(LIBS_SYSTEM ${LIB_DL} c stdc++ pthread)
-endif()
+set (THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
 
-## --- use Object Library to optimize compilation ---
+#set(LIBS_SYSTEM Threads::Threads)
+#if(WIN32)
+#    string(APPEND LIBS_SYSTEM " ws2_32")
+#endif()
 
-set(SOURCES
+## --- Use object library to optimize compilation ---
+
+add_library(paho-cpp-objs OBJECT
     async_client.cpp
     client.cpp
     disconnect_options.cpp
@@ -53,32 +53,68 @@ set(SOURCES
     token.cpp
     topic.cpp
     connect_options.cpp
-    will_options.cpp)
+    will_options.cpp
+)
+
+## install the shared library
+#install(TARGETS paho-cpp-objs EXPORT PahoMqttCpp
+#    OBJECTS DESTINATION ${CMAKE_INSTALL_LIBDIR}
+#)
 
 if(PAHO_WITH_SSL)
     add_definitions(-DOPENSSL)
 endif()
 
-add_library(OBJS OBJECT ${SOURCES})
+# Object libraries can't use target_link_libraries in order to take advantage
+# of transitive usage requirements until CMake 3.12. This is a workaround:
+#target_include_directories(OBJS PRIVATE ${PAHO_MQTT_C_INCLUDE_DIRS})
+
+target_include_directories(paho-cpp-objs 
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:include>
+    PRIVATE 
+        ${PAHO_MQTT_C_INCLUDE_DIRS}
+        src
+)
+
 
 ## --- Build the shared library, if requested ---
 
 if(PAHO_BUILD_SHARED)
     ## set position independent flag (-fPIC on Unix)
-    set_property(TARGET OBJS PROPERTY POSITION_INDEPENDENT_CODE ON)
+    # this may only be necessary for old compiler, but doesn't hurt
+    set_property(TARGET paho-cpp-objs PROPERTY POSITION_INDEPENDENT_CODE ON)
 
-    add_library(${PAHO_MQTT_CPP} SHARED $<TARGET_OBJECTS:OBJS>)
+    add_library(paho-mqttpp3 SHARED $<TARGET_OBJECTS:paho-cpp-objs>)
 
     ## add dependencies to the shared library
-    target_link_libraries(${PAHO_MQTT_CPP} ${LIBS_SYSTEM})
+    target_link_libraries(paho-mqttpp3
+        PRIVATE ${LIBS_SYSTEM}
+        PUBLIC PahoMqttC::PahoMqttC)
+
+    # It would be nice to exort the include paths from the obj lib, but we
+    # get an export error. Perhaps in a future version?
+    # 
+    # CMake Error: install(EXPORT "PahoMqttCpp" ...) includes target "paho-mqttpp3"
+    #   which requires target "paho-cpp-objs" that is not in the export set.
+
+    #target_include_directories(paho-mqttpp3 PUBLIC 
+    #    $<TARGET_PROPERTY:paho-cpp-objs,INCLUDE_DIRECTORIES>
+    #)
+
+    target_include_directories(paho-mqttpp3 PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:include>
+    )
 
     ## set the shared library soname
-    set_target_properties(${PAHO_MQTT_CPP} PROPERTIES
-        VERSION ${CLIENT_VERSION}
-        SOVERSION ${PAHO_VERSION_MAJOR})
+    set_target_properties(paho-mqttpp3 PROPERTIES
+        VERSION ${PROJECT_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR})
 
     ## install the shared library
-    install(TARGETS ${PAHO_MQTT_CPP}
+    install(TARGETS paho-mqttpp3 EXPORT PahoMqttCpp
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
@@ -88,75 +124,27 @@ endif()
 
 if(PAHO_BUILD_STATIC)
     ## create the static library
-    add_library(${PAHO_MQTT_CPP_STATIC} STATIC $<TARGET_OBJECTS:OBJS>)
+    add_library(paho-mqttpp3-static STATIC $<TARGET_OBJECTS:paho-cpp-objs>)
 
-    ## add dependencies to the static library
-    target_link_libraries(${PAHO_MQTT_CPP_STATIC} ${LIBS_SYSTEM})
+    ## add dependencies to the shared library
+    target_link_libraries(paho-mqttpp3-static
+        PRIVATE ${LIBS_SYSTEM}
+        PUBLIC PahoMqttC::PahoMqttC)
+
+    target_include_directories(paho-mqttpp3-static PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:include>
+    )
 
     ## install the static library
-    install(TARGETS ${PAHO_MQTT_CPP_STATIC}
+    install(TARGETS paho-mqttpp3-static EXPORT PahoMqttCpp
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-    ## Static lib has same name as shared lib
-    set_target_properties(${PAHO_MQTT_CPP_STATIC} PROPERTIES OUTPUT_NAME ${PAHO_MQTT_CPP})
-endif()
-
-## extract Paho MQTT C include directory
-get_filename_component(PAHO_MQTT_C_DEV_INC_DIR ${PAHO_MQTT_C_PATH}/src ABSOLUTE)
-get_filename_component(PAHO_MQTT_C_STD_INC_DIR ${PAHO_MQTT_C_PATH}/include ABSOLUTE)
-set(PAHO_MQTT_C_INC_DIR
-    ${PAHO_MQTT_C_DEV_INC_DIR}
-    ${PAHO_MQTT_C_STD_INC_DIR})
-
-## extract Paho MQTT C library directory
-get_filename_component(PAHO_MQTT_C_DEV_LIB_DIR ${PAHO_MQTT_C_PATH}/build/output ABSOLUTE)
-get_filename_component(PAHO_MQTT_C_STD_LIB_DIR ${PAHO_MQTT_C_PATH}/lib ABSOLUTE)
-get_filename_component(PAHO_MQTT_C_STD64_LIB_DIR ${PAHO_MQTT_C_PATH}/lib64 ABSOLUTE)
-set(PAHO_MQTT_C_LIB_DIR
-    ${PAHO_MQTT_C_DEV_LIB_DIR}
-    ${PAHO_MQTT_C_STD_LIB_DIR}
-    ${PAHO_MQTT_C_STD64_LIB_DIR})
-
-## extract Paho MQTT C binary directory (Windows may place libraries there)
-get_filename_component(PAHO_MQTT_C_BIN_DIR ${PAHO_MQTT_C_PATH}/bin ABSOLUTE)
-
-## add library suffixes so Windows can find Paho DLLs
-set(CMAKE_FIND_LIBRARY_PREFIXES ${CMAKE_FIND_LIBRARY_PREFIXES} "")
-set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} ".dll" ".lib")
-
-if(PAHO_WITH_SSL)
-    ## find the Paho MQTT C SSL library
-    find_library(PAHO_MQTT_C_LIB
-        NAMES paho-mqtt3as
-              mqtt3as
-        PATHS ${PAHO_MQTT_C_LIB_DIR}
-              ${PAHO_MQTT_C_BIN_DIR})
-
-    find_package(OpenSSL REQUIRED)
-else()
-    ## find the Paho MQTT C library
-    find_library(PAHO_MQTT_C_LIB
-        NAMES paho-mqtt3a
-              mqtt
-              paho-mqtt
-              mqtt3
-              paho-mqtt3
-              mqtt3a
-        PATHS ${PAHO_MQTT_C_LIB_DIR}
-              ${PAHO_MQTT_C_BIN_DIR})
-endif()
-
-## use the Paho MQTT C library if found. Otherwise terminate the compilation
-if(${PAHO_MQTT_C_LIB} STREQUAL "PAHO_MQTT_C_LIB-NOTFOUND")
-    message(FATAL_ERROR "Could not find Paho MQTT C library")
-else()
-    include_directories(${PAHO_MQTT_C_INC_DIR})
-    link_directories(${PAHO_MQTT_C_LIB_DIR})
-    if(PAHO_BUILD_SHARED)
-        target_link_libraries(${PAHO_MQTT_CPP} ${PAHO_MQTT_C_LIB})
-    endif()
-    if(PAHO_BUILD_STATIC)
-        target_link_libraries(${PAHO_MQTT_CPP_STATIC} ${PAHO_MQTT_C_LIB})
+    ## Let the archive use the same name as the shared lib on *nix systems
+    if(UNIX)
+        set_target_properties(paho-mqttpp3-static PROPERTIES OUTPUT_NAME paho-mqttpp3)
     endif()
 endif()
+
+

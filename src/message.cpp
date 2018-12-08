@@ -30,9 +30,6 @@ constexpr bool message::DFLT_RETAINED;
 
 const MQTTAsync_message message::DFLT_C_STRUCT = MQTTAsync_message_initializer;
 
-const string message::EMPTY_STR;
-const binary message::EMPTY_BIN;
-
 // --------------------------------------------------------------------------
 
 message::message() : msg_(DFLT_C_STRUCT)

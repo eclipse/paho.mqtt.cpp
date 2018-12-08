@@ -25,27 +25,13 @@
 ## Note: on OS X you should install XCode and the associated command-line tools
 
 ## cmake flags
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 
 ## project name
-project("paho-mqtt-cpp" LANGUAGES CXX)
-
-## library name
-set(PAHO_MQTT_CPP paho-mqttpp3)
-set(PAHO_MQTT_CPP_STATIC ${PAHO_MQTT_CPP}-static)
-
-## build settings
-set(PAHO_VERSION_MAJOR 1)
-set(PAHO_VERSION_MINOR 0)
-set(PAHO_VERSION_PATCH 0)
-
-set(CLIENT_VERSION ${PAHO_VERSION_MAJOR}.${PAHO_VERSION_MINOR}.${PAHO_VERSION_PATCH})
-
-set(CPACK_PACKAGE_VERSION_MAJOR ${PAHO_VERSION_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${PAHO_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH ${PAHO_VERSION_PATCH})
-
-INCLUDE(GNUInstallDirs)
+project("paho-mqtt-cpp" 
+    VERSION "1.0.1"
+    LANGUAGES CXX
+)
 
 ## --- Build options ---
 
@@ -60,10 +46,8 @@ else()
 endif()
 
 option(PAHO_BUILD_SAMPLES "Build sample programs" FALSE)
+option(PAHO_BUILD_TESTS "Build tests" FALSE)
 option(PAHO_BUILD_DOCUMENTATION "Create and install the API documentation (requires Doxygen)" FALSE)
-set(PAHO_MQTT_C_PATH "" CACHE PATH "Add a path to paho.mqtt.c library and headers")
-
-set(PAHO_MQTT_C paho-mqtt3a)
 
 ## --- C++11 build flags ---
 
@@ -71,17 +55,47 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# --- System Libraries ---
+
+include(GNUInstallDirs)
+
+if(WIN32)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+    set(LIBS_SYSTEM ws2_32)
+elseif(UNIX)
+    set(LIBS_SYSTEM c stdc++)
+endif()
+
 ## --- Build directories ---
 
+# For the paho_mqtt_c module
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 add_subdirectory(src)
-add_subdirectory(src/mqtt)
+
+# --- Documentation ---
+
+if(PAHO_BUILD_DOCUMENTATION)
+    add_subdirectory(doc)
+endif()
+
+# --- Default library for samples and unit tests ---
+
+if(PAHO_BUILD_SHARED)
+    set(PAHO_CPP_LIB paho-mqttpp3)
+else()
+    set(PAHO_CPP_LIB paho-mqttpp3-static)
+endif()
+
+# --- Sample Apps ---
 
 if(PAHO_BUILD_SAMPLES)
     add_subdirectory(src/samples)
 endif()
 
-if(PAHO_BUILD_DOCUMENTATION)
-    add_subdirectory(doc)
+# --- Unit Tests ---
+
+if(PAHO_BUILD_TESTS)
+    add_subdirectory(test/unit)
 endif()
 
 ## --- Packaging settings ---
@@ -93,3 +107,6 @@ elseif(UNIX)
 endif()
 
 include(CPack)
+add_subdirectory(cmake)
+
+

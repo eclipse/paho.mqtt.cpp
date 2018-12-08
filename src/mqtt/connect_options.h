@@ -255,13 +255,6 @@ public:
 		opts_.cleansession = to_int(cleanSession);
 	}
 	/**
-	 * Sets the connection timeout value.
-	 * @param timeout
-	 */
-	void set_connection_timeout(int timeout) {
-		opts_.connectTimeout = timeout;
-	}
-	/**
 	 * Sets the "keep alive" interval.
 	 * This is the maximum time that should pass without communications
 	 * between client and server. If no massages pass in this time, the
@@ -287,21 +280,21 @@ public:
 	 * Sets the connect timeout in seconds.
 	 * This is the maximum time that the underlying library will wait for a
 	 * connection before failing.
-	 * @param to The connect timeout in seconds.
+	 * @param timeout The connect timeout in seconds.
 	 */
-	void set_connect_timeout(int to) {
-		opts_.connectTimeout = to;
+	void set_connect_timeout(int timeout) {
+		opts_.connectTimeout = timeout;
 	}
 	/**
 	 * Sets the connect timeout with a chrono duration.
 	 * This is the maximum time that the underlying library will wait for a
 	 * connection before failing.
-	 * @param to The connect timeout in seconds.
+	 * @param timeout The connect timeout in seconds.
 	 */
 	template <class Rep, class Period>
-	void set_connect_timeout(const std::chrono::duration<Rep, Period>& to) {
+	void set_connect_timeout(const std::chrono::duration<Rep, Period>& timeout) {
 		// TODO: check range
-		set_connect_timeout((int) to_seconds_count(to));
+		set_connect_timeout((int) to_seconds_count(timeout));
 	}
 	/**
 	 * Sets the user name to use for the connection.
