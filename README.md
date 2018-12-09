@@ -9,6 +9,20 @@ Both synchronous and asynchronous modes of operation are supported.
 
 This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) by Ian Craggs, et al., specifically version 1.2.1 or possibly later.
 
+## Latest News
+
+To keep up with the latest announcements for this project, follow:
+
+**Twitter:** _@eclipsepaho_  and _@fmpagliughi_
+** EMail:** [Eclipse Paho Mailing List](https://accounts.eclipse.org/mailing-list/paho-dev)
+
+We're currently working towards two back-to-back releases:
+
+ - **v1.0.1** (End of 2018) Fix a number of bugs and modernize the CMake build system.
+ 
+  - **v1.1** (Early 2019) MQTT v5 and WebSocket support.
+
+
 ## Contributing
 
 Contributions to this project are gladly welcomed. Before submitting a Pull Request, please keep two things in mind:
@@ -59,6 +73,7 @@ PAHO_BUILD_SHARED | TRUE (Linux), FALSE (Win32) | Whether to build the shared li
 PAHO_BUILD_STATIC | FALSE (Linux), TRUE (Win32) | Whether to build the static library
 PAHO_BUILD_DOCUMENTATION | FALSE | Create and install the HTML based API documentation (requires Doxygen)
 PAHO_BUILD_SAMPLES | FALSE | Build sample programs
+PAHO_BUILD_TESTS | FALSE | Build the unit tests
 PAHO_WITH_SSL | TRUE (Linux), FALSE (Win32) | Flag that defines whether to build ssl-enabled binaries too
 
 If you installed the C library on a non-standard path, you might want to pass it as value to the
