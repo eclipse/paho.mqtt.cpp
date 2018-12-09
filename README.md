@@ -14,7 +14,8 @@ This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) 
 To keep up with the latest announcements for this project, follow:
 
 **Twitter:** _@eclipsepaho_  and _@fmpagliughi_
-** EMail:** [Eclipse Paho Mailing List](https://accounts.eclipse.org/mailing-list/paho-dev)
+
+**EMail:** [Eclipse Paho Mailing List](https://accounts.eclipse.org/mailing-list/paho-dev)
 
 We're currently working towards two back-to-back releases:
 
