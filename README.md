@@ -13,7 +13,7 @@ This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) 
 
 To keep up with the latest announcements for this project, follow:
 
-**Twitter:** _@eclipsepaho_  and _@fmpagliughi_
+**Twitter:** [@eclipsepaho](https://twitter.com/eclipsepaho) and [@fmpagliughi](https://twitter.com/fmpagliughi)
 
 **EMail:** [Eclipse Paho Mailing List](https://accounts.eclipse.org/mailing-list/paho-dev)
 
