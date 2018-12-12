@@ -18,11 +18,13 @@ To keep up with the latest announcements for this project, follow:
 
 **EMail:** [Eclipse Paho Mailing List](https://accounts.eclipse.org/mailing-list/paho-dev)
 
-We're currently working towards two back-to-back releases:
-
- - **v1.0.1** (End of 2018) Fix a number of bugs and modernize the CMake build system.
+**v1.0.1** is released! This was meant to fix a number of bugs and to update the CMake build system into a more "modern" version. It helped solve a number of issues when building under Windows and now allows the creation of DLL's on that platform.
  
-  - **v1.1** (Early 2019) MQTT v5 and WebSocket support.
+We're currently working towards the next release:
+
+ - **v1.1** (Early 2019) WebSocket and MQTT v5 support, with an updated Unit Test framework - probably Catch2.
+  
+This may actually split into two separate releases if the WebSocket support comes together quickly and can be released sooner.
 
 
 ## Contributing
@@ -35,6 +37,8 @@ Contributions to this project are gladly welcomed. Before submitting a Pull Requ
  For full details, see [CONTRIBUTING.md](https://github.com/eclipse/paho.mqtt.cpp/blob/master/CONTRIBUTING.md).
  
 ## Building from source
+
+*GNU Make and autotools are now considered deprecated. They will be removed from the repository in an upcoming release.*
 
 _CMake_ is now the only supported build system. For information about _autotools_, see  [DEPRECATED_BUILD.md](https://github.com/eclipse/paho.mqtt.cpp/blob/master/CONTRIBUTING.md). CMake is a cross-platform build system suitable for Unix and non-Unix platforms such as Microsoft Windows.
 
