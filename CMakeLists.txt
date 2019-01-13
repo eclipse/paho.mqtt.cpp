@@ -69,7 +69,7 @@ endif()
 ## --- Build directories ---
 
 # For the paho_mqtt_c module
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 add_subdirectory(src)
 
 # --- Documentation ---
