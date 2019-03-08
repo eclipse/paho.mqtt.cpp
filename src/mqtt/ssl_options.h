@@ -67,14 +67,6 @@ class ssl_options
 	 */
 	string enabledCipherSuites_;
 
-	/** 
-	 * The SSL/TLS version to use. Specify one of MQTT_SSL_VERSION_DEFAULT (0),
-	 * MQTT_SSL_VERSION_TLS_1_0 (1), MQTT_SSL_VERSION_TLS_1_1 (2) or 
-	 * MQTT_SSL_VERSION_TLS_1_2 (3).
-	 * Only used if struct_version is >= 1.
-	 */
-	int sslVersion_;
-
 	/** The connect options has special access */
 	friend class connect_options;
 	friend class connect_options_test;
@@ -121,11 +113,12 @@ public:
 	 * will present to the server during the SSL handshake.
 	 * @param enableServerCertAuth True/False option to enable verification of
 	 * the server certificate
+	 * @param sslVersion option to force the TLS version to use. @see set_ssl_version
 	 */
 	ssl_options(const string& trustStore, const string& keyStore,
 				const string& privateKey, const string& privateKeyPassword,
 				const string& enabledCipherSuites, bool enableServerCertAuth,
-				int sslVersion);
+				int sslVersion = 0);
 	/**
 	 * Copy constructor.
 	 * @param opt The other options to copy.
@@ -187,7 +180,7 @@ public:
 	 * @return int
 	 */
 	int get_ssl_version() const {
-		return sslVersion_;
+		return opts_.sslVersion;
 	}
 	/**
 	 * Sets the file containing the public digital certificates trusted by
@@ -242,7 +235,9 @@ public:
 	void set_enable_server_cert_auth(bool enablServerCertAuth);
 	/**
 	 * Set the SSL/TLS version to use.
-	 * @param sslVersion The ssl version to use.
+	 * @param sslVersion The ssl version to use. Specify one of 
+	 * MQTT_SSL_VERSION_DEFAULT (0), MQTT_SSL_VERSION_TLS_1_0 (1),
+	 * MQTT_SSL_VERSION_TLS_1_1 (2) or MQTT_SSL_VERSION_TLS_1_2 (3)
 	 */
 	void set_ssl_version(int sslVersion);
 };
