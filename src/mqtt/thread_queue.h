@@ -173,6 +173,7 @@ public:
 			g.unlock();
 			notEmptyCond_.notify_one();
 		}
+		return true;
 	}
 	/**
 	 * Attempt to place an item in the queue with a bounded wait.
