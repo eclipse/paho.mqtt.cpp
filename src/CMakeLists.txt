@@ -78,16 +78,13 @@ target_include_directories(paho-cpp-objs
 ## --- Build the shared library, if requested ---
 
 if(PAHO_BUILD_SHARED)
-    ## set position independent flag (-fPIC on Unix)
-    # this may only be necessary for old compiler, but doesn't hurt
-    set_property(TARGET paho-cpp-objs PROPERTY POSITION_INDEPENDENT_CODE ON)
-
+    ## create the shared library
     add_library(paho-mqttpp3 SHARED $<TARGET_OBJECTS:paho-cpp-objs>)
 
     ## add dependencies to the shared library
     target_link_libraries(paho-mqttpp3
         PRIVATE ${LIBS_SYSTEM}
-        PUBLIC PahoMqttC::PahoMqttC)
+        PUBLIC PahoMqttC::PahoMqttC Threads::Threads)
 
     # It would be nice to exort the include paths from the obj lib, but we
     # get an export error. Perhaps in a future version?
@@ -125,7 +122,7 @@ if(PAHO_BUILD_STATIC)
     ## add dependencies to the shared library
     target_link_libraries(paho-mqttpp3-static
         PRIVATE ${LIBS_SYSTEM}
-        PUBLIC PahoMqttC::PahoMqttC)
+        PUBLIC PahoMqttC::PahoMqttC Threads::Threads)
 
     target_include_directories(paho-mqttpp3-static PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>

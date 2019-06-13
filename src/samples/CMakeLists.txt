@@ -46,9 +46,7 @@ target_link_libraries(async_consume ${PAHO_CPP_LIB})
 target_link_libraries(sync_publish ${PAHO_CPP_LIB})
 target_link_libraries(sync_consume ${PAHO_CPP_LIB})
 target_link_libraries(data_publish ${PAHO_CPP_LIB})
-
-target_link_libraries(pub_speed_test ${PAHO_CPP_LIB}
-    Threads::Threads)
+target_link_libraries(pub_speed_test ${PAHO_CPP_LIB})
 
 set(INSTALL_TARGETS
     async_publish
