@@ -1,3 +1,8 @@
+# save build-time options
+set(PAHO_BUILD_STATIC @PAHO_BUILD_STATIC@)
+set(PAHO_BUILD_SHARED @PAHO_BUILD_SHARED@)
+set(PAHO_WITH_SSL @PAHO_WITH_SSL@)
+
 include(CMakeFindDependencyMacro)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 find_dependency(PahoMqttC REQUIRED)
