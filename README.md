@@ -18,13 +18,11 @@ To keep up with the latest announcements for this project, follow:
 
 **EMail:** [Eclipse Paho Mailing List](https://accounts.eclipse.org/mailing-list/paho-dev)
 
-**v1.0.1** is released! This was meant to fix a number of bugs and to update the CMake build system into a more "modern" version. It helped solve a number of issues when building under Windows and now allows the creation of DLL's on that platform.
- 
-We're currently working towards the next release:
+***Work has begun to add MQTT v5 support!***
 
- - **v1.1** (Early 2019) WebSocket and MQTT v5 support, with an updated Unit Test framework - probably Catch2.
-  
-This may actually split into two separate releases if the WebSocket support comes together quickly and can be released sooner.
+Inital development will start in the 'mqttv5' branch until some stability is reached, after which it will move into 'develop'.
+
+New unit tests will use _Catch2_ for the test framework. Before the release, if everything goes well with _Catch2_, existing unit tests will be ported to the new framework.
 
 
 ## Contributing
