@@ -49,7 +49,7 @@ const uint32_t VERSION = 0x00090000;
 /** The version string for the client library  */
 const string VERSION_STR("Paho MQTT C++ (mqttpp) v. 0.9");
 /** Copyright notice for the client library */
-const string COPYRIGHT("Copyright (c) 2013-2017 Frank Pagliughi");
+const string COPYRIGHT("Copyright (c) 2013-2019 Frank Pagliughi");
 
 /////////////////////////////////////////////////////////////////////////////
 
