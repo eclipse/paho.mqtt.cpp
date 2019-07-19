@@ -98,9 +98,9 @@ public:
 	 */
 	property(code c, int32_t val);
 	/**
-	 * Create a string property.
+	 * Create a string or binary property.
 	 * @param c The property code
-	 * @param val The string value for the property
+	 * @param val The value for the property
 	 */
 	property(code c, string_ref val);
 	/**
@@ -117,13 +117,19 @@ public:
 	property& operator=(const property& rhs);
 	property& operator=(property&& rhs);
 
-
 	/**
 	 * Returns the underlying C property struct.
 	 * @return The underlying C property struct.
 	 */
 	const MQTTProperty& prop() const {
 		return prop_;
+	}
+	/**
+	 * Gets the property type (identifier).
+	 * @return The code for the property type.
+	 */
+	code type() const {
+		return code(prop_.identifier);
 	}
 	/**
 	 * Gets a printable name for the property type.

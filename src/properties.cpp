@@ -66,6 +66,7 @@ property::property(const property& other)
 property::property(property&& other)
 	: prop_(other.prop_), name_(std::move(other.name_)), value_(std::move(other.value_))
 {
+	memset(&other.prop_, 0, sizeof(MQTTProperty));
 	fixup();
 }
 
@@ -106,6 +107,8 @@ property& property::operator=(property&& rhs)
 {
 	if (&rhs != this) {
 		prop_ = rhs.prop_;
+		memset(&rhs.prop_, 0, sizeof(MQTTProperty));
+
 		name_ = std::move(rhs.name_);
 		value_ = std::move(rhs.value_);
 		fixup();
