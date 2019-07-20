@@ -4,11 +4,19 @@
 // Eclipse Paho MQTT C++ library.
 //
 
+#include <iostream>
 #include <cstring>
 #include "catch2/catch.hpp"
 #include "mqtt/properties.h"
 
 using namespace mqtt;
+
+inline bool stringcmp(char* cstr, const string& s) {
+	return std::memcmp(cstr, s.data(), s.length()) == 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// property
 
 TEST_CASE("int property constructor", "[property]") {
     // This is a known byte property
@@ -73,7 +81,7 @@ TEST_CASE("string property constructor", "[property]") {
 
 		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_RESPONSE_TOPIC);
 		REQUIRE(prop.prop().value.data.len == int(topic.length()));
-		REQUIRE(std::strcmp(prop.prop().value.data.data, topic.c_str()) == 0);
+		REQUIRE(stringcmp(prop.prop().value.data.data, topic));
 
 		REQUIRE(prop.type() == typ);
 		REQUIRE(get<string>(prop) == topic);
@@ -81,15 +89,16 @@ TEST_CASE("string property constructor", "[property]") {
 
 	SECTION("property from c-string") {
 		const char* topic = "replies/bubba";
+		size_t n = std::strlen(topic);
 
 		property prop { typ, topic };
 
 		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_RESPONSE_TOPIC);
-		REQUIRE(prop.prop().value.data.len == strlen(topic));
-		REQUIRE(std::strcmp(prop.prop().value.data.data, topic) == 0);
+		REQUIRE(prop.prop().value.data.len == int(n));
+		REQUIRE(std::memcmp(prop.prop().value.data.data, topic, n) == 0);
 
 		REQUIRE(prop.type() == typ);
-		REQUIRE(get<string>(prop) == string(topic));
+		REQUIRE(get<string>(prop) == string(topic, n));
 	}
 }
 
@@ -124,10 +133,10 @@ TEST_CASE("string pair property constructor", "[property]") {
 		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_USER_PROPERTY);
 
 		REQUIRE(prop.prop().value.data.len == int(name.length()));
-		REQUIRE(std::strcmp(prop.prop().value.data.data, name.c_str()) == 0);
+		REQUIRE(stringcmp(prop.prop().value.data.data, name));
 
 		REQUIRE(prop.prop().value.value.len == int(value.length()));
-		REQUIRE(std::strcmp(prop.prop().value.value.data, value.c_str()) == 0);
+		REQUIRE(stringcmp(prop.prop().value.value.data, value));
 
 		REQUIRE(prop.type() == typ);
 
@@ -138,23 +147,26 @@ TEST_CASE("string pair property constructor", "[property]") {
 
 	SECTION("property from c-strings") {
 		const char* name = "bubba";
+		size_t name_len = strlen(name);
+
 		const char* value = "some val";
+		size_t value_len = strlen(value);
 
 		property prop { typ, name, value };
 
 		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_USER_PROPERTY);
 
-		REQUIRE(prop.prop().value.data.len == strlen(name));
-		REQUIRE(std::strcmp(prop.prop().value.data.data, name) == 0);
+		REQUIRE(prop.prop().value.data.len == name_len);
+		REQUIRE(std::memcmp(prop.prop().value.data.data, name, name_len) == 0);
 
-		REQUIRE(prop.prop().value.value.len == strlen(value));
-		REQUIRE(std::strcmp(prop.prop().value.value.data, value) == 0);
+		REQUIRE(prop.prop().value.value.len == value_len);
+		REQUIRE(std::memcmp(prop.prop().value.value.data, value, value_len) == 0);
 
 		REQUIRE(prop.type() == typ);
 
 		auto usr = get<string_pair>(prop);
-		REQUIRE(std::get<0>(usr) == string(name));
-		REQUIRE(std::get<1>(usr) == string(value));
+		REQUIRE(std::get<0>(usr) == string(name, name_len));
+		REQUIRE(std::get<1>(usr) == string(value, value_len));
 	}
 }
 
@@ -203,7 +215,7 @@ TEST_CASE("string property copy constructor", "[property]") {
 		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_RESPONSE_TOPIC);
 
 		REQUIRE(prop.prop().value.data.len == int(topic.length()));
-		REQUIRE(std::strcmp(prop.prop().value.data.data, topic.c_str()) == 0);
+		REQUIRE(std::memcmp(prop.prop().value.data.data, topic.data(), topic.length()) == 0);
 
 		REQUIRE(prop.type() == typ);
 		REQUIRE(get<string>(prop) == topic);
@@ -221,7 +233,7 @@ TEST_CASE("string property move constructor", "[property]") {
 		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_RESPONSE_TOPIC);
 
 		REQUIRE(prop.prop().value.data.len == int(topic.length()));
-		REQUIRE(std::strcmp(prop.prop().value.data.data, topic.c_str()) == 0);
+		REQUIRE(stringcmp(prop.prop().value.data.data, topic));
 
 		REQUIRE(prop.type() == typ);
 		REQUIRE(get<string>(prop) == topic);
@@ -246,10 +258,10 @@ TEST_CASE("string pair property copy constructor", "[property]") {
 		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_USER_PROPERTY);
 
 		REQUIRE(prop.prop().value.data.len == int(name.length()));
-		REQUIRE(std::strcmp(prop.prop().value.data.data, name.c_str()) == 0);
+		REQUIRE(stringcmp(prop.prop().value.data.data, name));
 
 		REQUIRE(prop.prop().value.value.len == int(value.length()));
-		REQUIRE(std::strcmp(prop.prop().value.value.data, value.c_str()) == 0);
+		REQUIRE(stringcmp(prop.prop().value.value.data, value));
 
 		REQUIRE(prop.type() == typ);
 
@@ -273,10 +285,10 @@ TEST_CASE("string pair property move constructor", "[property]") {
 		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_USER_PROPERTY);
 
 		REQUIRE(prop.prop().value.data.len == int(name.length()));
-		REQUIRE(std::strcmp(prop.prop().value.data.data, name.c_str()) == 0);
+		REQUIRE(stringcmp(prop.prop().value.data.data, name));
 
 		REQUIRE(prop.prop().value.value.len == int(value.length()));
-		REQUIRE(std::strcmp(prop.prop().value.value.data, value.c_str()) == 0);
+		REQUIRE(stringcmp(prop.prop().value.value.data, value));
 
 		REQUIRE(prop.type() == typ);
 
@@ -291,5 +303,164 @@ TEST_CASE("string pair property move constructor", "[property]") {
 		REQUIRE(org_prop.prop().value.value.len == 0);
 		REQUIRE(org_prop.prop().value.value.data == nullptr);
 	}
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// properties
+
+TEST_CASE("properties constructor", "[properties]") {
+    SECTION("properties default constructor") {
+		properties props;
+
+		REQUIRE(props.size() == 0);
+		REQUIRE(props.byte_length() == 1);
+	}
+}
+
+TEST_CASE("properties add", "[properties]") {
+    SECTION("properties adding items") {
+		properties props;
+		REQUIRE(props.size() == 0);
+
+		props.add({property::PAYLOAD_FORMAT_INDICATOR, 42});
+		REQUIRE(props.size() == 1);
+
+		props.add({property::MESSAGE_EXPIRY_INTERVAL, 70000});
+		REQUIRE(props.size() == 2);
+	}
+}
+
+TEST_CASE("properties clear", "[properties]") {
+    SECTION("properties clear") {
+		properties props;
+		props.add({property::PAYLOAD_FORMAT_INDICATOR, 42});
+		props.add({property::MESSAGE_EXPIRY_INTERVAL, 70000});
+		REQUIRE(props.size() == 2);
+
+		props.clear();
+		REQUIRE(props.size() == 0);
+		REQUIRE(props.byte_length() == 1);
+	}
+}
+
+TEST_CASE("properties count and contains", "[properties]") {
+    SECTION("single count properties") {
+		properties props;
+
+		REQUIRE(props.count(property::PAYLOAD_FORMAT_INDICATOR) == 0);
+		REQUIRE(!props.contains(property::PAYLOAD_FORMAT_INDICATOR));
+
+		props.add({property::PAYLOAD_FORMAT_INDICATOR, 42});
+		REQUIRE(props.count(property::PAYLOAD_FORMAT_INDICATOR) == 1);
+		REQUIRE(props.contains(property::PAYLOAD_FORMAT_INDICATOR));
+
+		props.add({property::MESSAGE_EXPIRY_INTERVAL, 70000});
+		REQUIRE(props.count(property::MESSAGE_EXPIRY_INTERVAL) == 1);
+
+		// Make sure adding expirary didn't affect format ind
+		REQUIRE(props.count(property::PAYLOAD_FORMAT_INDICATOR) == 1);
+		REQUIRE(props.contains(property::PAYLOAD_FORMAT_INDICATOR));
+	}
+
+	/*
+    SECTION("single count properties with multi add") {
+		properties props;
+
+		props.add({property::PAYLOAD_FORMAT_INDICATOR, 42});
+		REQUIRE(props.count(property::PAYLOAD_FORMAT_INDICATOR) == 1);
+
+		// Can't add again
+		props.add({property::PAYLOAD_FORMAT_INDICATOR, 16});
+		REQUIRE(props.count(property::PAYLOAD_FORMAT_INDICATOR) == 1);
+	}
+	*/
+
+    SECTION("multi count properties") {
+		properties props;
+
+		REQUIRE(props.count(property::USER_PROPERTY) == 0);
+
+		props.add({property::USER_PROPERTY, "usr1", "bubba"});
+		REQUIRE(props.count(property::USER_PROPERTY) == 1);
+
+		props.add({property::USER_PROPERTY, "usr2", "wally"});
+		REQUIRE(props.count(property::USER_PROPERTY) == 2);
+
+		props.add({property::USER_PROPERTY, "usr3", "some longer property value"});
+		REQUIRE(props.count(property::USER_PROPERTY) == 3);
+	}
+}
+
+TEST_CASE("getting properties", "[properties]") {
+    SECTION("integer properties") {
+		const uint8_t FMT_IND = 42;
+		const uint16_t TOP_ALIAS = 511;
+		const uint32_t MAX_PKT_SZ = 32*1024;
+
+		properties props;
+		props.add({property::PAYLOAD_FORMAT_INDICATOR, FMT_IND});
+		props.add({property::MAXIMUM_PACKET_SIZE, MAX_PKT_SZ});
+		props.add({property::TOPIC_ALIAS, TOP_ALIAS});
+
+		auto fmtInd = props.get(property::PAYLOAD_FORMAT_INDICATOR);
+		REQUIRE(get<uint8_t>(fmtInd) == FMT_IND);
+
+		auto topAlias = props.get(property::TOPIC_ALIAS);
+		REQUIRE(get<uint16_t>(topAlias) == TOP_ALIAS);
+
+		auto maxPktSz = props.get(property::MAXIMUM_PACKET_SIZE);
+		REQUIRE(get<uint32_t>(maxPktSz) == MAX_PKT_SZ);
+	}
+
+    SECTION("integer properties with typed get") {
+		const uint8_t FMT_IND = 42;
+		const uint16_t TOP_ALIAS = 511;
+		const uint32_t MAX_PKT_SZ = 32*1024;
+
+		properties props;
+		props.add({property::PAYLOAD_FORMAT_INDICATOR, FMT_IND});
+		props.add({property::MAXIMUM_PACKET_SIZE, MAX_PKT_SZ});
+		props.add({property::TOPIC_ALIAS, TOP_ALIAS});
+
+		REQUIRE(get<uint8_t>(props, property::PAYLOAD_FORMAT_INDICATOR) == FMT_IND);
+		REQUIRE(get<uint16_t>(props, property::TOPIC_ALIAS) == TOP_ALIAS);
+		REQUIRE(get<uint32_t>(props, property::MAXIMUM_PACKET_SIZE) == MAX_PKT_SZ);
+	}
+
+    SECTION("string properties") {
+		string topic { "replies/bubba" };
+		binary corr_id { "\x00\x01\x02\x03\x04", 5 };
+
+		properties props;
+		props.add({property::RESPONSE_TOPIC, topic});
+		props.add({property::CORRELATION_DATA, corr_id});
+
+		REQUIRE(get<string>(props, property::RESPONSE_TOPIC) == topic);
+		REQUIRE(get<binary>(props, property::CORRELATION_DATA) == corr_id);
+	}
+
+    SECTION("string pair properties") {
+		const string	NAME1  { "usr1" },
+						NAME2  { "usr2" },
+						VALUE1 { "this is value one" },
+						VALUE2 { "this is value two" };
+
+		properties props;
+		props.add({property::USER_PROPERTY, NAME1, VALUE1});
+		props.add({property::USER_PROPERTY, NAME2, VALUE2});
+
+		string	name1, value1,
+				name2, value2;
+
+		std::tie(name1, value1) = get<string_pair>(props, property::USER_PROPERTY, 0);
+		std::tie(name2, value2) = get<string_pair>(props, property::USER_PROPERTY, 1);
+
+		REQUIRE(name1 == NAME1);
+		REQUIRE(value1 == VALUE1);
+
+		REQUIRE(name2 == NAME2);
+		REQUIRE(value2 == VALUE2);
+	}
+
 }
 

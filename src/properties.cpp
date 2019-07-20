@@ -24,8 +24,9 @@ namespace mqtt {
 
 property::property(code c, int32_t val)
 {
-	prop_.identifier = MQTTPropertyCodes(c);
-	switch (::MQTTProperty_getType(prop_.identifier = MQTTPropertyCodes(c))) {
+	prop_.identifier = ::MQTTPropertyCodes(c);
+
+	switch (::MQTTProperty_getType(prop_.identifier)) {
 		case MQTTPROPERTY_TYPE_BYTE:
 			prop_.value.byte = uint8_t(val);
 			break;
@@ -43,47 +44,89 @@ property::property(code c, int32_t val)
 }
 
 property::property(code c, string_ref val)
-	: value_(std::move(val))
 {
-	prop_.identifier = MQTTPropertyCodes(c);
-	fixup();
+	prop_.identifier = ::MQTTPropertyCodes(c);
+
+	size_t n = val.size();
+	prop_.value.data.len = int(n);
+	prop_.value.data.data = (char*) malloc(n);
+	std::memcpy(prop_.value.data.data, val.data(), n);
 }
 
 property::property(code c, string_ref name, string_ref val)
-	: name_(std::move(name)), value_(std::move(val))
 {
 	prop_.identifier = MQTTPropertyCodes(c);
-	fixup();
+
+	size_t n = name.size();
+	prop_.value.data.len = int(n);
+	prop_.value.data.data = (char*) malloc(n);
+	std::memcpy(prop_.value.data.data, name.data(), n);
+
+	n = val.size();
+	prop_.value.value.len = int(n);
+	prop_.value.value.data = (char*) malloc(n);
+	std::memcpy(prop_.value.value.data, val.data(), n);
+}
+
+property::property(const MQTTProperty& cprop)
+{
+	copy(cprop);
+}
+
+property::property(MQTTProperty&& cprop)
+	:prop_(cprop)
+{
+	memset(&cprop, 0, sizeof(MQTTProperty));
 }
 
 
 property::property(const property& other)
-	: prop_(other.prop_), name_(other.name_), value_(other.value_)
 {
-	fixup();
+	copy(other.prop_);
 }
 
 property::property(property&& other)
-	: prop_(other.prop_), name_(std::move(other.name_)), value_(std::move(other.value_))
 {
+	std::memcpy(&prop_, &other.prop_, sizeof(MQTTProperty));
 	memset(&other.prop_, 0, sizeof(MQTTProperty));
-	fixup();
 }
 
-void property::fixup()
+property::~property()
 {
 	switch (::MQTTProperty_getType(prop_.identifier)) {
+		case MQTTPROPERTY_TYPE_UTF_8_STRING_PAIR:
+			free(prop_.value.value.data);
+			// Fall-through
+
 		case MQTTPROPERTY_TYPE_BINARY_DATA:
 		case MQTTPROPERTY_TYPE_UTF_8_ENCODED_STRING:
-			prop_.value.data.data = const_cast<char*>(value_.data());
-			prop_.value.data.len = int(value_.length());
+			free(prop_.value.data.data);
 			break;
 
+		default:
+			// Nothing necessary
+			break;
+	}
+}
+
+void property::copy(const MQTTProperty& cprop)
+{
+	size_t n;
+
+	std::memcpy(&prop_, &cprop, sizeof(MQTTProperty));
+
+	switch (::MQTTProperty_getType(prop_.identifier)) {
 		case MQTTPROPERTY_TYPE_UTF_8_STRING_PAIR:
-			prop_.value.data.data = const_cast<char*>(name_.data());
-			prop_.value.data.len = int(name_.length());
-			prop_.value.value.data = const_cast<char*>(value_.data());
-			prop_.value.value.len = int(value_.length());
+			n = prop_.value.value.len;
+			prop_.value.value.data = (char*) malloc(n);
+			memcpy(prop_.value.value.data, cprop.value.value.data, n);
+			// Fall-through
+
+		case MQTTPROPERTY_TYPE_BINARY_DATA:
+		case MQTTPROPERTY_TYPE_UTF_8_ENCODED_STRING:
+			n = prop_.value.data.len;
+			prop_.value.data.data = (char*) malloc(n);
+			memcpy(prop_.value.data.data, cprop.value.data.data, n);
 			break;
 
 		default:
@@ -94,33 +137,38 @@ void property::fixup()
 
 property& property::operator=(const property& rhs)
 {
-	if (&rhs != this) {
-		prop_ = rhs.prop_;
-		name_ = rhs.name_;
-		value_ = rhs.value_;
-		fixup();
-	}
+	if (&rhs != this)
+		copy(rhs.prop_);
+
 	return *this;
 }
 
 property& property::operator=(property&& rhs)
 {
 	if (&rhs != this) {
-		prop_ = rhs.prop_;
+		std::memcpy(&prop_, &rhs.prop_, sizeof(MQTTProperty));
 		memset(&rhs.prop_, 0, sizeof(MQTTProperty));
-
-		name_ = std::move(rhs.name_);
-		value_ = std::move(rhs.value_);
-		fixup();
 	}
 	return *this;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-int properties::add(const property& prop)
+void properties::clear()
 {
-	return 0;
+	::MQTTProperties_free(&props_);
+	memset(&props_, 0, sizeof(MQTTProperties));
+}
+
+property properties::get(property::code propid, size_t idx /*=0*/)
+{
+	MQTTProperty* prop = MQTTProperties_getPropertyAt(&props_,
+									MQTTPropertyCodes(propid), int(idx));
+	if (!prop)
+		// TODO: Use a better exception
+		throw std::exception();
+
+	return property(*prop);
 }
 
 /////////////////////////////////////////////////////////////////////////////

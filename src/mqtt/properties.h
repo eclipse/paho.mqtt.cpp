@@ -41,23 +41,12 @@ using string_pair = std::tuple<string, string>;
 
 class property
 {
-	/** The underlying C property struct */
 	MQTTProperty prop_;
-
-	/** The name field for string pairs, like user properties */
-	string_ref name_;
-
-	/** A string or binary value */
-	string_ref value_;
-
-    // Friends
-	template <typename T>
-	friend T get(const property&);
 
 	friend class properties;
 
-    // Fixes the pointers in the underlying C prop_
-	void fixup();
+	// Make a deep copy of the property struct into this one.
+	void copy(const MQTTProperty& other);
 
 public:
 	enum code {
@@ -111,15 +100,24 @@ public:
 	 */
 	property(code c, string_ref name, string_ref val);
 
+	property(const MQTTProperty& cprop);
+	property(MQTTProperty&& cprop);
+
 	property(const property& other);
 	property(property&& other);
+
+	/**
+	 * Destructor
+	 */
+	~property();
 
 	property& operator=(const property& rhs);
 	property& operator=(property&& rhs);
 
 	/**
-	 * Returns the underlying C property struct.
-	 * @return The underlying C property struct.
+	 * Gets the underlying C property struct.
+	 * @return A const reference to the underlying C property
+	 *  	   struct.
 	 */
 	const MQTTProperty& prop() const {
 		return prop_;
@@ -146,41 +144,48 @@ T get(const property&) { return T(); }
 
 template <>
 uint8_t get<uint8_t>(const property& prop) {
-	return (uint8_t) prop.prop_.value.byte;
+	return (uint8_t) prop.prop().value.byte;
 }
 
 template <>
 uint16_t get<uint16_t>(const property& prop) {
-	return (uint16_t) prop.prop_.value.integer2;
+	return (uint16_t) prop.prop().value.integer2;
 }
 
 template <>
 int16_t get<int16_t>(const property& prop) {
-	return (int16_t) prop.prop_.value.integer2;
+	return (int16_t) prop.prop().value.integer2;
 }
 
 template <>
 uint32_t get<uint32_t>(const property& prop) {
-	return (uint32_t) prop.prop_.value.integer4;
+	return (uint32_t) prop.prop().value.integer4;
 }
 
 template <>
 int32_t get<int32_t>(const property& prop) {
-	return (int32_t) prop.prop_.value.integer4;
+	return (int32_t) prop.prop().value.integer4;
 }
 
 template <>
 string get<string>(const property& prop) {
-	static const string EMPTY_STRING;
-	return prop.value_ ? prop.value_.str() : EMPTY_STRING;
+	// TODO: We need to insure that this is a string property,
+	//		otherwise we're returning junk
+	return (!prop.prop().value.data.data) ? string()
+		: string(prop.prop().value.data.data, prop.prop().value.data.len);
 }
 
 template <>
 string_pair get<string_pair>(const property& prop) {
-	static const string EMPTY_STRING;
-	auto name = prop.name_ ? prop.name_.str() : EMPTY_STRING;
-	auto val = prop.value_ ? prop.value_.str() : EMPTY_STRING;
-	return std::make_tuple(std::move(name), std::move(val));
+	// TODO: We need to insure that this is a string_pair property,
+	//		otherwise we're returning junk
+	string name = (!prop.prop().value.data.data) ? string()
+		: string(prop.prop().value.data.data, prop.prop().value.data.len);
+
+	string value = (!prop.prop().value.value.data) ? string()
+		: string(prop.prop().value.value.data, prop.prop().value.value.len);
+
+	return std::make_tuple(std::move(name), std::move(value));
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -195,13 +200,106 @@ class properties
 {
 	MQTTProperties props_;
 
+	template<typename T>
+	friend T get(const properties& props, property::code propid, size_t idx);
+
+	template<typename T>
+	friend T get(const properties& props, property::code propid);
+
 public:
-	properties() : props_(MQTTProperties_initializer) {}
+	/**
+	 * Default constructor.
+	 * Creates an empty properties list.
+	 */
+	properties() {
+		std::memset(&props_, 0, sizeof(properties));
+	}
+	/**
+	 * Destructor.
+	 */
+	~properties() {
+		::MQTTProperties_free(&props_);
+	}
+	/**
+	 * Gets the numbers of property items in the list.
+	 * @return The number of property items in the list.
+	 */
+	size_t size() const {
+		return size_t(props_.count);
+	}
 
-	~properties() {}
-
-	int add(const property& prop);
+	/**
+	 * Gets the number of bytes required for the serialized
+	 * structure on the wire.
+	 * @return The number of bytes required for the serialized
+	 *  	   struct.
+	 */
+	size_t byte_length() const {
+		return (size_t) ::MQTTProperties_len(const_cast<MQTTProperties*>(&props_));
+	}
+	/**
+	 * Adds a property to the list.
+	 * @param prop The property to add to the list.
+	 */
+	void add(const property& prop) {
+		::MQTTProperties_add(&props_, &prop.prop());
+	}
+	/**
+	 * Removes all the items from the property list.
+	 */
+	void clear();
+	/**
+	 * Determines if the list contains a specific property.
+	 * @param propid The property ID (code).
+	 * @return @em true if the list contains the property, @em false if not.
+	 */
+	bool contains(property::code propid) {
+		return ::MQTTProperties_hasProperty(&props_, MQTTPropertyCodes(propid)) != 0;
+	}
+	/**
+	 * Get the number of properties in the list with the specified property
+	 * ID.
+	 *
+	 * Most properties can exist only once. User properties and subscription
+	 * ID's can exist more than once.
+	 *
+	 * @param propid The property ID (code).
+	 * @return The number of properties in the list with the specified ID.
+	 */
+	size_t count(property::code propid) {
+		return size_t(::MQTTProperties_propertyCount(&props_, MQTTPropertyCodes(propid)));
+	}
+	/**
+	 * Gets the property with the specified ID.
+	 *
+	 * @param propid The property ID (code).
+	 * @param idx Which instance of the property to retrieve, if there are
+	 *  		  more than one.
+	 * @return The requested property
+	 */
+	property get(property::code propid, size_t idx=0);
 };
+
+
+template<typename T>
+T get(const properties& props, property::code propid, size_t idx)
+{
+	MQTTProperty* prop = MQTTProperties_getPropertyAt(
+								const_cast<MQTTProperties*>(&props.props_),
+								MQTTPropertyCodes(propid), int(idx));
+	if (!prop)
+		// TODO: Use a better exception
+		throw std::exception();
+
+	return get<T>(property(*prop));
+}
+
+template<typename T>
+T get(const properties& props, property::code propid)
+{
+	return get<T>(props, propid, 0);
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
