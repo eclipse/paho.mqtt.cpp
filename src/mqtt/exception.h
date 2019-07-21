@@ -67,7 +67,8 @@ public:
 	 * @return A string explanation of the error
 	 */
 	static string string_error(int code) {
-		mqtt::to_string(::MQTTAsync_strerror(code));
+		const char *msg = ::MQTTAsync_strerror(code);
+		return msg ? string(msg) : string();
 	}
 	/**
 	 * Gets a detailed error message for an error code.
@@ -78,8 +79,11 @@ public:
 	 *  	   explanation message.
 	 */
 	static string printable_error(int code, const string& msg=string()) {
-		string s = "MQTT Error [" + std::to_string(code) + "]";
-		s += ": " + (msg.empty() ? string_error(code) : msg);
+		string s = "MQTT error [" + std::to_string(code) + "]: ";
+		if (msg.empty())
+			s += string_error(code);
+		else
+			s += msg;
 		return s;
 	}
 	/**
