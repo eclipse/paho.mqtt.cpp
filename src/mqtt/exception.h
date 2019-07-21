@@ -33,19 +33,6 @@
 
 namespace mqtt {
 
-	static std::string from_c_error(int code) {
-		auto msg = MQTTAsync_strerror(code);
-		return msg != NULL ? msg : "";
-	}
-
-static std::string make_human_readable(int code, const string& msg) {
-	auto result = "MQTT error [" + std::to_string(code) + "]";
-	if (not msg.empty()) {
-		result += ": " + msg;
-	}
-	return result;
-}
-
 /////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -66,14 +53,36 @@ public:
 	 * @param code The error code from the C library.
 	 */
 	explicit exception(int code)
-		: exception(code, from_c_error(code)) {}
+		: exception(code, string_error(code)) {}
 	/**
 	 * Creates an MQTT exception.
 	 * @param code The error code from the C library.
 	 * @param msg The text message for the error.
 	 */
 	exception(int code, const string& msg)
-		: std::runtime_error(make_human_readable(code, msg)), code_(code), msg_(msg) {}
+		: std::runtime_error(printable_error(code, msg)), code_(code), msg_(msg) {}
+	/**
+	 * Gets an error message from an error code.
+	 * @param code The error code from the C lib
+	 * @return A string explanation of the error
+	 */
+	static string string_error(int code) {
+		const char* msg = ::MQTTAsync_strerror(code);
+		return msg ? string(msg) : string();
+	}
+	/**
+	 * Gets a detailed error message for an error code.
+	 * @param code The error code from the C lib
+	 * @param msg An optional additional message. If none is provided, the
+	 *  		  string_error message is used.
+	 * @return A string error message that includes the error code and an
+	 *  	   explanation message.
+	 */
+	static string printable_error(int code, const string& msg=string()) {
+		string s = "MQTT Error [" + std::to_string(code) + "]";
+		s += ": " + (msg.empty() ? string_error(code) : msg);
+		return s;
+	}
 	/**
 	 * Returns the error message for this exception.
 	 */
