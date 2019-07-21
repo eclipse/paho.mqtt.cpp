@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013-2017 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2019 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,6 +19,7 @@
  *
  * Contributors:
  *    Frank Pagliughi - initial implementation and documentation
+ *    Frank Pagliughi - MQTT v5 support
  *******************************************************************************/
 
 #ifndef __mqtt_async_client_h
@@ -45,9 +46,9 @@
 namespace mqtt {
 
 /** The version number for the client library. */
-const uint32_t VERSION = 0x00090000;
+const uint32_t VERSION = 0x01010000;
 /** The version string for the client library  */
-const string VERSION_STR("Paho MQTT C++ (mqttpp) v. 0.9");
+const string VERSION_STR("Paho MQTT C++ (mqttpp) v. 1.1");
 /** Copyright notice for the client library */
 const string COPYRIGHT("Copyright (c) 2013-2019 Frank Pagliughi");
 
@@ -79,6 +80,8 @@ private:
 	string serverURI_;
 	/** The client ID string that we provided to the server. */
 	string clientId_;
+	/** The MQTT protocol version we're connected at */
+	int mqttVersion_;
 	/** A user persistence wrapper (if any) */
 	std::unique_ptr<MQTTClient_persistence> persist_;
 	/** Callback supplied by the user (if any) */

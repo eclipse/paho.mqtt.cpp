@@ -41,12 +41,12 @@ public:
 	/**
 	 * Create an empty response object.
 	 */
-	response_options();
+	response_options(int mqttVersion=MQTTVERSION_DEFAULT);
 	/**
 	 * Creates a response object with the specified callbacks.
 	 * @param tok A token to be used as the context.
 	 */
-	response_options(const token_ptr& tok);
+	response_options(const token_ptr& tok, int mqttVersion=MQTTVERSION_DEFAULT);
 	/**
 	 * Sets the callback context to a generic token.
 	 * @param tok The token to be used as the callback context.
@@ -58,7 +58,7 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-//							delivery_response_options
+//						delivery_response_options
 /////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -81,12 +81,13 @@ public:
 	/**
 	 * Create an empty delivery response object.
 	 */
-	delivery_response_options();
+	delivery_response_options(int mqttVersion=MQTTVERSION_DEFAULT);
 	/**
 	 * Creates a response object tied to the specific delivery token.
 	 * @param dtok A delivery token to be used as the context.
 	 */
-	delivery_response_options(const delivery_token_ptr& dtok);
+	delivery_response_options(const delivery_token_ptr& dtok,
+							  int mqttVersion=MQTTVERSION_DEFAULT);
 	/**
 	 * Sets the callback context to a delivery token.
 	 * @param dtok The delivery token to be used as the callback context.

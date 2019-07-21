@@ -19,6 +19,7 @@
  *
  * Contributors:
  *    Frank Pagliughi - initial implementation and documentation
+ *    Frank Pagliughi - MQTT v5 support
  *******************************************************************************/
 
 #ifndef __mqtt_token_h
@@ -111,6 +112,7 @@ class token
 	 * @param rsp The success response.
 	 */
 	static void on_success(void* tokObj, MQTTAsync_successData* rsp);
+	static void on_success5(void* tokObj, MQTTAsync_successData5* rsp);
 	/**
 	 * C-style callback for failure.
 	 * This simply passes the call on to the proper token object for
@@ -121,6 +123,7 @@ class token
 	 * @param rsp The failure response.
 	 */
 	static void on_failure(void* tokObj, MQTTAsync_failureData* rsp);
+	static void on_failure5(void* tokObj, MQTTAsync_failureData5* rsp);
 	/**
 	 * C-style callback for client (re)connection.
 	 * This is normally only used to process a reconnect completion message.
@@ -133,11 +136,13 @@ class token
 	 * @param rsp The success response.
 	 */
 	void on_success(MQTTAsync_successData* rsp);
+	void on_success5(MQTTAsync_successData5* rsp);
 	/**
 	 * Internal handler for the failure callback.
 	 * @param rsp The failure response.
 	 */
 	void on_failure(MQTTAsync_failureData* rsp);
+	void on_failure5(MQTTAsync_failureData5* rsp);
 
 	/**
 	 * Check the current return code and throw an exception if it is not a

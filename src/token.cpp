@@ -1,7 +1,7 @@
 // token.cpp
 
 /*******************************************************************************
- * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2019 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,6 +14,7 @@
  *
  * Contributors:
  *    Frank Pagliughi - initial implementation and documentation
+ *    Frank Pagliughi - MQTT v5 support
  *******************************************************************************/
 
 #include "mqtt/token.h"
@@ -79,10 +80,22 @@ void token::on_success(void* context, MQTTAsync_successData* rsp)
 		static_cast<token*>(context)->on_success(rsp);
 }
 
+void token::on_success5(void* context, MQTTAsync_successData5* rsp)
+{
+	if (context)
+		static_cast<token*>(context)->on_success5(rsp);
+}
+
 void token::on_failure(void* context, MQTTAsync_failureData* rsp)
 {
 	if (context)
 		static_cast<token*>(context)->on_failure(rsp);
+}
+
+void token::on_failure5(void* context, MQTTAsync_failureData5* rsp)
+{
+	if (context)
+		static_cast<token*>(context)->on_failure5(rsp);
 }
 
 // --------------------------------------------------------------------------
@@ -105,7 +118,49 @@ void token::on_success(MQTTAsync_successData* rsp)
 	cli_->remove_token(this);
 }
 
+void token::on_success5(MQTTAsync_successData5* rsp)
+{
+	unique_lock g(lock_);
+	iaction_listener* listener = listener_;
+	tok_ = (rsp) ? rsp->token : 0;
+	rc_ = MQTTASYNC_SUCCESS;
+	complete_ = true;
+	g.unlock();
+
+	// Note: callback always completes before the object is signaled.
+	if (listener)
+		listener->on_success(*this);
+	cond_.notify_all();
+
+	cli_->remove_token(this);
+}
+
 void token::on_failure(MQTTAsync_failureData* rsp)
+{
+	unique_lock g(lock_);
+	iaction_listener* listener = listener_;
+	if (rsp) {
+		tok_ = rsp->token;
+		rc_ = rsp->code;
+		if (rsp->message)
+			errMsg_ = string(rsp->message);
+	}
+	else {
+		tok_ = 0;
+		rc_ = -1;
+	}
+	complete_ = true;
+	g.unlock();
+
+	// Note: callback always completes before the obect is signaled.
+	if (listener)
+		listener->on_failure(*this);
+	cond_.notify_all();
+
+	cli_->remove_token(this);
+}
+
+void token::on_failure5(MQTTAsync_failureData5* rsp)
 {
 	unique_lock g(lock_);
 	iaction_listener* listener = listener_;

@@ -337,6 +337,7 @@ public:
 	  *       that fails, fall back to 3.1
 	  *   @li MQTTVERSION_3_1 (3) = only try version 3.1
 	  *   @li MQTTVERSION_3_1_1 (4) = only try version 3.1.1
+	  *   @li MQTTVERSION_5 (5) = only try version 5
 	  */
 	void set_mqtt_version(int mqttVersion) { opts_.MQTTVersion = mqttVersion; }
 	/**
