@@ -140,35 +140,35 @@ public:
 
 // TODO: This shoult throw an exception
 template <typename T>
-T get(const property&) { return T(); }
+inline T get(const property&) { return T(); }
 
 template <>
-uint8_t get<uint8_t>(const property& prop) {
+inline uint8_t get<uint8_t>(const property& prop) {
 	return (uint8_t) prop.prop().value.byte;
 }
 
 template <>
-uint16_t get<uint16_t>(const property& prop) {
+inline uint16_t get<uint16_t>(const property& prop) {
 	return (uint16_t) prop.prop().value.integer2;
 }
 
 template <>
-int16_t get<int16_t>(const property& prop) {
+inline int16_t get<int16_t>(const property& prop) {
 	return (int16_t) prop.prop().value.integer2;
 }
 
 template <>
-uint32_t get<uint32_t>(const property& prop) {
+inline uint32_t get<uint32_t>(const property& prop) {
 	return (uint32_t) prop.prop().value.integer4;
 }
 
 template <>
-int32_t get<int32_t>(const property& prop) {
+inline int32_t get<int32_t>(const property& prop) {
 	return (int32_t) prop.prop().value.integer4;
 }
 
 template <>
-string get<string>(const property& prop) {
+inline string get<string>(const property& prop) {
 	// TODO: We need to insure that this is a string property,
 	//		otherwise we're returning junk
 	return (!prop.prop().value.data.data) ? string()
@@ -176,7 +176,7 @@ string get<string>(const property& prop) {
 }
 
 template <>
-string_pair get<string_pair>(const property& prop) {
+inline string_pair get<string_pair>(const property& prop) {
 	// TODO: We need to insure that this is a string_pair property,
 	//		otherwise we're returning junk
 	string name = (!prop.prop().value.data.data) ? string()
@@ -198,6 +198,7 @@ string_pair get<string_pair>(const property& prop) {
  */
 class properties
 {
+	/** The underlying C properties struct  */
 	MQTTProperties props_;
 
 	template<typename T>
@@ -221,13 +222,27 @@ public:
 		::MQTTProperties_free(&props_);
 	}
 	/**
+	 * Gets a reference to the underlying C properties structure.
+	 * @return A const reference to the underlying C properties structure.
+	 */
+	const MQTTProperties& c_struct() const {
+		return props_;
+	}
+	/**
+	 * Determines if the property list is empty.
+	 * @return @em true if there are no properties in the list, @em false if
+	 *  	   the list contains any items.
+	 */
+	bool empty() const {
+		return props_.count == 0;
+	}
+	/**
 	 * Gets the numbers of property items in the list.
 	 * @return The number of property items in the list.
 	 */
 	size_t size() const {
 		return size_t(props_.count);
 	}
-
 	/**
 	 * Gets the number of bytes required for the serialized
 	 * structure on the wire.
@@ -280,12 +295,13 @@ public:
 	property get(property::code propid, size_t idx=0);
 };
 
+// --------------------------------------------------------------------------
 
 template<typename T>
-T get(const properties& props, property::code propid, size_t idx)
+inline T get(const properties& props, property::code propid, size_t idx)
 {
 	MQTTProperty* prop = MQTTProperties_getPropertyAt(
-								const_cast<MQTTProperties*>(&props.props_),
+								const_cast<MQTTProperties*>(&props.c_struct()),
 								MQTTPropertyCodes(propid), int(idx));
 	if (!prop)
 		// TODO: Use a better exception
@@ -295,7 +311,7 @@ T get(const properties& props, property::code propid, size_t idx)
 }
 
 template<typename T>
-T get(const properties& props, property::code propid)
+inline T get(const properties& props, property::code propid)
 {
 	return get<T>(props, propid, 0);
 }

@@ -20,9 +20,9 @@ To keep up with the latest announcements for this project, follow:
 
 ***Work has begun to add MQTT v5 support!***
 
-Inital development will start in the 'mqttv5' branch until some stability is reached, after which it will move into 'develop'.
+Inital development has started in the 'mqttv5' branch until some stability is reached, after which it will move into 'develop'.
 
-New unit tests will use _Catch2_ for the test framework. Before the release, if everything goes well with _Catch2_, existing unit tests will be ported to the new framework.
+New unit tests are usin _Catch2_ for the test framework. The legacy unit tests are still using _CppUnit_, compiled into a separate test executable. Before the release, if everything goes well with _Catch2_, existing unit tests will be ported to the new framework.
 
 ### Unreleased Features in this Branch
 
@@ -30,6 +30,10 @@ New unit tests will use _Catch2_ for the test framework. Before the release, if 
     - **Properties**
         - New `property` class acts something like a std::variant to hold a property of any supported type.
         - New `properties` class is a collection type to hold all the properties for a single transmitted packet.
+    - The client object tracks the desired MQTT version that the app requested and/or is currently connected at. Internally this is now required by the `response_options` the need to distinguish between pre-v5 and post-v5 callback functions.
+    - More descriptive error messages (PR #154), integrated into the `mqtt::exception` class.
+    - The`message` and various options classes were updated for MQTT v5 to include properties and reson codes (where appropriate).
+    
 
 ## Contributing
 

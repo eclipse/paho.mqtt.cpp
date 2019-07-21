@@ -53,8 +53,10 @@ connect_options::connect_options(connect_options&& opt) : opts_(opt.opts_),
 						userName_(std::move(opt.userName_)),
 						password_(std::move(opt.password_))
 {
-	if (opts_.will)
+	if (opts_.will) {
 		opts_.will = &will_.opts_;
+		opts_.willProperties = const_cast<MQTTProperties*>(&will_.props_.c_struct());
+	}
 
 	if (opts_.ssl)
 		opts_.ssl = &ssl_.opts_;
@@ -83,19 +85,17 @@ connect_options& connect_options::operator=(connect_options&& opt)
 {
 	opts_ = opt.opts_;
 
-	will_ = std::move(opt.will_);
 	if (opts_.will)
-		opts_.will = &will_.opts_;
+		set_will(std::move(opt.will_));
+
+	if (opts_.ssl)
+		set_ssl(std::move(opt.ssl_));
 
 	userName_ = std::move(opt.userName_);
 	opts_.username = c_str(userName_);
 
 	password_ = std::move(opt.password_);
 	set_password(password_);
-
-	ssl_ = std::move(opt.ssl_);
-	if (opts_.ssl)
-		opts_.ssl = &ssl_.opts_;
 
 	return *this;
 }
@@ -104,6 +104,16 @@ void connect_options::set_will(const will_options& will)
 {
 	will_ = will;
 	opts_.will = &will_.opts_;
+	opts_.willProperties = will_.get_properties().empty()
+		? nullptr : const_cast<MQTTProperties*>(&will_.props_.c_struct());
+}
+
+void connect_options::set_will(will_options&& will)
+{
+	will_ = will;
+	opts_.will = &will_.opts_;
+	opts_.willProperties = will_.get_properties().empty()
+		? nullptr : const_cast<MQTTProperties*>(&will_.props_.c_struct());
 }
 
 void connect_options::set_user_name(string_ref userName)
@@ -127,6 +137,12 @@ void connect_options::set_password(binary_ref password)
 }
 
 void connect_options::set_ssl(const ssl_options& ssl)
+{
+	ssl_ = ssl;
+	opts_.ssl = &ssl_.opts_;
+}
+
+void connect_options::set_ssl(ssl_options&& ssl)
 {
 	ssl_ = ssl;
 	opts_.ssl = &ssl_.opts_;

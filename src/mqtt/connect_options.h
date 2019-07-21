@@ -69,6 +69,9 @@ class connect_options
 	/** Collection of server URIs, if any */
 	const_string_collection_ptr serverURIs_;
 
+	/** The connect properties */
+	properties props_;
+
 	/** The client has special access */
 	friend class async_client;
 	friend class connect_options_test;
@@ -194,6 +197,7 @@ public:
 	 * @param ssl The SSL options.
 	 */
 	void set_ssl(const ssl_options& ssl);
+	void set_ssl(ssl_options&& ssl);
 	/**
 	 * Returns whether the server should remember state for the client
 	 * across reconnects.
@@ -316,6 +320,7 @@ public:
 	 * @param will The LWT options.
 	 */
 	void set_will(const will_options& will);
+	void set_will(will_options&& will);
 	/**
 	 * Sets the callback context to a delivery token.
 	 * @param tok The delivery token to be used as the callback context.
@@ -368,6 +373,29 @@ public:
 								 const std::chrono::duration<Rep2, Period2>& maxRetryInterval) {
 		set_automatic_reconnect((int) to_seconds_count(minRetryInterval),
 								(int) to_seconds_count(maxRetryInterval));
+	}
+	/**
+	 * Gets the connect properties.
+	 * @return A const reference to the properties for the connect.
+	 */
+	const properties& get_properties() const {
+		return props_;
+	}
+	/**
+	 * Sets the properties for the connect.
+	 * @param props The properties to place into the message.
+	 */
+	void set_properties(const properties& props) {
+		props_ = props;
+		opts_.connectProperties = const_cast<MQTTProperties*>(&props_.c_struct());
+	}
+	/**
+	 * Moves the properties for the connect.
+	 * @param props The properties to move into the connect object.
+	 */
+	void set_properties(properties&& props) {
+		props_ = props;
+		opts_.connectProperties = const_cast<MQTTProperties*>(&props_.c_struct());
 	}
 	/**
 	 * Gets a string representation of the object.

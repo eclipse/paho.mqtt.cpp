@@ -67,8 +67,7 @@ public:
 	 * @return A string explanation of the error
 	 */
 	static string string_error(int code) {
-		const char* msg = ::MQTTAsync_strerror(code);
-		return msg ? string(msg) : string();
+		mqtt::to_string(::MQTTAsync_strerror(code));
 	}
 	/**
 	 * Gets a detailed error message for an error code.
