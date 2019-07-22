@@ -336,7 +336,11 @@ public:
 	 */
 	void set_servers(const_string_collection_ptr serverURIs);
 	/**
-      * Sets the version of MQTT to be used on the connect.
+	  * Sets the version of MQTT to be used on the connect.
+	  *
+	  * This will also set other connect options to legal values dependent on
+	  * the selected version.
+	  *
 	  * @param mqttVersion The MQTT version to use for the connection:
 	  *   @li MQTTVERSION_DEFAULT (0) = default: start with 3.1.1, and if
 	  *       that fails, fall back to 3.1
@@ -344,7 +348,7 @@ public:
 	  *   @li MQTTVERSION_3_1_1 (4) = only try version 3.1.1
 	  *   @li MQTTVERSION_5 (5) = only try version 5
 	  */
-	void set_mqtt_version(int mqttVersion) { opts_.MQTTVersion = mqttVersion; }
+	void set_mqtt_version(int mqttVersion);
 	/**
 	 * Enable or disable automatic reconnects.
 	 * The retry intervals are not affected.
@@ -373,6 +377,21 @@ public:
 								 const std::chrono::duration<Rep2, Period2>& maxRetryInterval) {
 		set_automatic_reconnect((int) to_seconds_count(minRetryInterval),
 								(int) to_seconds_count(maxRetryInterval));
+	}
+	/**
+	 * Determines if the 'clean start' flag is set for the connect.
+	 * @return @em true if the 'clean start' flag is set for the connect, @em
+	 *  	   false if not.
+	 */
+	bool is_clean_start() const {
+		return to_bool(opts_.cleanstart);
+	}
+	/**
+	 * Sets the 'clean start' flag for the connection.
+	 * @param cleanStart Whether to set the 'clean start' flag for the connect.
+	 */
+	void set_clean_start(bool cleanStart) {
+		opts_.cleanstart = to_int(cleanStart);
 	}
 	/**
 	 * Gets the connect properties.

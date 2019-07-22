@@ -29,6 +29,7 @@
 #include "mqtt/iaction_listener.h"
 #include "mqtt/exception.h"
 #include "mqtt/types.h"
+#include "mqtt/properties.h"
 #include "mqtt/buffer_ref.h"
 #include "mqtt/string_collection.h"
 #include <vector>
@@ -79,6 +80,12 @@ class token
 	int rc_;
 	/** Error message from the C lib (if any) */
 	string errMsg_;
+
+	/** MQTT v5 readon code */
+	ReasonCode reasonCode_;
+
+	/** MQTT v5 propeties */
+	properties props_;
 
 	/** Client and token-related options have special access */
 	friend class async_client;

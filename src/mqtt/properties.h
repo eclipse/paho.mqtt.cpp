@@ -216,6 +216,13 @@ public:
 		std::memset(&props_, 0, sizeof(properties));
 	}
 	/**
+	 * Creates a list of properties from a C struct.
+	 * @param cprops The c struct of properties
+	 */
+	properties(const MQTTProperties& cprops) {
+		props_ = ::MQTTProperties_copy(&cprops);
+	}
+	/**
 	 * Destructor.
 	 */
 	~properties() {
@@ -268,8 +275,9 @@ public:
 	 * @param propid The property ID (code).
 	 * @return @em true if the list contains the property, @em false if not.
 	 */
-	bool contains(property::code propid) {
-		return ::MQTTProperties_hasProperty(&props_, MQTTPropertyCodes(propid)) != 0;
+	bool contains(property::code propid) const {
+		return ::MQTTProperties_hasProperty(const_cast<MQTTProperties*>(&props_),
+											MQTTPropertyCodes(propid)) != 0;
 	}
 	/**
 	 * Get the number of properties in the list with the specified property

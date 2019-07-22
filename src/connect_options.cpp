@@ -177,6 +177,15 @@ void connect_options::set_servers(const_string_collection_ptr serverURIs)
 	}
 }
 
+void connect_options::set_mqtt_version(int mqttVersion) {
+	opts_.MQTTVersion = mqttVersion;
+
+	if (mqttVersion < MQTTVERSION_5)
+		opts_.cleanstart = 0;
+	else
+		opts_.cleansession = 0;
+}
+
 void connect_options::set_automatic_reconnect(int minRetryInterval,
 											  int maxRetryInterval)
 {

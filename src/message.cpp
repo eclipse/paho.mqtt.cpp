@@ -53,8 +53,9 @@ message::message(string_ref topic, binary_ref payload, int qos, bool retained)
 }
 
 message::message(string_ref topic, const MQTTAsync_message& msg)
-						: msg_(msg), topic_(std::move(topic))
+						: msg_(msg), topic_(std::move(topic)), props_(msg.properties)
 {
+	msg_.properties = props_.c_struct();
 	set_payload(msg.payload, msg.payloadlen);
 }
 
