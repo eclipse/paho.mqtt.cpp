@@ -45,12 +45,25 @@
 
 namespace mqtt {
 
-/** The version number for the client library. */
-const uint32_t VERSION = 0x01010000;
-/** The version string for the client library  */
-const string VERSION_STR("Paho MQTT C++ (mqttpp) v. 1.1");
-/** Copyright notice for the client library */
-const string COPYRIGHT("Copyright (c) 2013-2019 Frank Pagliughi");
+// OBSOLETE: The legacy constants that lacked the "PAHO_MQTTPP_" prefix
+// clashed with #define's from other libraries and will be removed at the
+// next major version upgrade.
+
+#if defined(PAHO_MQTTPP_VERSIONS)
+	/** The version number for the client library. */
+	const uint32_t PAHO_MQTTPP_VERSION = 0x01010000;
+	/** The version string for the client library  */
+	const string PAHO_MQTTPP_VERSION_STR("Paho MQTT C++ (mqttpp) v. 1.1");
+	/** Copyright notice for the client library */
+	const string PAHO_MQTTPP_COPYRIGHT("Copyright (c) 2013-2019 Frank Pagliughi");
+#else
+	/** The version number for the client library. */
+	const uint32_t VERSION = 0x01010000;
+	/** The version string for the client library  */
+	const string VERSION_STR("Paho MQTT C++ (mqttpp) v. 1.1");
+	/** Copyright notice for the client library */
+	const string COPYRIGHT("Copyright (c) 2013-2019 Frank Pagliughi");
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 
