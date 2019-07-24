@@ -74,6 +74,8 @@ class connect_options_test : public CppUnit::TestFixture
 	};
 	const const_string_collection_ptr URIs = std::make_shared<const string_collection>(URIsVec);
 
+	static constexpr token::Type TOKEN_TYPE = token::Type::CONNECT;
+
 public:
 	void setUp() {}
 	void tearDown() {}
@@ -370,7 +372,7 @@ public:
 
 		CPPUNIT_ASSERT(nullptr == c_struct.context);
 		mqtt::test::dummy_async_client ac;
-		auto tok = token::create(ac);
+		auto tok = token::create(TOKEN_TYPE, ac);
 		opts.set_token(tok);
 		CPPUNIT_ASSERT_EQUAL(tok, opts.get_token());
 		CPPUNIT_ASSERT(tok.get() == c_struct.context);

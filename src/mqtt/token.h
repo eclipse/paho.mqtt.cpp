@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013-2017 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2019 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,7 +19,7 @@
  *
  * Contributors:
  *    Frank Pagliughi - initial implementation and documentation
- *    Frank Pagliughi - MQTT v5 support
+ *    Frank Pagliughi - MQTT v5 support & server responses
  *******************************************************************************/
 
 #ifndef __mqtt_token_h
@@ -42,6 +42,25 @@ namespace mqtt {
 
 class iasync_client;
 
+/** Response for a connect request */
+struct connect_response {
+	/** The connection string of the server */
+	string serverURI;
+	/** The version of MQTT being used */
+	int mqttVersion;
+	/** The session present flag returned from the server */
+	bool sessionPresent;
+};
+
+/** Response for subscribe messages */
+struct subscribe_response {
+	/** The reason/result code for each topic request. */
+	std::vector<ReasonCode> reasonCodes;
+};
+
+/** Response for unsubscribe messages  */
+using unsubscribe_response = subscribe_response;
+
 /////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -50,6 +69,26 @@ class iasync_client;
  */
 class token
 {
+public:
+	/** Smart/shared pointer to an object of this class */
+	using ptr_t = std::shared_ptr<token>;
+	/** Smart/shared pointer to an object of this class */
+	using const_ptr_t = std::shared_ptr<const token>;
+	/** Weak pointer to an object of this class */
+	using weak_ptr_t = std::weak_ptr<token>;
+
+	/** The type of request that the token is tracking */
+	enum Type {
+		CONNECT,
+		SUBSCRIBE,
+		SUBSCRIBE_MANY,
+		PUBLISH,
+		UNSUBSCRIBE,
+		UNSUBSCRIBE_MANY,
+		DISCONNECT
+	};
+
+private:
 	/** Lock guard type for this class. */
 	using guard = std::lock_guard<std::mutex>;
 	/** Unique type for this class. */
@@ -60,10 +99,12 @@ class token
 	/** Condition variable signals when the action completes */
 	std::condition_variable cond_;
 
+	/** The type of request that the token is tracking */
+	Type type_;
 	/** The MQTT client that is processing this action */
 	iasync_client* cli_;
 	/** The underlying C token. Note that this is just an integer */
-	MQTTAsync_token tok_;
+	MQTTAsync_token msgId_;
 	/** The topic string(s) for the action being tracked by this token */
 	const_string_collection_ptr topics_;
 	/** User supplied context */
@@ -74,6 +115,8 @@ class token
 	 * complete, but before the token is signaled.
 	 */
 	iaction_listener* listener_;
+	/** The number of expected responses */
+	size_t nExpected_;
 	/** Whether the action has yet to complete */
 	bool complete_;
 	/** The action success/failure code */
@@ -81,11 +124,16 @@ class token
 	/** Error message from the C lib (if any) */
 	string errMsg_;
 
-	/** MQTT v5 readon code */
+	/** MQTT v5 reason code */
 	ReasonCode reasonCode_;
-
 	/** MQTT v5 propeties */
 	properties props_;
+	/** Connection response (null if not available) */
+	std::unique_ptr<connect_response> connRsp_;
+	/** Subscribe response (null if not available) */
+	std::unique_ptr<subscribe_response> subRsp_;
+	/** Unsubscribe response (null if not available) */
+	std::unique_ptr<unsubscribe_response> unsubRsp_;
 
 	/** Client and token-related options have special access */
 	friend class async_client;
@@ -103,11 +151,11 @@ class token
 	/**
 	 * Sets the ID for the message.
 	 * This is a guaranteed atomic operation.
-	 * @param msgid The ID of the message.
+	 * @param msgId The ID of the message.
 	 */
-	void set_message_id(MQTTAsync_token msgid) {
+	void set_message_id(MQTTAsync_token msgId) {
 		guard g(lock_);
-		tok_ = msgid;
+		msgId_ = msgId;
 	}
 	/**
 	 * C-style callback for success.
@@ -161,33 +209,30 @@ class token
 	}
 
 public:
-	/** Smart/shared pointer to an object of this class */
-	using ptr_t = std::shared_ptr<token>;
-	/** Smart/shared pointer to an object of this class */
-	using const_ptr_t = std::shared_ptr<const token>;
-	/** Weak pointer to an object of this class */
-	using weak_ptr_t = std::weak_ptr<token>;
+	/**
+	 * Constructs a token object.
+	 * @param cli The client that created the token.
+	 */
+	token(Type typ, iasync_client& cli)
+		: token(typ, cli, MQTTAsync_token(0)) {}
+	/**
+	 * Constructs a token object.
+	 * @param cli The client that created the token.
+	 * @param userContext optional object used to pass context to the
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param cb callback listener that will be notified when subscribe has
+	 *  		 completed
+	 */
+	token(Type typ, iasync_client& cli, void* userContext, iaction_listener& cb)
+		: token(typ, cli, const_string_collection_ptr(), userContext, cb) {}
 
 	/**
 	 * Constructs a token object.
 	 * @param cli The client that created the token.
-	 */
-	token(iasync_client& cli);
-	/**
-	 * Constructs a token object.
-	 * @param cli The client that created the token.
-	 * @param userContext optional object used to pass context to the
-	 *  				  callback. Use @em nullptr if not required.
-	 * @param cb callback listener that will be notified when subscribe has
-	 *  		 completed
-	 */
-	token(iasync_client& cli, void* userContext, iaction_listener& cb);
-	/**
-	 * Constructs a token object.
-	 * @param cli The client that created the token.
 	 * @param topic The topic assiciated with the token
 	 */
-	token(iasync_client& cli, const string& topic);
+	token(Type typ, iasync_client& cli, const string& topic)
+		: token(typ, cli, string_collection::create(topic)) {}
 	/**
 	 * Constructs a token object.
 	 * @param cli The client that created the token.
@@ -197,14 +242,16 @@ public:
 	 * @param cb callback listener that will be notified when subscribe has
 	 *  		 completed
 	 */
-	token(iasync_client& cli, const string& topic,
-		  void* userContext, iaction_listener& cb);
+	token(Type typ, iasync_client& cli, const string& topic,
+		  void* userContext, iaction_listener& cb)
+		: token(typ, cli, string_collection::create(topic), userContext, cb) {}
+
 	/**
 	 * Constructs a token object.
 	 * @param cli The client that created the token.
 	 * @param topics The topics associated with the token
 	 */
-	token(iasync_client& cli, const_string_collection_ptr topics);
+	token(Type typ, iasync_client& cli, const_string_collection_ptr topics);
 	/**
 	 * Constructs a token object.
 	 * @param cli The client that created the token.
@@ -214,14 +261,14 @@ public:
 	 * @param cb callback listener that will be notified when subscribe has
 	 *  		 completed
 	 */
-	token(iasync_client& cli, const_string_collection_ptr topics,
+	token(Type typ, iasync_client& cli, const_string_collection_ptr topics,
 		  void* userContext, iaction_listener& cb);
 	/**
 	 * Constructs a token object.
 	 * @param cli The client that created the token.
 	 * @param tok The message ID
 	 */
-	token(iasync_client& cli, MQTTAsync_token tok);
+	token(Type typ, iasync_client& cli, MQTTAsync_token tok);
 	/**
 	 * Virtual destructor.
 	 */
@@ -231,8 +278,8 @@ public:
 	 * @param cli The client that created the token.
 	 * @return A smart/shared pointer to a token.
 	 */
-	static ptr_t create(iasync_client& cli) {
-		return std::make_shared<token>(cli);
+	static ptr_t create(Type typ, iasync_client& cli) {
+		return std::make_shared<token>(typ, cli);
 	}
 	/**
 	 * Constructs a token object.
@@ -242,16 +289,17 @@ public:
 	 * @param cb callback listener that will be notified when subscribe has
 	 *  		 completed
 	 */
-	static ptr_t create(iasync_client& cli, void* userContext, iaction_listener& cb) {
-		return std::make_shared<token>(cli, userContext, cb);
+	static ptr_t create(Type typ, iasync_client& cli, void* userContext,
+						iaction_listener& cb) {
+		return std::make_shared<token>(typ, cli, userContext, cb);
 	}
 	/**
 	 * Constructs a token object.
 	 * @param cli The client that created the token.
 	 * @param topic The topic assiciated with the token
 	 */
-	static ptr_t create(iasync_client& cli, const string& topic) {
-		return std::make_shared<token>(cli, topic);
+	static ptr_t create(Type typ, iasync_client& cli, const string& topic) {
+		return std::make_shared<token>(typ, cli, topic);
 	}
 	/**
 	 * Constructs a token object.
@@ -262,17 +310,17 @@ public:
 	 * @param cb callback listener that will be notified when subscribe has
 	 *  		 completed
 	 */
-	static ptr_t create(iasync_client& cli, const string& topic,
+	static ptr_t create(Type typ, iasync_client& cli, const string& topic,
 						void* userContext, iaction_listener& cb) {
-		return std::make_shared<token>(cli, topic, userContext, cb);
+		return std::make_shared<token>(typ, cli, topic, userContext, cb);
 	}
 	/**
 	 * Constructs a token object.
 	 * @param cli The client that created the token.
 	 * @param topics The topics associated with the token
 	 */
-	static ptr_t create(iasync_client& cli, const_string_collection_ptr topics) {
-		return std::make_shared<token>(cli, topics);
+	static ptr_t create(Type typ, iasync_client& cli, const_string_collection_ptr topics) {
+		return std::make_shared<token>(typ, cli, topics);
 	}
 	/**
 	 * Constructs a token object.
@@ -283,9 +331,17 @@ public:
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb callback listener that will be notified when subscribe has
 	 */
-	static ptr_t create(iasync_client& cli, const_string_collection_ptr topics,
+	static ptr_t create(Type typ, iasync_client& cli, const_string_collection_ptr topics,
 						void* userContext, iaction_listener& cb) {
-		return std::make_shared<token>(cli, topics, userContext, cb);
+		return std::make_shared<token>(typ, cli, topics, userContext, cb);
+	}
+	/**
+	 * Gets the type of action the token is tracking, like CONNECT, PUBLISH,
+	 * etc.
+	 * @return The type of action the token is tracking.
+	 */
+	Type get_type() const {
+		return type_;
 	}
 	/**
 	 * Gets the action listener for this token.
@@ -306,8 +362,8 @@ public:
 	 * @return The message ID of the transaction being tracked.
 	 */
 	virtual int get_message_id() const {
-		static_assert(sizeof(tok_) <= sizeof(int), "MQTTAsync_token must fit into int");
-		return int(tok_);
+		static_assert(sizeof(msgId_) <= sizeof(int), "MQTTAsync_token must fit into int");
+		return int(msgId_);
 	}
 	/**
 	 * Gets the topic string(s) for the action being tracked by this
@@ -355,6 +411,38 @@ public:
 		guard g(lock_);
 		userContext_ = userContext;
 	}
+	/**
+	 * Sets the number of results expected.
+	 * This is only required for subecribe_many() with < MQTTv5
+	 * @param n The number of results expected.
+	 */
+	void set_num_expected(size_t n) {
+		nExpected_ = n;
+	}
+	/**
+	 * Gets the properties for the operation.
+	 * @return A const reference to the properties for the operation
+	 */
+	const properties& get_properties() const { return props_; }
+	/**
+	 * Gets the reason code for the operation.
+	 * @return The reason code for the operation.
+	 */
+	ReasonCode get_reason_code() const {
+		return reasonCode_;
+	}
+	/**
+	 * Gets the connect response, if available.
+	 * The connect response will be available after a connect token completes.
+	 * @return The server response for the connection.
+	 */
+	connect_response get_connect_response() const {
+		if (connRsp_)
+			return *connRsp_;
+		// TODO: Better exception
+		throw std::exception();
+	}
+
 	/**
 	 * Blocks the current thread until the action this token is associated
 	 * with has completed.
@@ -417,6 +505,7 @@ using token_ptr = token::ptr_t;
 
 /** Smart/shared pointer to a const token object */
 using const_token_ptr = token::const_ptr_t;
+
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt

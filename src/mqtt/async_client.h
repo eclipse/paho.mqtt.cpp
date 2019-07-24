@@ -45,12 +45,25 @@
 
 namespace mqtt {
 
-/** The version number for the client library. */
-const uint32_t VERSION = 0x01010000;
-/** The version string for the client library  */
-const string VERSION_STR("Paho MQTT C++ (mqttpp) v. 1.1");
-/** Copyright notice for the client library */
-const string COPYRIGHT("Copyright (c) 2013-2019 Frank Pagliughi");
+// OBSOLETE: The legacy constants that lacked the "PAHO_MQTTPP_" prefix
+// clashed with #define's from other libraries and will be removed at the
+// next major version upgrade.
+
+#if defined(PAHO_MQTTPP_VERSIONS)
+	/** The version number for the client library. */
+	const uint32_t PAHO_MQTTPP_VERSION = 0x01010000;
+	/** The version string for the client library  */
+	const string PAHO_MQTTPP_VERSION_STR("Paho MQTT C++ (mqttpp) v. 1.1");
+	/** Copyright notice for the client library */
+	const string PAHO_MQTTPP_COPYRIGHT("Copyright (c) 2013-2019 Frank Pagliughi");
+#else
+	/** The version number for the client library. */
+	const uint32_t VERSION = 0x01010000;
+	/** The version string for the client library  */
+	const string VERSION_STR("Paho MQTT C++ (mqttpp) v. 1.1");
+	/** Copyright notice for the client library */
+	const string COPYRIGHT("Copyright (c) 2013-2019 Frank Pagliughi");
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -212,7 +225,7 @@ public:
 	 * @throw security_exception for security related problems
 	 */
 	token_ptr connect(connect_options options, void* userContext,
-					   iaction_listener& cb) override;
+					  iaction_listener& cb) override;
 	/**
 	 *
 	 * @param userContext optional object used to pass context to the
@@ -593,7 +606,19 @@ public:
 		return que_->try_get_for(msg, relTime);
 	}
 	/**
-	 * Waits until a specific time for a message to occur.
+	 * Waits a limited time for a message to arrive.
+	 * @param relTime The maximum amount of time to wait for a message.
+	 * @return A shared pointer to the message that was received. It will be
+	 *  	   empty on timeout.
+	 */
+	template <typename Rep, class Period>
+	const_message_ptr try_consume_message_for(const std::chrono::duration<Rep, Period>& relTime) {
+		const_message_ptr msg;
+		que_->try_get_for(&msg, relTime);
+		return msg;
+	}
+	/**
+	 * Waits until a specific time for a message to appear.
 	 * @param msg Pointer to the value to receive the message
 	 * @param absTime The time point to wait until, before timing out.
 	 * @return @em true if a message was read, @em false if a timeout
@@ -603,6 +628,19 @@ public:
 	bool try_consume_message_until(const_message_ptr* msg,
 								   const std::chrono::time_point<Clock,Duration>& absTime) {
 		return que_->try_get_until(msg, absTime);
+	}
+	/**
+	 * Waits until a specific time for a message to appear.
+	 * @param msg Pointer to the value to receive the message
+	 * @param absTime The time point to wait until, before timing out.
+	 * @return @em true if a message was read, @em false if a timeout
+	 *  	   occurred.
+	 */
+	template <class Clock, class Duration>
+	const_message_ptr try_consume_message_until(const std::chrono::time_point<Clock,Duration>& absTime) {
+		const_message_ptr msg;
+		que_->try_get_until(msg, absTime);
+		return msg;
 	}
 
 };

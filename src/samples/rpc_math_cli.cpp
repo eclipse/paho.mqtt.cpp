@@ -1,4 +1,4 @@
-// async_publish.cpp
+// rpc_math_cli.cpp
 //
 // This is a Paho MQTT v5 C++ sample application.
 //
@@ -8,10 +8,10 @@
 //
 // The sample demonstrates:
 //  - Connecting to an MQTT server/broker
-//  - Publishing RPC reuest messages
-//  - Last will and testament
+//  - Using MQTT v5 properties
+//  - Publishing RPC request messages
 //  - Using asynchronous tokens
-//  - Implementing callbacks and action listeners
+//	- Subscribing to reply topic
 //
 
 /*******************************************************************************
@@ -31,6 +31,7 @@
  *******************************************************************************/
 
 #include <iostream>
+#include <sstream>
 #include <cstdlib>
 #include <string>
 #include <thread>	// For sleep
@@ -41,142 +42,91 @@
 #include "mqtt/properties.h"
 
 using namespace std;
+using namespace std::chrono;
 
-const std::string DFLT_SERVER_ADDRESS	{ "tcp://localhost:1883" };
-const std::string DFLT_CLIENT_ID		{ "cpp_rpc_math_cli" };
-
-const string TOPIC { "requests/math" };
-const int  QOS = 1;
+const string	SERVER_ADDRESS { "tcp://localhost:1883" };
+const string	REQ_TOPIC { "requests/math" };
+const int		QOS = 1;
 
 const auto TIMEOUT = std::chrono::seconds(10);
 
 /////////////////////////////////////////////////////////////////////////////
 
-/**
- * A callback class for use with the main MQTT client.
- */
-class callback : public virtual mqtt::callback
-{
-public:
-	void connection_lost(const string& cause) override {
-		cout << "\nConnection lost" << endl;
-		if (!cause.empty())
-			cout << "\tcause: " << cause << endl;
-	}
-
-	void delivery_complete(mqtt::delivery_token_ptr tok) override {
-		cout << "\tDelivery complete for token: "
-			<< (tok ? tok->get_message_id() : -1) << endl;
-	}
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
-/**
- * A base action listener.
- */
-class action_listener : public virtual mqtt::iaction_listener
-{
-protected:
-	void on_failure(const mqtt::token& tok) override {
-		cout << "\tListener failure for token: "
-			<< tok.get_message_id() << endl;
-	}
-
-	void on_success(const mqtt::token& tok) override {
-		cout << "\tListener success for token: "
-			<< tok.get_message_id() << endl;
-	}
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
-/**
- * A derived action listener for publish events.
- */
-class delivery_action_listener : public action_listener
-{
-	atomic<bool> done_;
-
-	void on_failure(const mqtt::token& tok) override {
-		action_listener::on_failure(tok);
-		done_ = true;
-	}
-
-	void on_success(const mqtt::token& tok) override {
-		action_listener::on_success(tok);
-		done_ = true;
-	}
-
-public:
-	delivery_action_listener() : done_(false) {}
-	bool is_done() const { return done_; }
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
 int main(int argc, char* argv[])
 {
-	string	address  = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS,
-			clientID = (argc > 2) ? string(argv[2]) : DFLT_CLIENT_ID;
-
-	cout << "Initializing for server '" << address << "'..." << endl;
-	mqtt::async_client client(address, clientID);
-
-	callback cb;
-	client.set_callback(cb);
+	mqtt::async_client cli(SERVER_ADDRESS, "");
 
 	mqtt::connect_options connopts;
 	connopts.set_mqtt_version(MQTTVERSION_5);
-	connopts.set_clean_session(false);
+	connopts.set_clean_start(true);
 
-	cout << "  ...OK" << endl;
+	cli.start_consuming();
 
 	try {
-		cout << "\nConnecting..." << endl;
-		mqtt::token_ptr conntok = client.connect(connopts);
-		cout << "Waiting for the connection..." << endl;
+		cout << "\nConnecting..." << flush;
+		mqtt::token_ptr conntok = cli.connect(connopts);
 		conntok->wait();
-		cout << "  ...OK" << endl;
+		auto connRsp = conntok->get_connect_response();
+		cout << "OK (" << connRsp.serverURI << ")" << endl;
 
-		/*
-		mqtt::property fmtind  { mqtt::property::PAYLOAD_FORMAT_INDICATOR, 42 };
-		mqtt::property msgexp  { mqtt::property::MESSAGE_EXPIRY_INTERVAL, 1000 };
-		mqtt::property rsptop  { mqtt::property::RESPONSE_TOPIC, "replies/bubba" };
-		mqtt::property usrprop { mqtt::property::USER_PROPERTY, "bubba", "wally wanna" };
+		// Figure out the "reply to" topic from the assigned (unique) client ID
+		mqtt::properties conn_props = conntok->get_properties();
+		string clientId = get<string>(conntok->get_properties(),
+									  mqtt::property::ASSIGNED_CLIENT_IDENTIFER);
 
-		mqtt::property usrprop2 { std::move(usrprop) };
-		auto usr = mqtt::get<mqtt::string_pair>(usrprop2);
+		//cout << "Client ID: " << clientId << endl;
+		string repTopic = "replies/" + clientId + "/math";
+		cout << "    Reply topic: " << repTopic << endl;
 
-		cout << fmtind.type_name() << ": "
-				<< unsigned(mqtt::get<uint8_t>(fmtind)) << "\n"
-			<< msgexp.type_name() << ": "
-				<< mqtt::get<int16_t>(msgexp) << "\n"
-			<< rsptop.type_name() << ": "
-				<< mqtt::get<string>(rsptop) << "\n"
-			<< usrprop.type_name() << ": ("
-				<< std::get<0>(usr) << ", "
-				<< std::get<1>(usr) << ")" << "\n"
-			<< endl;
-		*/
+		// Subscribe to the reply topic and verify the QoS
 
-		mqtt::properties props;
-		props.add({ mqtt::property::RESPONSE_TOPIC, "replies/bubba" });
-		props.add({ mqtt::property::CORRELATION_DATA, "1" });
+		mqtt::token_ptr tok = cli.subscribe(repTopic, 1);
+		tok->wait();
 
-		cout << "\nSending request..." << endl;
-		mqtt::message_ptr pubmsg = mqtt::make_message(TOPIC, "[4, 5]");
+		if (int(tok->get_reason_code()) != 1) {
+			cerr << "Error: Server doesn't support reply QoS: "
+				<< tok->get_reason_code() << endl;
+			return 1;
+		}
+
+		mqtt::properties props {
+			{ mqtt::property::RESPONSE_TOPIC, repTopic },
+			{ mqtt::property::CORRELATION_DATA, "1" }
+		};
+
+		ostringstream os;
+		os << "[ ";
+		for (int i=1; i<argc-1; ++i)
+			os << argv[i] << ", ";
+		os << argv[argc-1] << " ]";
+
+		cout << "\nSending add request " << os.str() << "..." << flush;
+		mqtt::message_ptr pubmsg = mqtt::make_message(REQ_TOPIC, os.str());
 		pubmsg->set_qos(QOS);
 		pubmsg->set_properties(props);
 
-		client.publish(pubmsg)->wait_for(TIMEOUT);
-		cout << "  ...OK" << endl;
+		cli.publish(pubmsg)->wait_for(TIMEOUT);
+		cout << "OK" << endl;
+
+		// Wait for reply.
+
+		auto msg = cli.try_consume_message_for(seconds(5));
+		if (!msg) {
+			cerr << "Didn't receive a reply from the service." << endl;
+			return 1;
+		}
+
+		//cout << msg->get_topic() << ": " << msg->to_string() << endl;
+		cout << "  Result: " << msg->to_string() << endl;
+
+		// Unsubscribe
+
+		cli.unsubscribe(repTopic)->wait();
 
 		// Disconnect
-		cout << "\nDisconnecting..." << endl;
-		conntok = client.disconnect();
-		conntok->wait();
-		cout << "  ...OK" << endl;
+		cout << "\nDisconnecting..." << flush;
+		cli.disconnect()->wait();
+		cout << "OK" << endl;
 	}
 	catch (const mqtt::exception& exc) {
 		cerr << exc.what() << endl;

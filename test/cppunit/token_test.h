@@ -3,6 +3,7 @@
 
 /*******************************************************************************
  * Copyright (c) 2016 Guilherme M. Ferreira <guilherme.maciel.ferreira@gmail.com>
+ * Copyright (c) 2016-2019 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,6 +17,7 @@
  * Contributors:
  *    Guilherme M. Ferreira - initial implementation and documentation
  *    Frank Pagliughi - additional tests. Made this test a friend of token.
+ *    Frank Pagliughi - Updated for token::Type
  *******************************************************************************/
 
 #ifndef __mqtt_token_test_h
@@ -60,6 +62,8 @@ class token_test : public CppUnit::TestFixture
 
 	mqtt::test::dummy_async_client cli;
 
+	static constexpr token::Type TYPE = token::Type::CONNECT;
+
 public:
 	void setUp() {}
 	void tearDown() {}
@@ -69,7 +73,7 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_user_constructor_client() {
-		mqtt::token tok{ cli };
+		mqtt::token tok{ TYPE, cli };
 		CPPUNIT_ASSERT_EQUAL(0, tok.get_message_id());
 		CPPUNIT_ASSERT_EQUAL(dynamic_cast<mqtt::iasync_client*>(&cli), tok.get_client());
 		CPPUNIT_ASSERT(nullptr == tok.get_user_context());
@@ -84,7 +88,7 @@ public:
 
 	void test_user_constructor_client_token() {
 		MQTTAsync_token id {2};
-		mqtt::token tok{ cli, id };
+		mqtt::token tok{ TYPE, cli, id };
 		CPPUNIT_ASSERT_EQUAL(id, tok.get_message_id());
 		CPPUNIT_ASSERT_EQUAL(dynamic_cast<mqtt::iasync_client*>(&cli), tok.get_client());
 		CPPUNIT_ASSERT(nullptr == tok.get_user_context());
@@ -99,7 +103,7 @@ public:
 
 	void test_user_constructor_client_string() {
 		std::string topic { "topic" };
-		mqtt::token tok{ cli, topic };
+		mqtt::token tok{ TYPE, cli, topic };
 		CPPUNIT_ASSERT_EQUAL(0, tok.get_message_id());
 		CPPUNIT_ASSERT_EQUAL(dynamic_cast<mqtt::iasync_client*>(&cli), tok.get_client());
 		CPPUNIT_ASSERT(nullptr == tok.get_user_context());
@@ -116,7 +120,7 @@ public:
 
 	void test_user_constructor_client_vector() {
 		auto topics = string_collection::create({ "topic1", "topic2" });
-		mqtt::token tok{ cli, topics };
+		mqtt::token tok{ TYPE, cli, topics };
 		CPPUNIT_ASSERT_EQUAL(0, tok.get_message_id());
 		CPPUNIT_ASSERT_EQUAL(dynamic_cast<mqtt::iasync_client*>(&cli), tok.get_client());
 		CPPUNIT_ASSERT_EQUAL(static_cast<void*>(nullptr), tok.get_user_context());
@@ -133,7 +137,7 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_on_success_with_data() {
-		mqtt::token tok{ cli };
+		mqtt::token tok{ TYPE, cli };
 
 		constexpr int MESSAGE_ID = 12;
 		MQTTAsync_successData data = {
@@ -151,7 +155,7 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_on_success_without_data() {
-		mqtt::token tok{ cli };
+		mqtt::token tok{ TYPE, cli };
 
 		CPPUNIT_ASSERT_EQUAL(false, tok.is_complete());
 		token::on_success(&tok, nullptr);
@@ -163,7 +167,7 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_on_failure_with_data() {
-		mqtt::token tok{ cli };
+		mqtt::token tok{ TYPE, cli };
 
 		CPPUNIT_ASSERT_EQUAL(false, tok.is_complete());
 		constexpr int MESSAGE_ID = 12;
@@ -182,7 +186,7 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_on_failure_without_data() {
-		mqtt::token tok{ cli };
+		mqtt::token tok{ TYPE, cli };
 
 		CPPUNIT_ASSERT_EQUAL(false, tok.is_complete());
 		token::on_failure(&tok, nullptr);
@@ -196,7 +200,7 @@ public:
 
 	void test_action_callback() {
 		mqtt::test::dummy_action_listener listener;
-		mqtt::token tok{ cli };
+		mqtt::token tok{ TYPE, cli };
 		tok.set_action_callback(listener);
 		CPPUNIT_ASSERT_EQUAL(dynamic_cast<mqtt::iaction_listener*>(&listener), tok.get_action_callback());
 
@@ -217,7 +221,7 @@ public:
 	void test_wait_success() {
 		const auto TIMEOUT = milliseconds(10);
 
-		mqtt::token tok{ cli };
+		mqtt::token tok{ TYPE, cli };
 
 		// NOTE: Make sure the complete flag is already true and the return
 		// code (rc) is MQTTASYNC_SUCCESS, so the token::wait()
@@ -273,7 +277,7 @@ public:
 	void test_wait_failure() {
 		const auto TIMEOUT = milliseconds(10);
 
-		mqtt::token tok{ cli };
+		mqtt::token tok{ TYPE, cli };
 
 		// NOTE: Make sure the complete flag is already true and the return
 		// code (rc) is MQTTASYNC_FAILURE, so the token::wait()
@@ -332,7 +336,7 @@ public:
 	void test_wait_for_timeout() {
 		const auto TIMEOUT = milliseconds(10);
 
-		mqtt::token tok{ cli };
+		mqtt::token tok{ TYPE, cli };
 
 		// Test for timeout on non-signaled token.
 		CPPUNIT_ASSERT_EQUAL(false, tok.is_complete());
@@ -363,9 +367,7 @@ public:
 		catch (...) {
 			CPPUNIT_FAIL("token::wait_until() should not throw on timeout");
 		}
-
 	}
-
 };
 
 /////////////////////////////////////////////////////////////////////////////

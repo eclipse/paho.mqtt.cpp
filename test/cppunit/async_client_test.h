@@ -194,7 +194,7 @@ public:
 		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
-		mqtt::token_ptr token_conn { nullptr };
+		mqtt::token_ptr token_conn;	//{ nullptr };
 		mqtt::connect_options co;
 		mqtt::will_options wo;
 		wo.set_qos(BAD_QOS); // Invalid QoS causes connection failure
@@ -243,7 +243,7 @@ public:
 		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
-		mqtt::token_ptr token_conn { nullptr };
+		mqtt::token_ptr token_conn;		//{ nullptr };
 		mqtt::connect_options co;
 		mqtt::will_options wo;
 		wo.set_qos(BAD_QOS); // Invalid QoS causes connection failure
@@ -327,7 +327,7 @@ public:
 		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
-		mqtt::token_ptr token_disconn { nullptr };
+		mqtt::token_ptr token_disconn;	//{ nullptr };
 		int reason_code = MQTTASYNC_SUCCESS;
 		try {
 			token_disconn = cli.disconnect(0);
@@ -378,7 +378,7 @@ public:
 		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
-		mqtt::token_ptr token_disconn { nullptr };
+		mqtt::token_ptr token_disconn;	//{ nullptr };
 		mqtt::test::dummy_action_listener listener;
 		int reason_code = MQTTASYNC_SUCCESS;
 		try {
@@ -413,8 +413,8 @@ public:
 		// delivery_token via async_client::add_token(delivery_token_ptr tok).
 		// The other functions add token async_client::add_token(token_ptr tok).
 
-		mqtt::delivery_token_ptr token_pub { nullptr };
-		mqtt::delivery_token_ptr token_pending { nullptr };
+		mqtt::delivery_token_ptr token_pub;	// { nullptr };
+		mqtt::delivery_token_ptr token_pending;	// { nullptr };
 
 		// NOTE: message IDs are 16-bit numbers sequentially incremented, from
 		// 1 to 65535 (MAX_MSG_ID). See MQTTAsync_assignMsgId() at Paho MQTT C.
@@ -474,7 +474,7 @@ public:
 		token_conn->wait();
 		CPPUNIT_ASSERT(cli.is_connected());
 
-		mqtt::delivery_token_ptr token_pub { nullptr };
+		mqtt::delivery_token_ptr token_pub;	// { nullptr };
 
 		// NOTE: async_client::publish() is the only method that adds
 		// delivery_token via async_client::add_token(delivery_token_ptr tok).

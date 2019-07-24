@@ -153,13 +153,21 @@ void connect_options::set_token(const token_ptr& tok)
 	tok_ = tok;
 	opts_.context = tok_.get();
 
+	opts_.onSuccess = nullptr;
+	opts_.onFailure = nullptr;
+
+	opts_.onSuccess5 = nullptr;
+	opts_.onFailure5 = nullptr;
+
 	if (tok) {
-		opts_.onSuccess = &token::on_success;
-		opts_.onFailure = &token::on_failure;
-	}
-	else {
-		opts_.onSuccess = nullptr;
-		opts_.onFailure = nullptr;
+		if (opts_.MQTTVersion < MQTTVERSION_5) {
+			opts_.onSuccess = &token::on_success;
+			opts_.onFailure = &token::on_failure;
+		}
+		else {
+			opts_.onSuccess5 = &token::on_success5;
+			opts_.onFailure5 = &token::on_failure5;
+		}
 	}
 }
 

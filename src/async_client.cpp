@@ -34,6 +34,27 @@
 	#define MQTTAsync_createOptions_initializer5 { {'M', 'Q', 'C', 'O'}, 0, 0, 100, MQTTVERSION_5 }
 #endif
 
+/////////////////////////////////////////////////////////////////////////////
+// Paho C logger
+
+enum LOG_LEVELS {
+	INVALID_LEVEL = -1,
+	TRACE_MAX = 1,
+	TRACE_MED,
+	TRACE_MIN,
+	TRACE_PROTOCOL,
+	LOG_PROTOCOL = TRACE_PROTOCOL,
+	LOG_ERROR,
+	LOG_SEVERE,
+	LOG_FATAL,
+};
+
+extern "C" {
+	void Log(enum LOG_LEVELS, int, const char *, ...);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
@@ -129,6 +150,8 @@ async_client::~async_client()
 // is notified of success on a normal connect with callbacks. 
 void async_client::on_connected(void* context, char* cause)
 {
+	::Log(TRACE_MIN, -1, "[cpp] on_connected");
+
 	if (context) {
 		async_client* cli = static_cast<async_client*>(context);
 		callback* cb = cli->userCallback_;
@@ -143,6 +166,8 @@ void async_client::on_connected(void* context, char* cause)
 // MQTTAsync_setCallbacks(). 
 void async_client::on_connection_lost(void *context, char *cause)
 {
+	::Log(TRACE_MIN, -1, "[cpp] on_connection lost");
+
 	if (context) {
 		async_client* cli = static_cast<async_client*>(context);
 		callback* cb = cli->userCallback_;
@@ -294,8 +319,8 @@ token_ptr async_client::connect()
 
 token_ptr async_client::connect(connect_options opts)
 {
-	// TODO: We really should get this value from the response (when
-	// 		the server confirms the requested version)
+	// TODO: We really should get (or update) this value from the response
+	//  	(when the server confirms the requested version)
 	mqttVersion_ = opts.opts_.MQTTVersion;
 
 	// TODO: If connTok_ is non-null, there could be a pending connect
@@ -304,7 +329,7 @@ token_ptr async_client::connect(connect_options opts)
 	// token which was destroyed. So for now, keep the old one alive within
 	// this function, and check the behavior of the C library...
 	auto tmpTok = connTok_;
-	connTok_ = token::create(*this);
+	connTok_ = token::create(token::Type::CONNECT, *this);
 	add_token(connTok_);
 
 	opts.set_token(connTok_);
@@ -321,14 +346,14 @@ token_ptr async_client::connect(connect_options opts)
 }
 
 token_ptr async_client::connect(connect_options opts, void* userContext,
-								iaction_listener& cb)
+										iaction_listener& cb)
 {
 	// TODO: We really should get this value from the response (when
 	// 		the server confirms the requested version)
 	mqttVersion_ = opts.opts_.MQTTVersion;
 
 	auto tmpTok = connTok_;
-	connTok_ = token::create(*this, userContext, cb);
+	connTok_ = token::create(token::Type::CONNECT, *this, userContext, cb);
 	add_token(connTok_);
 
 	opts.set_token(connTok_);
@@ -375,7 +400,7 @@ token_ptr async_client::reconnect()
 
 token_ptr async_client::disconnect(disconnect_options opts)
 {
-	auto tok = token::create(*this);
+	auto tok = token::create(token::Type::DISCONNECT, *this);
 	add_token(tok);
 
 	opts.set_token(tok);
@@ -392,7 +417,7 @@ token_ptr async_client::disconnect(disconnect_options opts)
 
 token_ptr async_client::disconnect(int timeout)
 {
-	auto tok = token::create(*this);
+	auto tok = token::create(token::Type::DISCONNECT, *this);
 	add_token(tok);
 
 	disconnect_options opts(timeout, tok);
@@ -409,7 +434,7 @@ token_ptr async_client::disconnect(int timeout)
 
 token_ptr async_client::disconnect(int timeout, void* userContext, iaction_listener& cb)
 {
-	auto tok = token::create(*this, userContext, cb);
+	auto tok = token::create(token::Type::DISCONNECT, *this, userContext, cb);
 	add_token(tok);
 
 	disconnect_options opts(timeout, tok);
@@ -562,7 +587,9 @@ token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 	if (n != qos.size())
 		throw std::invalid_argument("Collection sizes don't match");
 
-	auto tok = token::create(*this, topicFilters);
+	auto tok = token::create(token::Type::SUBSCRIBE_MANY, *this, topicFilters);
+	tok->set_num_expected(n);
+
 	add_token(tok);
 
 	response_options opts(tok, mqttVersion_);
@@ -587,7 +614,9 @@ token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 	if (n != qos.size())
 		throw std::invalid_argument("Collection sizes don't match");
 
-	auto tok = token::create(*this, topicFilters, userContext, cb);
+	auto tok = token::create(token::Type::SUBSCRIBE_MANY, *this,
+							 topicFilters, userContext, cb);
+	tok->set_num_expected(n);
 	add_token(tok);
 
 	response_options opts(tok, mqttVersion_);
@@ -605,7 +634,7 @@ token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 
 token_ptr async_client::subscribe(const string& topicFilter, int qos)
 {
-	auto tok = token::create(*this, topicFilter);
+	auto tok = token::create(token::Type::SUBSCRIBE, *this, topicFilter);
 	add_token(tok);
 
 	response_options opts(tok, mqttVersion_);
@@ -623,7 +652,8 @@ token_ptr async_client::subscribe(const string& topicFilter, int qos)
 token_ptr async_client::subscribe(const string& topicFilter, int qos,
 								   void* userContext, iaction_listener& cb)
 {
-	auto tok = token::create(*this, topicFilter, userContext, cb);
+	auto tok = token::create(token::Type::SUBSCRIBE, *this, topicFilter,
+							 userContext, cb);
 	add_token(tok);
 
 	response_options opts(tok, mqttVersion_);
@@ -643,7 +673,7 @@ token_ptr async_client::subscribe(const string& topicFilter, int qos,
 
 token_ptr async_client::unsubscribe(const string& topicFilter)
 {
-	auto tok = token::create(*this, topicFilter);
+	auto tok = token::create(token::Type::UNSUBSCRIBE, *this, topicFilter);
 	add_token(tok);
 
 	response_options opts(tok, mqttVersion_);
@@ -662,7 +692,8 @@ token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters)
 {
 	size_t n = topicFilters->size();
 
-	auto tok = token::create(*this, topicFilters);
+	auto tok = token::create(token::Type::UNSUBSCRIBE_MANY, *this, topicFilters);
+	tok->set_num_expected(n);
 	add_token(tok);
 
 	response_options opts(tok, mqttVersion_);
@@ -683,7 +714,9 @@ token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters,
 {
 	size_t n = topicFilters->size();
 
-	auto tok = token::create(*this, topicFilters, userContext, cb);
+	auto tok = token::create(token::Type::UNSUBSCRIBE_MANY, *this, topicFilters,
+							 userContext, cb);
+	tok->set_num_expected(n);
 	add_token(tok);
 
 	response_options opts(tok, mqttVersion_);
@@ -701,7 +734,8 @@ token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters,
 token_ptr async_client::unsubscribe(const string& topicFilter,
 									void* userContext, iaction_listener& cb)
 {
-	auto tok = token::create(*this, topicFilter, userContext, cb);
+	auto tok = token::create(token::Type::UNSUBSCRIBE , *this, topicFilter,
+							 userContext, cb);
 	add_token(tok);
 
 	response_options opts(tok, mqttVersion_);

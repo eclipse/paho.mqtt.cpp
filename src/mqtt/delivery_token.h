@@ -64,14 +64,14 @@ public:
 	 * Creates an empty delivery token connected to a particular client.
 	 * @param cli The asynchronous client object.
 	 */
-	delivery_token(iasync_client& cli) : token(cli) {}
+	delivery_token(iasync_client& cli) : token(token::Type::PUBLISH, cli) {}
 	/**
 	 * Creates a delivery token connected to a particular client.
 	 * @param cli The asynchronous client object.
 	 * @param msg The message being tracked.
 	 */
 	delivery_token(iasync_client& cli, const_message_ptr msg)
-			: token(cli, msg->get_topic()), msg_(std::move(msg)) {}
+			: token(token::Type::PUBLISH, cli, msg->get_topic()), msg_(std::move(msg)) {}
 	/**
 	 * Creates a delivery token connected to a particular client.
 	 * @param cli The asynchronous client object.
@@ -84,7 +84,7 @@ public:
 	 */
 	delivery_token(iasync_client& cli, const_message_ptr msg,
 				   void* userContext, iaction_listener& cb)
-			: token(cli, msg->get_topic(), userContext, cb), msg_(std::move(msg)) {}
+			: token(token::Type::PUBLISH, cli, msg->get_topic(), userContext, cb), msg_(std::move(msg)) {}
 	/**
 	 * Creates an empty delivery token connected to a particular client.
 	 * @param cli The asynchronous client object.

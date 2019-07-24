@@ -47,6 +47,8 @@ class disconnect_options_test : public CppUnit::TestFixture
 	const std::string EMPTY_STR;
 	mqtt::test::dummy_async_client cli;
 
+	static constexpr token::Type TOKEN_TYPE = token::Type::DISCONNECT;
+
 public:
 	void setUp() {}
 	void tearDown() {}
@@ -76,7 +78,7 @@ public:
 	void test_user_constructor() {
 		const int TIMEOUT = 10;
 
-		auto tok = token::create(cli);
+		auto tok = token::create(TOKEN_TYPE, cli);
 		mqtt::disconnect_options opts { TIMEOUT, tok };
 
 		const auto& c_struct = opts.opts_;
@@ -114,7 +116,7 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_set_token() {
-		auto tok = token::create(cli);
+		auto tok = token::create(TOKEN_TYPE, cli);
 		mqtt::disconnect_options opts;
 
 		const auto& c_struct = opts.opts_;

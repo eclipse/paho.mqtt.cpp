@@ -24,14 +24,16 @@
 #ifndef __mqtt_properties_h
 #define __mqtt_properties_h
 
-#include <tuple>
 extern "C" {
 	#include "MQTTProperties.h"
 }
 
 #include "mqtt/types.h"
 #include "mqtt/buffer_ref.h"
+#include <tuple>
+#include <initializer_list>
 
+#include <iostream>
 
 namespace mqtt {
 
@@ -213,7 +215,20 @@ public:
 	 * Creates an empty properties list.
 	 */
 	properties() {
-		std::memset(&props_, 0, sizeof(properties));
+		std::memset(&props_, 0, sizeof(MQTTProperties));
+	}
+	/**
+	 * Copy constructor.
+	 * @param other The property list to copy.
+	 */
+	properties(const properties& other)
+			: props_(::MQTTProperties_copy(&other.props_)) {}
+	/**
+	 * Move constructor.
+	 * @param other The property list to move to this one.
+	 */
+	properties(properties&& other) : props_(other.props_) {
+		std::memset(&other.props_, 0, sizeof(MQTTProperties));
 	}
 	/**
 	 * Creates a list of properties from a C struct.
@@ -223,33 +238,55 @@ public:
 		props_ = ::MQTTProperties_copy(&cprops);
 	}
 	/**
+	 * Constructs from a list of property objects.
+	 * @param An initializer list of property objects.
+	 */
+	properties(std::initializer_list<property> props);
+	/**
 	 * Destructor.
 	 */
-	~properties() {
-		::MQTTProperties_free(&props_);
-	}
+	~properties() { ::MQTTProperties_free(&props_); }
 	/**
 	 * Gets a reference to the underlying C properties structure.
 	 * @return A const reference to the underlying C properties structure.
 	 */
-	const MQTTProperties& c_struct() const {
-		return props_;
+	const MQTTProperties& c_struct() const { return props_; }
+	/**
+	 * Copy assignment.
+	 * @param rhs The other property list to copy into this one
+	 * @return A reference to this object.
+	 */
+	properties& operator=(const properties& rhs) {
+		if (&rhs != this) {
+			::MQTTProperties_free(&props_);
+			props_ = ::MQTTProperties_copy(&rhs.props_);
+		}
+		return *this;
+	}
+	/**
+	 * Move assignment
+	 * @param rht The property list to move to this one.
+	 * @return A reference to this object.
+	 */
+	properties& operator=(properties&& rhs) {
+		if (&rhs != this) {
+			::MQTTProperties_free(&props_);
+			props_ = rhs.props_;
+			std::memset(&rhs.props_, 0, sizeof(MQTTProperties));
+		}
+		return *this;
 	}
 	/**
 	 * Determines if the property list is empty.
 	 * @return @em true if there are no properties in the list, @em false if
 	 *  	   the list contains any items.
 	 */
-	bool empty() const {
-		return props_.count == 0;
-	}
+	bool empty() const { return props_.count == 0; }
 	/**
 	 * Gets the numbers of property items in the list.
 	 * @return The number of property items in the list.
 	 */
-	size_t size() const {
-		return size_t(props_.count);
-	}
+	size_t size() const { return size_t(props_.count); }
 	/**
 	 * Gets the number of bytes required for the serialized
 	 * structure on the wire.

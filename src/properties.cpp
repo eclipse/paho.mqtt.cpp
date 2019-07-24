@@ -154,6 +154,13 @@ property& property::operator=(property&& rhs)
 
 /////////////////////////////////////////////////////////////////////////////
 
+properties::properties(std::initializer_list<property> props)
+{
+	std::memset(&props_, 0, sizeof(properties));
+	for (const auto& prop : props)
+		::MQTTProperties_add(&props_, &prop.prop());
+}
+
 void properties::clear()
 {
 	::MQTTProperties_free(&props_);

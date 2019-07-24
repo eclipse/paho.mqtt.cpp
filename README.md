@@ -33,6 +33,7 @@ New unit tests are usin _Catch2_ for the test framework. The legacy unit tests a
     - The client object tracks the desired MQTT version that the app requested and/or is currently connected at. Internally this is now required by the `response_options` the need to distinguish between pre-v5 and post-v5 callback functions.
     - More descriptive error messages (PR #154), integrated into the `mqtt::exception` class.
     - The`message` and various options classes were updated for MQTT v5 to include properties and reson codes (where appropriate).
+    - Applications can (finally) get server responses from the various ack packets. These are available through the tokens after they complete.
     
 
 ## Contributing

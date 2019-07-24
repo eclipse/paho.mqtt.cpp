@@ -31,6 +31,7 @@
  *******************************************************************************/
 
 #include <iostream>
+#include <sstream>
 #include <cstdlib>
 #include <string>
 #include <cstring>
@@ -44,6 +45,9 @@ using namespace std::chrono;
 
 const string SERVER_ADDRESS	{ "tcp://localhost:1883" };
 const string CLIENT_ID		{ "rpc_math_srvr" };
+
+constexpr auto RESPONSE_TOPIC	= mqtt::property::RESPONSE_TOPIC;
+constexpr auto CORRELATION_DATA	= mqtt::property::CORRELATION_DATA;
 
 // --------------------------------------------------------------------------
 // Simple function to manually reconect a client.
@@ -76,8 +80,8 @@ int main(int argc, char* argv[])
 
 	mqtt::client cli(SERVER_ADDRESS, CLIENT_ID);
 
-	const vector<string> TOPICS { "requests/math" };
-	const vector<int> QOS { 1 };
+	const vector<string> TOPICS { "requests/math", "requests" };
+	const vector<int> QOS { 1, 1 };
 
 	try {
 		cout << "Connecting to the MQTT server..." << flush;
@@ -110,22 +114,36 @@ int main(int argc, char* argv[])
 			cout << "Received a request" << endl;
 
 			const mqtt::properties& props = msg->get_properties();
-			if (props.contains(mqtt::property::CORRELATION_DATA) &&
-					props.contains(mqtt::property::RESPONSE_TOPIC)) {
-				mqtt::binary corr_id  = mqtt::get<string>(props, mqtt::property::CORRELATION_DATA);
-				string reply_to = mqtt::get<string>(props, mqtt::property::RESPONSE_TOPIC);
+
+			if (props.contains(RESPONSE_TOPIC) && props.contains(CORRELATION_DATA)) {
+				mqtt::binary corr_id  = mqtt::get<string>(props, CORRELATION_DATA);
+				string reply_to = mqtt::get<string>(props, RESPONSE_TOPIC);
 
 				cout << "Client wants a reply to [" << corr_id << "] on '"
 					<< reply_to << "'" << endl;
-			}
 
-			if (msg->get_topic() == "requests/math" &&
-					msg->to_string() == "exit") {
-				cout << "Exit command received" << endl;
-				break;
-			}
+				cout << msg->get_topic() << ": " << msg->to_string() << endl;
 
-			cout << msg->get_topic() << ": " << msg->to_string() << endl;
+				char c;
+				int sum, x;
+
+				istringstream is(msg->to_string());
+				is >> c >> sum >> c;
+				cout << sum << endl;
+				while (c == ',' && (is >> x >> c)) {
+					sum += x;
+					cout << x << ": (" << sum << ")" << endl;
+				}
+
+				if (c != ']') {
+					cout << "Bad closing delimiter" << endl;
+				}
+
+				cout << sum << endl;
+
+				auto reply_msg = mqtt::message::create(reply_to, to_string(sum), 1, false);
+				cli.publish(reply_msg);
+			}
 		}
 
 		// Disconnect

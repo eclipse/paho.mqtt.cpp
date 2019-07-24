@@ -23,49 +23,50 @@
 
 #include <iostream>
 
+/////////////////////////////////////////////////////////////////////////////
+// Paho C logger
+
+enum LOG_LEVELS {
+	INVALID_LEVEL = -1,
+	TRACE_MAX = 1,
+	TRACE_MED,
+	TRACE_MIN,
+	TRACE_PROTOCOL,
+	LOG_PROTOCOL = TRACE_PROTOCOL,
+	LOG_ERROR,
+	LOG_SEVERE,
+	LOG_FATAL,
+};
+
+extern "C" {
+	void Log(enum LOG_LEVELS, int, const char *, ...);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 namespace mqtt {
 
 // --------------------------------------------------------------------------
 // Constructors
 
-token::token(iasync_client& cli) : token(cli, MQTTAsync_token(0))
-{
-}
-
-token::token(iasync_client& cli, void* userContext, iaction_listener& cb)
-				: token(cli, const_string_collection_ptr(), userContext, cb)
-{
-}
-
-token::token(iasync_client& cli, const string& top)
-				: token(cli, string_collection::create(top))
-{
-}
-
-token::token(iasync_client& cli, const string& top,
-			 void* userContext, iaction_listener& cb)
-				: token(cli, string_collection::create(top), userContext, cb)
-{
-}
-
-token::token(iasync_client& cli, const_string_collection_ptr topics)
-				: cli_(&cli), tok_(MQTTAsync_token(0)), topics_(topics),
-						userContext_(nullptr), listener_(nullptr),
+token::token(Type typ, iasync_client& cli, const_string_collection_ptr topics)
+				: type_(typ), cli_(&cli), msgId_(MQTTAsync_token(0)), topics_(topics),
+						userContext_(nullptr), listener_(nullptr), nExpected_(0),
 						complete_(false), rc_(0)
 {
 }
 
-token::token(iasync_client& cli, const_string_collection_ptr topics,
+token::token(Type typ, iasync_client& cli, const_string_collection_ptr topics,
 			 void* userContext, iaction_listener& cb)
-				: cli_(&cli), tok_(MQTTAsync_token(0)), topics_(topics),
-						userContext_(userContext), listener_(&cb),
+				: type_(typ), cli_(&cli), msgId_(MQTTAsync_token(0)), topics_(topics),
+						userContext_(userContext), listener_(&cb), nExpected_(0),
 						complete_(false), rc_(0)
 {
 }
 
-token::token(iasync_client& cli, MQTTAsync_token tok)
-				: cli_(&cli), tok_(tok), userContext_(nullptr),
-					listener_(nullptr), complete_(false), rc_(0)
+token::token(Type typ, iasync_client& cli, MQTTAsync_token tok)
+				: type_(typ), cli_(&cli), msgId_(tok), userContext_(nullptr),
+					listener_(nullptr), nExpected_(0), complete_(false), rc_(0)
 {
 }
 
@@ -103,9 +104,35 @@ void token::on_failure5(void* context, MQTTAsync_failureData5* rsp)
 
 void token::on_success(MQTTAsync_successData* rsp)
 {
+	::Log(TRACE_MIN, -1, "[cpp] on_success");
+
 	unique_lock g(lock_);
 	iaction_listener* listener = listener_;
-	tok_ = (rsp) ? rsp->token : 0;
+
+	if (rsp) {
+		msgId_ = rsp->token;
+
+		switch (type_) {
+			case Type::CONNECT:
+				connRsp_ = std::unique_ptr<connect_response>(new connect_response);
+				connRsp_->serverURI = string(rsp->alt.connect.serverURI);
+				connRsp_->mqttVersion = rsp->alt.connect.MQTTVersion;
+				connRsp_->sessionPresent = to_bool(rsp->alt.connect.sessionPresent);
+				break;
+
+			case SUBSCRIBE:
+				subRsp_ = std::unique_ptr<subscribe_response>(new subscribe_response);
+				subRsp_->reasonCodes.push_back(ReasonCode(rsp->alt.qos));
+				break;
+
+			case SUBSCRIBE_MANY:
+				subRsp_ = std::unique_ptr<subscribe_response>(new subscribe_response);
+				for (size_t i=0; i<nExpected_; ++i)
+					subRsp_->reasonCodes.push_back(ReasonCode(rsp->alt.qosList[i]));
+				break;
+		}
+	}
+
 	rc_ = MQTTASYNC_SUCCESS;
 	complete_ = true;
 	g.unlock();
@@ -120,9 +147,46 @@ void token::on_success(MQTTAsync_successData* rsp)
 
 void token::on_success5(MQTTAsync_successData5* rsp)
 {
+	::Log(TRACE_MIN, -1, "[cpp] on_success5");
+
 	unique_lock g(lock_);
 	iaction_listener* listener = listener_;
-	tok_ = (rsp) ? rsp->token : 0;
+	if (rsp) {
+		msgId_ = rsp->token;
+		reasonCode_ = ReasonCode(rsp->reasonCode);
+		props_ = properties(rsp->properties);
+
+		switch (type_) {
+			case Type::CONNECT:
+				connRsp_ = std::unique_ptr<connect_response>(new connect_response);
+				connRsp_->serverURI = string(rsp->alt.connect.serverURI);
+				connRsp_->mqttVersion = rsp->alt.connect.MQTTVersion;
+				connRsp_->sessionPresent = to_bool(rsp->alt.connect.sessionPresent);
+				break;
+
+			case SUBSCRIBE:
+			case SUBSCRIBE_MANY:
+				subRsp_ = std::unique_ptr<subscribe_response>(new subscribe_response);
+				if (rsp->alt.sub.reasonCodeCount == 1)
+					subRsp_->reasonCodes.push_back(reasonCode_);
+				else {
+					for (int i=0; i<rsp->alt.sub.reasonCodeCount; ++i)
+						subRsp_->reasonCodes.push_back(ReasonCode(rsp->alt.sub.reasonCodes[i]));
+				}
+				break;
+
+			case UNSUBSCRIBE:
+			case UNSUBSCRIBE_MANY:
+				unsubRsp_ = std::unique_ptr<unsubscribe_response>(new unsubscribe_response);
+				if (rsp->alt.unsub.reasonCodeCount == 1)
+					unsubRsp_->reasonCodes.push_back(reasonCode_);
+				else {
+					for (int i=0; i<rsp->alt.unsub.reasonCodeCount; ++i)
+						unsubRsp_->reasonCodes.push_back(ReasonCode(rsp->alt.unsub.reasonCodes[i]));
+				}
+				break;
+		}
+	}
 	rc_ = MQTTASYNC_SUCCESS;
 	complete_ = true;
 	g.unlock();
@@ -137,16 +201,17 @@ void token::on_success5(MQTTAsync_successData5* rsp)
 
 void token::on_failure(MQTTAsync_failureData* rsp)
 {
+	::Log(TRACE_MIN, -1, "[cpp] on_failure");
+
 	unique_lock g(lock_);
 	iaction_listener* listener = listener_;
 	if (rsp) {
-		tok_ = rsp->token;
+		msgId_ = rsp->token;
 		rc_ = rsp->code;
 		if (rsp->message)
 			errMsg_ = string(rsp->message);
 	}
 	else {
-		tok_ = 0;
 		rc_ = -1;
 	}
 	complete_ = true;
@@ -162,16 +227,19 @@ void token::on_failure(MQTTAsync_failureData* rsp)
 
 void token::on_failure5(MQTTAsync_failureData5* rsp)
 {
+	::Log(TRACE_MIN, -1, "[cpp] on_failure");
+
 	unique_lock g(lock_);
 	iaction_listener* listener = listener_;
 	if (rsp) {
-		tok_ = rsp->token;
+		msgId_ = rsp->token;
+		reasonCode_ = ReasonCode(rsp->reasonCode);
+		props_ = properties(rsp->properties);
 		rc_ = rsp->code;
 		if (rsp->message)
 			errMsg_ = string(rsp->message);
 	}
 	else {
-		tok_ = 0;
 		rc_ = -1;
 	}
 	complete_ = true;
