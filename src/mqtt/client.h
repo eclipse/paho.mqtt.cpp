@@ -154,18 +154,12 @@ public:
 	/**
 	 * Connects to an MQTT server using the default options.
 	 */
-	virtual void connect() {
-		cli_.connect()->wait_for(timeout_);
-		cli_.start_consuming();
-	}
+	virtual void connect();
 	/**
 	 * Connects to an MQTT server using the specified options.
 	 * @param opts
 	 */
-	virtual void connect(connect_options opts) {
-		cli_.connect(std::move(opts))->wait_for(timeout_);
-		cli_.start_consuming();
-	}
+	virtual void connect(connect_options opts);
 	/**
 	 * Reconnects the client using options from the previous connect.
 	 * The client must have previously called connect() for this to work.
@@ -174,10 +168,7 @@ public:
 	/**
 	 * Disconnects from the server.
 	 */
-	virtual void disconnect() {
-		cli_.stop_consuming();
-		cli_.disconnect()->wait_for(timeout_);
-	}
+	virtual void disconnect();
 	/**
 	 * Disconnects from the server.
 	 * @param timeoutMS the amount of time in milliseconds to allow for

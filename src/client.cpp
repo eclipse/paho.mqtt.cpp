@@ -63,6 +63,19 @@ void client::set_callback(callback& cb)
 	cli_.set_callback(*this);
 }
 
+void client::connect()
+{
+	cli_.connect()->wait_for(timeout_);
+	cli_.start_consuming();
+}
+
+void client::connect(connect_options opts)
+{
+	cli_.start_consuming();
+	cli_.connect(std::move(opts))->wait_for(timeout_);
+}
+
+
 void client::subscribe(const string_collection& topicFilters)
 {
 	qos_collection qos;
@@ -70,6 +83,12 @@ void client::subscribe(const string_collection& topicFilters)
 		qos.push_back(DFLT_QOS);
 
 	cli_.subscribe(ptr(topicFilters), qos)->wait_for(timeout_);
+}
+
+void client::disconnect()
+{
+	cli_.disconnect()->wait_for(timeout_);
+	cli_.stop_consuming();
 }
 
 /////////////////////////////////////////////////////////////////////////////
