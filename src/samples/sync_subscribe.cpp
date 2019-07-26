@@ -100,9 +100,17 @@ int main(int argc, char* argv[])
 
 	try {
 		std::cout << "Connecting to the MQTT server..." << std::flush;
-		cli.connect(connOpts);
-		cli.subscribe(TOPIC, QOS);
+		mqtt::connect_response rsp = cli.connect(connOpts);
 		std::cout << "OK" << std::endl;
+
+		if (!rsp.sessionPresent) {
+			std::cout << "Subscribing to topics..." << std::flush;
+			cli.subscribe(TOPIC, QOS);
+			std::cout << "OK" << std::endl;
+		}
+		else {
+			cout << "Session already present. Skipping subscribe." << std::endl;
+		}
 	}
 	catch (const mqtt::exception& exc) {
 		std::cerr << "\nERROR: Unable to connect to MQTT server: '"

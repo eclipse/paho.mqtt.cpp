@@ -154,17 +154,17 @@ public:
 	/**
 	 * Connects to an MQTT server using the default options.
 	 */
-	virtual void connect();
+	virtual connect_response connect();
 	/**
 	 * Connects to an MQTT server using the specified options.
 	 * @param opts
 	 */
-	virtual void connect(connect_options opts);
+	virtual connect_response connect(connect_options opts);
 	/**
 	 * Reconnects the client using options from the previous connect.
 	 * The client must have previously called connect() for this to work.
 	 */
-	virtual void reconnect() { cli_.reconnect()->wait_for(timeout_); }
+	virtual connect_response reconnect() { cli_.reconnect()->wait_for(timeout_); }
 	/**
 	 * Disconnects from the server.
 	 */
@@ -283,46 +283,36 @@ public:
 	 * Subscribe to a topic, which may include wildcards using a QoS of 1.
 	 * @param topicFilter
 	 */
-	virtual void subscribe(const string& topicFilter) {
-		cli_.subscribe(topicFilter, DFLT_QOS)->wait_for(timeout_);
-	}
+	virtual subscribe_response subscribe(const string& topicFilter);
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 * @param topicFilter A single topic to subscribe
 	 * @param qos The QoS of the subscription
 	 */
-	virtual void subscribe(const string& topicFilter, int qos) {
-		cli_.subscribe(topicFilter, qos)->wait_for(timeout_);
-	}
+	virtual subscribe_response subscribe(const string& topicFilter, int qos);
 	/**
 	 * Subscribes to a one or more topics, which may include wildcards using
 	 * a QoS of 1.
 	 * @param topicFilters A set of topics to subscribe
 	 */
-	virtual void subscribe(const string_collection& topicFilters);
+	virtual subscribe_response subscribe(const string_collection& topicFilters);
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
 	 * @param topicFilters A collection of topics to subscribe
 	 * @param qos A collection of QoS for each topic
 	 */
-	virtual void subscribe(const string_collection& topicFilters,
-						   const qos_collection& qos) {
-		cli_.subscribe(ptr(topicFilters), qos)->wait_for(timeout_);
-	}
+	virtual subscribe_response subscribe(const string_collection& topicFilters,
+										 const qos_collection& qos);
 	/**
 	 * Requests the server unsubscribe the client from a topic.
 	 * @param topicFilter A single topic to unsubscribe.
 	 */
-	virtual void unsubscribe(const string& topicFilter) {
-		cli_.unsubscribe(topicFilter)->wait_for(timeout_);
-	}
+	virtual unsubscribe_response unsubscribe(const string& topicFilter);
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
 	 * @param topicFilters A collection of topics to unsubscribe.
 	 */
-	virtual void unsubscribe(const string_collection& topicFilters) {
-		cli_.unsubscribe(ptr(topicFilters))->wait_for(timeout_);
-	}
+	virtual unsubscribe_response unsubscribe(const string_collection& topicFilters);
 	/**
 	 * Start consuming messages.
 	 * This initializes the client to receive messages through a queue that

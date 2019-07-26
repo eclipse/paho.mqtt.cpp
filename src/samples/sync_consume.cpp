@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
 {
 	mqtt::connect_options connOpts;
 	connOpts.set_keep_alive_interval(20);
-	connOpts.set_clean_session(true);
+	connOpts.set_clean_session(false);
 
 	mqtt::client cli(SERVER_ADDRESS, CLIENT_ID);
 
@@ -79,9 +79,17 @@ int main(int argc, char* argv[])
 
 	try {
 		cout << "Connecting to the MQTT server..." << flush;
-		cli.connect(connOpts);
-		cli.subscribe(TOPICS, QOS);
+		mqtt::connect_response rsp = cli.connect(connOpts);
 		cout << "OK\n" << endl;
+
+		if (!rsp.sessionPresent) {
+			std::cout << "Subscribing to topics..." << std::flush;
+			cli.subscribe(TOPICS, QOS);
+			std::cout << "OK" << std::endl;
+		}
+		else {
+			cout << "Session already present. Skipping subscribe." << std::endl;
+		}
 
 		// Consume messages
 
@@ -98,11 +106,12 @@ int main(int argc, char* argv[])
 					}
 					else {
 						cout << "Reconnect failed." << endl;
-						break;
 					}
 				}
-				else
-					break;
+				else {
+					cout << "An error occurred retrieving messages." << endl;
+				}
+				break;
 			}
 			if (msg->get_topic() == "command" &&
 					msg->to_string() == "exit") {
