@@ -32,6 +32,7 @@
 #include "mqtt/properties.h"
 #include "mqtt/buffer_ref.h"
 #include "mqtt/string_collection.h"
+#include "mqtt/server_response.h"
 #include <vector>
 #include <thread>
 #include <mutex>
@@ -41,37 +42,6 @@
 namespace mqtt {
 
 class iasync_client;
-
-/** Response for a connect request */
-struct connect_response
-{
-	/** The connection string of the server */
-	string serverURI;
-	/** The version of MQTT being used */
-	int mqttVersion;
-	/** The session present flag returned from the server */
-	bool sessionPresent;
-	/** The properties from the acknowledge  */
-	properties props;
-};
-
-/** Response for subscribe messages */
-struct subscribe_response
-{
-	/** The reason/result code for each topic request. */
-	std::vector<ReasonCode> reasonCodes;
-	/** The properties from the acknowledge  */
-	properties props;
-};
-
-/** Response for unsubscribe messages  */
-struct unsubscribe_response
-{
-	/** The reason/result code for each topic request. */
-	std::vector<ReasonCode> reasonCodes;
-	/** The properties from the acknowledge  */
-	properties props;
-};
 
 /////////////////////////////////////////////////////////////////////////////
 

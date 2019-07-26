@@ -117,21 +117,15 @@ void token::on_success(MQTTAsync_successData* rsp)
 
 		switch (type_) {
 			case Type::CONNECT:
-				connRsp_ = std::unique_ptr<connect_response>(new connect_response);
-				connRsp_->serverURI = string(rsp->alt.connect.serverURI);
-				connRsp_->mqttVersion = rsp->alt.connect.MQTTVersion;
-				connRsp_->sessionPresent = to_bool(rsp->alt.connect.sessionPresent);
+				connRsp_ = std::unique_ptr<connect_response>(new connect_response(rsp));
 				break;
 
 			case Type::SUBSCRIBE:
-				subRsp_ = std::unique_ptr<subscribe_response>(new subscribe_response);
-				subRsp_->reasonCodes.push_back(ReasonCode(rsp->alt.qos));
+				subRsp_ = std::unique_ptr<subscribe_response>(new subscribe_response(0, rsp));
 				break;
 
 			case Type::SUBSCRIBE_MANY:
-				subRsp_ = std::unique_ptr<subscribe_response>(new subscribe_response);
-				for (size_t i=0; i<nExpected_; ++i)
-					subRsp_->reasonCodes.push_back(ReasonCode(rsp->alt.qosList[i]));
+				subRsp_ = std::unique_ptr<subscribe_response>(new subscribe_response(nExpected_, rsp));
 				break;
 		}
 	}
@@ -160,35 +154,17 @@ void token::on_success5(MQTTAsync_successData5* rsp)
 
 		switch (type_) {
 			case Type::CONNECT:
-				connRsp_ = std::unique_ptr<connect_response>(new connect_response);
-				connRsp_->serverURI = string(rsp->alt.connect.serverURI);
-				connRsp_->mqttVersion = rsp->alt.connect.MQTTVersion;
-				connRsp_->sessionPresent = to_bool(rsp->alt.connect.sessionPresent);
-				connRsp_->props = properties(rsp->properties);
+				connRsp_ = std::unique_ptr<connect_response>(new connect_response(rsp));
 				break;
 
 			case Type::SUBSCRIBE:
 			case Type::SUBSCRIBE_MANY:
-				subRsp_ = std::unique_ptr<subscribe_response>(new subscribe_response);
-				if (rsp->alt.sub.reasonCodeCount == 1)
-					subRsp_->reasonCodes.push_back(reasonCode_);
-				else {
-					for (int i=0; i<rsp->alt.sub.reasonCodeCount; ++i)
-						subRsp_->reasonCodes.push_back(ReasonCode(rsp->alt.sub.reasonCodes[i]));
-				}
-				subRsp_->props = properties(rsp->properties);
+				subRsp_ = std::unique_ptr<subscribe_response>(new subscribe_response(rsp));
 				break;
 
 			case Type::UNSUBSCRIBE:
 			case Type::UNSUBSCRIBE_MANY:
-				unsubRsp_ = std::unique_ptr<unsubscribe_response>(new unsubscribe_response);
-				if (rsp->alt.unsub.reasonCodeCount == 1)
-					unsubRsp_->reasonCodes.push_back(reasonCode_);
-				else {
-					for (int i=0; i<rsp->alt.unsub.reasonCodeCount; ++i)
-						unsubRsp_->reasonCodes.push_back(ReasonCode(rsp->alt.unsub.reasonCodes[i]));
-				}
-				unsubRsp_->props = properties(rsp->properties);
+				unsubRsp_ = std::unique_ptr<unsubscribe_response>(new unsubscribe_response(rsp));
 				break;
 		}
 	}

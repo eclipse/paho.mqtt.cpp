@@ -71,13 +71,13 @@ int main(int argc, char* argv[])
 		cout << "Connecting..." << flush;
 		mqtt::token_ptr tok = cli.connect(connopts);
 		auto connRsp = tok->get_connect_response();
-		cout << "OK (" << connRsp.serverURI << ")" << endl;
+		cout << "OK (" << connRsp.get_server_uri() << ")" << endl;
 
 		// Since we gave an empty client ID, the server should create a
 		// unique one for us and send it back as ASSIGNED_CLIENT_IDENTIFER
 		// in the connect properties.
 
-		string clientId = get<string>(connRsp.props,
+		string clientId = get<string>(connRsp.get_properties(),
 									  mqtt::property::ASSIGNED_CLIENT_IDENTIFER);
 
 		// So now we can create a unique RPC response topic using

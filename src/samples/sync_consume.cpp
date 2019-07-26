@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 		mqtt::connect_response rsp = cli.connect(connOpts);
 		cout << "OK\n" << endl;
 
-		if (!rsp.sessionPresent) {
+		if (!rsp.is_session_present()) {
 			std::cout << "Subscribing to topics..." << std::flush;
 			cli.subscribe(TOPICS, QOS);
 			std::cout << "OK" << std::endl;
