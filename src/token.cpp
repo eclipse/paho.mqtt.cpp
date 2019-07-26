@@ -50,23 +50,26 @@ namespace mqtt {
 // Constructors
 
 token::token(Type typ, iasync_client& cli, const_string_collection_ptr topics)
-				: type_(typ), cli_(&cli), msgId_(MQTTAsync_token(0)), topics_(topics),
+				: type_(typ), cli_(&cli), rc_(0), reasonCode_(ReasonCode::SUCCESS),
+						msgId_(MQTTAsync_token(0)), topics_(topics),
 						userContext_(nullptr), listener_(nullptr), nExpected_(0),
-						complete_(false), rc_(0)
+						complete_(false)
 {
 }
 
 token::token(Type typ, iasync_client& cli, const_string_collection_ptr topics,
 			 void* userContext, iaction_listener& cb)
-				: type_(typ), cli_(&cli), msgId_(MQTTAsync_token(0)), topics_(topics),
+				: type_(typ), cli_(&cli), rc_(0), reasonCode_(ReasonCode::SUCCESS),
+						msgId_(MQTTAsync_token(0)), topics_(topics),
 						userContext_(userContext), listener_(&cb), nExpected_(0),
-						complete_(false), rc_(0)
+						complete_(false)
 {
 }
 
 token::token(Type typ, iasync_client& cli, MQTTAsync_token tok)
-				: type_(typ), cli_(&cli), msgId_(tok), userContext_(nullptr),
-					listener_(nullptr), nExpected_(0), complete_(false), rc_(0)
+				: type_(typ), cli_(&cli), rc_(0), reasonCode_(ReasonCode::SUCCESS),
+					msgId_(tok), userContext_(nullptr),
+					listener_(nullptr), nExpected_(0), complete_(false)
 {
 }
 
@@ -120,12 +123,12 @@ void token::on_success(MQTTAsync_successData* rsp)
 				connRsp_->sessionPresent = to_bool(rsp->alt.connect.sessionPresent);
 				break;
 
-			case SUBSCRIBE:
+			case Type::SUBSCRIBE:
 				subRsp_ = std::unique_ptr<subscribe_response>(new subscribe_response);
 				subRsp_->reasonCodes.push_back(ReasonCode(rsp->alt.qos));
 				break;
 
-			case SUBSCRIBE_MANY:
+			case Type::SUBSCRIBE_MANY:
 				subRsp_ = std::unique_ptr<subscribe_response>(new subscribe_response);
 				for (size_t i=0; i<nExpected_; ++i)
 					subRsp_->reasonCodes.push_back(ReasonCode(rsp->alt.qosList[i]));
@@ -154,7 +157,6 @@ void token::on_success5(MQTTAsync_successData5* rsp)
 	if (rsp) {
 		msgId_ = rsp->token;
 		reasonCode_ = ReasonCode(rsp->reasonCode);
-		props_ = properties(rsp->properties);
 
 		switch (type_) {
 			case Type::CONNECT:
@@ -162,10 +164,11 @@ void token::on_success5(MQTTAsync_successData5* rsp)
 				connRsp_->serverURI = string(rsp->alt.connect.serverURI);
 				connRsp_->mqttVersion = rsp->alt.connect.MQTTVersion;
 				connRsp_->sessionPresent = to_bool(rsp->alt.connect.sessionPresent);
+				connRsp_->props = properties(rsp->properties);
 				break;
 
-			case SUBSCRIBE:
-			case SUBSCRIBE_MANY:
+			case Type::SUBSCRIBE:
+			case Type::SUBSCRIBE_MANY:
 				subRsp_ = std::unique_ptr<subscribe_response>(new subscribe_response);
 				if (rsp->alt.sub.reasonCodeCount == 1)
 					subRsp_->reasonCodes.push_back(reasonCode_);
@@ -173,10 +176,11 @@ void token::on_success5(MQTTAsync_successData5* rsp)
 					for (int i=0; i<rsp->alt.sub.reasonCodeCount; ++i)
 						subRsp_->reasonCodes.push_back(ReasonCode(rsp->alt.sub.reasonCodes[i]));
 				}
+				subRsp_->props = properties(rsp->properties);
 				break;
 
-			case UNSUBSCRIBE:
-			case UNSUBSCRIBE_MANY:
+			case Type::UNSUBSCRIBE:
+			case Type::UNSUBSCRIBE_MANY:
 				unsubRsp_ = std::unique_ptr<unsubscribe_response>(new unsubscribe_response);
 				if (rsp->alt.unsub.reasonCodeCount == 1)
 					unsubRsp_->reasonCodes.push_back(reasonCode_);
@@ -184,6 +188,7 @@ void token::on_success5(MQTTAsync_successData5* rsp)
 					for (int i=0; i<rsp->alt.unsub.reasonCodeCount; ++i)
 						unsubRsp_->reasonCodes.push_back(ReasonCode(rsp->alt.unsub.reasonCodes[i]));
 				}
+				unsubRsp_->props = properties(rsp->properties);
 				break;
 		}
 	}
@@ -234,7 +239,7 @@ void token::on_failure5(MQTTAsync_failureData5* rsp)
 	if (rsp) {
 		msgId_ = rsp->token;
 		reasonCode_ = ReasonCode(rsp->reasonCode);
-		props_ = properties(rsp->properties);
+		//props_ = properties(rsp->properties);
 		rc_ = rsp->code;
 		if (rsp->message)
 			errMsg_ = string(rsp->message);
@@ -261,6 +266,7 @@ void token::reset()
 	guard g(lock_);
 	complete_ = false;
 	rc_ = 0;
+	reasonCode_ = ReasonCode::SUCCESS;
 	errMsg_.clear();
 }
 
@@ -268,7 +274,52 @@ void token::wait()
 {
 	unique_lock g(lock_);
 	cond_.wait(g, [this]{return complete_;});
-	check_rc();
+	check_ret();
+}
+
+connect_response token::get_connect_response() const
+{
+	if (type_ != Type::CONNECT)
+		throw bad_cast();
+
+	unique_lock g(lock_);
+	cond_.wait(g, [this]{return complete_;});
+	check_ret();
+
+	if (!connRsp_)
+		throw missing_response("connect");
+
+	return *connRsp_;
+}
+
+subscribe_response token::get_subscribe_response() const
+{
+	if (type_ != Type::SUBSCRIBE && type_ != Type::SUBSCRIBE_MANY)
+		throw bad_cast();
+
+	unique_lock g(lock_);
+	cond_.wait(g, [this]{return complete_;});
+	check_ret();
+
+	if (!subRsp_)
+		throw missing_response("subscribe");
+
+	return *subRsp_;
+}
+
+unsubscribe_response token::get_unsubscribe_response() const
+{
+	if (type_ != Type::UNSUBSCRIBE && type_ != Type::UNSUBSCRIBE_MANY)
+		throw bad_cast();
+
+	unique_lock g(lock_);
+	cond_.wait(g, [this]{return complete_;});
+	check_ret();
+
+	if (!unsubRsp_)
+		throw missing_response("unsubscribe");
+
+	return *unsubRsp_;
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -43,23 +43,35 @@ namespace mqtt {
 class iasync_client;
 
 /** Response for a connect request */
-struct connect_response {
+struct connect_response
+{
 	/** The connection string of the server */
 	string serverURI;
 	/** The version of MQTT being used */
 	int mqttVersion;
 	/** The session present flag returned from the server */
 	bool sessionPresent;
+	/** The properties from the acknowledge  */
+	properties props;
 };
 
 /** Response for subscribe messages */
-struct subscribe_response {
+struct subscribe_response
+{
 	/** The reason/result code for each topic request. */
 	std::vector<ReasonCode> reasonCodes;
+	/** The properties from the acknowledge  */
+	properties props;
 };
 
 /** Response for unsubscribe messages  */
-using unsubscribe_response = subscribe_response;
+struct unsubscribe_response
+{
+	/** The reason/result code for each topic request. */
+	std::vector<ReasonCode> reasonCodes;
+	/** The properties from the acknowledge  */
+	properties props;
+};
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -97,18 +109,25 @@ private:
 	/** Object monitor mutex. */
 	mutable std::mutex lock_;
 	/** Condition variable signals when the action completes */
-	std::condition_variable cond_;
+	mutable std::condition_variable cond_;
 
 	/** The type of request that the token is tracking */
 	Type type_;
 	/** The MQTT client that is processing this action */
 	iasync_client* cli_;
+	/** The action success/failure code */
+	int rc_;
+	/** MQTT v5 reason code */
+	ReasonCode reasonCode_;
+	/** Error message from the C lib (if any) */
+	string errMsg_;
 	/** The underlying C token. Note that this is just an integer */
 	MQTTAsync_token msgId_;
 	/** The topic string(s) for the action being tracked by this token */
 	const_string_collection_ptr topics_;
 	/** User supplied context */
 	void* userContext_;
+
 	/**
 	 * User supplied listener.
 	 * Note that the user listener fires after the action is marked
@@ -119,15 +138,9 @@ private:
 	size_t nExpected_;
 	/** Whether the action has yet to complete */
 	bool complete_;
-	/** The action success/failure code */
-	int rc_;
-	/** Error message from the C lib (if any) */
-	string errMsg_;
 
-	/** MQTT v5 reason code */
-	ReasonCode reasonCode_;
 	/** MQTT v5 propeties */
-	properties props_;
+	//properties props_;
 	/** Connection response (null if not available) */
 	std::unique_ptr<connect_response> connRsp_;
 	/** Subscribe response (null if not available) */
@@ -203,9 +216,9 @@ private:
 	 * Check the current return code and throw an exception if it is not a
 	 * success code.
 	 */
-	void check_rc() {
-		if (rc_ != MQTTASYNC_SUCCESS)
-			throw exception(rc_, errMsg_);
+	void check_ret() const {
+		if (rc_ != MQTTASYNC_SUCCESS || reasonCode_ > ReasonCode::GRANTED_QOS_2)
+			throw exception(rc_, reasonCode_, errMsg_);
 	}
 
 public:
@@ -340,9 +353,7 @@ public:
 	 * etc.
 	 * @return The type of action the token is tracking.
 	 */
-	Type get_type() const {
-		return type_;
-	}
+	Type get_type() const { return type_; }
 	/**
 	 * Gets the action listener for this token.
 	 * @return The action listener for this token.
@@ -416,33 +427,18 @@ public:
 	 * This is only required for subecribe_many() with < MQTTv5
 	 * @param n The number of results expected.
 	 */
-	void set_num_expected(size_t n) {
-		nExpected_ = n;
-	}
+	void set_num_expected(size_t n) { nExpected_ = n; }
+
 	/**
 	 * Gets the properties for the operation.
 	 * @return A const reference to the properties for the operation
 	 */
-	const properties& get_properties() const { return props_; }
+	//const properties& get_properties() const { return props_; }
 	/**
 	 * Gets the reason code for the operation.
 	 * @return The reason code for the operation.
 	 */
-	ReasonCode get_reason_code() const {
-		return reasonCode_;
-	}
-	/**
-	 * Gets the connect response, if available.
-	 * The connect response will be available after a connect token completes.
-	 * @return The server response for the connection.
-	 */
-	connect_response get_connect_response() const {
-		if (connRsp_)
-			return *connRsp_;
-		// TODO: Better exception
-		throw std::exception();
-	}
-
+	ReasonCode get_reason_code() const { return reasonCode_; }
 	/**
 	 * Blocks the current thread until the action this token is associated
 	 * with has completed.
@@ -456,7 +452,7 @@ public:
 	virtual bool try_wait() {
 		guard g(lock_);
 		if (complete_)
-			check_rc();
+			check_ret();
 		return complete_;
 	}
 	/**
@@ -481,7 +477,7 @@ public:
 		if (!cond_.wait_for(g, std::chrono::milliseconds(relTime),
 							[this]{return complete_;}))
 			return false;
-		check_rc();
+		check_ret();
 		return true;
 	}
 	/**
@@ -495,9 +491,34 @@ public:
 		unique_lock g(lock_);
 		if (!cond_.wait_until(g, absTime, [this]{return complete_;}))
 			return false;
-		check_rc();
+		check_ret();
 		return true;
 	}
+
+	/**
+	 * Gets the response from a connect operation.
+	 * This returns the result of the completed operation. If the
+	 * operaton is not yet complete this will block until the result
+	 * is available.
+	 * @return The result of the operation.
+	 */
+	connect_response get_connect_response() const;
+	/**
+	 * Gets the response from a connect operation.
+	 * This returns the result of the completed operation. If the
+	 * operaton is not yet complete this will block until the result
+	 * is available.
+	 * @return The result of the operation.
+	 */
+	subscribe_response get_subscribe_response() const;
+	/**
+	 * Gets the response from a connect operation.
+	 * This returns the result of the completed operation. If the
+	 * operaton is not yet complete this will block until the result
+	 * is available.
+	 * @return The result of the operation.
+	 */
+	unsubscribe_response get_unsubscribe_response() const;
 };
 
 /** Smart/shared pointer to a token object */

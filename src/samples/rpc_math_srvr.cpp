@@ -68,6 +68,25 @@ bool try_reconnect(mqtt::client& cli)
 	return false;
 }
 
+// --------------------------------------------------------------------------
+// RPC function implementations
+
+double add(const std::vector<double>& nums)
+{
+	double sum = 0.0;
+	for (auto n : nums)
+		sum += n;
+	return sum;
+}
+
+double mult(const std::vector<double>& nums)
+{
+	double prod = 1.0;
+	for (auto n : nums)
+		prod *= n;
+	return prod;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[])
@@ -80,7 +99,7 @@ int main(int argc, char* argv[])
 
 	mqtt::client cli(SERVER_ADDRESS, CLIENT_ID);
 
-	const vector<string> TOPICS { "requests/math", "requests" };
+	const vector<string> TOPICS { "requests/math", "requests/math/#" };
 	const vector<int> QOS { 1, 1 };
 
 	try {
@@ -125,23 +144,38 @@ int main(int argc, char* argv[])
 				cout << msg->get_topic() << ": " << msg->to_string() << endl;
 
 				char c;
-				int sum, x;
+				double x;
+				vector<double> nums;
 
 				istringstream is(msg->to_string());
-				is >> c >> sum >> c;
-				cout << sum << endl;
-				while (c == ',' && (is >> x >> c)) {
-					sum += x;
-					cout << x << ": (" << sum << ")" << endl;
+				if (!(is >> c) || c != '[') {
+					cout << "Malformed arguments" << endl;
+					// Maybe send an error message to client.
+					continue;
 				}
+
+				c = ',';
+				while (c == ',' && (is >> x >> c))
+					nums.push_back(x);
 
 				if (c != ']') {
 					cout << "Bad closing delimiter" << endl;
+					continue;
 				}
 
-				cout << sum << endl;
+				x = 0.0;
+				if (msg->get_topic() == "requests/math/add")
+					x = add(nums);
+				else if (msg->get_topic() == "requests/math/mult")
+					x = mult(nums);
+				else {
+					cout << "Unknown request: " << msg->get_topic() << endl;
+					continue;
+				}
 
-				auto reply_msg = mqtt::message::create(reply_to, to_string(sum), 1, false);
+				cout << "  Result: " << x << endl;
+
+				auto reply_msg = mqtt::message::create(reply_to, to_string(x), 1, false);
 				cli.publish(reply_msg);
 			}
 		}

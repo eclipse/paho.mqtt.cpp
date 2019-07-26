@@ -33,6 +33,8 @@
 
 namespace mqtt {
 
+using bad_cast = std::bad_cast;
+
 /////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -42,63 +44,88 @@ namespace mqtt {
 class exception : public std::runtime_error
 {
 protected:
-	/** The error code from the C library */
-	int code_;
+	/** The error return code from the C library */
+	int rc_;
+	/** The reason code from the server */
+	ReasonCode reasonCode_;
 	/** The error message from the C library */
 	string msg_;
 
 public:
 	/**
 	 * Creates an MQTT exception.
-	 * @param code The error code from the C library.
+	 * @param rc The error return code from the C library.
 	 */
-	explicit exception(int code)
-		: exception(code, string_error(code)) {}
+	explicit exception(int rc)
+		: exception(rc, string_error(rc)) {}
 	/**
 	 * Creates an MQTT exception.
-	 * @param code The error code from the C library.
+	 * @param rc The error return code from the C library.
 	 * @param msg The text message for the error.
 	 */
-	exception(int code, const string& msg)
-		: std::runtime_error(printable_error(code, msg)), code_(code), msg_(msg) {}
+	exception(int rc, const string& msg)
+		: std::runtime_error(printable_error(rc, msg)),
+			rc_(rc), reasonCode_(ReasonCode::SUCCESS), msg_(msg) {}
+	/**
+	 * Creates an MQTT exception.
+	 * @param rc The error return code from the C library.
+	 * @param reasonCode The reason code from the server
+	 * @param msg The text message for the error.
+	 */
+	exception(int rc, ReasonCode reasonCode, const string& msg)
+		: std::runtime_error(printable_error(rc, msg)),
+			rc_(rc), reasonCode_(reasonCode), msg_(msg) {}
 	/**
 	 * Gets an error message from an error code.
-	 * @param code The error code from the C lib
+	 * @param rc The error code from the C lib
 	 * @return A string explanation of the error
 	 */
-	static string string_error(int code) {
-		const char *msg = ::MQTTAsync_strerror(code);
+	static string string_error(int rc) {
+		const char *msg = ::MQTTAsync_strerror(rc);
 		return msg ? string(msg) : string();
 	}
 	/**
 	 * Gets a detailed error message for an error code.
-	 * @param code The error code from the C lib
+	 * @param rc The error code from the C lib
 	 * @param msg An optional additional message. If none is provided, the
 	 *  		  string_error message is used.
 	 * @return A string error message that includes the error code and an
 	 *  	   explanation message.
 	 */
-	static string printable_error(int code, const string& msg=string()) {
-		string s = "MQTT error [" + std::to_string(code) + "]: ";
+	static string printable_error(int rc, const string& msg=string()) {
+		string s = "MQTT error [" + std::to_string(rc) + "]: ";
 		if (msg.empty())
-			s += string_error(code);
+			s += string_error(rc);
 		else
 			s += msg;
 		return s;
 	}
 	/**
-	 * Returns the error message for this exception.
+	 * Returns the return code for this exception.
 	 */
-	string get_message() const { return msg_; }
+	int get_return_code() const { return rc_; }
 	/**
 	 * Returns the reason code for this exception.
 	 */
-	int get_reason_code() const { return code_; }
+	int get_reason_code() const { return reasonCode_; }
+	/**
+	 * Returns the error message for this exception.
+	 */
+	string get_message() const { return msg_; }
 	/**
 	 * Gets a string representation of this exception.
 	 * @return A string representation of this exception.
 	 */
 	string to_string() const { return string(what()); }
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+class missing_response : public std::runtime_error
+{
+public:
+	missing_response(const string& rsp)
+		: std::runtime_error("Missing "+rsp+" response") {}
 };
 
 /////////////////////////////////////////////////////////////////////////////

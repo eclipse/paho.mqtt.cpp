@@ -44,16 +44,21 @@
 using namespace std;
 using namespace std::chrono;
 
-const string	SERVER_ADDRESS { "tcp://localhost:1883" };
-const string	REQ_TOPIC { "requests/math" };
-const int		QOS = 1;
-
+const string SERVER_ADDRESS { "tcp://localhost:1883" };
 const auto TIMEOUT = std::chrono::seconds(10);
 
 /////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[])
 {
+	if (argc < 4) {
+		cout << "USAGE: rpc_math_cli <add|mult> <num1> <num2> [... numN]" << endl;
+		return 1;
+	}
+
+	constexpr int QOS = 1;
+	const string REQ_TOPIC_HDR { "requests/math/" };
+
 	mqtt::async_client cli(SERVER_ADDRESS, "");
 
 	mqtt::connect_options connopts;
@@ -63,31 +68,39 @@ int main(int argc, char* argv[])
 	cli.start_consuming();
 
 	try {
-		cout << "\nConnecting..." << flush;
-		mqtt::token_ptr conntok = cli.connect(connopts);
-		conntok->wait();
-		auto connRsp = conntok->get_connect_response();
+		cout << "Connecting..." << flush;
+		mqtt::token_ptr tok = cli.connect(connopts);
+		auto connRsp = tok->get_connect_response();
 		cout << "OK (" << connRsp.serverURI << ")" << endl;
 
-		// Figure out the "reply to" topic from the assigned (unique) client ID
-		mqtt::properties conn_props = conntok->get_properties();
-		string clientId = get<string>(conntok->get_properties(),
+		// Since we gave an empty client ID, the server should create a
+		// unique one for us and send it back as ASSIGNED_CLIENT_IDENTIFER
+		// in the connect properties.
+
+		string clientId = get<string>(connRsp.props,
 									  mqtt::property::ASSIGNED_CLIENT_IDENTIFER);
 
-		//cout << "Client ID: " << clientId << endl;
+		// So now we can create a unique RPC response topic using
+		// the assigned (unique) client ID.
+
 		string repTopic = "replies/" + clientId + "/math";
 		cout << "    Reply topic: " << repTopic << endl;
 
 		// Subscribe to the reply topic and verify the QoS
 
-		mqtt::token_ptr tok = cli.subscribe(repTopic, 1);
+		tok = cli.subscribe(repTopic, QOS);
 		tok->wait();
 
-		if (int(tok->get_reason_code()) != 1) {
-			cerr << "Error: Server doesn't support reply QoS: "
-				<< tok->get_reason_code() << endl;
-			return 1;
+		if (int(tok->get_reason_code()) != QOS) {
+			cerr << "Error: Server doesn't support reply QoS: ["
+				<< tok->get_reason_code() << "]" << endl;
+			return 2;
 		}
+
+		// Create and send the request message
+
+		string	req { argv[1] },
+				reqTopic { REQ_TOPIC_HDR + req };
 
 		mqtt::properties props {
 			{ mqtt::property::RESPONSE_TOPIC, repTopic },
@@ -96,12 +109,14 @@ int main(int argc, char* argv[])
 
 		ostringstream os;
 		os << "[ ";
-		for (int i=1; i<argc-1; ++i)
+		for (int i=2; i<argc-1; ++i)
 			os << argv[i] << ", ";
 		os << argv[argc-1] << " ]";
 
-		cout << "\nSending add request " << os.str() << "..." << flush;
-		mqtt::message_ptr pubmsg = mqtt::make_message(REQ_TOPIC, os.str());
+		string reqArgs { os.str() };
+
+		cout << "\nSending '" << req << "' request " << os.str() << "..." << flush;
+		mqtt::message_ptr pubmsg = mqtt::make_message(reqTopic, reqArgs);
 		pubmsg->set_qos(QOS);
 		pubmsg->set_properties(props);
 
@@ -116,7 +131,6 @@ int main(int argc, char* argv[])
 			return 1;
 		}
 
-		//cout << msg->get_topic() << ": " << msg->to_string() << endl;
 		cout << "  Result: " << msg->to_string() << endl;
 
 		// Unsubscribe
