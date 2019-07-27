@@ -105,6 +105,9 @@ void token::on_failure5(void* context, MQTTAsync_failureData5* rsp)
 // --------------------------------------------------------------------------
 // Object callbacks
 
+//
+// The success callback for MQTT v3 connections
+//
 void token::on_success(MQTTAsync_successData* rsp)
 {
 	::Log(TRACE_MIN, -1, "[cpp] on_success");
@@ -117,15 +120,15 @@ void token::on_success(MQTTAsync_successData* rsp)
 
 		switch (type_) {
 			case Type::CONNECT:
-				connRsp_ = std::unique_ptr<connect_response>(new connect_response(rsp));
+				connRsp_.reset(new connect_response(rsp));
 				break;
 
 			case Type::SUBSCRIBE:
-				subRsp_ = std::unique_ptr<subscribe_response>(new subscribe_response(0, rsp));
+				subRsp_.reset(new subscribe_response(nExpected_, rsp));
 				break;
 
-			case Type::SUBSCRIBE_MANY:
-				subRsp_ = std::unique_ptr<subscribe_response>(new subscribe_response(nExpected_, rsp));
+			case Type::UNSUBSCRIBE:
+				unsubRsp_.reset(new unsubscribe_response(rsp));
 				break;
 		}
 	}
@@ -142,6 +145,9 @@ void token::on_success(MQTTAsync_successData* rsp)
 	cli_->remove_token(this);
 }
 
+//
+// The success callback for MQTT v5 connections
+//
 void token::on_success5(MQTTAsync_successData5* rsp)
 {
 	::Log(TRACE_MIN, -1, "[cpp] on_success5");
@@ -154,17 +160,15 @@ void token::on_success5(MQTTAsync_successData5* rsp)
 
 		switch (type_) {
 			case Type::CONNECT:
-				connRsp_ = std::unique_ptr<connect_response>(new connect_response(rsp));
+				connRsp_.reset(new connect_response(rsp));
 				break;
 
 			case Type::SUBSCRIBE:
-			case Type::SUBSCRIBE_MANY:
-				subRsp_ = std::unique_ptr<subscribe_response>(new subscribe_response(rsp));
+				subRsp_.reset(new subscribe_response(rsp));
 				break;
 
 			case Type::UNSUBSCRIBE:
-			case Type::UNSUBSCRIBE_MANY:
-				unsubRsp_ = std::unique_ptr<unsubscribe_response>(new unsubscribe_response(rsp));
+				unsubRsp_.reset(new unsubscribe_response(rsp));
 				break;
 		}
 	}
@@ -180,6 +184,9 @@ void token::on_success5(MQTTAsync_successData5* rsp)
 	cli_->remove_token(this);
 }
 
+//
+// The failure callback for MQTT v3 connections
+//
 void token::on_failure(MQTTAsync_failureData* rsp)
 {
 	::Log(TRACE_MIN, -1, "[cpp] on_failure");
@@ -189,6 +196,10 @@ void token::on_failure(MQTTAsync_failureData* rsp)
 	if (rsp) {
 		msgId_ = rsp->token;
 		rc_ = rsp->code;
+
+		// HACK: For backward compatability with v3 connections
+		reasonCode_ = ReasonCode(MQTTPP_V3_CODE);
+
 		if (rsp->message)
 			errMsg_ = string(rsp->message);
 	}
@@ -206,6 +217,9 @@ void token::on_failure(MQTTAsync_failureData* rsp)
 	cli_->remove_token(this);
 }
 
+//
+// The failure callback for MQTT v5 connections
+//
 void token::on_failure5(MQTTAsync_failureData5* rsp)
 {
 	::Log(TRACE_MIN, -1, "[cpp] on_failure");
@@ -241,7 +255,7 @@ void token::reset()
 {
 	guard g(lock_);
 	complete_ = false;
-	rc_ = 0;
+	rc_ = MQTTASYNC_SUCCESS;
 	reasonCode_ = ReasonCode::SUCCESS;
 	errMsg_.clear();
 }
@@ -270,7 +284,7 @@ connect_response token::get_connect_response() const
 
 subscribe_response token::get_subscribe_response() const
 {
-	if (type_ != Type::SUBSCRIBE && type_ != Type::SUBSCRIBE_MANY)
+	if (type_ != Type::SUBSCRIBE)
 		throw bad_cast();
 
 	unique_lock g(lock_);
@@ -285,7 +299,7 @@ subscribe_response token::get_subscribe_response() const
 
 unsubscribe_response token::get_unsubscribe_response() const
 {
-	if (type_ != Type::UNSUBSCRIBE && type_ != Type::UNSUBSCRIBE_MANY)
+	if (type_ != Type::UNSUBSCRIBE)
 		throw bad_cast();
 
 	unique_lock g(lock_);

@@ -587,7 +587,7 @@ token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 	if (n != qos.size())
 		throw std::invalid_argument("Collection sizes don't match");
 
-	auto tok = token::create(token::Type::SUBSCRIBE_MANY, *this, topicFilters);
+	auto tok = token::create(token::Type::SUBSCRIBE, *this, topicFilters);
 	tok->set_num_expected(n);
 
 	add_token(tok);
@@ -614,7 +614,7 @@ token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 	if (n != qos.size())
 		throw std::invalid_argument("Collection sizes don't match");
 
-	auto tok = token::create(token::Type::SUBSCRIBE_MANY, *this,
+	auto tok = token::create(token::Type::SUBSCRIBE, *this,
 							 topicFilters, userContext, cb);
 	tok->set_num_expected(n);
 	add_token(tok);
@@ -635,6 +635,7 @@ token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 token_ptr async_client::subscribe(const string& topicFilter, int qos)
 {
 	auto tok = token::create(token::Type::SUBSCRIBE, *this, topicFilter);
+	tok->set_num_expected(0);	// Indicates non-array response for single val
 	add_token(tok);
 
 	response_options opts(tok, mqttVersion_);
@@ -654,6 +655,7 @@ token_ptr async_client::subscribe(const string& topicFilter, int qos,
 {
 	auto tok = token::create(token::Type::SUBSCRIBE, *this, topicFilter,
 							 userContext, cb);
+	tok->set_num_expected(0);
 	add_token(tok);
 
 	response_options opts(tok, mqttVersion_);
@@ -674,6 +676,7 @@ token_ptr async_client::subscribe(const string& topicFilter, int qos,
 token_ptr async_client::unsubscribe(const string& topicFilter)
 {
 	auto tok = token::create(token::Type::UNSUBSCRIBE, *this, topicFilter);
+	tok->set_num_expected(0);	// Indicates non-array response for single val
 	add_token(tok);
 
 	response_options opts(tok, mqttVersion_);
@@ -692,7 +695,7 @@ token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters)
 {
 	size_t n = topicFilters->size();
 
-	auto tok = token::create(token::Type::UNSUBSCRIBE_MANY, *this, topicFilters);
+	auto tok = token::create(token::Type::UNSUBSCRIBE, *this, topicFilters);
 	tok->set_num_expected(n);
 	add_token(tok);
 
@@ -714,7 +717,7 @@ token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters,
 {
 	size_t n = topicFilters->size();
 
-	auto tok = token::create(token::Type::UNSUBSCRIBE_MANY, *this, topicFilters,
+	auto tok = token::create(token::Type::UNSUBSCRIBE, *this, topicFilters,
 							 userContext, cb);
 	tok->set_num_expected(n);
 	add_token(tok);

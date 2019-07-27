@@ -30,24 +30,39 @@
 
 namespace mqtt {
 
+/**
+ * Base class for responses from the server.
+ */
 class server_response
 {
 	/** The properties from the acknowledge  */
 	properties props_;
 
-	friend class token;
-
 public:
+	/**
+	 * Creates a response with empty property list.
+	 */
 	server_response() {}
-
+	/**
+	 * Creates a server response with the specified properties.
+	 * @param props The properties in the response.
+	 */
 	server_response(const properties& props)
 		: props_(props) {}
-
+	/**
+	 * Creates a server response with the specified properties.
+	 * @param props The properties in the response.
+	 */
 	server_response(properties&& props)
 		: props_(std::move(props)) {}
-
+	/**
+	 * Virtual destructor.
+	 */
 	virtual ~server_response() {}
-
+	/**
+	 * Gets the properties from the response.
+	 * @return The properties from the response.
+	 */
 	const properties& get_properties() const { return props_; }
 };
 
@@ -79,12 +94,29 @@ class connect_response : public server_response
 	}
 
 public:
+	/**
+	 * Gets the URI of the broker to which we connected.
+	 * @return The URI of the broker.
+	 */
 	string get_server_uri() const { return serverURI_; }
+	/**
+	 * Gets the MQTT version for the connection.
+	 * @return The MQTT version for the connection.
+	 */
 	int get_mqtt_version() const { return mqttVersion_; }
+	/**
+	 * Determines whether a session already existed for this client on the
+	 * server.
+	 * This tells whether the server has a persistent session stored for the
+	 * client, given the ClientID specified in the connect message.
+	 * @return Whether a session already existed for this client on the server.
+	 */
 	bool is_session_present() const { return sessionPresent_; }
 };
 
-/** Response for subscribe messages */
+/**
+ * Response for subscribe messages
+ */
 struct subscribe_response : public server_response
 {
 	/** The reason/result code for each topic request. */
@@ -146,8 +178,9 @@ class unsubscribe_response : public server_response
 		}
 	}
 
-public:
+	unsubscribe_response(MQTTAsync_successData* rsp) {}
 
+public:
 	/**
 	 * Gets the reason codes from the server response.
 	 * On an unsubscribe ack there is a reason code for each topic

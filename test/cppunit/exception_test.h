@@ -35,7 +35,7 @@ class exception_test : public CppUnit::TestFixture
 
 	CPPUNIT_TEST( test_user_constructor );
 	CPPUNIT_TEST( test_get_message );
-	CPPUNIT_TEST( test_get_reason_code );
+	CPPUNIT_TEST( test_get_return_code );
 	CPPUNIT_TEST( test_to_str );
 	CPPUNIT_TEST( test_what );
 
@@ -53,13 +53,13 @@ public:
 
 	void test_user_constructor() {
 		mqtt::exception ex1(MQTTASYNC_FAILURE);
-		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex1.get_reason_code());
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex1.get_return_code());
 
 		mqtt::exception ex2(MQTTASYNC_PERSISTENCE_ERROR);
-		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_PERSISTENCE_ERROR, ex2.get_reason_code());
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_PERSISTENCE_ERROR, ex2.get_return_code());
 
 		mqtt::exception ex3(MQTTASYNC_OPERATION_INCOMPLETE);
-		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_OPERATION_INCOMPLETE, ex3.get_reason_code());
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_OPERATION_INCOMPLETE, ex3.get_return_code());
 	}
 
 // ----------------------------------------------------------------------
@@ -72,12 +72,12 @@ public:
 	}
 
 // ----------------------------------------------------------------------
-// Test get_reason_code()
+// Test get_return_code()
 // ----------------------------------------------------------------------
 
-	void test_get_reason_code() {
+	void test_get_return_code() {
 		mqtt::exception ex1(MQTTASYNC_FAILURE);
-		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex1.get_reason_code());
+		CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex1.get_return_code());
 	}
 
 // ----------------------------------------------------------------------

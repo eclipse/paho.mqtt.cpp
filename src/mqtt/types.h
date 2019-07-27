@@ -99,7 +99,8 @@ enum ReasonCode {
     CONNECTION_RATE_EXCEEDED = 159,
     MAXIMUM_CONNECT_TIME = 160,
     SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED = 161,
-    WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED = 162
+    WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED = 162,
+	MQTTPP_V3_CODE = 255	// This is not a protocol code; used internally by the library
 };
 
 /////////////////////////////////////////////////////////////////////////////

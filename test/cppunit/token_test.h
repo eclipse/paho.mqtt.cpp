@@ -143,6 +143,7 @@ public:
 		MQTTAsync_successData data = {
 			.token = MESSAGE_ID,
 		};
+		data.alt.connect.serverURI = const_cast<char*>("tcp://some_server.com");
 
 		CPPUNIT_ASSERT_EQUAL(false, tok.is_complete());
 		token::on_success(&tok, &data);
@@ -300,7 +301,7 @@ public:
 			CPPUNIT_FAIL("token::wait() should throw on failure");
 		}
 		catch (mqtt::exception& ex) {
-			CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex.get_reason_code());
+			CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex.get_return_code());
 		}
 
 		try {
@@ -308,7 +309,7 @@ public:
 			CPPUNIT_FAIL("token::try_wait() should throw on failure");
 		}
 		catch (mqtt::exception& ex) {
-			CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex.get_reason_code());
+			CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex.get_return_code());
 		}
 
 		try {
@@ -316,7 +317,7 @@ public:
 			CPPUNIT_FAIL("token::wait_for() should throw on failure");
 		}
 		catch (mqtt::exception& ex) {
-			CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex.get_reason_code());
+			CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex.get_return_code());
 		}
 
 		try {
@@ -324,7 +325,7 @@ public:
 			CPPUNIT_FAIL("token::wait_until() should throw on failure");
 		}
 		catch (mqtt::exception& ex) {
-			CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex.get_reason_code());
+			CPPUNIT_ASSERT_EQUAL(MQTTASYNC_FAILURE, ex.get_return_code());
 		}
 	}
 
