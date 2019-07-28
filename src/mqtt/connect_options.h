@@ -355,7 +355,7 @@ public:
 	 * @param on Whether to turn reconnects on or off
 	 */
 	void set_automatic_reconnect(bool on) {
-		opts_.automaticReconnect = on ? !0 : 0;
+		opts_.automaticReconnect = to_int(on);
 	}
 	/**
 	 * Enable or disable automatic reconnects.

@@ -220,10 +220,29 @@ TEST_CASE("string property copy constructor", "[property]") {
 		REQUIRE(prop.type() == typ);
 		REQUIRE(get<string>(prop) == topic);
 	}
+
+	// Make sure the copy is still valid after the original disappears
+	SECTION("copy a temp string property") {
+		property::code typ = property::RESPONSE_TOPIC;
+		string topic { "replies/bubba" };
+
+		std::unique_ptr<property> org_prop{ new property { typ, topic } };
+		property prop { *org_prop };
+		org_prop.reset(nullptr);
+
+		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_RESPONSE_TOPIC);
+
+		REQUIRE(prop.prop().value.data.len == int(topic.length()));
+		REQUIRE(std::memcmp(prop.prop().value.data.data, topic.data(), topic.length()) == 0);
+
+		REQUIRE(prop.type() == typ);
+		REQUIRE(get<string>(prop) == topic);
+	}
+
 }
 
 TEST_CASE("string property move constructor", "[property]") {
-	SECTION("copy a string property") {
+	SECTION("move a string property") {
 		property::code typ = property::RESPONSE_TOPIC;
 		string topic { "replies/bubba" };
 
@@ -254,6 +273,30 @@ TEST_CASE("string pair property copy constructor", "[property]") {
 
 		property org_prop { typ, name, value };
 		property prop { org_prop };
+
+		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_USER_PROPERTY);
+
+		REQUIRE(prop.prop().value.data.len == int(name.length()));
+		REQUIRE(stringcmp(prop.prop().value.data.data, name));
+
+		REQUIRE(prop.prop().value.value.len == int(value.length()));
+		REQUIRE(stringcmp(prop.prop().value.value.data, value));
+
+		REQUIRE(prop.type() == typ);
+
+		auto usr = get<string_pair>(prop);
+		REQUIRE(std::get<0>(usr) == name);
+		REQUIRE(std::get<1>(usr) == value);
+	}
+
+	// Make sure the property is still valid after the original disappears
+	SECTION("property from temp strings property") {
+		string	name { "bubba" },
+				value { "some val" };
+
+		std::unique_ptr<property> org_prop{ new property { typ, name, value } };
+		property prop { *org_prop };
+		org_prop.reset(nullptr);
 
 		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_USER_PROPERTY);
 

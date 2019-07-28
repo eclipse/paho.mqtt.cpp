@@ -80,7 +80,7 @@ async_client::async_client(const string& serverURI, const string& clientId,
 	MQTTAsync_createOptions opts MQTTAsync_createOptions_initializer5;
 
 	if (maxBufferedMessages != 0) {
-		opts.sendWhileDisconnected = !0;
+		opts.sendWhileDisconnected = to_int(true);
 		opts.maxBufferedMessages = maxBufferedMessages;
 	}
 
@@ -101,7 +101,7 @@ async_client::async_client(const string& serverURI, const string& clientId,
 	MQTTAsync_createOptions opts MQTTAsync_createOptions_initializer5;
 
 	if (maxBufferedMessages != 0) {
-		opts.sendWhileDisconnected = !0;
+		opts.sendWhileDisconnected = to_int(true);
 		opts.maxBufferedMessages = maxBufferedMessages;
 	}
 
@@ -302,7 +302,7 @@ void async_client::disable_callbacks()
 	// the "message arrived" parameter. So, for now we send it an empty
 	// lambda function.
 	int rc = MQTTAsync_setCallbacks(cli_, this, nullptr,
-					[](void*,char*,int,MQTTAsync_message*) -> int {return !0;},
+					[](void*,char*,int,MQTTAsync_message*) -> int {return to_int(true);},
 					nullptr);
 					
 	if (rc != MQTTASYNC_SUCCESS)

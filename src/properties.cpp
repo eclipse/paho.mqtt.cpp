@@ -172,8 +172,7 @@ property properties::get(property::code propid, size_t idx /*=0*/)
 	MQTTProperty* prop = MQTTProperties_getPropertyAt(&props_,
 									MQTTPropertyCodes(propid), int(idx));
 	if (!prop)
-		// TODO: Use a better exception
-		throw std::exception();
+		throw bad_cast();
 
 	return property(*prop);
 }

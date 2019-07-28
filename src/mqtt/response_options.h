@@ -41,7 +41,7 @@ public:
 	/**
 	 * Create an empty response object.
 	 */
-	response_options(int mqttVersion=MQTTVERSION_DEFAULT);
+	explicit response_options(int mqttVersion=MQTTVERSION_DEFAULT);
 	/**
 	 * Creates a response object with the specified callbacks.
 	 * @param tok A token to be used as the context.

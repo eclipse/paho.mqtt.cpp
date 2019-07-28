@@ -243,9 +243,7 @@ public:
 	 *  	@li MQTT_SSL_VERSION_TLS_1_1 (2)
 	 *  	@li MQTT_SSL_VERSION_TLS_1_2 (3)
 	 */
-	void set_ssl_version(int ver) {
-		opts_.sslVersion = ver;
-	}
+	void set_ssl_version(int ver) { opts_.sslVersion = ver; }
 	/**
 	 * Gets the path to a directory containing CA certificates in PEM
 	 * format.

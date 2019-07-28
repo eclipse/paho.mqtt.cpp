@@ -197,7 +197,7 @@ void connect_options::set_mqtt_version(int mqttVersion) {
 void connect_options::set_automatic_reconnect(int minRetryInterval,
 											  int maxRetryInterval)
 {
-	opts_.automaticReconnect = !0;
+	opts_.automaticReconnect = to_int(true);
 	opts_.minRetryInterval = minRetryInterval;
 	opts_.maxRetryInterval = maxRetryInterval;
 }

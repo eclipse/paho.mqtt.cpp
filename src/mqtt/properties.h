@@ -30,6 +30,7 @@ extern "C" {
 
 #include "mqtt/types.h"
 #include "mqtt/buffer_ref.h"
+#include "mqtt/exception.h"
 #include <tuple>
 #include <initializer_list>
 
@@ -101,9 +102,17 @@ public:
 	 * @param val The string value for the property
 	 */
 	property(code c, string_ref name, string_ref val);
-
-	property(const MQTTProperty& cprop);
-	property(MQTTProperty&& cprop);
+	/**
+	 * Creates a property list from an C struct.
+	 * @param cprop A C struct for a property list.
+	 */
+	explicit property(const MQTTProperty& cprop);
+	/**
+	 * Moves a C struct into this property list.
+	 * This takes ownership of any memory that the C struct is holding.
+	 * @param cprop A C struct for a property list.
+	 */
+	explicit property(MQTTProperty&& cprop);
 
 	property(const property& other);
 	property(property&& other);
@@ -112,25 +121,29 @@ public:
 	 * Destructor
 	 */
 	~property();
-
+	/**
+	 * Copy assignment.
+	 * @param rhs Another property list to copy into this one.
+	 * @return A reference to this object.
+	 */
 	property& operator=(const property& rhs);
+	/**
+	 * Move assignment.
+	 * @param rhs Another property list to move into this one.
+	 * @return A reference to this object.
+	 */
 	property& operator=(property&& rhs);
-
 	/**
 	 * Gets the underlying C property struct.
 	 * @return A const reference to the underlying C property
 	 *  	   struct.
 	 */
-	const MQTTProperty& prop() const {
-		return prop_;
-	}
+	const MQTTProperty& prop() const { return prop_; }
 	/**
 	 * Gets the property type (identifier).
 	 * @return The code for the property type.
 	 */
-	code type() const {
-		return code(prop_.identifier);
-	}
+	code type() const { return code(prop_.identifier); }
 	/**
 	 * Gets a printable name for the property type.
 	 * @return A printable name for the property type.
@@ -140,9 +153,12 @@ public:
 	}
 };
 
-// TODO: This shoult throw an exception
+/**
+ * Extracts the value from the property as the specitied type.
+ * @return The value from the property as the specitied type.
+ */
 template <typename T>
-inline T get(const property&) { return T(); }
+inline T get(const property&) { throw bad_cast(); }
 
 template <>
 inline uint8_t get<uint8_t>(const property& prop) {
@@ -171,16 +187,12 @@ inline int32_t get<int32_t>(const property& prop) {
 
 template <>
 inline string get<string>(const property& prop) {
-	// TODO: We need to insure that this is a string property,
-	//		otherwise we're returning junk
 	return (!prop.prop().value.data.data) ? string()
 		: string(prop.prop().value.data.data, prop.prop().value.data.len);
 }
 
 template <>
 inline string_pair get<string_pair>(const property& prop) {
-	// TODO: We need to insure that this is a string_pair property,
-	//		otherwise we're returning junk
 	string name = (!prop.prop().value.data.data) ? string()
 		: string(prop.prop().value.data.data, prop.prop().value.data.len);
 
@@ -349,8 +361,7 @@ inline T get(const properties& props, property::code propid, size_t idx)
 								const_cast<MQTTProperties*>(&props.c_struct()),
 								MQTTPropertyCodes(propid), int(idx));
 	if (!prop)
-		// TODO: Use a better exception
-		throw std::exception();
+		throw bad_cast();
 
 	return get<T>(property(*prop));
 }
@@ -360,7 +371,6 @@ inline T get(const properties& props, property::code propid)
 {
 	return get<T>(props, propid, 0);
 }
-
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
