@@ -15,7 +15,7 @@ if [ "$TRAVIS_OS_NAME" == "linux" ]; then
   sudo env "PATH=$PATH" cmake --build build/ --target install
 
   # Run the unit tests
-  ./build/tests/unit/unit_tests --success
+  ./build/test/unit/unit_tests --success
 
   #ctest -VV --timeout 600
   #cpack --verbose
@@ -25,6 +25,6 @@ if [ "$TRAVIS_OS_NAME" == "linux" ]; then
   sudo env "PATH=$PATH" cmake --build build/ --target install
 
   # Run the unit tests
-  ./build/tests/unit/unit_tests --success
+  ./build/test/unit/unit_tests --success
 
 fi
