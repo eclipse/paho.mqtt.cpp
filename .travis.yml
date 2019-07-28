@@ -142,8 +142,6 @@ matrix:
 script:
   # Test CMake building
   - ./travis_build_cmake.sh
-  # Test Autotools building
-  - ./travis_build_autotools.sh
   # Static Analysis
   - cppcheck --enable=all --std=c++11 --force --quiet src/*.cpp
 
