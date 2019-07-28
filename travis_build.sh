@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 if [ "$TRAVIS_OS_NAME" == "linux" ]; then
 
@@ -8,7 +8,7 @@ if [ "$TRAVIS_OS_NAME" == "linux" ]; then
     COMPILER=g++;
   fi
 
-  echo "travis build dir $TRAVIS_BUILD_DIR pwd $PWD"
+  echo "Travis build dir: $TRAVIS_BUILD_DIR,  pwd: $PWD"
 
   rm -rf build/
   cmake -Bbuild -H. -DCMAKE_CXX_COMPILER=$COMPILER -DPAHO_BUILD_SAMPLES=ON -DPAHO_BUILD_STATIC=ON -DPAHO_BUILD_DOCUMENTATION=OFF -DPAHO_WITH_SSL=OFF
