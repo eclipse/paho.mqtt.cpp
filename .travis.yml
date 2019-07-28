@@ -140,8 +140,6 @@ matrix:
     - compiler: gcc
 
 script:
-  # Test Makefile building
-  - ./travis_build_make.sh
   # Test CMake building
   - ./travis_build_cmake.sh
   # Test Autotools building
