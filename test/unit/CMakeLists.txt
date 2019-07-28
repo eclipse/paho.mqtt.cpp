@@ -1,12 +1,10 @@
 # CMakeLists.txt
 #
-# CMake file for the Paho C++ library's unit tests.
-#
-# This is part of the Paho MQTT C++ client library.
+# CMake file for the Catch2 unit tests in the Eclipse Paho C++ library.
 #
 
 #*******************************************************************************
-# Copyright (c) 2018, Frank Pagliughi
+# Copyright (c) 2019 Frank Pagliughi <fpagliughi@mindspring.com>
 #
 #  All rights reserved. This program and the accompanying materials
 #  are made available under the terms of the Eclipse Public License v1.0
@@ -17,16 +15,32 @@
 #  and the Eclipse Distribution License is available at 
 #    http://www.eclipse.org/org/documents/edl-v10.php.
 # 
+#  Contributors:
+#     Frank Pagliughi - Initial implementation
 #*******************************************************************************/
 
-# --- Executable ---
+find_package(Catch2 REQUIRED)
 
-add_executable(paho-mqttpp-test test.cpp)
+# --- For apps that use threads ---
 
-target_link_libraries(paho-mqttpp-test ${PAHO_CPP_LIB} cppunit)
+#set(THREADS_PREFER_PTHREAD_FLAG ON)
+#find_package(Threads REQUIRED)
 
-## install binaries
-install(TARGETS paho-mqttpp-test EXPORT PahoMqttCppTests
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
+# --- Executables ---
+
+add_executable(unit_tests unit_tests.cpp
+	test_properties.cpp
 )
+
+# --- Link for executables ---
+
+message(STATUS "Using library for unit tests: ${PAHO_CPP_LIB}")
+
+# .. Threads::Threads)
+target_link_libraries(unit_tests ${PAHO_CPP_LIB} Catch2::Catch2)
+
+include(CTest)
+include(Catch)
+
+catch_discover_tests(unit_tests)
+

@@ -1,4 +1,4 @@
-// sync_consume.cpp
+// rpc_math_srvr.cpp
 //
 // This is a Paho MQTT C++ client, sample application.
 //
@@ -31,6 +31,7 @@
  *******************************************************************************/
 
 #include <iostream>
+#include <sstream>
 #include <cstdlib>
 #include <string>
 #include <cstring>
@@ -43,7 +44,10 @@ using namespace std;
 using namespace std::chrono;
 
 const string SERVER_ADDRESS	{ "tcp://localhost:1883" };
-const string CLIENT_ID		{ "sync_consume_cpp" };
+const string CLIENT_ID		{ "rpc_math_srvr" };
+
+constexpr auto RESPONSE_TOPIC	= mqtt::property::RESPONSE_TOPIC;
+constexpr auto CORRELATION_DATA	= mqtt::property::CORRELATION_DATA;
 
 // --------------------------------------------------------------------------
 // Simple function to manually reconect a client.
@@ -64,32 +68,45 @@ bool try_reconnect(mqtt::client& cli)
 	return false;
 }
 
+// --------------------------------------------------------------------------
+// RPC function implementations
+
+double add(const std::vector<double>& nums)
+{
+	double sum = 0.0;
+	for (auto n : nums)
+		sum += n;
+	return sum;
+}
+
+double mult(const std::vector<double>& nums)
+{
+	double prod = 1.0;
+	for (auto n : nums)
+		prod *= n;
+	return prod;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[])
 {
 	mqtt::connect_options connOpts;
+	connOpts.set_mqtt_version(MQTTVERSION_5);
 	connOpts.set_keep_alive_interval(20);
-	connOpts.set_clean_session(false);
+	connOpts.set_clean_start(true);
+
 
 	mqtt::client cli(SERVER_ADDRESS, CLIENT_ID);
 
-	const vector<string> TOPICS { "data/#", "command" };
-	const vector<int> QOS { 0, 1 };
+	const vector<string> TOPICS { "requests/math", "requests/math/#" };
+	const vector<int> QOS { 1, 1 };
 
 	try {
 		cout << "Connecting to the MQTT server..." << flush;
-		mqtt::connect_response rsp = cli.connect(connOpts);
+		cli.connect(connOpts);
+		cli.subscribe(TOPICS, QOS);
 		cout << "OK\n" << endl;
-
-		if (!rsp.is_session_present()) {
-			std::cout << "Subscribing to topics..." << std::flush;
-			cli.subscribe(TOPICS, QOS);
-			std::cout << "OK" << std::endl;
-		}
-		else {
-			cout << "Session already present. Skipping subscribe." << std::endl;
-		}
 
 		// Consume messages
 
@@ -106,20 +123,61 @@ int main(int argc, char* argv[])
 					}
 					else {
 						cout << "Reconnect failed." << endl;
+						break;
 					}
 				}
-				else {
-					cout << "An error occurred retrieving messages." << endl;
-				}
-				break;
-			}
-			if (msg->get_topic() == "command" &&
-					msg->to_string() == "exit") {
-				cout << "Exit command received" << endl;
-				break;
+				else
+					break;
 			}
 
-			cout << msg->get_topic() << ": " << msg->to_string() << endl;
+			cout << "Received a request" << endl;
+
+			const mqtt::properties& props = msg->get_properties();
+
+			if (props.contains(RESPONSE_TOPIC) && props.contains(CORRELATION_DATA)) {
+				mqtt::binary corr_id  = mqtt::get<string>(props, CORRELATION_DATA);
+				string reply_to = mqtt::get<string>(props, RESPONSE_TOPIC);
+
+				cout << "Client wants a reply to [" << corr_id << "] on '"
+					<< reply_to << "'" << endl;
+
+				cout << msg->get_topic() << ": " << msg->to_string() << endl;
+
+				char c;
+				double x;
+				vector<double> nums;
+
+				istringstream is(msg->to_string());
+				if (!(is >> c) || c != '[') {
+					cout << "Malformed arguments" << endl;
+					// Maybe send an error message to client.
+					continue;
+				}
+
+				c = ',';
+				while (c == ',' && (is >> x >> c))
+					nums.push_back(x);
+
+				if (c != ']') {
+					cout << "Bad closing delimiter" << endl;
+					continue;
+				}
+
+				x = 0.0;
+				if (msg->get_topic() == "requests/math/add")
+					x = add(nums);
+				else if (msg->get_topic() == "requests/math/mult")
+					x = mult(nums);
+				else {
+					cout << "Unknown request: " << msg->get_topic() << endl;
+					continue;
+				}
+
+				cout << "  Result: " << x << endl;
+
+				auto reply_msg = mqtt::message::create(reply_to, to_string(x), 1, false);
+				cli.publish(reply_msg);
+			}
 		}
 
 		// Disconnect

@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013-2017 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2019 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,6 +19,7 @@
  *
  * Contributors:
  *    Frank Pagliughi - initial implementation and documentation
+ *    Frank Pagliughi - MQTT v5 support (properties)
  *******************************************************************************/
 
 #ifndef __mqtt_message_h
@@ -26,6 +27,7 @@
 
 #include "MQTTAsync.h"
 #include "mqtt/buffer_ref.h"
+#include "mqtt/properties.h"
 #include "mqtt/exception.h"
 #include <memory>
 
@@ -67,6 +69,8 @@ private:
 	string_ref topic_;
 	/** The message payload - an arbitrary binary blob. */
 	binary_ref payload_;
+	/** The properties for the message  */
+	properties props_;
 
 	/** The client has special access. */
 	friend class async_client;
@@ -300,17 +304,6 @@ public:
 		msg_.qos = qos;
 	}
 	/**
-	 * Whether or not the publish message should be retained by the broker.
-	 * @param retained @em true if the message should be retained by the
-	 *  			   broker, @em false if not.
-	 */
-	void set_retained(bool retained) { msg_.retained = to_int(retained); }
-	/**
-	 * Returns a string representation of this messages payload.
-	 * @return string
-	 */
-	string to_string() const { return get_payload_str(); }
-	/**
 	 * Determines if the QOS value is a valid one.
 	 * @param qos The QOS value.
 	 * @throw std::invalid_argument If the qos value is invalid.
@@ -319,6 +312,40 @@ public:
 		if (qos < 0 || qos > 2)
 			throw exception(MQTTASYNC_BAD_QOS, "Bad QoS");
 	}
+	/**
+	 * Whether or not the publish message should be retained by the broker.
+	 * @param retained @em true if the message should be retained by the
+	 *  			   broker, @em false if not.
+	 */
+	void set_retained(bool retained) { msg_.retained = to_int(retained); }
+	/**
+	 * Gets the properties in the message.
+	 * @return A const reference to the properties in the message.
+	 */
+	const properties& get_properties() const {
+		return props_;
+	}
+	/**
+	 * Sets the properties in the message.
+	 * @param props The properties to place into the message.
+	 */
+	void set_properties(const properties& props) {
+		props_ = props;
+		msg_.properties = props_.c_struct();
+	}
+	/**
+	 * Moves the properties into the message.
+	 * @param props The properties to move into the message.
+	 */
+	void set_properties(properties&& props) {
+		props_ = props;
+		msg_.properties = props_.c_struct();
+	}
+	/**
+	 * Returns a string representation of this messages payload.
+	 * @return A string representation of this messages payload.
+	 */
+	string to_string() const { return get_payload_str(); }
 };
 
 /** Smart/shared pointer to a message */

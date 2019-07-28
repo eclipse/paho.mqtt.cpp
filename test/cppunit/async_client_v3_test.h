@@ -1,8 +1,10 @@
-// async_client_test.h
-// Unit tests for the async_client class in the Paho MQTT C++ library.
+// async_client_v3_test.h
+// Unit tests for the MQTT v3 async_client class in the Paho MQTT C++
+// library.
 
 /*******************************************************************************
  * Copyright (c) 2017 Guilherme M. Ferreira <guilherme.maciel.ferreira@gmail.com>
+ * Copyright (c) 2019 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,10 +17,11 @@
  *
  * Contributors:
  *    Guilherme M. Ferreira - initial implementation and documentation
+ *    Frank Pagliughi - updates
  *******************************************************************************/
 
-#ifndef __mqtt_async_client_test_h
-#define __mqtt_async_client_test_h
+#ifndef __mqtt_async_client_v3_test_h
+#define __mqtt_async_client_v3_test_h
 
 #include <stdexcept>
 #include <vector>
@@ -37,7 +40,7 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-class async_client_test : public CppUnit::TestFixture
+class async_client_v3_test : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE( async_client_test );
 
@@ -95,7 +98,7 @@ class async_client_test : public CppUnit::TestFixture
 	// NOTE: This test case requires network access. It uses one of
 	//  	 the public available MQTT brokers
 	#if defined(TEST_EXTERNAL_SERVER)
-		const std::string GOOD_SERVER_URI { "tcp://m2m.eclipse.org:1883" };
+		const std::string GOOD_SERVER_URI { "tcp://mqtt.eclipse.org:1883" };
 	#else
 		const std::string GOOD_SERVER_URI { "tcp://localhost:1883" };
 		const std::string GOOD_SSL_SERVER_URI { "ssl://localhost:18885" };
@@ -194,7 +197,7 @@ public:
 		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
-		mqtt::token_ptr token_conn { nullptr };
+		mqtt::token_ptr token_conn;	//{ nullptr };
 		mqtt::connect_options co;
 		mqtt::will_options wo;
 		wo.set_qos(BAD_QOS); // Invalid QoS causes connection failure
@@ -243,7 +246,7 @@ public:
 		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
-		mqtt::token_ptr token_conn { nullptr };
+		mqtt::token_ptr token_conn;		//{ nullptr };
 		mqtt::connect_options co;
 		mqtt::will_options wo;
 		wo.set_qos(BAD_QOS); // Invalid QoS causes connection failure
@@ -327,7 +330,7 @@ public:
 		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
-		mqtt::token_ptr token_disconn { nullptr };
+		mqtt::token_ptr token_disconn;	//{ nullptr };
 		int reason_code = MQTTASYNC_SUCCESS;
 		try {
 			token_disconn = cli.disconnect(0);
@@ -378,7 +381,7 @@ public:
 		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
 		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
 
-		mqtt::token_ptr token_disconn { nullptr };
+		mqtt::token_ptr token_disconn;	//{ nullptr };
 		mqtt::test::dummy_action_listener listener;
 		int reason_code = MQTTASYNC_SUCCESS;
 		try {
@@ -413,8 +416,8 @@ public:
 		// delivery_token via async_client::add_token(delivery_token_ptr tok).
 		// The other functions add token async_client::add_token(token_ptr tok).
 
-		mqtt::delivery_token_ptr token_pub { nullptr };
-		mqtt::delivery_token_ptr token_pending { nullptr };
+		mqtt::delivery_token_ptr token_pub;	// { nullptr };
+		mqtt::delivery_token_ptr token_pending;	// { nullptr };
 
 		// NOTE: message IDs are 16-bit numbers sequentially incremented, from
 		// 1 to 65535 (MAX_MSG_ID). See MQTTAsync_assignMsgId() at Paho MQTT C.
@@ -474,7 +477,7 @@ public:
 		token_conn->wait();
 		CPPUNIT_ASSERT(cli.is_connected());
 
-		mqtt::delivery_token_ptr token_pub { nullptr };
+		mqtt::delivery_token_ptr token_pub;	// { nullptr };
 
 		// NOTE: async_client::publish() is the only method that adds
 		// delivery_token via async_client::add_token(delivery_token_ptr tok).
@@ -967,5 +970,5 @@ public:
 // end namespace mqtt
 }
 
-#endif //  __mqtt_async_client_test_h
+#endif //  __mqtt_async_client_v3_test_h
 

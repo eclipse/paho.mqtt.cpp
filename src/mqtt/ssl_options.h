@@ -7,6 +7,7 @@
 
 /*******************************************************************************
  * Copyright (c) 2016 Guilherme Ferreira <guilherme.maciel.ferreira@gmail.com>
+ * Copyright (c) 2016-2019 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,6 +21,7 @@
  * Contributors:
  *    Guilherme Ferreira - initial implementation and documentation
  *    Frank Pagliughi - added copy & move operations
+ *    Frank Pagliughi - upgraded compatibility to Paho C 1.3
  *******************************************************************************/
 
 #ifndef __mqtt_ssl_options_h
@@ -60,6 +62,9 @@ class ssl_options
 
 	/** The password to load the client's privateKey if encrypted. */
 	string privateKeyPassword_;
+
+	/** Path to a directory containing CA certificates in PEM format */
+	string caPath_;
 
 	/**
 	 * The list of cipher suites that the client will present to the
@@ -224,6 +229,37 @@ public:
 	 *  						  certificate
 	 */
 	void set_enable_server_cert_auth(bool enablServerCertAuth);
+	/**
+	 * Gets the requested SSL/TLS version.
+	 * @return The requested SSL/TLS version.
+	 */
+	int get_ssl_version() const { return opts_.sslVersion; }
+	/**
+	 * Set the SSL/TLS version to use.
+	 *
+	 * @param ver The desired SSL/TLS version. Specify one of:
+	 *  	@li MQTT_SSL_VERSION_DEFAULT (0)
+	 *  	@li MQTT_SSL_VERSION_TLS_1_0 (1)
+	 *  	@li MQTT_SSL_VERSION_TLS_1_1 (2)
+	 *  	@li MQTT_SSL_VERSION_TLS_1_2 (3)
+	 */
+	void set_ssl_version(int ver) { opts_.sslVersion = ver; }
+	/**
+	 * Gets the path to a directory containing CA certificates in PEM
+	 * format.
+	 *
+	 * @return Path to a directory containing CA certificates in PEM format,
+	 *  	   if set. If this isn't set, returns an empty string.
+	 */
+	string ca_path() const { return caPath_; }
+	/**
+	 * Sets the path to a directory containing CA certificates in PEM
+	 * format.
+	 *
+	 * @param path Path to a directory containing CA certificates in PEM
+	 *  	   format.
+	 */
+	void ca_path(const string& path);
 };
 
 /**

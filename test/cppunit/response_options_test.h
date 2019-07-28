@@ -43,6 +43,8 @@ class response_options_test : public CppUnit::TestFixture
 
 	mqtt::test::dummy_async_client cli;
 
+	static constexpr token::Type TOKEN_TYPE = token::Type::CONNECT;
+
 public:
 	void setUp() {}
 	void tearDown() {}
@@ -67,7 +69,7 @@ public:
 // ----------------------------------------------------------------------
 
 	void test_user_constructor() {
-		mqtt::token_ptr token { std::make_shared<mqtt::token>(cli) };
+		mqtt::token_ptr token { mqtt::token::create(TOKEN_TYPE, cli) };
 		mqtt::response_options opts { token };
 		MQTTAsync_responseOptions& c_struct = opts.opts_;
 
@@ -87,7 +89,7 @@ public:
 		MQTTAsync_responseOptions& c_struct = opts.opts_;
 
 		CPPUNIT_ASSERT(c_struct.context == nullptr);
-		mqtt::token_ptr token { std::make_shared<mqtt::token>(cli) };
+		mqtt::token_ptr token { mqtt::token::create(TOKEN_TYPE, cli) };
 		opts.set_token( token );
 		CPPUNIT_ASSERT(c_struct.context == token.get());
 	}

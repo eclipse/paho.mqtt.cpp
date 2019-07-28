@@ -20,6 +20,7 @@
 #include "buffer_ref_test.h"
 #include "string_collection_test.h"
 #include "async_client_test.h"
+#include "async_client_v3_test.h"
 #include "client_test.h"
 #include "message_test.h"
 #include "will_options_test.h"
@@ -59,6 +60,7 @@ int main(int argc, char* argv[])
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::exception_test );
 
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::async_client_test );
+	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::async_client_v3_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::client_test );
 
 	TextUi::TestRunner runner;

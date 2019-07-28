@@ -47,6 +47,7 @@ add_library(paho-cpp-objs OBJECT
     disconnect_options.cpp
     iclient_persistence.cpp
     message.cpp
+    properties.cpp
     response_options.cpp
     ssl_options.cpp
     string_collection.cpp

@@ -135,6 +135,12 @@ void ssl_options::set_enable_server_cert_auth(bool enableServerCertAuth)
 	opts_.enableServerCertAuth = to_int(enableServerCertAuth);
 }
 
+void ssl_options::ca_path(const string& path)
+{
+	caPath_ = path;
+	opts_.CApath = c_str(caPath_);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 } // end namespace mqtt
 

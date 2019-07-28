@@ -100,7 +100,7 @@ public:
 	 * @throw security_exception for security related problems
 	 */
 	virtual token_ptr connect(connect_options options, void* userContext,
-							   iaction_listener& cb) =0;
+							  iaction_listener& cb) =0;
 	/**
 	 *
 	 * @param userContext optional object used to pass context to the

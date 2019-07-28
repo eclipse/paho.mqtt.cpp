@@ -96,6 +96,7 @@ endif()
 
 if(PAHO_BUILD_TESTS)
     add_subdirectory(test/unit)
+    add_subdirectory(test/cppunit)
 endif()
 
 ## --- Packaging settings ---

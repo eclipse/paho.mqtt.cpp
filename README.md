@@ -1,29 +1,49 @@
 # Eclipse Paho MQTT C++ Client Library
 
-Master: [![Build Status](https://travis-ci.org/eclipse/paho.mqtt.cpp.svg?branch=master)](https://travis-ci.org/eclipse/paho.mqtt.cpp)  Develop: [![Build Status](https://travis-ci.org/eclipse/paho.mqtt.cpp.svg?branch=master)](https://travis-ci.org/eclipse/paho.mqtt.cpp)
+[![Build Status](https://travis-ci.org/eclipse/paho.mqtt.cpp.svg?branch=master)](https://travis-ci.org/eclipse/paho.mqtt.cpp)
 
 This repository contains the source code for the [Eclipse Paho](http://eclipse.org/paho) MQTT C++ client library on memory-managed operating systems such as Linux/Posix and Windows.
 
-This code builds a library which enables C++11 applications to connect to an [MQTT](http://mqtt.org) broker to publish messages, and to subscribe to topics and receive published messages.
+This code builds a library which enables C++11 applications to connect to an [MQTT](http://mqtt.org) broker, publish messages to the broker, and to subscribe to topics and receive published messages.
 
 Both synchronous and asynchronous modes of operation are supported.
 
-This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) by Ian Craggs, et al., specifically version 1.2.1 or possibly later.
+This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) by Ian Craggs, et al., specifically version 1.3.0 or possibly later.
 
 ## Latest News
 
-To keep up with the latest announcements for this project, follow:
+To keep up with the latest announcements for this project, or to ask questions:
 
 **Twitter:** [@eclipsepaho](https://twitter.com/eclipsepaho) and [@fmpagliughi](https://twitter.com/fmpagliughi)
 
 **EMail:** [Eclipse Paho Mailing List](https://accounts.eclipse.org/mailing-list/paho-dev)
 
-***Work has begun to add MQTT v5 support!***
+**Mattermost:** [Eclipse Mattermost Paho Channel](https://mattermost.eclipse.org/eclipse/channels/paho)
 
-Inital development will start in the 'mqttv5' branch until some stability is reached, after which it will move into 'develop'.
 
-New unit tests will use _Catch2_ for the test framework. Before the release, if everything goes well with _Catch2_, existing unit tests will be ported to the new framework.
+### Now with MQTT v5 support!
 
+Support of MQTT v5 features is currently being added. The library can request a v5 connection, and supports properties and reason codes are working.
+
+### Server responses
+
+The previous library did not return server responses back to the application. This has be fixed, and now the data returned in the various acknowledge packets can be read by the application when an operation completes, via the _token_ objects. For MQTT v5 connection, all properties and reason codes can also be obtained by the app.
+
+### _Catch2_ Unit Tests
+
+New unit tests are using _Catch2_ for the test framework. The legacy unit tests are still using _CppUnit_, compiled into a separate test executable. If everything goes well with _Catch2_, the older unit tests will be ported to _Catch2_ as well.
+
+### Unreleased Features in this Branch
+
+- Started MQTT v5 support
+    - **Properties**
+        - New `property` class acts something like a std::variant to hold a property of any supported type.
+        - New `properties` class is a collection type to hold all the properties for a single transmitted packet.
+    - The client object tracks the desired MQTT version that the app requested and/or is currently connected at. Internally this is now required by the `response_options` the need to distinguish between pre-v5 and post-v5 callback functions.
+    - More descriptive error messages (PR #154), integrated into the `mqtt::exception` class.
+    - The`message` and various options classes were updated for MQTT v5 to include properties and reson codes (where appropriate).
+    - Applications can (finally) get server responses from the various ack packets. These are available through the tokens after they complete.
+    
 
 ## Contributing
 

@@ -7,6 +7,7 @@
 
 /*******************************************************************************
  * Copyright (c) 2016 Guilherme M. Ferreira <guilherme.maciel.ferreira@gmail.com>
+ * Copyright (c) 2016-2019 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -61,6 +62,13 @@ class will_options
 
 	/** LWT message text */
 	binary_ref payload_;
+
+	/**
+	 * The properties for the LWT message.
+	 * Strangely, in the C lib, the will properties are not in the
+	 * willOptions struct, but are rather in the connectOptions.
+	 */
+	properties props_;
 
 	/** The connect options has special access */
 	friend class connect_options;
@@ -219,6 +227,21 @@ public:
 	 *  			   subscribers.
 	 */
 	void set_retained(bool retained) { opts_.retained = to_int(retained); }
+	/**
+	 * Gets the connect properties.
+	 * @return A const reference to the properties for the connect.
+	 */
+	const properties& get_properties() const { return props_; }
+	/**
+	 * Sets the properties for the connect.
+	 * @param props The properties to place into the message.
+	 */
+	void set_properties(const properties& props) { props_ = props; }
+	/**
+	 * Moves the properties for the connect.
+	 * @param props The properties to move into the connect object.
+	 */
+	void set_properties(properties&& props) { props_ = props; }
 };
 
 /** Shared pointer to a will options object. */
