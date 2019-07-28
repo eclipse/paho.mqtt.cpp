@@ -15,7 +15,8 @@ if [ "$TRAVIS_OS_NAME" == "linux" ]; then
   sudo env "PATH=$PATH" cmake --build build/ --target install
 
   # Run the unit tests
-  ./build/test/unit/unit_tests --success
+  ./build/test/unit/unit_tests  # --success
+  ./build/test/cppunit/paho-mqttpp-test 
 
   #ctest -VV --timeout 600
   #cpack --verbose
@@ -25,6 +26,7 @@ if [ "$TRAVIS_OS_NAME" == "linux" ]; then
   sudo env "PATH=$PATH" cmake --build build/ --target install
 
   # Run the unit tests
-  ./build/test/unit/unit_tests --success
+  ./build/test/unit/unit_tests  # --success
+  ./build/test/cppunit/paho-mqttpp-test 
 
 fi
