@@ -130,6 +130,10 @@ void token::on_success(MQTTAsync_successData* rsp)
 			case Type::UNSUBSCRIBE:
 				unsubRsp_.reset(new unsubscribe_response(rsp));
 				break;
+
+			default:
+				// The others don't have responses
+				break;
 		}
 	}
 
@@ -169,6 +173,10 @@ void token::on_success5(MQTTAsync_successData5* rsp)
 
 			case Type::UNSUBSCRIBE:
 				unsubRsp_.reset(new unsubscribe_response(rsp));
+				break;
+
+			default:
+				// The others don't have responses
 				break;
 		}
 	}

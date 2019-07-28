@@ -164,7 +164,7 @@ public:
 	 * Reconnects the client using options from the previous connect.
 	 * The client must have previously called connect() for this to work.
 	 */
-	virtual connect_response reconnect() { cli_.reconnect()->wait_for(timeout_); }
+	virtual connect_response reconnect();
 	/**
 	 * Disconnects from the server.
 	 */

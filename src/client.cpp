@@ -79,6 +79,13 @@ connect_response client::connect(connect_options opts)
 	return tok->get_connect_response();
 }
 
+connect_response client::reconnect()
+{
+	auto tok = cli_.reconnect();
+	tok->wait_for(timeout_);
+	return tok->get_connect_response();
+}
+
 subscribe_response client::subscribe(const string& topicFilter)
 {
 	auto tok = cli_.subscribe(topicFilter, DFLT_QOS);
