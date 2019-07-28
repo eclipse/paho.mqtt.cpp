@@ -33,16 +33,22 @@ The previous library did not return server responses back to the application. Th
 
 New unit tests are using _Catch2_ for the test framework. The legacy unit tests are still using _CppUnit_, compiled into a separate test executable. If everything goes well with _Catch2_, the older unit tests will be ported to _Catch2_ as well.
 
+_Catch2_ can be found here: [Catch2](https://github.com/catchorg/Catch2)
+
 ### Unreleased Features in this Branch
 
 - Started MQTT v5 support
     - **Properties**
         - New `property` class acts something like a std::variant to hold a property of any supported type.
         - New `properties` class is a collection type to hold all the properties for a single transmitted packet.
+        - Properties can be added to outbound messages and obtained from received messages.
+        - Properties can also be obtained from server responses to requests such as from a _connect_ call. These are available in the `token` objects when they complete.
     - The client object tracks the desired MQTT version that the app requested and/or is currently connected at. Internally this is now required by the `response_options` the need to distinguish between pre-v5 and post-v5 callback functions.
-    - More descriptive error messages (PR #154), integrated into the `mqtt::exception` class.
+    - MQTT v5 reason codes for requests are available via `token` objects when they complete. They are also available in `exception` objects that are thrown by tokens.
+    - More descriptive error messages (PR #154), integrated into the `mqtt::exception` class. MQTT v5 reason codes are also included in the exceptions when an error occurs.
     - The`message` and various options classes were updated for MQTT v5 to include properties and reson codes (where appropriate).
-    - Applications can (finally) get server responses from the various ack packets. These are available through the tokens after they complete.
+    - Applications can (finally) get server responses from the various ack packets. These are available through the tokens after they complete, as `connect_response`, `subscribe_response`, and `unsubscribe_response`.
+    - Sample applications were added showing how to do basic Remote Procedure Calls (RPC's) with MQTT v5 using the *RESPONSE_TOPIC* and *CORRELATION_DATA* properties. These are *rpc_math_cli* and *rpc_math_srvr* in the _src/samples_ directory. 
     
 
 ## Contributing
@@ -56,11 +62,11 @@ Contributions to this project are gladly welcomed. Before submitting a Pull Requ
  
 ## Building from source
 
-*GNU Make and autotools are now considered deprecated. They will be removed from the repository in an upcoming release.*
+*GNU Make and autotools were deprecated and removed in the v1.1 release.*
 
-_CMake_ is now the only supported build system. For information about _autotools_, see  [DEPRECATED_BUILD.md](https://github.com/eclipse/paho.mqtt.cpp/blob/master/CONTRIBUTING.md). CMake is a cross-platform build system suitable for Unix and non-Unix platforms such as Microsoft Windows.
+_CMake_  is a cross-platform build system suitable for Unix and non-Unix platforms such as Microsoft Windows. It is now the only supported build system.
 
-The Paho C++ library requires the Paho C library, v1.2.1 or greater, to be built and installed first. More information below.
+The Paho C++ library requires the Paho C library, v1.3.0 or greater, to be built and installed first. More information below.
 
 CMake allows for options to direct the build. The following are specific to Paho C++:
 
@@ -70,7 +76,7 @@ PAHO_BUILD_SHARED | TRUE (Linux), FALSE (Win32) | Whether to build the shared li
 PAHO_BUILD_STATIC | FALSE (Linux), TRUE (Win32) | Whether to build the static library
 PAHO_BUILD_DOCUMENTATION | FALSE | Create and install the HTML based API documentation (requires Doxygen)
 PAHO_BUILD_SAMPLES | FALSE | Build sample programs
-PAHO_BUILD_TESTS | FALSE | Build the unit tests
+PAHO_BUILD_TESTS | FALSE | Build the unit tests. (This currently requires both _CppUnit_ and _Catch2_)
 PAHO_WITH_SSL | TRUE (Linux), FALSE (Win32) | Flag that defines whether to build ssl-enabled binaries too
 
 In addition, the C++ build might commonly use `CMAKE_PREFIX_PATH` to help the build system find the location of the Paho C library.
