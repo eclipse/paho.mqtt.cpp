@@ -1,10 +1,10 @@
 language: cpp
-
 sudo: required
-
-dist: trusty
-
+dist: bionic
 os: linux
+
+before_install:
+  - ./install_catch2.sh
 
 install:
   # Install Paho MQTT C (Need only paho-mqtt3a and paho-mqtt3as)
@@ -13,7 +13,6 @@ install:
 addons:
   apt:
     sources:
-      - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
       - sourceline: 'ppa:mosquitto-dev/mosquitto-ppa'
     packages:
       - cppcheck
@@ -26,49 +25,12 @@ addons:
 
 matrix:
   include:
-    # GCC 4.8
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
-            - sourceline: 'ppa:mosquitto-dev/mosquitto-ppa'
-          packages:
-            - g++-4.8
-            - cppcheck
-            - libcppunit-dev
-            - git
-            - cmake
-            - cmake-data
-            - doxygen
-            - mosquitto
-      env: COMPILER=g++-4.8
-    # GCC 4.9
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
-            - sourceline: 'ppa:mosquitto-dev/mosquitto-ppa'
-          packages:
-            - g++-4.9
-            - cppcheck
-            - libcppunit-dev
-            - git
-            - cmake
-            - cmake-data
-            - doxygen
-            - mosquitto
-      env: COMPILER=g++-4.9
     # GCC 5
     - compiler: gcc
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
             - sourceline: 'ppa:mosquitto-dev/mosquitto-ppa'
           packages:
             - g++-5
@@ -86,7 +48,6 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
             - sourceline: 'ppa:mosquitto-dev/mosquitto-ppa'
           packages:
             - g++-6
@@ -98,17 +59,15 @@ matrix:
             - doxygen
             - mosquitto
       env: COMPILER=g++-6
-    # Clang 3.6
-    - compiler: clang
+    # GCC 7
+    - compiler: gcc
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.6
-            - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
             - sourceline: 'ppa:mosquitto-dev/mosquitto-ppa'
           packages:
-            - clang-3.6
+            - g++-7
             - cppcheck
             - libcppunit-dev
             - git
@@ -116,18 +75,16 @@ matrix:
             - cmake-data
             - doxygen
             - mosquitto
-      env: COMPILER=clang++-3.6
-    # Clang 3.8
-    - compiler: clang
+      env: COMPILER=g++-7
+    # GCC 8
+    - compiler: gcc
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.8
-            - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
             - sourceline: 'ppa:mosquitto-dev/mosquitto-ppa'
           packages:
-            - clang-3.8
+            - g++-8
             - cppcheck
             - libcppunit-dev
             - git
@@ -135,13 +92,47 @@ matrix:
             - cmake-data
             - doxygen
             - mosquitto
-      env: COMPILER=clang++-3.8
+      env: COMPILER=g++-8
+    # Clang 3.9
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - sourceline: 'ppa:mosquitto-dev/mosquitto-ppa'
+          packages:
+            - clang-3.9
+            - cppcheck
+            - libcppunit-dev
+            - git
+            - cmake
+            - cmake-data
+            - doxygen
+            - mosquitto
+      env: COMPILER=clang++-3.9
+    # Clang 4.0
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - sourceline: 'ppa:mosquitto-dev/mosquitto-ppa'
+          packages:
+            - clang-4.0
+            - cppcheck
+            - libcppunit-dev
+            - git
+            - cmake
+            - cmake-data
+            - doxygen
+            - mosquitto
+      env: COMPILER=clang++-4.0
   exclude:
     - compiler: gcc
 
 script:
-  # Test CMake building
-  - ./travis_build_cmake.sh
+  # Test build
+  - ./travis_build.sh
   # Static Analysis
   - cppcheck --enable=all --std=c++11 --force --quiet src/*.cpp
 
