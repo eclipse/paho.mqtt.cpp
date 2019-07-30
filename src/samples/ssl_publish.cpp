@@ -17,10 +17,12 @@
 // We can test this using mosquitto configured with certificates in the
 // Paho C library. The C library has an SSL/TSL test suite, and we can use
 // that to test:
-//     mosquitto -c paho.mqtt.c/test/tls-testing/mosquitto.conf
+//     $ cd paho.mqtt.c
+//     $ mosquitto -c test/tls-testing/mosquitto.conf
 //
-// Then use the file "test-root-ca.crt" from that directory
-// (paho.mqtt.c/test/tls-testing) for the trust store for this program.
+// Then use the files "test-root-ca.crt" and "client.pem" from the
+// test/ssl directory (paho.mqtt.c/test/ssl) for the trust store and
+// key_store, respectively, for this program.
 //
 
 /*******************************************************************************
@@ -40,6 +42,7 @@
  *******************************************************************************/
 
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
 #include <string>
 #include <chrono>
@@ -49,12 +52,11 @@
 const std::string DFLT_SERVER_ADDRESS	{ "ssl://localhost:18885" };
 const std::string DFLT_CLIENT_ID		{ "ssl_publish_cpp" };
 
-const std::string TOPIC { "hello" };
+const std::string KEY_STORE				{ "client.pem" };
+const std::string TRUST_STORE			{ "test-root-ca.crt" };
 
-const char* PAYLOAD1 = "Hello World!";
-const char* PAYLOAD2 = "Hi there!";
-
-const char* LWT_PAYLOAD = "Last will and testament.";
+const std::string LWT_TOPIC				{ "events/disconnect" };
+const std::string LWT_PAYLOAD			{ "Last will and testament." };
 
 const int  QOS = 1;
 const auto TIMEOUT = std::chrono::seconds(10);
@@ -88,6 +90,24 @@ int main(int argc, char* argv[])
 	string	address  = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS,
 			clientID = (argc > 2) ? string(argv[2]) : DFLT_CLIENT_ID;
 
+	// Note that we don't actually need to open the trust or key stores.
+	// We just need a quick, portable way to check that they exist.
+	{
+		ifstream tstore(TRUST_STORE);
+		if (!tstore) {
+			cerr << "The trust store file does not exist: " << TRUST_STORE << endl;
+			cerr << "  Get a copy from \"paho.mqtt.c/test/ssl/test-root-ca.crt\"" << endl;;
+			return 1;
+		}
+
+		ifstream kstore(KEY_STORE);
+		if (!kstore) {
+			cerr << "The key store file does not exist: " << KEY_STORE << endl;
+			cerr << "  Get a copy from \"paho.mqtt.c/test/ssl/client.pem\"" << endl;
+			return 1;
+		}
+    }
+
 	cout << "Initializing for server '" << address << "'..." << endl;
 	mqtt::async_client client(address, clientID);
 
@@ -97,9 +117,10 @@ int main(int argc, char* argv[])
 	mqtt::connect_options connopts("testuser", "testpassword");
 
 	mqtt::ssl_options sslopts;
-	sslopts.set_trust_store("test-root-ca.crt");
+	sslopts.set_trust_store(TRUST_STORE);
+	sslopts.set_key_store(KEY_STORE);
 
-	mqtt::message willmsg(TOPIC, LWT_PAYLOAD, 1, true);
+	mqtt::message willmsg(LWT_TOPIC, LWT_PAYLOAD, QOS, true);
 	mqtt::will_options will(willmsg);
 
 	connopts.set_will(will);
@@ -108,29 +129,23 @@ int main(int argc, char* argv[])
 	cout << "  ...OK" << endl;
 
 	try {
+		// Connect using SSL/TLS
+
 		cout << "\nConnecting..." << endl;
 		mqtt::token_ptr conntok = client.connect(connopts);
 		cout << "Waiting for the connection..." << endl;
 		conntok->wait();
 		cout << "  ...OK" << endl;
 
-		// First use a message pointer.
+		// Send a message
 
 		cout << "\nSending message..." << endl;
-		mqtt::message_ptr pubmsg = mqtt::make_message(TOPIC, PAYLOAD1);
-		pubmsg->set_qos(QOS);
-		client.publish(pubmsg)->wait_for(TIMEOUT);
-		cout << "  ...OK" << endl;
-
-		// Now try with itemized publish.
-
-		cout << "\nSending next message..." << endl;
-		mqtt::delivery_token_ptr pubtok;
-		pubtok = client.publish(TOPIC, PAYLOAD2, strlen(PAYLOAD2), QOS, false);
-		pubtok->wait_for(TIMEOUT);
+		auto msg = mqtt::make_message("hello", "Hello secure C++ world!", QOS, false);
+		client.publish(msg)->wait_for(TIMEOUT);
 		cout << "  ...OK" << endl;
 
 		// Disconnect
+
 		cout << "\nDisconnecting..." << endl;
 		conntok = client.disconnect();
 		conntok->wait();
