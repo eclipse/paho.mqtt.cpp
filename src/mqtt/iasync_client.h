@@ -32,6 +32,7 @@
 #include "mqtt/iaction_listener.h"
 #include "mqtt/connect_options.h"
 #include "mqtt/disconnect_options.h"
+#include "mqtt/subscribe_options.h"
 #include "mqtt/exception.h"
 #include "mqtt/message.h"
 #include "mqtt/callback.h"
@@ -287,7 +288,42 @@ public:
 	/**
 	 * Stops the callbacks.
 	 */
-	virtual void disable_callbacks() = 0;
+	virtual void disable_callbacks() =0;
+	/**
+	 * Subscribe to a topic, which may include wildcards.
+	 * @param topicFilter the topic to subscribe to, which can include
+	 *  				  wildcards.
+	 * @param qos the maximum quality of service at which to subscribe.
+	 *  		  Messages published at a lower quality of service will be
+	 *  		  received at the published QoS. Messages published at a
+	 *  		  higher quality of service will be received using the QoS
+	 *  		  specified on the subscribe.
+	 * @param opts The options for the subscription.
+	 * @return token used to track and wait for the subscribe to complete.
+	 *  	   The token will be passed to callback methods if set.
+	 */
+	virtual token_ptr subscribe(const string& topicFilter, int qos,
+								const subscribe_options& opts=subscribe_options()) =0;
+	/**
+	 * Subscribe to a topic, which may include wildcards.
+	 * @param topicFilter the topic to subscribe to, which can include
+	 *  				  wildcards.
+	 * @param qos the maximum quality of service at which to subscribe.
+	 *  		  Messages published at a lower quality of service will be
+	 *  		  received at the published QoS. Messages published at a
+	 *  		  higher quality of service will be received using the QoS
+	 *  		  specified on the subscribe.
+	 * @param userContext optional object used to pass context to the
+	 *  				  callback. Use @em nullptr if not required.
+	 * @param callback listener that will be notified when subscribe has
+	 *  			   completed
+	 * @param opts The options for the subscription.
+	 * @return token used to track and wait for the subscribe to complete.
+	 *  	   The token will be passed to callback methods if set.
+	 */
+	virtual token_ptr subscribe(const string& topicFilter, int qos,
+								void* userContext, iaction_listener& callback,
+								const subscribe_options& opts=subscribe_options()) =0;
 	/**
 	 * Subscribe to multiple topics, each of which may include wildcards.
 	 * Provides an optimized way to subscribe to multiple topics compared to
@@ -299,11 +335,14 @@ public:
 	 *  		  received at the published QoS. Messages published at a
 	 *  		  higher quality of service will be received using the QoS
 	 *  		  specified on the subscribe.
+	 * @param opts A collection of subscription optsions (one for each
+	 *  		   topic)
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
 	virtual token_ptr subscribe(const_string_collection_ptr topicFilters,
-								const qos_collection& qos) =0;
+								const qos_collection& qos,
+								const std::vector<subscribe_options>& opts=std::vector<subscribe_options>()) =0;
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
 	 * @param topicFilters one or more topics to subscribe to, which can
@@ -317,43 +356,15 @@ public:
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param callback listener that will be notified when subscribe has
 	 *  			   completed
+	 * @param opts A collection of subscription optsions (one for each
+	 *  		   topic)
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
 	virtual token_ptr subscribe(const_string_collection_ptr topicFilters,
-								 const qos_collection& qos,
-								 void* userContext, iaction_listener& callback) =0;
-	/**
-	 * Subscribe to a topic, which may include wildcards.
-	 * @param topicFilter the topic to subscribe to, which can include
-	 *  				  wildcards.
-	 * @param qos the maximum quality of service at which to subscribe.
-	 *  		  Messages published at a lower quality of service will be
-	 *  		  received at the published QoS. Messages published at a
-	 *  		  higher quality of service will be received using the QoS
-	 *  		  specified on the subscribe.
-	 * @return token used to track and wait for the subscribe to complete.
-	 *  	   The token will be passed to callback methods if set.
-	 */
-	virtual token_ptr subscribe(const string& topicFilter, int qos) =0;
-	/**
-	 * Subscribe to a topic, which may include wildcards.
-	 * @param topicFilter the topic to subscribe to, which can include
-	 *  				  wildcards.
-	 * @param qos the maximum quality of service at which to subscribe.
-	 *  		  Messages published at a lower quality of service will be
-	 *  		  received at the published QoS. Messages published at a
-	 *  		  higher quality of service will be received using the QoS
-	 *  		  specified on the subscribe.
-	 * @param userContext optional object used to pass context to the
-	 *  				  callback. Use @em nullptr if not required.
-	 * @param callback listener that will be notified when subscribe has
-	 *  			   completed
-	 * @return token used to track and wait for the subscribe to complete.
-	 *  	   The token will be passed to callback methods if set.
-	 */
-	virtual token_ptr subscribe(const string& topicFilter, int qos,
-								void* userContext, iaction_listener& callback) =0;
+								const qos_collection& qos,
+								void* userContext, iaction_listener& callback,
+								const std::vector<subscribe_options>& opts=std::vector<subscribe_options>()) =0;
 	/**
 	 * Requests the server unsubscribe the client from a topic.
 	 * @param topicFilter the topic to unsubscribe from. It must match a

@@ -245,6 +245,18 @@ public:
 	 */
 	void set_ssl_version(int ver) { opts_.sslVersion = ver; }
 	/**
+	 * Determines whether it will carry out post-connect checks, including
+	 * that a certificate matches the given host name.
+	 * @return Whether it will carry out post-connect checks.
+	 */
+	bool get_verify() const { return to_bool(opts_.verify); }
+	/**
+	 * Sets whether it should carry out post-connect checks, including that
+	 * a certificate matches the given host name.
+	 * @param v Whether it should carry out post-connect checks.
+	 */
+	void set_verify(bool v) { opts_.verify = to_int(v); }
+	/**
 	 * Gets the path to a directory containing CA certificates in PEM
 	 * format.
 	 *

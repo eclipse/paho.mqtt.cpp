@@ -513,13 +513,13 @@ delivery_token_ptr async_client::publish(const_message_ptr msg)
 	auto tok = delivery_token::create(*this, msg);
 	add_token(tok);
 
-	delivery_response_options opts(tok, mqttVersion_);
+	delivery_response_options rspOpts(tok, mqttVersion_);
 
 	int rc = MQTTAsync_sendMessage(cli_, msg->get_topic().c_str(),
-								   &(msg->msg_), &opts.opts_);
+								   &(msg->msg_), &rspOpts.opts_);
 
 	if (rc == MQTTASYNC_SUCCESS) {
-		tok->set_message_id(opts.opts_.token);
+		tok->set_message_id(rspOpts.opts_.token);
 	}
 	else {
 		remove_token(tok);
@@ -535,13 +535,13 @@ delivery_token_ptr async_client::publish(const_message_ptr msg,
 	delivery_token_ptr tok = delivery_token::create(*this, msg, userContext, cb);
 	add_token(tok);
 
-	delivery_response_options opts(tok, mqttVersion_);
+	delivery_response_options rspOpts(tok, mqttVersion_);
 
 	int rc = MQTTAsync_sendMessage(cli_, msg->get_topic().c_str(),
-								   &(msg->msg_), &opts.opts_);
+								   &(msg->msg_), &rspOpts.opts_);
 
 	if (rc == MQTTASYNC_SUCCESS) {
-		tok->set_message_id(opts.opts_.token);
+		tok->set_message_id(rspOpts.opts_.token);
 	}
 	else {
 		remove_token(tok);
@@ -578,24 +578,39 @@ void async_client::set_callback(callback& cb)
 // --------------------------------------------------------------------------
 // Subscribe
 
-token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
-								   const qos_collection& qos)
-
+token_ptr async_client::subscribe(const string& topicFilter, int qos,
+								  const subscribe_options& opts /*=subscribe_options()*/)
 {
-	size_t n = topicFilters->size();
-
-	if (n != qos.size())
-		throw std::invalid_argument("Collection sizes don't match");
-
-	auto tok = token::create(token::Type::SUBSCRIBE, *this, topicFilters);
-	tok->set_num_expected(n);
-
+	auto tok = token::create(token::Type::SUBSCRIBE, *this, topicFilter);
+	tok->set_num_expected(0);	// Indicates non-array response for single val
 	add_token(tok);
 
-	response_options opts(tok, mqttVersion_);
+	response_options rspOpts(tok, mqttVersion_);
+	rspOpts.set_subscribe_options(opts);
 
-	int rc = MQTTAsync_subscribeMany(cli_, int(n), topicFilters->c_arr(),
-									 const_cast<int*>(qos.data()), &opts.opts_);
+	int rc = MQTTAsync_subscribe(cli_, topicFilter.c_str(), qos, &rspOpts.opts_);
+
+	if (rc != MQTTASYNC_SUCCESS) {
+		remove_token(tok);
+		throw exception(rc);
+	}
+
+	return tok;
+}
+
+token_ptr async_client::subscribe(const string& topicFilter, int qos,
+								  void* userContext, iaction_listener& cb,
+								  const subscribe_options& opts /*=subscribe_options()*/)
+{
+	auto tok = token::create(token::Type::SUBSCRIBE, *this, topicFilter,
+							 userContext, cb);
+	tok->set_num_expected(0);
+	add_token(tok);
+
+	response_options rspOpts(tok, mqttVersion_);
+	rspOpts.set_subscribe_options(opts);
+
+	int rc = MQTTAsync_subscribe(cli_, topicFilter.c_str(), qos, &rspOpts.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(tok);
@@ -607,7 +622,38 @@ token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 
 token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 								  const qos_collection& qos,
-								  void* userContext, iaction_listener& cb)
+								  const std::vector<subscribe_options>& opts
+									/*=std::vector<subscribe_options>()*/)
+{
+	size_t n = topicFilters->size();
+
+	if (n != qos.size())
+		throw std::invalid_argument("Collection sizes don't match");
+
+	auto tok = token::create(token::Type::SUBSCRIBE, *this, topicFilters);
+	tok->set_num_expected(n);
+
+	add_token(tok);
+
+	response_options rspOpts(tok, mqttVersion_);
+	rspOpts.set_subscribe_options(opts);
+
+	int rc = MQTTAsync_subscribeMany(cli_, int(n), topicFilters->c_arr(),
+									 const_cast<int*>(qos.data()), &rspOpts.opts_);
+
+	if (rc != MQTTASYNC_SUCCESS) {
+		remove_token(tok);
+		throw exception(rc);
+	}
+
+	return tok;
+}
+
+token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
+								  const qos_collection& qos,
+								  void* userContext, iaction_listener& cb,
+								  const std::vector<subscribe_options>& opts
+									/*=std::vector<subscribe_options>()*/)
 {
 	size_t n = topicFilters->size();
 
@@ -619,48 +665,11 @@ token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 	tok->set_num_expected(n);
 	add_token(tok);
 
-	response_options opts(tok, mqttVersion_);
+	response_options rspOpts(tok, mqttVersion_);
+	rspOpts.set_subscribe_options(opts);
 
 	int rc = MQTTAsync_subscribeMany(cli_, int(n), topicFilters->c_arr(),
-									 const_cast<int*>(qos.data()), &opts.opts_);
-
-	if (rc != MQTTASYNC_SUCCESS) {
-		remove_token(tok);
-		throw exception(rc);
-	}
-
-	return tok;
-}
-
-token_ptr async_client::subscribe(const string& topicFilter, int qos)
-{
-	auto tok = token::create(token::Type::SUBSCRIBE, *this, topicFilter);
-	tok->set_num_expected(0);	// Indicates non-array response for single val
-	add_token(tok);
-
-	response_options opts(tok, mqttVersion_);
-
-	int rc = MQTTAsync_subscribe(cli_, topicFilter.c_str(), qos, &opts.opts_);
-
-	if (rc != MQTTASYNC_SUCCESS) {
-		remove_token(tok);
-		throw exception(rc);
-	}
-
-	return tok;
-}
-
-token_ptr async_client::subscribe(const string& topicFilter, int qos,
-								   void* userContext, iaction_listener& cb)
-{
-	auto tok = token::create(token::Type::SUBSCRIBE, *this, topicFilter,
-							 userContext, cb);
-	tok->set_num_expected(0);
-	add_token(tok);
-
-	response_options opts(tok, mqttVersion_);
-
-	int rc = MQTTAsync_subscribe(cli_, topicFilter.c_str(), qos, &opts.opts_);
+									 const_cast<int*>(qos.data()), &rspOpts.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(tok);
@@ -679,9 +688,9 @@ token_ptr async_client::unsubscribe(const string& topicFilter)
 	tok->set_num_expected(0);	// Indicates non-array response for single val
 	add_token(tok);
 
-	response_options opts(tok, mqttVersion_);
+	response_options rspOpts(tok, mqttVersion_);
 
-	int rc = MQTTAsync_unsubscribe(cli_, topicFilter.c_str(), &opts.opts_);
+	int rc = MQTTAsync_unsubscribe(cli_, topicFilter.c_str(), &rspOpts.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(tok);
@@ -699,10 +708,10 @@ token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters)
 	tok->set_num_expected(n);
 	add_token(tok);
 
-	response_options opts(tok, mqttVersion_);
+	response_options rspOpts(tok, mqttVersion_);
 
 	int rc = MQTTAsync_unsubscribeMany(cli_, int(n),
-									   topicFilters->c_arr(), &opts.opts_);
+									   topicFilters->c_arr(), &rspOpts.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(tok);
@@ -722,9 +731,9 @@ token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters,
 	tok->set_num_expected(n);
 	add_token(tok);
 
-	response_options opts(tok, mqttVersion_);
+	response_options rspOpts(tok, mqttVersion_);
 
-	int rc = MQTTAsync_unsubscribeMany(cli_, int(n), topicFilters->c_arr(), &opts.opts_);
+	int rc = MQTTAsync_unsubscribeMany(cli_, int(n), topicFilters->c_arr(), &rspOpts.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(tok);
@@ -741,9 +750,9 @@ token_ptr async_client::unsubscribe(const string& topicFilter,
 							 userContext, cb);
 	add_token(tok);
 
-	response_options opts(tok, mqttVersion_);
+	response_options rspOpts(tok, mqttVersion_);
 
-	int rc = MQTTAsync_unsubscribe(cli_, topicFilter.c_str(), &opts.opts_);
+	int rc = MQTTAsync_unsubscribe(cli_, topicFilter.c_str(), &rspOpts.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(tok);

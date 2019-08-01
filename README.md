@@ -48,6 +48,7 @@ _Catch2_ can be found here: [Catch2](https://github.com/catchorg/Catch2)
     - More descriptive error messages (PR #154), integrated into the `mqtt::exception` class. MQTT v5 reason codes are also included in the exceptions when an error occurs.
     - The`message` and various options classes were updated for MQTT v5 to include properties and reson codes (where appropriate).
     - Applications can (finally) get server responses from the various ack packets. These are available through the tokens after they complete, as `connect_response`, `subscribe_response`, and `unsubscribe_response`.
+    - Support for subscibe options, like no local subscriptions, etc.
     - Sample applications were added showing how to do basic Remote Procedure Calls (RPC's) with MQTT v5 using the *RESPONSE_TOPIC* and *CORRELATION_DATA* properties. These are *rpc_math_cli* and *rpc_math_srvr* in the _src/samples_ directory. 
     
 

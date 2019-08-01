@@ -42,13 +42,16 @@ using string_pair = std::tuple<string, string>;
 
 /////////////////////////////////////////////////////////////////////////////
 
+/**
+ * A single MQTT v5 property.
+ */
 class property
 {
+	/** The underlying Paho C property struct. */
 	MQTTProperty prop_;
 
-	friend class properties;
-
 	// Make a deep copy of the property struct into this one.
+	// For string properties, this allocates memory and copied the string(s)
 	void copy(const MQTTProperty& other);
 
 public:
@@ -113,10 +116,16 @@ public:
 	 * @param cprop A C struct for a property list.
 	 */
 	explicit property(MQTTProperty&& cprop);
-
+	/**
+	 * Copy constructor
+	 * @param other The other property to copy into this one.
+	 */
 	property(const property& other);
+	/**
+	 * Move constructor.
+	 * @param other The other property that is moved into this one.
+	 */
 	property(property&& other);
-
 	/**
 	 * Destructor
 	 */
@@ -138,7 +147,7 @@ public:
 	 * @return A const reference to the underlying C property
 	 *  	   struct.
 	 */
-	const MQTTProperty& prop() const { return prop_; }
+	const MQTTProperty& c_struct() const { return prop_; }
 	/**
 	 * Gets the property type (identifier).
 	 * @return The code for the property type.
@@ -162,42 +171,42 @@ inline T get(const property&) { throw bad_cast(); }
 
 template <>
 inline uint8_t get<uint8_t>(const property& prop) {
-	return (uint8_t) prop.prop().value.byte;
+	return (uint8_t) prop.c_struct().value.byte;
 }
 
 template <>
 inline uint16_t get<uint16_t>(const property& prop) {
-	return (uint16_t) prop.prop().value.integer2;
+	return (uint16_t) prop.c_struct().value.integer2;
 }
 
 template <>
 inline int16_t get<int16_t>(const property& prop) {
-	return (int16_t) prop.prop().value.integer2;
+	return (int16_t) prop.c_struct().value.integer2;
 }
 
 template <>
 inline uint32_t get<uint32_t>(const property& prop) {
-	return (uint32_t) prop.prop().value.integer4;
+	return (uint32_t) prop.c_struct().value.integer4;
 }
 
 template <>
 inline int32_t get<int32_t>(const property& prop) {
-	return (int32_t) prop.prop().value.integer4;
+	return (int32_t) prop.c_struct().value.integer4;
 }
 
 template <>
 inline string get<string>(const property& prop) {
-	return (!prop.prop().value.data.data) ? string()
-		: string(prop.prop().value.data.data, prop.prop().value.data.len);
+	return (!prop.c_struct().value.data.data) ? string()
+		: string(prop.c_struct().value.data.data, prop.c_struct().value.data.len);
 }
 
 template <>
 inline string_pair get<string_pair>(const property& prop) {
-	string name = (!prop.prop().value.data.data) ? string()
-		: string(prop.prop().value.data.data, prop.prop().value.data.len);
+	string name = (!prop.c_struct().value.data.data) ? string()
+		: string(prop.c_struct().value.data.data, prop.c_struct().value.data.len);
 
-	string value = (!prop.prop().value.value.data) ? string()
-		: string(prop.prop().value.value.data, prop.prop().value.value.len);
+	string value = (!prop.c_struct().value.value.data) ? string()
+		: string(prop.c_struct().value.value.data, prop.c_struct().value.value.len);
 
 	return std::make_tuple(std::move(name), std::move(value));
 }
@@ -313,7 +322,7 @@ public:
 	 * @param prop The property to add to the list.
 	 */
 	void add(const property& prop) {
-		::MQTTProperties_add(&props_, &prop.prop());
+		::MQTTProperties_add(&props_, &prop.c_struct());
 	}
 	/**
 	 * Removes all the items from the property list.

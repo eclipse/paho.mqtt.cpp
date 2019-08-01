@@ -25,8 +25,8 @@ TEST_CASE("int property constructor", "[property]") {
 
 		property prop { typ, 42 };
 
-		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_PAYLOAD_FORMAT_INDICATOR);
-		REQUIRE(prop.prop().value.byte == 42);
+		REQUIRE(prop.c_struct().identifier == MQTTPROPERTY_CODE_PAYLOAD_FORMAT_INDICATOR);
+		REQUIRE(prop.c_struct().value.byte == 42);
 
 		REQUIRE(prop.type() == typ);
 		REQUIRE(get<uint8_t>(prop) == uint8_t(42));
@@ -42,8 +42,8 @@ TEST_CASE("int property constructor", "[property]") {
 
 		property prop { typ, 512 };
 
-		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_TOPIC_ALIAS);
-		REQUIRE(prop.prop().value.integer2 == 512);
+		REQUIRE(prop.c_struct().identifier == MQTTPROPERTY_CODE_TOPIC_ALIAS);
+		REQUIRE(prop.c_struct().value.integer2 == 512);
 
 		REQUIRE(prop.type() == typ);
 		REQUIRE(get<int16_t>(prop) == int16_t(512));
@@ -59,8 +59,8 @@ TEST_CASE("int property constructor", "[property]") {
 
 		property prop { typ, 70000 };
 
-		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_MESSAGE_EXPIRY_INTERVAL);
-		REQUIRE(prop.prop().value.integer4 == 70000);
+		REQUIRE(prop.c_struct().identifier == MQTTPROPERTY_CODE_MESSAGE_EXPIRY_INTERVAL);
+		REQUIRE(prop.c_struct().value.integer4 == 70000);
 
 		REQUIRE(prop.type() == typ);
 		REQUIRE(get<int32_t>(prop) == int32_t(70000));
@@ -79,9 +79,9 @@ TEST_CASE("string property constructor", "[property]") {
 
 		property prop { typ, topic };
 
-		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_RESPONSE_TOPIC);
-		REQUIRE(prop.prop().value.data.len == int(topic.length()));
-		REQUIRE(stringcmp(prop.prop().value.data.data, topic));
+		REQUIRE(prop.c_struct().identifier == MQTTPROPERTY_CODE_RESPONSE_TOPIC);
+		REQUIRE(prop.c_struct().value.data.len == int(topic.length()));
+		REQUIRE(stringcmp(prop.c_struct().value.data.data, topic));
 
 		REQUIRE(prop.type() == typ);
 		REQUIRE(get<string>(prop) == topic);
@@ -93,9 +93,9 @@ TEST_CASE("string property constructor", "[property]") {
 
 		property prop { typ, topic };
 
-		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_RESPONSE_TOPIC);
-		REQUIRE(prop.prop().value.data.len == int(n));
-		REQUIRE(std::memcmp(prop.prop().value.data.data, topic, n) == 0);
+		REQUIRE(prop.c_struct().identifier == MQTTPROPERTY_CODE_RESPONSE_TOPIC);
+		REQUIRE(prop.c_struct().value.data.len == int(n));
+		REQUIRE(std::memcmp(prop.c_struct().value.data.data, topic, n) == 0);
 
 		REQUIRE(prop.type() == typ);
 		REQUIRE(get<string>(prop) == string(topic, n));
@@ -111,9 +111,9 @@ TEST_CASE("binary property constructor", "[property]") {
 
 		property prop { property::CORRELATION_DATA, corr_id };
 
-		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_CORRELATION_DATA);
-		REQUIRE(prop.prop().value.data.len == int(corr_id.length()));
-		REQUIRE(std::memcmp(prop.prop().value.data.data, corr_id.data(), LEN) == 0);
+		REQUIRE(prop.c_struct().identifier == MQTTPROPERTY_CODE_CORRELATION_DATA);
+		REQUIRE(prop.c_struct().value.data.len == int(corr_id.length()));
+		REQUIRE(std::memcmp(prop.c_struct().value.data.data, corr_id.data(), LEN) == 0);
 
 		REQUIRE(prop.type() == typ);
 		REQUIRE(get<binary>(prop) == corr_id);
@@ -130,13 +130,13 @@ TEST_CASE("string pair property constructor", "[property]") {
 
 		property prop { typ, name, value };
 
-		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_USER_PROPERTY);
+		REQUIRE(prop.c_struct().identifier == MQTTPROPERTY_CODE_USER_PROPERTY);
 
-		REQUIRE(prop.prop().value.data.len == int(name.length()));
-		REQUIRE(stringcmp(prop.prop().value.data.data, name));
+		REQUIRE(prop.c_struct().value.data.len == int(name.length()));
+		REQUIRE(stringcmp(prop.c_struct().value.data.data, name));
 
-		REQUIRE(prop.prop().value.value.len == int(value.length()));
-		REQUIRE(stringcmp(prop.prop().value.value.data, value));
+		REQUIRE(prop.c_struct().value.value.len == int(value.length()));
+		REQUIRE(stringcmp(prop.c_struct().value.value.data, value));
 
 		REQUIRE(prop.type() == typ);
 
@@ -154,13 +154,13 @@ TEST_CASE("string pair property constructor", "[property]") {
 
 		property prop { typ, name, value };
 
-		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_USER_PROPERTY);
+		REQUIRE(prop.c_struct().identifier == MQTTPROPERTY_CODE_USER_PROPERTY);
 
-		REQUIRE(prop.prop().value.data.len == name_len);
-		REQUIRE(std::memcmp(prop.prop().value.data.data, name, name_len) == 0);
+		REQUIRE(prop.c_struct().value.data.len == name_len);
+		REQUIRE(std::memcmp(prop.c_struct().value.data.data, name, name_len) == 0);
 
-		REQUIRE(prop.prop().value.value.len == value_len);
-		REQUIRE(std::memcmp(prop.prop().value.value.data, value, value_len) == 0);
+		REQUIRE(prop.c_struct().value.value.len == value_len);
+		REQUIRE(std::memcmp(prop.c_struct().value.value.data, value, value_len) == 0);
 
 		REQUIRE(prop.type() == typ);
 
@@ -177,8 +177,8 @@ TEST_CASE("int property copy constructor", "[property]") {
 		property org_prop { typ, 70000 };
 		property prop { org_prop };
 
-		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_MESSAGE_EXPIRY_INTERVAL);
-		REQUIRE(prop.prop().value.integer4 == 70000);
+		REQUIRE(prop.c_struct().identifier == MQTTPROPERTY_CODE_MESSAGE_EXPIRY_INTERVAL);
+		REQUIRE(prop.c_struct().value.integer4 == 70000);
 
 		REQUIRE(prop.type() == typ);
 		REQUIRE(get<int32_t>(prop) == int32_t(70000));
@@ -192,15 +192,15 @@ TEST_CASE("int property move constructor", "[property]") {
 		property org_prop { typ, 70000 };
 		property prop { std::move(org_prop) };
 
-		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_MESSAGE_EXPIRY_INTERVAL);
-		REQUIRE(prop.prop().value.integer4 == 70000);
+		REQUIRE(prop.c_struct().identifier == MQTTPROPERTY_CODE_MESSAGE_EXPIRY_INTERVAL);
+		REQUIRE(prop.c_struct().value.integer4 == 70000);
 
 		REQUIRE(prop.type() == typ);
 		REQUIRE(get<int32_t>(prop) == int32_t(70000));
 
 		// Make sure the old value was moved
-		REQUIRE(org_prop.prop().identifier == 0);
-		REQUIRE(org_prop.prop().value.integer4 == 0);
+		REQUIRE(org_prop.c_struct().identifier == 0);
+		REQUIRE(org_prop.c_struct().value.integer4 == 0);
     }
 }
 
@@ -212,10 +212,10 @@ TEST_CASE("string property copy constructor", "[property]") {
 		property org_prop { typ, topic };
 		property prop { org_prop };
 
-		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_RESPONSE_TOPIC);
+		REQUIRE(prop.c_struct().identifier == MQTTPROPERTY_CODE_RESPONSE_TOPIC);
 
-		REQUIRE(prop.prop().value.data.len == int(topic.length()));
-		REQUIRE(std::memcmp(prop.prop().value.data.data, topic.data(), topic.length()) == 0);
+		REQUIRE(prop.c_struct().value.data.len == int(topic.length()));
+		REQUIRE(std::memcmp(prop.c_struct().value.data.data, topic.data(), topic.length()) == 0);
 
 		REQUIRE(prop.type() == typ);
 		REQUIRE(get<string>(prop) == topic);
@@ -230,10 +230,10 @@ TEST_CASE("string property copy constructor", "[property]") {
 		property prop { *org_prop };
 		org_prop.reset(nullptr);
 
-		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_RESPONSE_TOPIC);
+		REQUIRE(prop.c_struct().identifier == MQTTPROPERTY_CODE_RESPONSE_TOPIC);
 
-		REQUIRE(prop.prop().value.data.len == int(topic.length()));
-		REQUIRE(std::memcmp(prop.prop().value.data.data, topic.data(), topic.length()) == 0);
+		REQUIRE(prop.c_struct().value.data.len == int(topic.length()));
+		REQUIRE(std::memcmp(prop.c_struct().value.data.data, topic.data(), topic.length()) == 0);
 
 		REQUIRE(prop.type() == typ);
 		REQUIRE(get<string>(prop) == topic);
@@ -249,18 +249,18 @@ TEST_CASE("string property move constructor", "[property]") {
 		property org_prop { typ, topic };
 		property prop { std::move(org_prop) };
 
-		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_RESPONSE_TOPIC);
+		REQUIRE(prop.c_struct().identifier == MQTTPROPERTY_CODE_RESPONSE_TOPIC);
 
-		REQUIRE(prop.prop().value.data.len == int(topic.length()));
-		REQUIRE(stringcmp(prop.prop().value.data.data, topic));
+		REQUIRE(prop.c_struct().value.data.len == int(topic.length()));
+		REQUIRE(stringcmp(prop.c_struct().value.data.data, topic));
 
 		REQUIRE(prop.type() == typ);
 		REQUIRE(get<string>(prop) == topic);
 
 		// Make sure the old value was moved
-		REQUIRE(org_prop.prop().identifier == 0);
-		REQUIRE(org_prop.prop().value.data.len == 0);
-		REQUIRE(org_prop.prop().value.data.data == nullptr);
+		REQUIRE(org_prop.c_struct().identifier == 0);
+		REQUIRE(org_prop.c_struct().value.data.len == 0);
+		REQUIRE(org_prop.c_struct().value.data.data == nullptr);
 	}
 }
 
@@ -274,13 +274,13 @@ TEST_CASE("string pair property copy constructor", "[property]") {
 		property org_prop { typ, name, value };
 		property prop { org_prop };
 
-		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_USER_PROPERTY);
+		REQUIRE(prop.c_struct().identifier == MQTTPROPERTY_CODE_USER_PROPERTY);
 
-		REQUIRE(prop.prop().value.data.len == int(name.length()));
-		REQUIRE(stringcmp(prop.prop().value.data.data, name));
+		REQUIRE(prop.c_struct().value.data.len == int(name.length()));
+		REQUIRE(stringcmp(prop.c_struct().value.data.data, name));
 
-		REQUIRE(prop.prop().value.value.len == int(value.length()));
-		REQUIRE(stringcmp(prop.prop().value.value.data, value));
+		REQUIRE(prop.c_struct().value.value.len == int(value.length()));
+		REQUIRE(stringcmp(prop.c_struct().value.value.data, value));
 
 		REQUIRE(prop.type() == typ);
 
@@ -298,13 +298,13 @@ TEST_CASE("string pair property copy constructor", "[property]") {
 		property prop { *org_prop };
 		org_prop.reset(nullptr);
 
-		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_USER_PROPERTY);
+		REQUIRE(prop.c_struct().identifier == MQTTPROPERTY_CODE_USER_PROPERTY);
 
-		REQUIRE(prop.prop().value.data.len == int(name.length()));
-		REQUIRE(stringcmp(prop.prop().value.data.data, name));
+		REQUIRE(prop.c_struct().value.data.len == int(name.length()));
+		REQUIRE(stringcmp(prop.c_struct().value.data.data, name));
 
-		REQUIRE(prop.prop().value.value.len == int(value.length()));
-		REQUIRE(stringcmp(prop.prop().value.value.data, value));
+		REQUIRE(prop.c_struct().value.value.len == int(value.length()));
+		REQUIRE(stringcmp(prop.c_struct().value.value.data, value));
 
 		REQUIRE(prop.type() == typ);
 
@@ -325,13 +325,13 @@ TEST_CASE("string pair property move constructor", "[property]") {
 		property org_prop { typ, name, value };
 		property prop { std::move(org_prop) };
 
-		REQUIRE(prop.prop().identifier == MQTTPROPERTY_CODE_USER_PROPERTY);
+		REQUIRE(prop.c_struct().identifier == MQTTPROPERTY_CODE_USER_PROPERTY);
 
-		REQUIRE(prop.prop().value.data.len == int(name.length()));
-		REQUIRE(stringcmp(prop.prop().value.data.data, name));
+		REQUIRE(prop.c_struct().value.data.len == int(name.length()));
+		REQUIRE(stringcmp(prop.c_struct().value.data.data, name));
 
-		REQUIRE(prop.prop().value.value.len == int(value.length()));
-		REQUIRE(stringcmp(prop.prop().value.value.data, value));
+		REQUIRE(prop.c_struct().value.value.len == int(value.length()));
+		REQUIRE(stringcmp(prop.c_struct().value.value.data, value));
 
 		REQUIRE(prop.type() == typ);
 
@@ -340,11 +340,11 @@ TEST_CASE("string pair property move constructor", "[property]") {
 		REQUIRE(std::get<1>(usr) == value);
 
 		// Make sure the old value was moved
-		REQUIRE(org_prop.prop().identifier == 0);
-		REQUIRE(org_prop.prop().value.data.len == 0);
-		REQUIRE(org_prop.prop().value.data.data == nullptr);
-		REQUIRE(org_prop.prop().value.value.len == 0);
-		REQUIRE(org_prop.prop().value.value.data == nullptr);
+		REQUIRE(org_prop.c_struct().identifier == 0);
+		REQUIRE(org_prop.c_struct().value.data.len == 0);
+		REQUIRE(org_prop.c_struct().value.data.data == nullptr);
+		REQUIRE(org_prop.c_struct().value.value.len == 0);
+		REQUIRE(org_prop.c_struct().value.value.data == nullptr);
 	}
 }
 

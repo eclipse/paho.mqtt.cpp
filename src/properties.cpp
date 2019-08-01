@@ -158,7 +158,7 @@ properties::properties(std::initializer_list<property> props)
 {
 	std::memset(&props_, 0, sizeof(properties));
 	for (const auto& prop : props)
-		::MQTTProperties_add(&props_, &prop.prop());
+		::MQTTProperties_add(&props_, &prop.c_struct());
 }
 
 void properties::clear()

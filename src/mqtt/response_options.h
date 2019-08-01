@@ -10,6 +10,7 @@
 #include "MQTTAsync.h"
 #include "mqtt/token.h"
 #include "mqtt/delivery_token.h"
+#include "subscribe_options.h"
 
 namespace mqtt {
 
@@ -23,6 +24,10 @@ class token_test;
 
 /**
  * The response options for various asynchronous calls.
+ *
+ * This is an internal data structure, only used within the library.
+   Therefor it is not totally fleshed out, but rather only exposes the
+   functionality currently required by the library.
  */
 class response_options
 {
@@ -31,6 +36,9 @@ class response_options
 
 	/** The token to which we are connected */
 	token::weak_ptr_t tok_;
+
+	/** A list of subscription options for subscribe-many */
+	std::vector<MQTTSubscribe_options> subOpts_;
 
 	/** The client has special access */
 	friend class async_client;
@@ -51,10 +59,17 @@ public:
 	 * Sets the callback context to a generic token.
 	 * @param tok The token to be used as the callback context.
 	 */
-	void set_token(const token_ptr& tok) {
-		tok_ = tok;
-		opts_.context = tok.get();
-	}
+	void set_token(const token_ptr& tok);
+	/**
+	 * Sets the options for a single topic subscription.
+	 * @param opts The subscribe options.
+	 */
+	void set_subscribe_options(const subscribe_options& opts);
+	/**
+	 * Sets the options for a multi-topic subscription.
+	 * @param opts A vector of the subscribe options.
+	 */
+	void set_subscribe_options(const std::vector<subscribe_options>& opts);
 };
 
 /////////////////////////////////////////////////////////////////////////////
