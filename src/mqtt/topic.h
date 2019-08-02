@@ -26,6 +26,7 @@
 
 #include "MQTTAsync.h"
 #include "mqtt/delivery_token.h"
+#include "mqtt/subscribe_options.h"
 #include "mqtt/message.h"
 #include "mqtt/types.h"
 #include <vector>
@@ -153,6 +154,11 @@ public:
 	 *  	   complete.
 	 */
 	delivery_token_ptr publish(binary_ref payload, int qos, bool retained);
+	/**
+	 * Subscribe to the topic.
+	 * @return A token used to track the progress of the operation.
+	 */
+	token_ptr subscribe(const subscribe_options& opts=subscribe_options());
 	/**
 	 * Returns a string representation of this topic.
 	 * @return The name of the topic

@@ -322,6 +322,20 @@ public:
 	void set_will(const will_options& will);
 	void set_will(will_options&& will);
 	/**
+	 * Sets the "Last Will and Testament" (LWT) as a message
+	 * @param msg The LWT message
+	 */
+	void set_will_message(const message& msg) {
+		set_will(will_options(msg));
+	}
+	/**
+	 * Sets the "Last Will and Testament" (LWT) as a message
+	 * @param msg Pointer to a LWT message
+	 */
+	void set_will_message(const_message_ptr msg) {
+		if (msg) set_will(will_options(*msg));
+	}
+	/**
 	 * Sets the callback context to a delivery token.
 	 * @param tok The delivery token to be used as the callback context.
 	 */

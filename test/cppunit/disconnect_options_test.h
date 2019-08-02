@@ -79,7 +79,8 @@ public:
 		const int TIMEOUT = 10;
 
 		auto tok = token::create(TOKEN_TYPE, cli);
-		mqtt::disconnect_options opts { TIMEOUT, tok };
+		mqtt::disconnect_options opts { TIMEOUT };
+		opts.set_token(tok, MQTTVERSION_DEFAULT);
 
 		const auto& c_struct = opts.opts_;
 
@@ -124,11 +125,11 @@ public:
 		CPPUNIT_ASSERT(nullptr == c_struct.onSuccess);
 		CPPUNIT_ASSERT(nullptr == c_struct.onFailure);
 
-		opts.set_token(mqtt::token_ptr());
+		opts.set_token(mqtt::token_ptr(), MQTTVERSION_DEFAULT);
 		CPPUNIT_ASSERT(nullptr == c_struct.onSuccess);
 		CPPUNIT_ASSERT(nullptr == c_struct.onFailure);
 
-		opts.set_token(tok);
+		opts.set_token(tok, MQTTVERSION_DEFAULT);
 		CPPUNIT_ASSERT(nullptr != c_struct.onSuccess);
 		CPPUNIT_ASSERT(nullptr != c_struct.onFailure);
 

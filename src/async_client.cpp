@@ -155,9 +155,15 @@ void async_client::on_connected(void* context, char* cause)
 	if (context) {
 		async_client* cli = static_cast<async_client*>(context);
 		callback* cb = cli->userCallback_;
+		auto& connHandler = cli->connHandler_;
+
+		string cause_str = cause ? string(cause) : string();
 
 		if (cb)
-			cb->connected(cause ? string(cause) : string());
+			cb->connected(cause_str);
+
+		if (connHandler)
+			connHandler(cause_str);
 	}
 }
 
@@ -172,9 +178,15 @@ void async_client::on_connection_lost(void *context, char *cause)
 		async_client* cli = static_cast<async_client*>(context);
 		callback* cb = cli->userCallback_;
 		consumer_queue_type& que = cli->que_;
+		auto& connLostHandler = cli->connLostHandler_;
+
+		string cause_str = cause ? string(cause) : string();
 
 		if (cb)
-			cb->connection_lost(cause ? string(cause) : string());
+			cb->connection_lost(cause_str);
+
+		if (connLostHandler)
+			connLostHandler(cause_str);
 
 		if (que)
 			que->put(const_message_ptr{});
@@ -191,12 +203,16 @@ int async_client::on_message_arrived(void* context, char* topicName, int topicLe
 		async_client* cli = static_cast<async_client*>(context);
 		callback* cb = cli->userCallback_;
 		consumer_queue_type& que = cli->que_;
+		message_handler& msgHandler = cli->msgHandler_;
 
-		if (cb || que) {
+		if (cb || que || msgHandler) {
 			size_t len = (topicLen == 0) ? strlen(topicName) : size_t(topicLen);
 
 			string topic(topicName, topicName+len);
 			auto m = message::create(std::move(topic), *msg);
+
+			if (msgHandler)
+				msgHandler(m);
 
 			if (cb)
 				cb->message_arrived(m);
@@ -295,6 +311,32 @@ void async_client::remove_token(token* tok)
 	}
 }
 
+
+// --------------------------------------------------------------------------
+// Callback management
+
+void async_client::set_callback(callback& cb)
+{
+	guard g(lock_);
+	userCallback_ = &cb;
+
+	int rc = MQTTAsync_setConnected(cli_, this, &async_client::on_connected);
+
+	if (rc == MQTTASYNC_SUCCESS) {
+		rc = MQTTAsync_setCallbacks(cli_, this,
+									&async_client::on_connection_lost,
+									&async_client::on_message_arrived,
+									nullptr /*&async_client::on_delivery_complete*/);
+	}
+	else
+		MQTTAsync_setConnected(cli_, nullptr, nullptr);
+
+	if (rc != MQTTASYNC_SUCCESS) {
+		userCallback_ = nullptr;
+		throw exception(rc);
+	}
+}
+
 void async_client::disable_callbacks()
 {
 	// TODO: It would be nice to disable callbacks at the C library level,
@@ -304,9 +346,30 @@ void async_client::disable_callbacks()
 	int rc = MQTTAsync_setCallbacks(cli_, this, nullptr,
 					[](void*,char*,int,MQTTAsync_message*) -> int {return to_int(true);},
 					nullptr);
-					
+
 	if (rc != MQTTASYNC_SUCCESS)
 		throw exception(rc);
+}
+
+void async_client::set_connected_handler(connection_handler cb)
+{
+	connHandler_ = cb;
+	check_ret(::MQTTAsync_setConnected(cli_, this,
+						&async_client::on_connected));
+}
+
+void async_client::set_connection_lost_handler(connection_handler cb)
+{
+	connLostHandler_ = cb;
+	check_ret(::MQTTAsync_setConnectionLostCallback(cli_, this,
+						&async_client::on_connection_lost));
+}
+
+void async_client::set_message_callback(message_handler cb)
+{
+	msgHandler_ = cb;
+	check_ret(::MQTTAsync_setMessageArrivedCallback(cli_, this,
+						&async_client::on_message_arrived));
 }
 
 // --------------------------------------------------------------------------
@@ -403,24 +466,7 @@ token_ptr async_client::disconnect(disconnect_options opts)
 	auto tok = token::create(token::Type::DISCONNECT, *this);
 	add_token(tok);
 
-	opts.set_token(tok);
-
-	int rc = MQTTAsync_disconnect(cli_, &opts.opts_);
-
-	if (rc != MQTTASYNC_SUCCESS) {
-		remove_token(tok);
-		throw exception(rc);
-	}
-
-	return tok;
-}
-
-token_ptr async_client::disconnect(int timeout)
-{
-	auto tok = token::create(token::Type::DISCONNECT, *this);
-	add_token(tok);
-
-	disconnect_options opts(timeout, tok);
+	opts.set_token(tok, mqttVersion_);
 
 	int rc = MQTTAsync_disconnect(cli_, &opts.opts_);
 
@@ -437,7 +483,8 @@ token_ptr async_client::disconnect(int timeout, void* userContext, iaction_liste
 	auto tok = token::create(token::Type::DISCONNECT, *this, userContext, cb);
 	add_token(tok);
 
-	disconnect_options opts(timeout, tok);
+	disconnect_options opts(timeout);
+	opts.set_token(tok, mqttVersion_);
 
 	int rc = MQTTAsync_disconnect(cli_, &opts.opts_);
 
@@ -549,30 +596,6 @@ delivery_token_ptr async_client::publish(const_message_ptr msg,
 	}
 
 	return tok;
-}
-
-// --------------------------------------------------------------------------
-
-void async_client::set_callback(callback& cb)
-{
-	guard g(lock_);
-	userCallback_ = &cb;
-
-	int rc = MQTTAsync_setConnected(cli_, this, &async_client::on_connected);
-
-	if (rc == MQTTASYNC_SUCCESS) {
-		rc = MQTTAsync_setCallbacks(cli_, this,
-									&async_client::on_connection_lost,
-									&async_client::on_message_arrived,
-									nullptr /*&async_client::on_delivery_complete*/);
-	}
-	else
-		MQTTAsync_setConnected(cli_, nullptr, nullptr);
-
-	if (rc != MQTTASYNC_SUCCESS) {
-		userCallback_ = nullptr;
-		throw exception(rc);
-	}
 }
 
 // --------------------------------------------------------------------------

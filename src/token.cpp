@@ -230,7 +230,7 @@ void token::on_failure(MQTTAsync_failureData* rsp)
 //
 void token::on_failure5(MQTTAsync_failureData5* rsp)
 {
-	::Log(TRACE_MIN, -1, "[cpp] on_failure");
+	::Log(TRACE_MIN, -1, "[cpp] on_failure5");
 
 	unique_lock g(lock_);
 	iaction_listener* listener = listener_;

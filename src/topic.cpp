@@ -44,6 +44,11 @@ delivery_token_ptr topic::publish(binary_ref payload, int qos, bool retained)
 	return cli_.publish(name_, std::move(payload), qos, retained);
 }
 
+token_ptr topic::subscribe(const subscribe_options& opts)
+{
+	return cli_.subscribe(name_, qos_, opts);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
 }

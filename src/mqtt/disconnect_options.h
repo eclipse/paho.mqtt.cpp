@@ -62,19 +62,18 @@ public:
 	/**
 	 * Creates disconnect options tied to the specific token.
 	 * @param timeout The timeout (in milliseconds).
-	 * @param tok A token to be used as the context.
 	 */
-	disconnect_options(int timeout, const token_ptr& tok);
+	disconnect_options(int timeout) : disconnect_options() {
+		set_timeout(timeout);
+	}
 	/**
 	 * Creates disconnect options tied to the specific token.
 	 * @param to The timeout.
-	 * @param tok A token to be used as the context.
 	 */
 	template <class Rep, class Period>
-	disconnect_options(const std::chrono::duration<Rep, Period>& to,
-					   const token_ptr& tok) : disconnect_options() {
+	disconnect_options(const std::chrono::duration<Rep, Period>& to)
+			: disconnect_options() {
 		set_timeout(to);
-		set_token(tok);
 	}
 	/**
 	 * Copy constructor.
@@ -123,8 +122,10 @@ public:
 	/**
 	 * Sets the callback context to a delivery token.
 	 * @param tok The delivery token to be used as the callback context.
+	 * @param mqttVersion The version of MQTT we're using for the
+	 *  				  connection.
 	 */
-	void set_token(const token_ptr& tok);
+	void set_token(const token_ptr& tok, int mqttVersion);
 	/**
 	 * Gets the callback context to a delivery token.
 	 * @return The delivery token to be used as the callback context.

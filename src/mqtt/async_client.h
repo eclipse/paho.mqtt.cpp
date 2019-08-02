@@ -41,6 +41,7 @@
 #include <list>
 #include <memory>
 #include <tuple>
+#include <functional>
 #include <stdexcept>
 
 namespace mqtt {
@@ -79,6 +80,11 @@ public:
 	/** Type for a thread-safe queue to consume messages synchronously */
 	using consumer_queue_type = std::unique_ptr<thread_queue<const_message_ptr>>;
 
+	/** Handler type for registering an individual message callback */
+	using message_handler = std::function<void(const_message_ptr)>;
+	/** Handler type for when a connecion is made or lost */
+	using connection_handler = std::function<void(const string& cause)>;
+
 private:
 	/** Lock guard type for this class */
 	using guard = std::unique_lock<std::mutex>;
@@ -99,6 +105,12 @@ private:
 	std::unique_ptr<MQTTClient_persistence> persist_;
 	/** Callback supplied by the user (if any) */
 	callback* userCallback_;
+	/** Connection handler  */
+	connection_handler connHandler_;
+	/** Connection lost handler  */
+	connection_handler connLostHandler_;
+	/** Message handler (if any) */
+	message_handler msgHandler_;
 	/** Copy of connect token (for re-connects) */
 	token_ptr connTok_;
 	/** A list of tokens that are in play */
@@ -127,6 +139,12 @@ private:
 	async_client() =delete;
 	async_client(const async_client&) =delete;
 	async_client& operator=(const async_client&) =delete;
+
+	/** Checks a function return code and throws on error. */
+	static void check_ret(int rc) {
+		if (rc != MQTTASYNC_SUCCESS)
+			throw exception(rc);
+	}
 
 public:
 	/**
@@ -193,6 +211,37 @@ public:
 	 * Destructor
 	 */
 	~async_client() override;
+	/**
+	 * Sets a callback listener to use for events that happen
+	 * asynchronously.
+	 * @param cb callback receiver which will be invoked for certain
+	 *  		 asynchronous events
+	 */
+	void set_callback(callback& cb) override;
+	/**
+	 * Stops callbacks.
+	 * This is not normally called by the application. It should be used
+	 * cautiously as it may cause the application to lose messages.
+	 */
+	void disable_callbacks() override;
+	/**
+	 * Callback for when a connection is made.
+	 * @param cb Callback functor for when the connection is made.
+	 */
+	void set_connected_handler(connection_handler cb) /*override*/;
+	/**
+	 * Callback for when a connection is lost.
+	 * @param cb Callback functor for when the connection is lost.
+	 */
+	void set_connection_lost_handler(connection_handler cb) /*override*/;
+	/**
+	 * Sets the callback for when a message arrives from the broker.
+	 * Note that the application can only have one message handler which can
+	 * be installed individually using this method, or installled as a
+	 * listener object.
+	 * @param cb The callback functor to register with the library.
+	 */
+	void set_message_callback(message_handler cb) /*override*/;
 	/**
 	 * Connects to an MQTT server using the default options.
 	 * @return token used to track and wait for the connect to complete. The
@@ -271,7 +320,9 @@ public:
 	 *  	   set.
 	 * @throw exception for problems encountered while disconnecting
 	 */
-	token_ptr disconnect(int timeout) override;
+	token_ptr disconnect(int timeout) override {
+		return disconnect(disconnect_options(timeout));
+	}
 	/**
 	 * Disconnects from the server.
 	 * @param timeout the amount of time in milliseconds to allow for
@@ -453,19 +504,6 @@ public:
 	 */
 	delivery_token_ptr publish(const_message_ptr msg,
 							   void* userContext, iaction_listener& cb) override;
-	/**
-	 * Sets a callback listener to use for events that happen
-	 * asynchronously.
-	 * @param cb callback receiver which will be invoked for certain
-	 *  		 asynchronous events
-	 */
-	void set_callback(callback& cb) override;
-	/**
-	 * Stops callbacks.
-	 * This is not normally called by the application. It should be used
-	 * cautiously as it may cause the application to lose messages.
-	 */
-	void disable_callbacks() override;
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 * @param topicFilter the topic to subscribe to, which can include

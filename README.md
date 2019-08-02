@@ -37,7 +37,7 @@ _Catch2_ can be found here: [Catch2](https://github.com/catchorg/Catch2)
 
 ### Unreleased Features in this Branch
 
-- Started MQTT v5 support
+- Started MQTT v5 support:
     - **Properties**
         - New `property` class acts something like a std::variant to hold a property of any supported type.
         - New `properties` class is a collection type to hold all the properties for a single transmitted packet.
@@ -45,12 +45,14 @@ _Catch2_ can be found here: [Catch2](https://github.com/catchorg/Catch2)
         - Properties can also be obtained from server responses to requests such as from a _connect_ call. These are available in the `token` objects when they complete.
     - The client object tracks the desired MQTT version that the app requested and/or is currently connected at. Internally this is now required by the `response_options` the need to distinguish between pre-v5 and post-v5 callback functions.
     - MQTT v5 reason codes for requests are available via `token` objects when they complete. They are also available in `exception` objects that are thrown by tokens.
-    - More descriptive error messages (PR #154), integrated into the `mqtt::exception` class. MQTT v5 reason codes are also included in the exceptions when an error occurs.
-    - The`message` and various options classes were updated for MQTT v5 to include properties and reson codes (where appropriate).
-    - Applications can (finally) get server responses from the various ack packets. These are available through the tokens after they complete, as `connect_response`, `subscribe_response`, and `unsubscribe_response`.
     - Support for subscibe options, like no local subscriptions, etc.
-    - Sample applications were added showing how to do basic Remote Procedure Calls (RPC's) with MQTT v5 using the *RESPONSE_TOPIC* and *CORRELATION_DATA* properties. These are *rpc_math_cli* and *rpc_math_srvr* in the _src/samples_ directory. 
-    
+    - Sample applications were added showing how to do basic Remote Procedure Calls (RPC's) with MQTT v5 using the *RESPONSE_TOPIC* and *CORRELATION_DATA* properties. These are *rpc_math_cli* and *rpc_math_srvr* in the _src/samples_ directory.
+    - A sample "chat" application was added, showing how to use subscribe options, such as "no local".
+- More descriptive error messages (PR #154), integrated into the `mqtt::exception` class. MQTT v5 reason codes are also included in the exceptions when an error occurs.
+- Applications can (finally) get server responses from the various ack packets. These are available through the tokens after they complete, as `connect_response`, `subscribe_response`, and `unsubscribe_response`.
+- The `topic` objects can be used to subscribe.
+- Applications can register individual callback functions instead of using a `callback` interface object. This allows easy use of lambda functions for callbacks.
+- The connect options can take a LWT as a plain message, via `connect_options::set_will_message()` 
 
 ## Contributing
 
