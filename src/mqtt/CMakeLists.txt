@@ -30,9 +30,12 @@ install(
         iasync_client.h
         iclient_persistence.h
         message.h
+				properties.h
         response_options.h
+				server_response.h
         ssl_options.h
         string_collection.h
+				subscribe_options.h
         thread_queue.h
         token.h
         topic.h
