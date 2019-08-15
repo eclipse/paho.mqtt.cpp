@@ -8,7 +8,7 @@ This code builds a library which enables C++11 applications to connect to an [MQ
 
 Both synchronous and asynchronous modes of operation are supported.
 
-This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) by Ian Craggs, et al., specifically version 1.3.1 or possibly later.
+This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) by Ian Craggs, et al., specifically version dasdsa1.3.1 or possibly later.
 
 ## Latest News
 
@@ -111,7 +111,7 @@ First, build and install the Paho C library:
 ```
 $ git clone https://github.com/eclipse/paho.mqtt.c.git
 $ cd paho.mqtt.c
-$ git checkout v1.2.1
+$ git checkout v1.3.1
 $ cmake -Bbuild -H. -DPAHO_WITH_SSL=ON
 $ sudo cmake --build build/ --target install
 $ sudo ldconfig
