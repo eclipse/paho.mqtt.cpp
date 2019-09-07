@@ -33,7 +33,9 @@ namespace mqtt {
 /////////////////////////////////////////////////////////////////////////////
 
 /**
- * The MQTT v5 subscribe options.
+ * The MQTT v5 subscription options.
+ * These are defined in section 3.8.3.1 of the MQTT v5 spec.
+ * The defaults use the behavior that was present in MQTT v3.1.1.
  */
 class subscribe_options
 {
@@ -59,33 +61,101 @@ public:
 	 * Retain flag is only set on publications sent by a broker if in
 	 * response to a subscribe request
 	 */
-	static constexpr byte NO_RETAIN_AS_PUBLISHED = 0;
+	static constexpr bool NO_RETAIN_AS_PUBLISHED = false;
 	/** Keep the retain flag as on the original publish message */
-	static constexpr byte RETAIN_AS_PUBLISHED = 1;
+	static constexpr bool RETAIN_AS_PUBLISHED = true;
 
-	/** Send retained messages at the time of the subscribe */
-	static constexpr byte SEND_RETAINED_ON_SUBSCRIBE = 0;
-	/** Send retained messages on subscribe only if subscription is new */
-	static constexpr byte SEND_RETAINED_ON_NEW = 1;
-	/** Do not send retained messages at all */
-	static constexpr byte DONT_SEND_RETAINED = 2;
+	/** The options for subscription retain handling */
+	enum RetainHandling {
+		/** Send retained messages at the time of the subscribe */
+		SEND_RETAINED_ON_SUBSCRIBE = 0,
+		/** Send retained messages on subscribe only if subscription is new */
+		SEND_RETAINED_ON_NEW = 1,
+		/** Do not send retained messages at all */
+		DONT_SEND_RETAINED = 2
+	};
 
 	/**
 	 * Create default subscription options.
 	 * These are the default options corresponding to the original MQTT (v3)
-	 * behaviours.
+	 * behaviors.
 	 */
 	subscribe_options()
 			: opts_(MQTTSubscribe_options_initializer) {}
-
-	explicit subscribe_options(bool noLocal, byte retainAsPublished=0,
-							   byte retainHandling=0)
+	/**
+	 * Creates a set of subscription options.
+	 *
+	 * @param noLocal Whether the server should send back our own
+	 *  			  publications, if subscribed.
+	 * @param retainAsPublished Whether to keep the retained flag as in the
+	 *  						original published message (true).
+	 * @param retainHandling When to send retained messages:
+	 *  	@li (SEND_RETAINED_ON_SUBSCRIBE, 0) At the time of the subscribe
+	 *  	@li (SEND_RETAINED_ON_NEW, 1) Only at the time of a new
+	 *  		subscribe
+	 *  	@li (DONT_SEND_RETAINED, 2) Not at the time of subscribe
+	 */
+	explicit subscribe_options(bool noLocal, byte retainAsPublished=false,
+							   RetainHandling retainHandling=SEND_RETAINED_ON_SUBSCRIBE)
 			: opts_(MQTTSubscribe_options_initializer) {
-		opts_.noLocal = to_int(noLocal);
-		opts_.retainAsPublished = (unsigned char) retainAsPublished ;
+		opts_.noLocal = noLocal ? 1 : 0;
+		opts_.retainAsPublished = retainAsPublished ? 1 : 0;
 		opts_.retainHandling = (unsigned char) retainHandling;
 	}
-
+	/**
+	 * Gets the value of the "no local" flag.
+	 * @return Whether the server should send back our own publications, if
+	 *  	   subscribed.
+	 */
+	bool get_no_local() const {
+		return to_bool(opts_.noLocal);
+	}
+	/**
+	 * Sets the "no local" flag on or off.
+	 * @param on Whether the server should send back our own publications,
+	 *  		 if subscribed.
+	 */
+	void set_no_local(bool on=true) {
+		opts_.noLocal = on ? 1 : 0;
+	}
+	/**
+	 * Gets the "retain as published" flag.
+	 * @return Whether to keep the retained flag as in the original
+	 *  		 published message.
+	 */
+	bool get_retain_as_published() const {
+		return to_bool(opts_.retainAsPublished);
+	}
+	/**
+	 * Sets the "retain as published" flag on or off.
+	 * @param on Whether to keep the retained flag as in the original
+	 *  		 published message.
+	 */
+	void set_retain_as_published(bool on) {
+		opts_.retainAsPublished = on ? 1 : 0;
+	}
+	/**
+	 * Gets the "retasin handling" option.
+	 * @return When to send retained messages:
+	 *  	@li (SEND_RETAINED_ON_SUBSCRIBE, 0) At the time of the subscribe
+	 *  	@li (SEND_RETAINED_ON_NEW, 1) Only at the time of a new
+	 *  		subscribe
+	 *  	@li (DONT_SEND_RETAINED, 2) Not at the time of subscribe
+	 */
+	auto get_retain_handling() const -> RetainHandling {
+		return RetainHandling(opts_.retainHandling);
+	}
+	/**
+	 * Sets the "retain handling" option.
+	 * @param retainHandling When to send retained messages:
+	 *  	@li (SEND_RETAINED_ON_SUBSCRIBE, 0) At the time of the subscribe
+	 *  	@li (SEND_RETAINED_ON_NEW, 1) Only at the time of a new
+	 *  		subscribe
+	 *  	@li (DONT_SEND_RETAINED, 2) Not at the time of subscribe
+	 */
+	void set_retain_handling(RetainHandling retainHandling) {
+		opts_.retainHandling = (unsigned char) retainHandling;
+	}
 };
 
 

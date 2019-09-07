@@ -46,14 +46,19 @@
 #include "mqtt/async_client.h"
 #include "mqtt/topic.h"
 
-const std::string SERVER_ADDRESS("tcp://localhost:1883");
-
-const int QOS = 1;
-
 /////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[])
 {
+	// The broker/server address
+	const std::string SERVER_ADDRESS("tcp://localhost:1883");
+
+	// The QoS to use for publishing and subscribing
+	const int QOS = 1;
+
+	// Tell the broker we don't want our own messages sent back to us.
+	const bool NO_LOCAL = true;
+
 	if (argc != 3) {
 		std::cout << "USAGE: mqttpp_chat <user> <group>" << std::endl;
 		return 1;
@@ -108,7 +113,7 @@ int main(int argc, char* argv[])
 		// we don't get own messages sent back to us
 
 		std::cout << "Ok\nJoining the group..." << std::flush;
-		auto subOpts = mqtt::subscribe_options(mqtt::subscribe_options::SUBSCRIBE_NO_LOCAL);
+		auto subOpts = mqtt::subscribe_options(NO_LOCAL);
 		topic.subscribe(subOpts)->wait();
 		std::cout << "Ok" << std::endl;
 	}
