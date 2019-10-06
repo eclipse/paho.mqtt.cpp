@@ -127,6 +127,42 @@ matrix:
             - doxygen
             - mosquitto
       env: COMPILER=clang++-4.0
+    # Clang 7
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-xenial-7
+            - sourceline: 'ppa:mosquitto-dev/mosquitto-ppa'
+          packages:
+            - clang-7
+            - cppcheck
+            - libcppunit-dev
+            - git
+            - cmake
+            - cmake-data
+            - doxygen
+            - mosquitto
+      env: COMPILER=clang++-7
+    # Clang 8
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-xenial-8
+            - sourceline: 'ppa:mosquitto-dev/mosquitto-ppa'
+          packages:
+            - clang-8
+            - cppcheck
+            - libcppunit-dev
+            - git
+            - cmake
+            - cmake-data
+            - doxygen
+            - mosquitto
+      env: COMPILER=clang++-8
   exclude:
     - compiler: gcc
 
