@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2019 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -58,23 +58,23 @@ public:
 	 * before this is called. 
 	 * @param cause
 	 */
-	virtual void connected(const string& cause) {}
+	virtual void connected(const string& /*cause*/) {}
 	/**
 	 * This method is called when the connection to the server is lost.
 	 * @param cause
 	 */
-	virtual void connection_lost(const string& cause) {}
+	virtual void connection_lost(const string& /*cause*/) {}
 	/**
 	 * This method is called when a message arrives from the server.
 	 * @param msg The message
 	 */
-	virtual void message_arrived(const_message_ptr msg) {}
+	virtual void message_arrived(const_message_ptr /*msg*/) {}
 	/**
 	 * Called when delivery for a message has been completed, and all
 	 * acknowledgments have been received.
 	 * @param tok The token tracking the message delivery.
 	 */
-	virtual void delivery_complete(delivery_token_ptr tok) {}
+	virtual void delivery_complete(delivery_token_ptr /*tok*/) {}
 };
 
 /** Smart/shared pointer to a callback object */
