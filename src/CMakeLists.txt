@@ -62,10 +62,6 @@ add_library(paho-cpp-objs OBJECT
 #    OBJECTS DESTINATION ${CMAKE_INSTALL_LIBDIR}
 #)
 
-if(PAHO_WITH_SSL)
-    add_definitions(-DOPENSSL)
-endif()
-
 # Object libraries can't use target_link_libraries in order to take advantage
 # of transitive usage requirements until CMake 3.12. This is a workaround:
 #target_include_directories(OBJS PRIVATE ${PAHO_MQTT_C_INCLUDE_DIRS})
