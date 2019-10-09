@@ -21,6 +21,11 @@
 
 namespace mqtt {
 
+#if __cplusplus < 201703L
+	constexpr int  will_options::DFLT_QOS;
+	constexpr bool will_options::DFLT_RETAINED;
+#endif
+
 const MQTTAsync_willOptions will_options::DFLT_C_STRUCT = MQTTAsync_willOptions_initializer;
 
 /////////////////////////////////////////////////////////////////////////////

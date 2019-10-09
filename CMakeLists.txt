@@ -25,7 +25,8 @@
 ## Note: on OS X you should install XCode and the associated command-line tools
 
 ## cmake flags
-cmake_minimum_required(VERSION 3.5)
+#cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 
 ## project name
 project("paho-mqtt-cpp" 
@@ -51,7 +52,8 @@ option(PAHO_BUILD_DOCUMENTATION "Create and install the API documentation (requi
 
 ## --- C++11 build flags ---
 
-set(CMAKE_CXX_STANDARD 11)
+#set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 # Generate position-independent code (-fPIC on UNIX)

@@ -51,6 +51,7 @@ add_library(paho-cpp-objs OBJECT
     response_options.cpp
     ssl_options.cpp
     string_collection.cpp
+	  subscribe_options.cpp
     token.cpp
     topic.cpp
     connect_options.cpp

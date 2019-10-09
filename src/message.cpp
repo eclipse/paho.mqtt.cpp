@@ -25,8 +25,10 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-constexpr int message::DFLT_QOS;
-constexpr bool message::DFLT_RETAINED;
+#if __cplusplus < 201703L
+	constexpr int message::DFLT_QOS;
+	constexpr bool message::DFLT_RETAINED;
+#endif
 
 const MQTTAsync_message message::DFLT_C_STRUCT = MQTTAsync_message_initializer;
 
