@@ -144,7 +144,7 @@ If you did not install Paho C library to a default system location or you want t
 
 ```
 $ cmake -Bbuild -H. -DPAHO_BUILD_DOCUMENTATION=TRUE -DPAHO_BUILD_SAMPLES=TRUE \
-    -DCMAKE_PREFIX_PATH=../../paho.mqtt.c/build/install/usr/local ..
+    -DCMAKE_PREFIX_PATH=../../paho.mqtt.c/build/install/usr/local
 ```
 
 To use another compiler, either the CXX environment variable can be specified in the configuration step:
