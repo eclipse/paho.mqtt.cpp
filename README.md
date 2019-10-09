@@ -100,6 +100,12 @@ On Debian based systems this would mean that the following packages have to be i
 $ sudo apt-get install build-essential gcc make cmake cmake-gui cmake-curses-gui
 ```
 
+If you will be using secure sockets (and you probably should):
+
+```
+$ sudo apt-get install libssl-dev 
+```
+
 Building the documentation requires doxygen and optionally graphviz to be installed:
 
 ```
@@ -112,7 +118,8 @@ First, build and install the Paho C library:
 $ git clone https://github.com/eclipse/paho.mqtt.c.git
 $ cd paho.mqtt.c
 $ git checkout v1.3.1
-$ cmake -Bbuild -H. -DPAHO_WITH_SSL=ON
+
+$ cmake -Bbuild -H. -DPAHO_WITH_SSL=ON -DPAHO_ENABLE_TESTING=OFF
 $ sudo cmake --build build/ --target install
 $ sudo ldconfig
 ```
@@ -130,6 +137,7 @@ $ git clone https://github.com/eclipse/paho.mqtt.cpp
 $ cd paho.mqtt.cpp
 $ cmake -Bbuild -H. -DPAHO_BUILD_DOCUMENTATION=TRUE -DPAHO_BUILD_SAMPLES=TRUE
 $ sudo cmake --build build/ --target install
+$ sudo ldconfig
 ```
 
 If you did not install Paho C library to a default system location or you want to build against a different version, use the `CMAKE_PREFIX_PATH` to specify its install location:
