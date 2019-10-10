@@ -5,6 +5,7 @@ os: linux
 
 before_install:
   - ./install_catch2.sh
+  - ./travis_install.sh
 
 install:
   # Install Paho MQTT C (Need only paho-mqtt3a and paho-mqtt3as)
