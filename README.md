@@ -6,7 +6,15 @@ This repository contains the source code for the [Eclipse Paho](http://eclipse.o
 
 This code builds a library which enables C++11 applications to connect to an [MQTT](http://mqtt.org) broker, publish messages to the broker, and to subscribe to topics and receive published messages.
 
-Both synchronous and asynchronous modes of operation are supported.
+The library has the following features:
+
+- Support for MQTT v5, v3.1.1, and v 3.1
+- TCP, SSL/TLS, and WebSocket transports
+- Message persistence
+- Automatic reconnect
+- Offline buffering
+- High availability
+- Blocking and non-blocking API's
 
 This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) by Ian Craggs, et al., specifically version 1.3.1 or possibly later.
 
@@ -21,23 +29,9 @@ To keep up with the latest announcements for this project, or to ask questions:
 **Mattermost:** [Eclipse Mattermost Paho Channel](https://mattermost.eclipse.org/eclipse/channels/paho)
 
 
-### Now with MQTT v5 support!
+### New Features in Paho C++ v1.1
 
-Support of MQTT v5 features is currently being added. The library can request a v5 connection, and supports properties and reason codes are working.
-
-### Server responses
-
-The previous library did not return server responses back to the application. This has be fixed, and now the data returned in the various acknowledge packets can be read by the application when an operation completes, via the _token_ objects. For MQTT v5 connection, all properties and reason codes can also be obtained by the app.
-
-### _Catch2_ Unit Tests
-
-New unit tests are using _Catch2_ for the test framework. The legacy unit tests are still using _CppUnit_, compiled into a separate test executable. If everything goes well with _Catch2_, the older unit tests will be ported to _Catch2_ as well.
-
-_Catch2_ can be found here: [Catch2](https://github.com/catchorg/Catch2)
-
-### Unreleased Features in this Branch
-
-- Started MQTT v5 support:
+- MQTT v5 support:
     - **Properties**
         - New `property` class acts something like a std::variant to hold a property of any supported type.
         - New `properties` class is a collection type to hold all the properties for a single transmitted packet.
@@ -49,10 +43,16 @@ _Catch2_ can be found here: [Catch2](https://github.com/catchorg/Catch2)
     - Sample applications were added showing how to do basic Remote Procedure Calls (RPC's) with MQTT v5 using the *RESPONSE_TOPIC* and *CORRELATION_DATA* properties. These are *rpc_math_cli* and *rpc_math_srvr* in the _src/samples_ directory.
     - A sample "chat" application was added, showing how to use subscribe options, such as "no local".
 - More descriptive error messages (PR #154), integrated into the `mqtt::exception` class. MQTT v5 reason codes are also included in the exceptions when an error occurs.
-- Applications can (finally) get server responses from the various ack packets. These are available through the tokens after they complete, as `connect_response`, `subscribe_response`, and `unsubscribe_response`.
+- Applications can (finally) get server responses from the various ACK packets. These are available through the tokens after they complete, as `connect_response`, `subscribe_response`, and `unsubscribe_response`.
 - The `topic` objects can be used to subscribe.
 - Applications can register individual callback functions instead of using a `callback` interface object. This allows easy use of lambda functions for callbacks.
 - The connect options can take a LWT as a plain message, via `connect_options::set_will_message()` 
+
+### _Catch2_ Unit Tests
+
+Unit tests are being converted to use _Catch2_ for the test framework. The legacy unit tests are still using _CppUnit_, compiled into a separate test executable. If everything goes well with _Catch2_, the older unit tests will be ported to _Catch2_ as well.
+
+_Catch2_ can be found here: [Catch2](https://github.com/catchorg/Catch2)
 
 ## Contributing
 
@@ -112,7 +112,16 @@ Building the documentation requires doxygen and optionally graphviz to be instal
 $ sudo apt-get install doxygen graphviz
 ```
 
-First, build and install the Paho C library:
+Unite tests are currently being built using both _CppUnit_ and _Catch2_. The _CppUnit_ tests are being deprecated and replaced with _Catch2_ equivalents. In the meantime, however, both systems are required to build the tests.
+
+```
+$ sudo apt-get install libcppunit-dev
+```
+
+_Catch2_ can be found here: [Catch2](https://github.com/catchorg/Catch2)
+
+
+Before building the C++ library, first, build and install the Paho C library:
 
 ```
 $ git clone https://github.com/eclipse/paho.mqtt.c.git
@@ -164,7 +173,7 @@ $ cmake -DCMAKE_CXX_COMPILER=clang++
 
 The versions of CMake on Ubuntu 14.04 or 16.04 LTS are pretty old and have some problems with Paho C++ library. A newer version can be added by downloading the source and building it. If the older cmake can be removed from the system using the package manager, or it can be kept, using the Ububtu alternatives to chose between the versions. 
 
-For example, here's how to install CMake v3.6 on Ubuntu 14.04:
+For example, here's how to install CMake v3.6 on Ubuntu 14.04, while keeping the older CMake available as _cmake-2.8:_
 
 ```
 $ wget http://www.cmake.org/files/v3.6/cmake-3.6.3.tar.gz 
