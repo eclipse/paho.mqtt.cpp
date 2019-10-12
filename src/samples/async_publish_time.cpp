@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 		cout << "Connecting..." << endl;
 		cli.connect(connopts)->wait();
 
-		mqtt::topic top(cli, "test/time", QOS);
+		mqtt::topic top(cli, "data/time", QOS);
 		cout << "Publishing data..." << endl;
 
 		uint64_t	t = timestamp(),
