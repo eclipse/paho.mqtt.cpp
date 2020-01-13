@@ -32,6 +32,7 @@
 #include "mqtt/delivery_token.h"
 #include "mqtt/iclient_persistence.h"
 #include "mqtt/iaction_listener.h"
+#include "mqtt/properties.h"
 #include "mqtt/exception.h"
 #include "mqtt/message.h"
 #include "mqtt/callback.h"
@@ -84,6 +85,8 @@ public:
 	using message_handler = std::function<void(const_message_ptr)>;
 	/** Handler type for when a connecion is made or lost */
 	using connection_handler = std::function<void(const string& cause)>;
+	/** Handler type for when a disconnect packet is received */
+	using disconnected_handler = std::function<void(const properties&, ReasonCode)>;
 
 private:
 	/** Lock guard type for this class */
@@ -105,10 +108,12 @@ private:
 	std::unique_ptr<MQTTClient_persistence> persist_;
 	/** Callback supplied by the user (if any) */
 	callback* userCallback_;
-	/** Connection handler  */
+	/** Connection handler */
 	connection_handler connHandler_;
-	/** Connection lost handler  */
+	/** Connection lost handler */
 	connection_handler connLostHandler_;
+	/** Disconnected handler */
+	disconnected_handler disconnectedHandler_;
 	/** Message handler (if any) */
 	message_handler msgHandler_;
 	/** Copy of connect token (for re-connects) */
@@ -120,9 +125,11 @@ private:
 	/** A queue of messages for consumer API */
 	consumer_queue_type que_;
 
-	/** Callbacks from the C library  */
+	/** Callbacks from the C library */
 	static void on_connected(void* context, char* cause);
 	static void on_connection_lost(void *context, char *cause);
+	static void on_disconnected(void* context, MQTTProperties* cprops,
+								MQTTReasonCodes reasonCode);
 	static int  on_message_arrived(void* context, char* topicName, int topicLen,
 								   MQTTAsync_message* msg);
 	static void on_delivery_complete(void* context, MQTTAsync_token tok);
@@ -234,6 +241,11 @@ public:
 	 * @param cb Callback functor for when the connection is lost.
 	 */
 	void set_connection_lost_handler(connection_handler cb) /*override*/;
+	/**
+	 * Callback for when a disconnect packet is received from the server.
+	 * @param cb Callback for when the disconnect packet is received.
+	 */
+	void set_disconnected_handler(disconnected_handler cb) /*override*/;
 	/**
 	 * Sets the callback for when a message arrives from the broker.
 	 * Note that the application can only have one message handler which can

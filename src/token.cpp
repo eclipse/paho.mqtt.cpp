@@ -23,27 +23,6 @@
 
 #include <iostream>
 
-/////////////////////////////////////////////////////////////////////////////
-// Paho C logger
-
-enum LOG_LEVELS {
-	INVALID_LEVEL = -1,
-	TRACE_MAX = 1,
-	TRACE_MED,
-	TRACE_MIN,
-	TRACE_PROTOCOL,
-	LOG_PROTOCOL = TRACE_PROTOCOL,
-	LOG_ERROR,
-	LOG_SEVERE,
-	LOG_FATAL,
-};
-
-extern "C" {
-	void Log(enum LOG_LEVELS, int, const char *, ...);
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
 namespace mqtt {
 
 // --------------------------------------------------------------------------
@@ -110,8 +89,6 @@ void token::on_failure5(void* context, MQTTAsync_failureData5* rsp)
 //
 void token::on_success(MQTTAsync_successData* rsp)
 {
-	::Log(TRACE_MIN, -1, "[cpp] on_success");
-
 	unique_lock g(lock_);
 	iaction_listener* listener = listener_;
 
@@ -154,8 +131,6 @@ void token::on_success(MQTTAsync_successData* rsp)
 //
 void token::on_success5(MQTTAsync_successData5* rsp)
 {
-	::Log(TRACE_MIN, -1, "[cpp] on_success5");
-
 	unique_lock g(lock_);
 	iaction_listener* listener = listener_;
 	if (rsp) {
@@ -197,8 +172,6 @@ void token::on_success5(MQTTAsync_successData5* rsp)
 //
 void token::on_failure(MQTTAsync_failureData* rsp)
 {
-	::Log(TRACE_MIN, -1, "[cpp] on_failure");
-
 	unique_lock g(lock_);
 	iaction_listener* listener = listener_;
 	if (rsp) {
@@ -230,8 +203,6 @@ void token::on_failure(MQTTAsync_failureData* rsp)
 //
 void token::on_failure5(MQTTAsync_failureData5* rsp)
 {
-	::Log(TRACE_MIN, -1, "[cpp] on_failure5");
-
 	unique_lock g(lock_);
 	iaction_listener* listener = listener_;
 	if (rsp) {

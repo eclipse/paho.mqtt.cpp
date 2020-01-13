@@ -34,27 +34,6 @@
 	#define MQTTAsync_createOptions_initializer5 { {'M', 'Q', 'C', 'O'}, 0, 0, 100, MQTTVERSION_5 }
 #endif
 
-/////////////////////////////////////////////////////////////////////////////
-// Paho C logger
-
-enum LOG_LEVELS {
-	INVALID_LEVEL = -1,
-	TRACE_MAX = 1,
-	TRACE_MED,
-	TRACE_MIN,
-	TRACE_PROTOCOL,
-	LOG_PROTOCOL = TRACE_PROTOCOL,
-	LOG_ERROR,
-	LOG_SEVERE,
-	LOG_FATAL,
-};
-
-extern "C" {
-	void Log(enum LOG_LEVELS, int, const char *, ...);
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
 namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
@@ -150,8 +129,6 @@ async_client::~async_client()
 // is notified of success on a normal connect with callbacks. 
 void async_client::on_connected(void* context, char* cause)
 {
-	::Log(TRACE_MIN, -1, "[cpp] on_connected");
-
 	if (context) {
 		async_client* cli = static_cast<async_client*>(context);
 		callback* cb = cli->userCallback_;
@@ -172,8 +149,6 @@ void async_client::on_connected(void* context, char* cause)
 // MQTTAsync_setCallbacks(). 
 void async_client::on_connection_lost(void *context, char *cause)
 {
-	::Log(TRACE_MIN, -1, "[cpp] on_connection lost");
-
 	if (context) {
 		async_client* cli = static_cast<async_client*>(context);
 		callback* cb = cli->userCallback_;
@@ -190,6 +165,22 @@ void async_client::on_connection_lost(void *context, char *cause)
 
 		if (que)
 			que->put(const_message_ptr{});
+	}
+}
+
+// Callback from the C lib for when a disconnect packet is received from
+// the server.
+void async_client::on_disconnected(void* context, MQTTProperties* cprops,
+								   MQTTReasonCodes reasonCode)
+{
+	if (context) {
+		async_client* cli = static_cast<async_client*>(context);
+		auto& disconnectedHandler = cli->disconnectedHandler_;
+
+		if (disconnectedHandler) {
+			properties props(*cprops);
+			disconnectedHandler(props, ReasonCode(reasonCode));
+		}
 	}
 }
 
@@ -363,6 +354,13 @@ void async_client::set_connection_lost_handler(connection_handler cb)
 	connLostHandler_ = cb;
 	check_ret(::MQTTAsync_setConnectionLostCallback(cli_, this,
 						&async_client::on_connection_lost));
+}
+
+void async_client::set_disconnected_handler(disconnected_handler cb)
+{
+	disconnectedHandler_ = cb;
+	check_ret(::MQTTAsync_setDisconnected(cli_, this,
+						&async_client::on_disconnected));
 }
 
 void async_client::set_message_callback(message_handler cb)
