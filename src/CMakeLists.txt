@@ -49,7 +49,7 @@ find_package(Threads REQUIRED)
 
 ## --- Use object library to optimize compilation ---
 
-add_library(paho-cpp-objs OBJECT
+set (PAHO-CPP-SRC
     async_client.cpp
     client.cpp
     disconnect_options.cpp
@@ -59,29 +59,11 @@ add_library(paho-cpp-objs OBJECT
     response_options.cpp
     ssl_options.cpp
     string_collection.cpp
-	  subscribe_options.cpp
+	subscribe_options.cpp
     token.cpp
     topic.cpp
     connect_options.cpp
     will_options.cpp
-)
-
-## install the shared library
-#install(TARGETS paho-cpp-objs EXPORT PahoMqttCpp
-#    OBJECTS DESTINATION ${CMAKE_INSTALL_LIBDIR}
-#)
-
-# Object libraries can't use target_link_libraries in order to take advantage
-# of transitive usage requirements until CMake 3.12. This is a workaround:
-#target_include_directories(OBJS PRIVATE ${PAHO_MQTT_C_INCLUDE_DIRS})
-
-target_include_directories(paho-cpp-objs 
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-        $<INSTALL_INTERFACE:include>
-    PRIVATE 
-        ${PAHO_MQTT_C_INCLUDE_DIRS}
-        src
 )
 
 
@@ -89,26 +71,21 @@ target_include_directories(paho-cpp-objs
 
 if(PAHO_BUILD_SHARED)
     ## create the shared library
-    add_library(paho-mqttpp3 SHARED $<TARGET_OBJECTS:paho-cpp-objs>)
+    add_library(paho-mqttpp3 SHARED ${PAHO-CPP-SRC})
 
     ## add dependencies to the shared library
     target_link_libraries(paho-mqttpp3
         PRIVATE ${LIBS_SYSTEM}
         PUBLIC PahoMqttC::PahoMqttC Threads::Threads)
 
-    # It would be nice to exort the include paths from the obj lib, but we
-    # get an export error. Perhaps in a future version?
-    # 
-    # CMake Error: install(EXPORT "PahoMqttCpp" ...) includes target "paho-mqttpp3"
-    #   which requires target "paho-cpp-objs" that is not in the export set.
 
-    #target_include_directories(paho-mqttpp3 PUBLIC 
-    #    $<TARGET_PROPERTY:paho-cpp-objs,INCLUDE_DIRECTORIES>
-    #)
-
-    target_include_directories(paho-mqttpp3 PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-        $<INSTALL_INTERFACE:include>
+    target_include_directories(paho-mqttpp3 
+        PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+            $<INSTALL_INTERFACE:include>
+        PRIVATE 
+            ${PAHO_MQTT_C_INCLUDE_DIRS}
+            src        
     )
 
     ## set the shared library soname
@@ -127,16 +104,20 @@ endif()
 
 if(PAHO_BUILD_STATIC)
     ## create the static library
-    add_library(paho-mqttpp3-static STATIC $<TARGET_OBJECTS:paho-cpp-objs>)
+    add_library(paho-mqttpp3-static STATIC ${PAHO-CPP-SRC})
 
     ## add dependencies to the shared library
     target_link_libraries(paho-mqttpp3-static
         PRIVATE ${LIBS_SYSTEM}
         PUBLIC PahoMqttC::PahoMqttC Threads::Threads)
 
-    target_include_directories(paho-mqttpp3-static PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-        $<INSTALL_INTERFACE:include>
+    target_include_directories(paho-mqttpp3-static 
+        PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+            $<INSTALL_INTERFACE:include>
+        PRIVATE 
+            ${PAHO_MQTT_C_INCLUDE_DIRS}
+            src                
     )
 
     ## install the static library
