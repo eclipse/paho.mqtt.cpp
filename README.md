@@ -62,7 +62,31 @@ Contributions to this project are gladly welcomed. Before submitting a Pull Requ
  - Please submit all Pull Requests against the _develop_ branch (not master).
  
  For full details, see [CONTRIBUTING.md](https://github.com/eclipse/paho.mqtt.cpp/blob/master/CONTRIBUTING.md).
- 
+
+## Package Managers
+
+### Conan
+
+either add to conanfile.txt and do `conan install $build_dir --build missing`
+```toml
+[requires]
+paho-mqtt-cpp/[>=1.0.1]
+```
+
+or install directly to the build folder
+```shell
+conan install paho-mqtt-cpp/1.0.1 --build missing
+```
+
+in both cases use normal cmake find package `find_package(PahoMqttCpp REQUIRED)`
+
+### vcpkg
+
+```shell
+vcpkg install paho-mqttpp3:%VCPKG_ARCH%
+cmake .. -DCMAKE_TOOLCHAIN_FILE=$path_to_vcpkg/scripts/buildsystems/vcpkg.cmake
+```
+
 ## Building from source
 
 *GNU Make and autotools were deprecated and removed in the v1.1 release.*
