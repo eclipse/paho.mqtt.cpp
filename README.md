@@ -20,6 +20,8 @@ This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) 
 
 ## Latest News
 
+A new release is underway to fix some minor build issues and missing features. This should be v1.2, due in early 2020.
+
 To keep up with the latest announcements for this project, or to ask questions:
 
 **Twitter:** [@eclipsepaho](https://twitter.com/eclipsepaho) and [@fmpagliughi](https://twitter.com/fmpagliughi)
@@ -28,6 +30,12 @@ To keep up with the latest announcements for this project, or to ask questions:
 
 **Mattermost:** [Eclipse Mattermost Paho Channel](https://mattermost.eclipse.org/eclipse/channels/paho)
 
+### Unreleased Features in this Branch
+
+- [#231] Added `on_disconnected` callback to handle receipt of disconnect packet from server.
+- [#211, 223, #235] Removed use of Log() function from the Paho C library.
+- [#227] Fixed race condition in thread-safe queue
+- [#224] & [#255] Subscribing to MQTT v3 broker with array of one topic causes segfault.
 
 ### New Features in Paho C++ v1.1
 

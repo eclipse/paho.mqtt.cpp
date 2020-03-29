@@ -78,6 +78,7 @@ class async_client_test : public CppUnit::TestFixture
 	CPPUNIT_TEST( test_subscribe_single_topic_4_args_failure );
 	CPPUNIT_TEST( test_subscribe_many_topics_2_args );
 	CPPUNIT_TEST( test_subscribe_many_topics_2_args_failure );
+	CPPUNIT_TEST( test_subscribe_many_topics_2_args_single );
 	CPPUNIT_TEST( test_subscribe_many_topics_4_args );
 	CPPUNIT_TEST( test_subscribe_many_topics_4_args_failure );
 
@@ -729,6 +730,29 @@ public:
 
 		try {
 			cli.subscribe(TOPIC_COLL, GOOD_QOS_COLL)->wait_for(TIMEOUT);
+		}
+		catch (const mqtt::exception& exc) {
+			CPPUNIT_FAIL(exc.what());
+		}
+
+		mqtt::token_ptr token_disconn { cli.disconnect() };
+		CPPUNIT_ASSERT(token_disconn);
+		token_disconn->wait();
+		CPPUNIT_ASSERT_EQUAL(false, cli.is_connected());
+	}
+
+	// There was an odd failure when subscribe_many was given a single topic.
+	void test_subscribe_many_topics_2_args_single() {
+		mqtt::async_client cli { GOOD_SERVER_URI, CLIENT_ID };
+		cli.connect()->wait();
+		CPPUNIT_ASSERT(cli.is_connected());
+
+		mqtt::const_string_collection_ptr TOPIC_1_COLL {
+			mqtt::string_collection::create({ "TOPIC0" })
+		};
+		mqtt::iasync_client::qos_collection GOOD_QOS_1_COLL { 0 };
+		try {
+			cli.subscribe(TOPIC_1_COLL, GOOD_QOS_1_COLL)->wait_for(TIMEOUT);
 		}
 		catch (const mqtt::exception& exc) {
 			CPPUNIT_FAIL(exc.what());
