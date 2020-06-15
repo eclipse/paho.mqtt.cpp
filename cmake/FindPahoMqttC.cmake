@@ -5,10 +5,6 @@ if(PAHO_WITH_SSL)
 else()
     set(_PAHO_MQTT_C_LIB_NAME paho-mqtt3a)
 endif()
-# add suffix when using static Paho MQTT C library variant
-if(PAHO_BUILD_STATIC)
-    set(_PAHO_MQTT_C_LIB_NAME ${_PAHO_MQTT_C_LIB_NAME}-static)
-endif()
 
 find_library(PAHO_MQTT_C_LIBRARIES NAMES ${_PAHO_MQTT_C_LIB_NAME})
 unset(_PAHO_MQTT_C_LIB_NAME)
