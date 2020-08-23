@@ -1,7 +1,7 @@
 // string_collection.cpp
 
 /*******************************************************************************
- * Copyright (c) 2017 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2017-2020 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,7 +15,6 @@
  * Contributors:
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
-
 
 #include "mqtt/string_collection.h"
 
@@ -93,6 +92,19 @@ void string_collection::clear()
 {
 	coll_.clear();
 	cArr_.clear();
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+void name_value_collection::update_c_arr()
+{
+	cArr_.clear();
+	cArr_.reserve(map_.size());
+	for (const auto& m : map_) {
+		cArr_.push_back(
+            MQTTAsync_nameValue{ m.first.c_str(), m.second.c_str() }
+        );
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////

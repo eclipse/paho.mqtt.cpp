@@ -33,6 +33,7 @@
 #include "mqtt/will_options.h"
 #include "mqtt/ssl_options.h"
 #include <vector>
+#include <map>
 #include <chrono>
 
 namespace mqtt {
@@ -46,7 +47,7 @@ namespace mqtt {
 class connect_options
 {
 	/** The default C struct */
-	static const MQTTAsync_connectOptions DFLT_C_STRUCT ;
+	static const MQTTAsync_connectOptions DFLT_C_STRUCT;
 
 	/** The underlying C connection options */
 	MQTTAsync_connectOptions opts_;
