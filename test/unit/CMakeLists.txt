@@ -31,6 +31,7 @@ find_package(Catch2 REQUIRED)
 add_executable(unit_tests unit_tests.cpp
 	test_properties.cpp
   test_string_collection.cpp
+  test_topic.cpp
 )
 
 # --- Link for executables ---
