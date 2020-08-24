@@ -34,6 +34,7 @@ add_executable(unit_tests unit_tests.cpp
   test_properties.cpp
   test_string_collection.cpp
   test_topic.cpp
+  test_will_options.cpp
 )
 
 # --- Link for executables ---

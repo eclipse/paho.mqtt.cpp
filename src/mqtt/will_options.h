@@ -47,10 +47,13 @@ class connect_options;
  */
 class will_options
 {
+public:
 	/** The default QoS for the LWT, if unspecified */
 	static constexpr int DFLT_QOS = 0;
 	/** The defalut retained flag for LWT, if unspecified */
 	static constexpr bool DFLT_RETAINED = false;
+
+private:
 	/** A default C struct to support re-initializing variables */
 	static const MQTTAsync_willOptions DFLT_C_STRUCT;
 
@@ -169,6 +172,12 @@ public:
 	 * @param opt The other options.
 	 */
 	will_options& operator=(will_options&& opt);
+    /**
+     * Expose the underlying C struct for the unit tests.
+     */
+    #if defined(UNIT_TESTS)
+        const MQTTAsync_willOptions& c_struct() const { return opts_; }
+    #endif
 	/**
 	 * Gets the LWT message topic name.
 	 * @return The LWT message topic name.
