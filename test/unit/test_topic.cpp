@@ -17,6 +17,8 @@
  *
  *******************************************************************************/
 
+#define UNIT_TESTS
+
 #include <algorithm>
 #include <memory>
 #include <stdexcept>
@@ -28,21 +30,21 @@ using namespace mqtt;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int DFLT_QOS = message::DFLT_QOS;
-const bool DFLT_RETAINED = message::DFLT_RETAINED;
+static const int DFLT_QOS = message::DFLT_QOS;
+static const bool DFLT_RETAINED = message::DFLT_RETAINED;
 
-const std::string TOPIC { "my/topic/name" };
-const int QOS = 1;
-const bool RETAINED = true;
+static const std::string TOPIC { "my/topic/name" };
+static const int QOS = 1;
+static const bool RETAINED = true;
 
-const int BAD_LOW_QOS  = -1;
-const int BAD_HIGH_QOS =  3;
+static const int BAD_LOW_QOS  = -1;
+static const int BAD_HIGH_QOS =  3;
 
-const char* BUF = "Hello there";
-const size_t N = std::strlen(BUF);
-const binary PAYLOAD { BUF };
+static const char* BUF = "Hello there";
+static const size_t N = std::strlen(BUF);
+static const binary PAYLOAD { BUF };
 
-mqtt::test::mock_async_client cli;
+static mqtt::test::mock_async_client cli;
 
 // ----------------------------------------------------------------------
 // Constructors

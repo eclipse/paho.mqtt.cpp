@@ -74,7 +74,6 @@ private:
 
 	/** The client has special access. */
 	friend class async_client;
-	friend class message_test;
 
 	/**
 	 * Set the dup flag in the underlying message
@@ -218,6 +217,12 @@ public:
 	 * @return A reference to this message.
 	 */
 	message& operator=(message&& rhs);
+    /**
+     * Expose the underlying C struct for the unit tests.
+     */
+    #if defined(UNIT_TESTS)
+        const MQTTAsync_message& c_struct() const { return msg_; }
+    #endif
 	/**
 	 * Sets the topic string.
 	 * @param topic The topic on which the message is published.

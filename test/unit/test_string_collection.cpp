@@ -20,6 +20,8 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
+#define UNIT_TESTS
+
 #include <vector>
 #include <cstring>
 #include "catch2/catch.hpp"
@@ -27,8 +29,8 @@
 
 using namespace mqtt;
 
-const string STR { "Some random string" };
-const std::vector<string> VEC { "test0", "test1", "test2" };
+static const string STR { "Some random string" };
+static const std::vector<string> VEC { "test0", "test1", "test2" };
 
 // ----------------------------------------------------------------------
 // Test the default constructor
