@@ -129,6 +129,12 @@ public:
 	 */
 	connect_options& operator=(connect_options&& opt);
 	/**
+	 * Expose the underlying C struct for the unit tests.
+	 */
+	 #if defined(UNIT_TESTS)
+		const MQTTAsync_connectOptions& c_struct() const { return opts_; }
+	#endif
+	/**
 	 * Gets the "keep alive" interval.
 	 * @return The keep alive interval in seconds.
 	 */

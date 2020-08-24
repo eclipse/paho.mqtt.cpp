@@ -30,6 +30,7 @@ find_package(Catch2 REQUIRED)
 
 add_executable(unit_tests unit_tests.cpp
   test_buffer_ref.cpp
+  test_connect_options.cpp
   test_message.cpp
   test_properties.cpp
   test_string_collection.cpp
