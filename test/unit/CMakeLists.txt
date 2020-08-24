@@ -29,6 +29,7 @@ find_package(Catch2 REQUIRED)
 # --- Executables ---
 
 add_executable(unit_tests unit_tests.cpp
+  test_buffer_ref.cpp
   test_message.cpp
   test_properties.cpp
   test_string_collection.cpp

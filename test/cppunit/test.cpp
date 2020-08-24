@@ -17,7 +17,6 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
-#include "buffer_ref_test.h"
 #include "async_client_test.h"
 #include "async_client_v3_test.h"
 #include "client_test.h"
@@ -37,7 +36,6 @@ using namespace CppUnit;
 
 int main(int argc, char* argv[])
 {
-	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::buffer_ref_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::will_options_test );
 
 	#if defined(OPENSSL)
