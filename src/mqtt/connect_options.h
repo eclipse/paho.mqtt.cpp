@@ -259,8 +259,10 @@ public:
 
 	/**
 	 * Sets whether the server should remember state for the client across
-	 * reconnects.
-	 * @param cleanSession
+	 * reconnects. (MQTT v3.x only)
+	 * @param cleanSession @em true if the server should remember state for
+	 *  				   the client across reconnects, @em false
+	 *  				   othherwise.
 	 */
 	void set_clean_session(bool cleanSession) {
 		opts_.cleansession = to_int(cleanSession);
@@ -446,6 +448,196 @@ public:
 
 /** Smart/shared pointer to a connection options object. */
 using connect_options_ptr = connect_options::ptr_t;
+
+/////////////////////////////////////////////////////////////////////////////
+
+class connect_options_builder
+{
+	connect_options opts_;
+
+public:
+	/** This class */
+	using self = connect_options_builder;
+	/**
+	 * Default constructor.
+	 */
+	connect_options_builder() {}
+	/**
+	 * Sets whether the server should remember state for the client across
+	 * reconnects. (MQTT v3.x only)
+	 * @param on @em true if the server should remember state for the client
+	 *  		 across reconnects, @em false othherwise.
+	 */
+	auto clean_session(bool on) -> self& {
+		opts_.set_clean_session(on);
+		return *this;
+	}
+	/**
+	 * Sets the "keep alive" interval with a chrono duration.
+	 * This is the maximum time that should pass without communications
+	 * between client and server. If no massages pass in this time, the
+	 * client will ping the broker.
+	 * @param interval The keep alive interval.
+	 */
+	template <class Rep, class Period>
+	auto keep_alive_interval(const std::chrono::duration<Rep, Period>& interval) -> self& {
+		opts_.set_keep_alive_interval(interval);
+		return *this;
+	}
+	/**
+	 * Sets the connect timeout with a chrono duration.
+	 * This is the maximum time that the underlying library will wait for a
+	 * connection before failing.
+	 * @param timeout The connect timeout in seconds.
+	 */
+	template <class Rep, class Period>
+	auto connect_timeout(const std::chrono::duration<Rep, Period>& timeout) -> self& {
+		opts_.set_connect_timeout(timeout);
+		return *this;
+	}
+	/**
+	 * Sets the user name to use for the connection.
+	 * @param userName
+	 */
+	auto user_name(string_ref userName) -> self& {
+		opts_.set_user_name(userName);
+		return *this;
+	}
+	/**
+	 * Sets the password to use for the connection.
+	 */
+	auto password(binary_ref password) -> self& {
+		opts_.set_password(password);
+		return *this;
+	}
+	/**
+	 * Sets the maximum number of messages that can be in-flight
+	 * simultaneously.
+	 * @param n The maximum number of inflight messages.
+	 */
+	auto max_inflight(int n) -> self& {
+		opts_.set_max_inflight(n);
+		return *this;
+	}
+	/**
+	 * Sets the "Last Will and Testament" (LWT) for the connection.
+	 * @param will The LWT options.
+	 */
+	auto will(const will_options& will) -> self& {
+		opts_.set_will(will);
+		return *this;
+	}
+
+	auto will(will_options&& will) -> self& {
+		opts_.set_will(std::move(will));
+		return *this;
+	}
+	/**
+	 * Sets the "Last Will and Testament" (LWT) as a message
+	 * @param msg The LWT message
+	 */
+	auto will(const message& msg) -> self& {
+		opts_.set_will_message(msg);
+		return *this;
+	}
+	/**
+	 * Sets the "Last Will and Testament" (LWT) as a message
+	 * @param msg Pointer to a LWT message
+	 */
+	auto will(const_message_ptr msg) -> self& {
+		opts_.set_will_message(msg);
+		return *this;
+	}
+	/**
+	 * Sets the callback context to a delivery token.
+	 * @param tok The delivery token to be used as the callback context.
+	 */
+	auto token(const token_ptr& tok) -> self& {
+		opts_.set_token(tok);
+		return *this;
+	}
+	/**
+	 * Sets the list of servers to which the client will connect.
+	 * @param serverURIs A pointer to a collection of server URI's. Each
+	 *  				 entry should be of the form @em
+	 *  				 protocol://host:port where @em protocol must be
+	 *  				 @em tcp or @em ssl. For @em host, you can specify
+	 *  				 either an IP address or a domain name.
+	 */
+	auto servers(const_string_collection_ptr serverURIs) -> self& {
+		opts_.set_servers(serverURIs);
+		return *this;
+	}
+	/**
+	  * Sets the version of MQTT to be used on the connect.
+	  *
+	  * This will also set other connect options to legal values dependent on
+	  * the selected version.
+	  *
+	  * @param ver The MQTT version to use for the connection:
+	  *   @li MQTTVERSION_DEFAULT (0) = default: start with 3.1.1, and if
+	  *       that fails, fall back to 3.1
+	  *   @li MQTTVERSION_3_1 (3) = only try version 3.1
+	  *   @li MQTTVERSION_3_1_1 (4) = only try version 3.1.1
+	  *   @li MQTTVERSION_5 (5) = only try version 5
+	  */
+	auto mqtt_version(int ver) -> self& {
+		opts_.set_mqtt_version(ver);
+		return *this;
+	}
+	/**
+	 * Enable or disable automatic reconnects.
+	 * The retry intervals are not affected.
+	 * @param on Whether to turn reconnects on or off
+	 */
+	auto automatic_reconnect(bool on) -> self& {
+		opts_.set_automatic_reconnect(on);
+		return *this;
+	}
+	/**
+	 * Enable or disable automatic reconnects.
+	 * @param minRetryInterval Minimum retry interval. Doubled on each
+	 *  					   failed retry.
+	 * @param maxRetryInterval Maximum retry interval. The doubling stops
+	 *  					   here on failed retries.
+	 */
+	template <class Rep1, class Period1, class Rep2, class Period2>
+	auto automatic_reconnect(const std::chrono::duration<Rep1, Period1>& minRetryInterval,
+							 const std::chrono::duration<Rep2, Period2>& maxRetryInterval) -> self& {
+		opts_.set_automatic_reconnect(minRetryInterval, maxRetryInterval);
+		return *this;
+	}
+	/**
+	 * Sets the 'clean start' flag for the connection. (MQTT v5 only)
+	 * @param on @em true to set the 'clean start' flag for the connect,
+	 *  		 @em false otherwise.
+	 */
+	auto clean_start(bool on) -> self& {
+		opts_.set_clean_start(on);
+		return *this;
+	}
+	/**
+	 * Sets the properties for the connect message.
+	 * @param props The properties for the connect message.
+	 */
+	auto properties(const mqtt::properties& props) -> self& {
+		opts_.set_properties(props);
+		return *this;
+	}
+	/**
+	 * Sets the properties for the connect message.
+	 * @param props The properties for the connect message.
+	 */
+	auto properties(mqtt::properties&& props) -> self& {
+		opts_.set_properties(std::move(props));
+		return *this;
+	}
+	/**
+	 * Finish building the options and return them.
+	 * @return The option struct as built.
+	 */
+	connect_options finalize() { return opts_; }
+};
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt

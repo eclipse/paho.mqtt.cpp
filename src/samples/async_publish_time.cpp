@@ -91,13 +91,13 @@ int main(int argc, char* argv[])
 
 	// We configure to allow publishing to the client while off-line,
 	// and that it's OK to do so before the 1st successful connection.
-	auto create_opts = mqtt::create_options_builder()
-						   .send_while_disconnected(true, true)
-					       .max_buffered_messages(MAX_BUFFERED_MESSAGES)
-						   .delete_oldest_messages()
-						   .finalize();
+	auto createOpts = mqtt::create_options_builder()
+						  .send_while_disconnected(true, true)
+					      .max_buffered_messages(MAX_BUFFERED_MESSAGES)
+						  .delete_oldest_messages()
+						  .finalize();
 
-	mqtt::async_client cli(address, "", create_opts);
+	mqtt::async_client cli(address, "", createOpts);
 
 	// Set callbacks for when connected and connection lost.
 
@@ -111,19 +111,19 @@ int main(int argc, char* argv[])
 			<< timestamp() << ") ***" << std::endl;
 	});
 
-	mqtt::connect_options connopts;
-	mqtt::message willmsg("test/events", "Time publisher disconnected", 1, true);
-	mqtt::will_options will(willmsg);
-	connopts.set_will(will);
-	connopts.set_automatic_reconnect(1, 10);
+	auto willMsg = mqtt::message("test/events", "Time publisher disconnected", 1, true);
+	auto connOpts = mqtt::connect_options_builder()
+						.will(willMsg)
+						.automatic_reconnect(seconds(1), seconds(10))
+						.finalize();
 
 	try {
 		// Note that we start the connection, but don't wait for completion.
 		// We configured to allow publishing before a successful connection.
 		cout << "Starting connection..." << endl;
-		cli.connect(connopts);
+		cli.connect(connOpts);
 
-		mqtt::topic top(cli, "data/time", QOS);
+		auto top = mqtt::topic(cli, "data/time", QOS);
 		cout << "Publishing data..." << endl;
 
 		while (timestamp() % DELTA_MS != 0)
@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
 			this_thread::sleep_for(SAMPLE_PERIOD);
 
 			t = timestamp();
-			cout << t << endl;
+			//cout << t << endl;
 			if (abs(int(t - tlast)) >= DELTA_MS)
 				top.publish(to_string(tlast = t));
 

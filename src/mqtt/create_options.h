@@ -173,7 +173,7 @@ class create_options_builder
 	create_options opts_;
 
 public:
-	/** This class  */
+	/** This class */
 	using self = create_options_builder;
 	/**
 	 * Default constructor.

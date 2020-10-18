@@ -37,7 +37,7 @@ To keep up with the latest announcements for this project, or to ask questions:
     - Output buffer can delete oldest messages when full
     - Can choose to clear the persistence store on startup
     - Select whether to persist QoS 0 messages
-- Started classes to create options using the Builder Pattern, with the `create_options_builder`.
+- Started classes to create options using the Builder Pattern, with the `create_options_builder`, `connect_options_builder`.
 - [#231] Added `on_disconnected` callback to handle receipt of disconnect packet from server.
 - [#211, 223, #235] Removed use of Log() function from the Paho C library.
 - [#227] Fixed race condition in thread-safe queue
