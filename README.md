@@ -32,10 +32,18 @@ To keep up with the latest announcements for this project, or to ask questions:
 
 ### Unreleased Features in this Branch
 
+- New `create_options` that can be used to construct a client with new features:
+    - Send while disconnected before the 1st successful connection
+    - Output buffer can delete oldest messages when full
+    - Can choose to clear the persistence store on startup
+    - Select whether to persist QoS 0 messages
+- Started classes to create options using the Builder Pattern, with the `create_options_builder`.
 - [#231] Added `on_disconnected` callback to handle receipt of disconnect packet from server.
 - [#211, 223, #235] Removed use of Log() function from the Paho C library.
 - [#227] Fixed race condition in thread-safe queue
 - [#224] & [#255] Subscribing to MQTT v3 broker with array of one topic causes segfault.
+
+Targets Paho C v1.3.6
 
 ### New Features in Paho C++ v1.1
 

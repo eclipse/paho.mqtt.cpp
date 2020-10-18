@@ -28,6 +28,7 @@
 #include "MQTTAsync.h"
 #include "mqtt/types.h"
 #include "mqtt/token.h"
+#include "mqtt/create_options.h"
 #include "mqtt/string_collection.h"
 #include "mqtt/delivery_token.h"
 #include "mqtt/iclient_persistence.h"
@@ -214,6 +215,39 @@ public:
 	 */
 	async_client(const string& serverURI, const string& clientId,
 				 int maxBufferedMessages, iclient_persistence* persistence=nullptr);
+
+	/**
+	 * Create an async_client that can be used to communicate with an MQTT
+	 * server, which allows for off-line message buffering.
+	 * This uses file-based persistence in the specified directory.
+	 * @param serverURI the address of the server to connect to, specified
+	 *  				as a URI.
+	 * @param clientId a client identifier that is unique on the server
+	 *  			   being connected to
+	 * @param opts The create options
+	 * @param persistDir The directory to use for persistence data
+	 * @throw exception if an argument is invalid
+	 */
+	async_client(const string& serverURI, const string& clientId,
+				 const create_options& opts, const string& persistDir);
+	/**
+	 * Create an async_client that can be used to communicate with an MQTT
+	 * server, which allows for off-line message buffering.
+	 * This allows the caller to specify a user-defined persistence object,
+	 * or use no persistence.
+	 * @param serverURI the address of the server to connect to, specified
+	 *  				as a URI.
+	 * @param clientId a client identifier that is unique on the server
+	 *  			   being connected to
+	 * @param maxBufferedMessages the maximum number of messages allowed to
+	 *  						  be buffered while not connected
+	 * @param persistence The user persistence structure. If this is null,
+	 *  				  then no persistence is used.
+	 * @throw exception if an argument is invalid
+	 */
+	async_client(const string& serverURI, const string& clientId,
+				 const create_options& opts,
+				 iclient_persistence* persistence=nullptr);
 	/**
 	 * Destructor
 	 */
