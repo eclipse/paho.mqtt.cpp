@@ -334,3 +334,29 @@ TEST_CASE("validate qos", "[message]")
     REQUIRE_NOTHROW(mqtt::message::validate_qos(0));
 }
 
+/////////////////////////////////////////////////////////////////////////////
+
+TEST_CASE("builder", "[message]")
+{
+	auto msg = mqtt::message_ptr_builder()
+			       .topic(TOPIC)
+			       .payload(PAYLOAD)
+				   .qos(QOS)
+				   .retained(true)
+				   .finalize();
+
+	REQUIRE(TOPIC == msg->get_topic());
+	REQUIRE(PAYLOAD == msg->get_payload_str());
+	REQUIRE(QOS == msg->get_qos());
+	REQUIRE(msg->is_retained());
+	REQUIRE(DFLT_DUP == msg->is_duplicate());
+
+	const auto& c_struct = msg->c_struct();
+
+	REQUIRE(int(PAYLOAD.size()) == c_struct.payloadlen);
+	REQUIRE(0 == memcmp(PAYLOAD.data(), c_struct.payload, PAYLOAD.size()));
+	REQUIRE(QOS == c_struct.qos);
+	REQUIRE(c_struct.retained != 0);
+	REQUIRE(DFLT_DUP == (c_struct.dup != 0));
+}
+

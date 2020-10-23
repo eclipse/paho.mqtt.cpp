@@ -228,7 +228,7 @@ public:
 	 * @param topic The topic on which the message is published.
 	 */
 	void set_topic(string_ref topic) {
-		topic_ = topic_ ? std::move(topic) : string_ref(string());
+		topic_ = topic ? std::move(topic) : string_ref(string());
 	}
 	/**
 	 * Gets the topic reference for the message.
@@ -405,6 +405,91 @@ inline message_ptr make_message(string_ref topic, binary_ref payload,
 								int qos, bool retained) {
 	return mqtt::message::create(std::move(topic), std::move(payload), qos, retained);
 }
+
+/////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Class to build messages.
+ */
+class message_ptr_builder
+{
+	/** The underlying message */
+	message_ptr msg_;
+
+public:
+	/** This class */
+	using self = message_ptr_builder;
+	/**
+	 * Default constructor.
+	 */
+	message_ptr_builder() : msg_{ std::make_shared<message>() } {}
+	/**
+	 * Sets the topic string.
+	 * @param topic The topic on which the message is published.
+	 */
+	auto topic(string_ref topic) -> self& {
+		msg_->set_topic(topic);
+		return *this;
+	}
+	/**
+	 * Sets the payload of this message to be the specified buffer.
+	 * Note that this accepts copy or move operations:
+	 *   set_payload(buf);
+	 *   set_payload(std::move(buf));
+	 * @param payload A buffer to use as the message payload.
+	 */
+	auto payload(binary_ref payload) -> self& {
+		msg_->set_payload(payload);
+		return *this;
+	}
+	/**
+	 * Sets the payload of this message to be the specified byte array.
+	 * @param payload the bytes to use as the message payload
+	 * @param n the number of bytes in the payload
+	 */
+	auto payload(const void* payload, size_t n) -> self& {
+		msg_->set_payload(payload, n);
+		return *this;
+	}
+	/**
+	 * Sets the quality of service for this message.
+	 * @param qos The integer Quality of Service for the message
+	 */
+	auto qos(int qos) -> self& {
+		msg_->set_qos(qos);
+		return *this;
+	}
+	/**
+	 * Whether or not the publish message should be retained by the broker.
+	 * @param on @em true if the message should be retained by the broker, @em
+	 *  		 false if not.
+	 */
+	auto retained(bool on) -> self& {
+		msg_->set_retained(on);
+		return *this;
+	}
+	/**
+	 * Sets the properties for the disconnect message.
+	 * @param props The properties for the disconnect message.
+	 */
+	auto properties(mqtt::properties&& props) -> self& {
+		msg_->set_properties(std::move(props));
+		return *this;
+	}
+	/**
+	 * Sets the properties for the disconnect message.
+	 * @param props The properties for the disconnect message.
+	 */
+	auto properties(const mqtt::properties& props) -> self& {
+		msg_->set_properties(props);
+		return *this;
+	}
+	/**
+	 * Finish building the options and return them.
+	 * @return The option struct as built.
+	 */
+	message_ptr finalize() { return msg_; }
+};
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt

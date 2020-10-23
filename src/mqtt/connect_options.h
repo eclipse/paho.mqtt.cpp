@@ -451,6 +451,9 @@ using connect_options_ptr = connect_options::ptr_t;
 
 /////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Class to build connect options.
+ */
 class connect_options_builder
 {
 	connect_options opts_;

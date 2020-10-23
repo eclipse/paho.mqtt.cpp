@@ -282,7 +282,7 @@ using ssl_options_ptr = ssl_options::ptr_t;
 /////////////////////////////////////////////////////////////////////////////
 
 /**
- * Class to build the SSL options for connections.*
+ * Class to build the SSL options for connections.
  */
 class ssl_options_builder
 {

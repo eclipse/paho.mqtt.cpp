@@ -209,7 +209,7 @@ public:
 	 * Sets the MQTT version used to create the client.
 	 * @param ver The MQTT version used to create the client.
 	 */
-	auto set_mqtt_verison(int ver) -> self& {
+	auto mqtt_version(int ver) -> self& {
 		opts_.opts_.MQTTVersion = ver;
 		return *this;
 	}

@@ -91,13 +91,18 @@ double mult(const std::vector<double>& nums)
 
 int main(int argc, char* argv[])
 {
-	mqtt::connect_options connOpts;
-	connOpts.set_mqtt_version(MQTTVERSION_5);
-	connOpts.set_keep_alive_interval(20);
-	connOpts.set_clean_start(true);
-
+	//auto createOpts = mqtt::create_options_builder()
+	//				      .mqtt_version(MQTTVERSION_5)
+	//					  .finalize();
 
 	mqtt::client cli(SERVER_ADDRESS, CLIENT_ID);
+
+	auto connOpts = mqtt::connect_options_builder()
+					    .mqtt_version(MQTTVERSION_5)
+					    .keep_alive_interval(seconds(20))
+					    .clean_start(true)
+						.finalize();
+
 
 	const vector<string> TOPICS { "requests/math", "requests/math/#" };
 	const vector<int> QOS { 1, 1 };
