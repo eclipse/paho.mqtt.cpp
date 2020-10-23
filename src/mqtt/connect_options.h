@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2020 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -541,11 +541,23 @@ public:
 		return *this;
 	}
 	/**
-	 * Sets the "Last Will and Testament" (LWT) as a message
-	 * @param msg Pointer to a LWT message
+	 * Sets the SSL options for the connection.
+	 * These will only have an effect if compiled against the SSL version of
+	 * the Paho C library, and connecting with a secure URI.
+	 * @param ssl The SSL options.
 	 */
-	auto will(const_message_ptr msg) -> self& {
-		opts_.set_will_message(msg);
+	auto ssl(const ssl_options& ssl) -> self& {
+		opts_.set_ssl(ssl);
+		return *this;
+	}
+	/**
+	 * Sets the SSL options for the connection.
+	 * These will only have an effect if compiled against the SSL version of
+	 * the Paho C library, and connecting with a secure URI.
+	 * @param ssl The SSL options.
+	 */
+	auto ssl(ssl_options&& ssl) -> self& {
+		opts_.set_ssl(std::move(ssl));
 		return *this;
 	}
 	/**

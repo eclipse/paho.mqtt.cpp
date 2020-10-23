@@ -49,7 +49,7 @@
 #include <cstring>
 #include "mqtt/async_client.h"
 
-const std::string DFLT_SERVER_ADDRESS	{ "ssl://localhost:18885" };
+const std::string DFLT_SERVER_ADDRESS	{ "ssl://localhost:18884" };
 const std::string DFLT_CLIENT_ID		{ "ssl_publish_cpp" };
 
 const std::string KEY_STORE				{ "client.pem" };
@@ -114,17 +114,21 @@ int main(int argc, char* argv[])
 	callback cb;
 	client.set_callback(cb);
 
-	mqtt::connect_options connopts("testuser", "testpassword");
+	// Build the connect options, including SSL and a LWT message.
 
-	mqtt::ssl_options sslopts;
-	sslopts.set_trust_store(TRUST_STORE);
-	sslopts.set_key_store(KEY_STORE);
+	auto sslopts = mqtt::ssl_options_builder()
+					   .trust_store(TRUST_STORE)
+					   .key_store(KEY_STORE)
+					   .finalize();
 
-	mqtt::message willmsg(LWT_TOPIC, LWT_PAYLOAD, QOS, true);
-	mqtt::will_options will(willmsg);
+	auto willmsg = mqtt::message(LWT_TOPIC, LWT_PAYLOAD, QOS, true);
 
-	connopts.set_will(will);
-	connopts.set_ssl(sslopts);
+	auto connopts = mqtt::connect_options_builder()
+					    .user_name("testuser")
+					    .password("testpassword")
+					    .will(std::move(willmsg))
+						.ssl(std::move(sslopts))
+						.finalize();
 
 	cout << "  ...OK" << endl;
 
@@ -147,8 +151,7 @@ int main(int argc, char* argv[])
 		// Disconnect
 
 		cout << "\nDisconnecting..." << endl;
-		conntok = client.disconnect();
-		conntok->wait();
+		client.disconnect()->wait();
 		cout << "  ...OK" << endl;
 	}
 	catch (const mqtt::exception& exc) {

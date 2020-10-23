@@ -280,6 +280,124 @@ public:
 using ssl_options_ptr = ssl_options::ptr_t;
 
 /////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Class to build the SSL options for connections.*
+ */
+class ssl_options_builder
+{
+	/** The underlying options */
+	ssl_options opts_;
+
+public:
+	/** This class */
+	using self = ssl_options_builder;
+	/**
+	 * Default constructor.
+	 */
+	ssl_options_builder() {}
+	/**
+	 * Sets the file containing the public digital certificates trusted by
+	 * the client.
+	 * @param store The file in PEM format containing the public digital
+	 *  			certificates trusted by the client.
+	 */
+	auto trust_store(const string& store) -> self& {
+		opts_.set_trust_store(store);
+		return *this;
+	}
+	/**
+	 * Sets the file containing the public certificate chain of the client.
+	 * @param store The file in PEM format containing the public certificate
+	 *  			chain of the client. It may also include the client's
+	 *  			private key.
+	 */
+	auto key_store(const string& store) -> self& {
+		opts_.set_key_store(store);
+		return *this;
+	}
+	/**
+	 * Sets the file containing the client's private key.
+	 * @param key If not included in the sslKeyStore, this is the file in
+	 *  		  PEM format containing the client's private key.
+	 */
+	auto private_key(const string& key) -> self& {
+		opts_.set_private_key(key);
+		return *this;
+	}
+	/**
+	 * Sets the password to load the client's privateKey if encrypted.
+	 * @param passwd The password to load the privateKey if encrypted.
+	 */
+	auto private_keypassword(const string& passwd) -> self& {
+		opts_.set_private_key_password(passwd);
+		return *this;
+	}
+	/**
+	 * Sets the list of cipher suites that the client will present to the server
+	 * during the SSL handshake.
+	 * @param suites The list of cipher suites that the client will present to
+	 *  			 the server during the SSL handshake. For a full
+	 *  			 explanation of the cipher list format, please see the
+	 *  			 OpenSSL on-line documentation:
+	 *  			 http://www.openssl.org/docs/apps/ciphers.html#CIPHER_LIST_FORMAT
+	 *  			 If this setting is ommitted, its default value will be
+	 *  			 "ALL", that is, all the cipher suites -excluding those
+	 *  			 offering no encryption- will be considered. This setting
+	 *  			 can be used to set an SSL anonymous connection (empty
+	 *  			 string value, for instance).
+	 */
+	auto enabled_cipher_suites(const string& suites) -> self& {
+		opts_.set_enabled_cipher_suites(suites);
+		return *this;
+	}
+	/**
+	 * Enables or disables verification of the server certificate.
+	 * @param on enable/disable verification of the server certificate
+	 */
+	auto enable_server_cert_auth(bool on) -> self& {
+		opts_.set_enable_server_cert_auth(on);
+		return *this;
+	}
+	/**
+	 * Set the SSL/TLS version to use.
+	 *
+	 * @param ver The desired SSL/TLS version. Specify one of:
+	 *  	@li MQTT_SSL_VERSION_DEFAULT (0)
+	 *  	@li MQTT_SSL_VERSION_TLS_1_0 (1)
+	 *  	@li MQTT_SSL_VERSION_TLS_1_1 (2)
+	 *  	@li MQTT_SSL_VERSION_TLS_1_2 (3)
+	 */
+	auto ssl_version(int ver) -> self& {
+		opts_.set_ssl_version(ver);
+		return *this;
+	}
+	/**
+	 * Sets whether it should carry out post-connect checks, including that
+	 * a certificate matches the given host name.
+	 * @param on Whether it should carry out post-connect checks.
+	 */
+	auto verify(bool on=true) -> self& {
+		opts_.set_verify(on);
+		return *this;
+	}
+	/**
+	 * Sets the path to a directory containing CA certificates in PEM format.
+	 * @param path Path to a directory containing CA certificates in PEM
+	 *  	   format.
+	 */
+	auto ca_path(const string& path) -> self& {
+		opts_.ca_path(path);
+		return *this;
+	}
+	/**
+	 * Finish building the options and return them.
+	 * @return The option struct as built.
+	 */
+	ssl_options finalize() { return opts_; }
+};
+
+/////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
 }
 
