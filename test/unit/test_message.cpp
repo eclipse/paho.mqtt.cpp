@@ -336,6 +336,32 @@ TEST_CASE("validate qos", "[message]")
 
 /////////////////////////////////////////////////////////////////////////////
 
+// --------------------------------------------------------------------------
+// Test the default builder
+// --------------------------------------------------------------------------
+
+TEST_CASE("default builder", "[message]")
+{
+	auto msg = mqtt::message_ptr_builder().finalize();
+
+    REQUIRE(EMPTY_STR == msg->get_payload_str());
+    REQUIRE(DFLT_QOS == msg->get_qos());
+    REQUIRE(DFLT_RETAINED == msg->is_retained());
+    REQUIRE(DFLT_DUP == msg->is_duplicate());
+
+    const auto& c_struct = msg->c_struct();
+
+	REQUIRE(0 == c_struct.payloadlen);
+	REQUIRE(nullptr == c_struct.payload);
+	REQUIRE(DFLT_QOS == c_struct.qos);
+	REQUIRE(DFLT_RETAINED == (c_struct.retained != 0));
+	REQUIRE(DFLT_DUP == (c_struct.dup != 0));
+}
+
+// --------------------------------------------------------------------------
+// Test a complete builder
+// --------------------------------------------------------------------------
+
 TEST_CASE("builder", "[message]")
 {
 	auto msg = mqtt::message_ptr_builder()

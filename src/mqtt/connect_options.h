@@ -471,7 +471,7 @@ public:
 	 * @param on @em true if the server should remember state for the client
 	 *  		 across reconnects, @em false othherwise.
 	 */
-	auto clean_session(bool on) -> self& {
+	auto clean_session(bool on=true) -> self& {
 		opts_.set_clean_session(on);
 		return *this;
 	}
@@ -605,7 +605,7 @@ public:
 	 * The retry intervals are not affected.
 	 * @param on Whether to turn reconnects on or off
 	 */
-	auto automatic_reconnect(bool on) -> self& {
+	auto automatic_reconnect(bool on=true) -> self& {
 		opts_.set_automatic_reconnect(on);
 		return *this;
 	}
@@ -627,7 +627,7 @@ public:
 	 * @param on @em true to set the 'clean start' flag for the connect,
 	 *  		 @em false otherwise.
 	 */
-	auto clean_start(bool on) -> self& {
+	auto clean_start(bool on=true) -> self& {
 		opts_.set_clean_start(on);
 		return *this;
 	}

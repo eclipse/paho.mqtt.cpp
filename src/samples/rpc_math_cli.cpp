@@ -59,15 +59,12 @@ int main(int argc, char* argv[])
 	constexpr int QOS = 1;
 	const string REQ_TOPIC_HDR { "requests/math/" };
 
-	auto createopts = mqtt::create_options_builder()
-					      .mqtt_version(MQTTVERSION_5)
-						  .finalize();
+	mqtt::async_client cli(SERVER_ADDRESS, "");
 
-	mqtt::async_client cli(SERVER_ADDRESS, "", createopts);
-
-	mqtt::connect_options connopts;
-	connopts.set_mqtt_version(MQTTVERSION_5);
-	connopts.set_clean_start(true);
+	auto connopts = mqtt::connect_options_builder()
+					    .mqtt_version(MQTTVERSION_5)
+					    .clean_start()
+						.finalize();
 
 	cli.start_consuming();
 
