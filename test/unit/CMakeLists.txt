@@ -32,6 +32,7 @@ add_executable(unit_tests unit_tests.cpp
   test_buffer_ref.cpp
   test_connect_options.cpp
   test_create_options.cpp
+  test_disconnect_options.cpp
 	test_exception.cpp
   test_message.cpp
   test_properties.cpp

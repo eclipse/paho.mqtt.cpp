@@ -96,6 +96,12 @@ public:
 	 */
 	disconnect_options& operator=(disconnect_options&& opt);
 	/**
+	 * Expose the underlying C struct for the unit tests.
+	 */
+	#if defined(UNIT_TESTS)
+		const MQTTAsync_disconnectOptions& c_struct() const { return opts_; }
+	#endif
+	/**
 	 * Gets the timeout used for disconnecting.
 	 * @return The timeout for disconnecting (in milliseconds).
 	 */
