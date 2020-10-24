@@ -73,7 +73,7 @@ TEST_CASE("will_options default ctor", "[options]")
 
 TEST_CASE("will_options string buf ctor", "[options]")
 {
-	test::mock_async_client cli;
+	mock_async_client cli;
 	mqtt::topic topic { cli, TOPIC };
 
 	mqtt::will_options opts(topic, BUF, N, QOS, true);

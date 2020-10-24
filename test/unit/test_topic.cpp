@@ -44,7 +44,7 @@ static const char* BUF = "Hello there";
 static const size_t N = std::strlen(BUF);
 static const binary PAYLOAD { BUF };
 
-static mqtt::test::mock_async_client cli;
+static mqtt::mock_async_client cli;
 
 // ----------------------------------------------------------------------
 // Constructors

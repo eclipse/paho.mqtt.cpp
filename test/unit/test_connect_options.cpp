@@ -356,7 +356,7 @@ TEST_CASE("set_token", "[options]")
 	REQUIRE(nullptr == c_struct.context);
 
 	SECTION("set token") {
-		mqtt::test::mock_async_client ac;
+		mock_async_client ac;
 		auto tok = token::create(TOKEN_TYPE, ac);
 		opts.set_token(tok);
 		REQUIRE(tok == opts.get_token());

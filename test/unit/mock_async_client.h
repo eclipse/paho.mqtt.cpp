@@ -30,7 +30,6 @@
 #include "mqtt/connect_options.h"
 
 namespace mqtt {
-namespace test {
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -38,6 +37,25 @@ class mock_async_client : public mqtt::iasync_client
 {
 public:
 	void remove_token(mqtt::token* tok) override {}
+
+
+	static void succeed(mqtt::token* tok, MQTTAsync_successData* rsp) {
+		token::on_success(tok, rsp);
+	}
+
+	static void succeed5(mqtt::token* tok, MQTTAsync_successData5* rsp) {
+		token::on_success5(tok, rsp);
+	}
+
+	static void fail(mqtt::token* tok, MQTTAsync_failureData* rsp) {
+		token::on_failure(tok, rsp);
+	}
+
+	static void fail5(mqtt::token* tok, MQTTAsync_failureData5* rsp) {
+		token::on_failure5(tok, rsp);
+	}
+
+	// iface
 
 	mqtt::token_ptr connect() override {
 		return mqtt::token_ptr{};
@@ -184,10 +202,6 @@ public:
 		return mqtt::token_ptr{};
 	}
 };
-
-/////////////////////////////////////////////////////////////////////////////
-// end namespace test
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt

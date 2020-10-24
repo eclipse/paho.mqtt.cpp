@@ -118,7 +118,7 @@ private:
 
 	/** Client and token-related options have special access */
 	friend class async_client;
-	friend class token_test;
+	friend class mock_async_client;
 
 	friend class connect_options;
 	friend class response_options;

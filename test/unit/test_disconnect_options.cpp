@@ -34,7 +34,7 @@ static const std::string EMPTY_STR;
 
 static constexpr token::Type TOKEN_TYPE = token::Type::DISCONNECT;
 
-static mqtt::test::mock_async_client cli;
+static mock_async_client cli;
 
 // ----------------------------------------------------------------------
 // Test default constructor

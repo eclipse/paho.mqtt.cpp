@@ -21,7 +21,6 @@
 #include "async_client_v3_test.h"
 #include "client_test.h"
 #include "iclient_persistence_test.h"
-#include "token_test.h"
 
 using namespace CppUnit;
 
@@ -30,7 +29,6 @@ using namespace CppUnit;
 int main(int argc, char* argv[])
 {
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::iclient_persistence_test );
-	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::token_test );
 
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::async_client_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::async_client_v3_test );

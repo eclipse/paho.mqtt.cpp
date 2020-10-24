@@ -37,7 +37,7 @@ using namespace mqtt;
 
 static constexpr token::Type TOKEN_TYPE = token::Type::CONNECT;
 
-static mqtt::test::mock_async_client cli;
+static mock_async_client cli;
 
 // ----------------------------------------------------------------------
 // Test default constructor
@@ -113,7 +113,7 @@ TEST_CASE("delivery_response_options dflt constructor", "[options]")
 
 TEST_CASE("delivery_response_options user constructor", "[options]")
 {
-	mqtt::test::mock_async_client cli;
+	mock_async_client cli;
 
 	mqtt::delivery_token_ptr token { new mqtt::delivery_token{ cli } };
 	mqtt::delivery_response_options opts { token };
@@ -137,7 +137,7 @@ TEST_CASE("delivery_response_options set token", "[options]")
 
 	REQUIRE(c_struct.context == nullptr);
 
-	mqtt::test::mock_async_client cli;
+	mock_async_client cli;
 	mqtt::delivery_token_ptr token { new mqtt::delivery_token{ cli } };
 	opts.set_token( token );
 	REQUIRE(c_struct.context == token.get());
