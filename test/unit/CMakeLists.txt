@@ -40,6 +40,10 @@ add_executable(unit_tests unit_tests.cpp
   test_will_options.cpp
 )
 
+if(PAHO_WITH_SSL)
+  target_sources(unit_tests PUBLIC test_ssl_options.cpp)
+endif()
+
 # --- Link for executables ---
 
 message(STATUS "Using library for unit tests: ${PAHO_CPP_LIB}")

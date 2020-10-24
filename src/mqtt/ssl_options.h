@@ -74,8 +74,7 @@ class ssl_options
 
 	/** The connect options has special access */
 	friend class connect_options;
-	friend class connect_options_test;
-	friend class ssl_options_test;
+	//friend class connect_options_test;
 
 	/**
 	 * Gets a pointer to the C-language NUL-terminated strings for the
@@ -144,6 +143,12 @@ public:
 	 * @return A reference to this object.
 	 */
 	ssl_options& operator=(ssl_options&& opt);
+	/**
+	 * Expose the underlying C struct for the unit tests.
+	 */
+	 #if defined(UNIT_TESTS)
+		const MQTTAsync_SSLOptions& c_struct() const { return opts_; }
+	#endif
 	/**
 	 * Returns the file containing the public digital certificates trusted by
 	 * the client.

@@ -20,7 +20,6 @@
 #include "async_client_test.h"
 #include "async_client_v3_test.h"
 #include "client_test.h"
-#include "ssl_options_test.h"
 #include "disconnect_options_test.h"
 #include "response_options_test.h"
 #include "delivery_response_options_test.h"
@@ -33,10 +32,6 @@ using namespace CppUnit;
 
 int main(int argc, char* argv[])
 {
-	#if defined(OPENSSL)
-		CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::ssl_options_test );
-	#endif
-
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::disconnect_options_test );
 	CPPUNIT_TEST_SUITE_REGISTRATION( mqtt::response_options_test );
 
