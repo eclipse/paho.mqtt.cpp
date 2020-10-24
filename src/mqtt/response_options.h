@@ -14,8 +14,6 @@
 
 namespace mqtt {
 
-class response_options_test;
-class delivery_response_options_test;
 class token_test;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -42,7 +40,6 @@ class response_options
 
 	/** The client has special access */
 	friend class async_client;
-	friend class response_options_test;
 	friend class token_test;
 
 public:
@@ -55,6 +52,12 @@ public:
 	 * @param tok A token to be used as the context.
 	 */
 	response_options(const token_ptr& tok, int mqttVersion=MQTTVERSION_DEFAULT);
+	/**
+	 * Expose the underlying C struct for the unit tests.
+	 */
+	#if defined(UNIT_TESTS)
+		const MQTTAsync_responseOptions& c_struct() const { return opts_; }
+	#endif
 	/**
 	 * Sets the callback context to a generic token.
 	 * @param tok The token to be used as the callback context.
