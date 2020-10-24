@@ -188,13 +188,13 @@ TEST_CASE("token action callback", "[token]")
 	tok.set_action_callback(listener);
 	REQUIRE(dynamic_cast<mqtt::iaction_listener*>(&listener) == tok.get_action_callback());
 
-	REQUIRE(!listener.on_success_called);
+	REQUIRE(!listener.succeeded());
 	mock_async_client::succeed(&tok, nullptr);
-	REQUIRE(listener.on_success_called);
+	REQUIRE(listener.succeeded());
 
-	REQUIRE(!listener.on_failure_called);
+	REQUIRE(!listener.failed());
 	mock_async_client::fail(&tok, nullptr);
-	REQUIRE(listener.on_failure_called);
+	REQUIRE(listener.failed());
 }
 
 // ----------------------------------------------------------------------

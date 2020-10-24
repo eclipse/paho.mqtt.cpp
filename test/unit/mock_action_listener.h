@@ -30,20 +30,26 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-class mock_action_listener : public mqtt::iaction_listener
+/**
+ * Test/mock action listener to determine which callback gets triggered, if
+ * any.
+ */
+class mock_action_listener : public iaction_listener
 {
+	bool onSuccessCalled_ { false };
+	bool onFailureCalled_ { false };
+
+	void on_success(const mqtt::token&) override {
+        onSuccessCalled_ = true;
+    }
+
+    void on_failure(const mqtt::token&) override {
+        onFailureCalled_ = true;
+    }
+
 public:
-	bool on_success_called { false };
-	bool on_failure_called { false };
-
-	void on_success(const mqtt::token& token) override {
-		on_success_called = true;
-	}
-
-	void on_failure(const mqtt::token& token) override {
-		on_failure_called = true;
-	}
-
+    bool succeeded() const { return onSuccessCalled_; }
+    bool failed() const { return onFailureCalled_; }
 };
 
 /////////////////////////////////////////////////////////////////////////////
