@@ -107,6 +107,12 @@ public:
 	delivery_response_options(const delivery_token_ptr& dtok,
 							  int mqttVersion=MQTTVERSION_DEFAULT);
 	/**
+	 * Expose the underlying C struct for the unit tests.
+	 */
+	#if defined(UNIT_TESTS)
+		const MQTTAsync_responseOptions& c_struct() const { return opts_; }
+	#endif
+	/**
 	 * Sets the callback context to a delivery token.
 	 * @param dtok The delivery token to be used as the callback context.
 	 */

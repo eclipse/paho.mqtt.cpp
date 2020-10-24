@@ -17,8 +17,11 @@
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
- *    Guilherme M. Ferreira - initial implementation and documentation
- *    Frank Pagliughi - converted to use Catch2
+ *    Guilherme M. Ferreira
+ *        - initial implementation and documentation
+ *    Frank Pagliughi
+ *        - converted to use Catch2
+ *        - Merged in delivery response options
  *******************************************************************************/
 
 #define UNIT_TESTS
@@ -80,6 +83,62 @@ TEST_CASE("response_options set token", "[options]")
 
 	REQUIRE(c_struct.context == nullptr);
 	mqtt::token_ptr token { mqtt::token::create(TOKEN_TYPE, cli) };
+	opts.set_token( token );
+	REQUIRE(c_struct.context == token.get());
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Delivery Response Options
+/////////////////////////////////////////////////////////////////////////////
+
+// ----------------------------------------------------------------------
+// Test default constructor
+// ----------------------------------------------------------------------
+
+TEST_CASE("delivery_response_options dflt constructor", "[options]")
+{
+	mqtt::delivery_response_options opts;
+	const auto& c_struct = opts.c_struct();
+
+	REQUIRE(c_struct.context == nullptr);
+
+	// Make sure the callback functions are set during object construction
+	REQUIRE(c_struct.onSuccess != nullptr);
+	REQUIRE(c_struct.onFailure != nullptr);
+}
+
+// ----------------------------------------------------------------------
+// Test user constructor
+// ----------------------------------------------------------------------
+
+TEST_CASE("delivery_response_options user constructor", "[options]")
+{
+	mqtt::test::mock_async_client cli;
+
+	mqtt::delivery_token_ptr token { new mqtt::delivery_token{ cli } };
+	mqtt::delivery_response_options opts { token };
+	const auto& c_struct = opts.c_struct();
+
+	REQUIRE(c_struct.context == token.get());
+
+	// Make sure the callback functions are set during object construction
+	REQUIRE(c_struct.onSuccess != nullptr);
+	REQUIRE(c_struct.onFailure != nullptr);
+}
+
+// ----------------------------------------------------------------------
+// Test set context
+// ----------------------------------------------------------------------
+
+TEST_CASE("delivery_response_options set token", "[options]")
+{
+	mqtt::delivery_response_options opts;
+	const auto& c_struct = opts.c_struct();
+
+	REQUIRE(c_struct.context == nullptr);
+
+	mqtt::test::mock_async_client cli;
+	mqtt::delivery_token_ptr token { new mqtt::delivery_token{ cli } };
 	opts.set_token( token );
 	REQUIRE(c_struct.context == token.get());
 }
