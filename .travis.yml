@@ -17,7 +17,6 @@ addons:
       - sourceline: 'ppa:mosquitto-dev/mosquitto-ppa'
     packages:
       - cppcheck
-      - libcppunit-dev
       - git
       - cmake
       - cmake-data
@@ -36,7 +35,6 @@ matrix:
           packages:
             - g++-5
             - cppcheck
-            - libcppunit-dev
             - git
             - cmake
             - cmake-data
@@ -53,7 +51,6 @@ matrix:
           packages:
             - g++-6
             - cppcheck
-            - libcppunit-dev
             - git
             - cmake
             - cmake-data
@@ -70,7 +67,6 @@ matrix:
           packages:
             - g++-7
             - cppcheck
-            - libcppunit-dev
             - git
             - cmake
             - cmake-data
@@ -87,7 +83,6 @@ matrix:
           packages:
             - g++-8
             - cppcheck
-            - libcppunit-dev
             - git
             - cmake
             - cmake-data
@@ -104,7 +99,6 @@ matrix:
           packages:
             - clang-3.9
             - cppcheck
-            - libcppunit-dev
             - git
             - cmake
             - cmake-data
@@ -121,7 +115,6 @@ matrix:
           packages:
             - clang-4.0
             - cppcheck
-            - libcppunit-dev
             - git
             - cmake
             - cmake-data
@@ -139,7 +132,6 @@ matrix:
           packages:
             - clang-7
             - cppcheck
-            - libcppunit-dev
             - git
             - cmake
             - cmake-data
@@ -157,7 +149,6 @@ matrix:
           packages:
             - clang-8
             - cppcheck
-            - libcppunit-dev
             - git
             - cmake
             - cmake-data
