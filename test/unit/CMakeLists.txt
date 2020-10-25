@@ -35,6 +35,7 @@ add_executable(unit_tests unit_tests.cpp
   test_disconnect_options.cpp
 	test_exception.cpp
   test_message.cpp
+  test_persistence.cpp
   test_properties.cpp
   test_response_options.cpp
   test_string_collection.cpp

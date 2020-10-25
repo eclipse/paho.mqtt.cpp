@@ -54,7 +54,7 @@ namespace mqtt {
 class iclient_persistence
 {
 	friend class async_client;
-	friend class iclient_persistence_test;
+	friend class mock_persistence;
 
 	/** Callbacks from the C library */
 	static int persistence_open(void** handle, const char* clientID, const char* serverURI, void* context);
