@@ -45,8 +45,9 @@ using namespace mqtt;
 
 static const std::string BAD_SERVER_URI  { "one://invalid.address" };
 static const std::string CLIENT_ID { "" }; // { "async_client_unit_test" };
-static const std::string PERSISTENCE_DIR { "/tmp" };
+static const std::string PERSISTENCE_DIR { "persist" };
 static const std::string TOPIC { "TOPIC" };
+
 static const int GOOD_QOS { 0 };
 static const int BAD_QOS  { 3 };
 static const_string_collection_ptr TOPIC_COLL { string_collection::create({ "TOPIC0", "TOPIC1", "TOPIC2" })};
