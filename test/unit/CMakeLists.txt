@@ -29,6 +29,7 @@ find_package(Catch2 REQUIRED)
 # --- Executables ---
 
 add_executable(unit_tests unit_tests.cpp
+  test_async_client.cpp
   test_buffer_ref.cpp
   test_client.cpp
   test_connect_options.cpp
