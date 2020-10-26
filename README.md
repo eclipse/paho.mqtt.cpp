@@ -20,7 +20,7 @@ This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) 
 
 ## Latest News
 
-A new release is underway to fix some minor build issues and missing features. This should be v1.2, due in early 2020.
+A new release is underway to fix some minor build issues and missing features. This should be v1.2, due before the end of 2020.
 
 To keep up with the latest announcements for this project, or to ask questions:
 
@@ -37,7 +37,8 @@ To keep up with the latest announcements for this project, or to ask questions:
     - Output buffer can delete oldest messages when full
     - Can choose to clear the persistence store on startup
     - Select whether to persist QoS 0 messages
-- Started classes to create options using the Builder Pattern, with the `create_options_builder`, `connect_options_builder`.
+- Started classes to create options using the Builder Pattern, with the `create_options_builder`, `connect_options_builder`, `message_ptr_builder`, etc.
+- Converted the unit tests to use Catch2
 - [#231] Added `on_disconnected` callback to handle receipt of disconnect packet from server.
 - [#211, 223, #235] Removed use of Log() function from the Paho C library.
 - [#227] Fixed race condition in thread-safe queue
