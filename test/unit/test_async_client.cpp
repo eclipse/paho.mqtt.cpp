@@ -29,7 +29,6 @@
 #include "mock_callback.h"
 #include "mock_action_listener.h"
 
-using namespace std::chrono;
 using namespace mqtt;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -44,7 +43,7 @@ using namespace mqtt;
 #endif
 
 static const std::string BAD_SERVER_URI  { "one://invalid.address" };
-static const std::string CLIENT_ID { "" }; // { "async_client_unit_test" };
+static const std::string CLIENT_ID { "test_async_client" };
 static const std::string PERSISTENCE_DIR { "persist" };
 static const std::string TOPIC { "TOPIC" };
 
@@ -60,6 +59,16 @@ static const int TIMEOUT { 1000 };
 static int CONTEXT { 4 };
 static mock_action_listener listener;
 static const bool RETAINED { false };
+
+// Note: We could someday use this to generate client ID's to run
+//    tests in parallel, keeping unique client ID's for each test
+/*
+static inline std::string test_client_id() {
+	auto s = Catch::getResultCapture().getCurrentTestName();
+	std::replace(s.begin(), s.end(), ' ', '_');
+	return s.substr(0,22);
+}
+*/
 
 //----------------------------------------------------------------------
 // Test constructors async_client::async_client()
