@@ -93,7 +93,6 @@ TEST_CASE("client user constructor 3 string args", "[client]")
 	REQUIRE(CLIENT_ID == cli.get_client_id());
 }
 
-#if 0
 TEST_CASE("client user constructor 3 args", "[client]")
 {
 	mock_persistence cp;
@@ -107,7 +106,6 @@ TEST_CASE("client user constructor 3 args", "[client]")
 	REQUIRE(GOOD_SERVER_URI == cli_no_persistence.get_server_uri());
 	REQUIRE(CLIENT_ID == cli_no_persistence.get_client_id());
 }
-#endif
 
 //----------------------------------------------------------------------
 // Test client::connect()

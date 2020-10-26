@@ -51,8 +51,8 @@ static const int GOOD_QOS { 0 };
 static const int BAD_QOS  { 3 };
 static const_string_collection_ptr TOPIC_COLL { string_collection::create({ "TOPIC0", "TOPIC1", "TOPIC2" })};
 
-static mqtt::iasync_client::qos_collection GOOD_QOS_COLL { 0, 1, 2 };
-static mqtt::iasync_client::qos_collection BAD_QOS_COLL  { BAD_QOS, 1, 2 };
+static iasync_client::qos_collection GOOD_QOS_COLL { 0, 1, 2 };
+static iasync_client::qos_collection BAD_QOS_COLL  { BAD_QOS, 1, 2 };
 
 static const std::string PAYLOAD { "PAYLOAD" };
 static const int TIMEOUT { 1000 };
@@ -76,7 +76,7 @@ static inline std::string test_client_id() {
 
 TEST_CASE("async_client user constructor 2 string_args", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 
 	REQUIRE(GOOD_SERVER_URI == cli.get_server_uri());
 	REQUIRE(CLIENT_ID == cli.get_client_id());
@@ -86,7 +86,7 @@ TEST_CASE("async_client user constructor 2 string args failure", "[client]")
 {
 	int return_code = MQTTASYNC_SUCCESS;
 	try {
-		mqtt::async_client cli{BAD_SERVER_URI, CLIENT_ID};
+		async_client cli{BAD_SERVER_URI, CLIENT_ID};
 	}
 	catch (mqtt::exception& ex) {
 		return_code = ex.get_return_code();
@@ -96,27 +96,25 @@ TEST_CASE("async_client user constructor 2 string args failure", "[client]")
 
 TEST_CASE("async_client user constructor 3 string args", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID, PERSISTENCE_DIR};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID, PERSISTENCE_DIR};
 
 	REQUIRE(GOOD_SERVER_URI == cli.get_server_uri());
 	REQUIRE(CLIENT_ID == cli.get_client_id());
 }
 
-#if 0
 TEST_CASE("async_client user constructor 3 args", "[client]")
 {
 	mock_persistence cp;
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID, &cp};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID, &cp};
 
 	REQUIRE(GOOD_SERVER_URI == cli.get_server_uri());
 	REQUIRE(CLIENT_ID == cli.get_client_id());
 
-	mqtt::async_client cli_no_persistence{GOOD_SERVER_URI, CLIENT_ID, nullptr};
+	async_client cli_no_persistence{GOOD_SERVER_URI, CLIENT_ID, nullptr};
 
 	REQUIRE(GOOD_SERVER_URI == cli_no_persistence.get_server_uri());
 	REQUIRE(CLIENT_ID == cli_no_persistence.get_client_id());
 }
-#endif
 
 //----------------------------------------------------------------------
 // Test async_client::connect()
@@ -124,11 +122,11 @@ TEST_CASE("async_client user constructor 3 args", "[client]")
 
 TEST_CASE("async_client connect 0 arg", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
 	try {
-		mqtt::token_ptr token_conn = cli.connect();
+		token_ptr token_conn = cli.connect();
 		REQUIRE(token_conn);
 		token_conn->wait();
 		REQUIRE(cli.is_connected());
@@ -140,11 +138,11 @@ TEST_CASE("async_client connect 0 arg", "[client]")
 
 TEST_CASE("async_client connect 1 arg", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
-	mqtt::connect_options co;
-	mqtt::token_ptr token_conn{cli.connect(co)};
+	connect_options co;
+	token_ptr token_conn{cli.connect(co)};
 	REQUIRE(token_conn);
 	token_conn->wait();
 	REQUIRE(cli.is_connected());
@@ -152,12 +150,12 @@ TEST_CASE("async_client connect 1 arg", "[client]")
 
 TEST_CASE("async_client connect 1 arg failure", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
-	mqtt::token_ptr token_conn; //{ nullptr };
-	mqtt::connect_options co;
-	mqtt::will_options wo;
+	token_ptr token_conn; //{ nullptr };
+	connect_options co;
+	will_options wo;
 	wo.set_qos(BAD_QOS); // Invalid QoS causes connection failure
 	co.set_will(wo);
 	int return_code = MQTTASYNC_SUCCESS;
@@ -175,11 +173,11 @@ TEST_CASE("async_client connect 1 arg failure", "[client]")
 
 TEST_CASE("async_client connect 2 args", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
 	mock_action_listener listener;
-	mqtt::token_ptr token_conn{cli.connect(&CONTEXT, listener)};
+	token_ptr token_conn{cli.connect(&CONTEXT, listener)};
 	REQUIRE(token_conn);
 	token_conn->wait();
 	REQUIRE(cli.is_connected());
@@ -189,12 +187,12 @@ TEST_CASE("async_client connect 2 args", "[client]")
 
 TEST_CASE("async_client connect 3 args", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
-	mqtt::connect_options co;
+	connect_options co;
 	mock_action_listener listener;
-	mqtt::token_ptr token_conn{cli.connect(co, &CONTEXT, listener)};
+	token_ptr token_conn{cli.connect(co, &CONTEXT, listener)};
 	REQUIRE(token_conn);
 	token_conn->wait();
 	REQUIRE(cli.is_connected());
@@ -204,12 +202,12 @@ TEST_CASE("async_client connect 3 args", "[client]")
 
 TEST_CASE("async_client connect 3 args failure", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
-	mqtt::token_ptr token_conn;     //{ nullptr };
-	mqtt::connect_options co;
-	mqtt::will_options wo;
+	token_ptr token_conn;     //{ nullptr };
+	connect_options co;
+	will_options wo;
 	wo.set_qos(BAD_QOS); // Invalid QoS causes connection failure
 	co.set_will(wo);
 	mock_action_listener listener;
@@ -235,14 +233,14 @@ TEST_CASE("async_client connect uninitialized ssl", "[client]")
 	int reasonCode = MQTTASYNC_SUCCESS;
 	try {
 		// Compiled against a non-SSL library should throw here.
-		mqtt::async_client cli{GOOD_SSL_SERVER_URI, CLIENT_ID};
+		async_client cli{GOOD_SSL_SERVER_URI, CLIENT_ID};
 
-		mqtt::connect_options opts;
+		connect_options opts;
 		opts.set_keep_alive_interval(10);
 		opts.set_clean_session(true);
 		// Note that we're not setting SSL options.
 
-		mqtt::token_ptr tok;
+		token_ptr tok;
 
 		// Compiled against the SSL library should throw here
 		tok = cli.connect(opts);
@@ -260,15 +258,15 @@ TEST_CASE("async_client connect uninitialized ssl", "[client]")
 
 TEST_CASE("async_client disconnect 0 arg", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
-	mqtt::token_ptr token_conn{cli.connect()};
+	token_ptr token_conn{cli.connect()};
 	REQUIRE(token_conn);
 	token_conn->wait();
 	REQUIRE(cli.is_connected());
 
-	mqtt::token_ptr token_disconn{cli.disconnect()};
+	token_ptr token_disconn{cli.disconnect()};
 	REQUIRE(token_disconn);
 	token_disconn->wait();
 	REQUIRE(!cli.is_connected());
@@ -276,15 +274,15 @@ TEST_CASE("async_client disconnect 0 arg", "[client]")
 
 TEST_CASE("async_client disconnect 1 arg", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
-	mqtt::token_ptr token_conn{cli.connect()};
+	token_ptr token_conn{cli.connect()};
 	REQUIRE(token_conn);
 	token_conn->wait();
 	REQUIRE(cli.is_connected());
 
-	mqtt::token_ptr token_disconn{cli.disconnect(0)};
+	token_ptr token_disconn{cli.disconnect(0)};
 	REQUIRE(token_disconn);
 	token_disconn->wait();
 	REQUIRE(!cli.is_connected());
@@ -292,10 +290,10 @@ TEST_CASE("async_client disconnect 1 arg", "[client]")
 
 TEST_CASE("async_client disconnect 1 arg failure", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
-	mqtt::token_ptr token_disconn;  //{ nullptr };
+	token_ptr token_disconn;  //{ nullptr };
 	int return_code = MQTTASYNC_SUCCESS;
 	try {
 		token_disconn = cli.disconnect(0);
@@ -310,16 +308,16 @@ TEST_CASE("async_client disconnect 1 arg failure", "[client]")
 
 TEST_CASE("async_client disconnect 2 args", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
-	mqtt::token_ptr token_conn{cli.connect()};
+	token_ptr token_conn{cli.connect()};
 	REQUIRE(token_conn);
 	token_conn->wait();
 	REQUIRE(cli.is_connected());
 
 	mock_action_listener listener;
-	mqtt::token_ptr token_disconn{cli.disconnect(&CONTEXT, listener)};
+	token_ptr token_disconn{cli.disconnect(&CONTEXT, listener)};
 	REQUIRE(token_disconn);
 	token_disconn->wait();
 	REQUIRE(!cli.is_connected());
@@ -328,16 +326,16 @@ TEST_CASE("async_client disconnect 2 args", "[client]")
 
 TEST_CASE("async_client disconnect 3 args", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
-	mqtt::token_ptr token_conn{cli.connect()};
+	token_ptr token_conn{cli.connect()};
 	REQUIRE(token_conn);
 	token_conn->wait();
 	REQUIRE(cli.is_connected());
 
 	mock_action_listener listener;
-	mqtt::token_ptr token_disconn{cli.disconnect(0, &CONTEXT, listener)};
+	token_ptr token_disconn{cli.disconnect(0, &CONTEXT, listener)};
 	REQUIRE(token_disconn);
 	token_disconn->wait();
 	REQUIRE(!cli.is_connected());
@@ -346,10 +344,10 @@ TEST_CASE("async_client disconnect 3 args", "[client]")
 
 TEST_CASE("async_client disconnect 3 args failure", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
-	mqtt::token_ptr token_disconn;  //{ nullptr };
+	token_ptr token_disconn;  //{ nullptr };
 	mock_action_listener listener;
 	int return_code = MQTTASYNC_SUCCESS;
 	try {
@@ -369,14 +367,14 @@ TEST_CASE("async_client disconnect 3 args failure", "[client]")
 
 TEST_CASE("async_client get pending delivery token", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
 	REQUIRE(0 == GOOD_QOS_COLL[0]);
 	REQUIRE(1 == GOOD_QOS_COLL[1]);
 	REQUIRE(2 == GOOD_QOS_COLL[2]);
 
-	mqtt::token_ptr token_conn{cli.connect()};
+	token_ptr token_conn{cli.connect()};
 	REQUIRE(token_conn);
 	token_conn->wait();
 	REQUIRE(cli.is_connected());
@@ -385,8 +383,8 @@ TEST_CASE("async_client get pending delivery token", "[client]")
 	// delivery_token via async_client::add_token(delivery_token_ptr tok).
 	// The other functions add token async_client::add_token(token_ptr tok).
 
-	mqtt::delivery_token_ptr token_pub; // { nullptr };
-	mqtt::delivery_token_ptr token_pending; // { nullptr };
+	delivery_token_ptr token_pub; // { nullptr };
+	delivery_token_ptr token_pending; // { nullptr };
 
 	// NOTE: message IDs are 16-bit numbers sequentially incremented, from
 	// 1 to 65535 (MAX_MSG_ID). See MQTTAsync_assignMsgId() at Paho MQTT C.
@@ -401,14 +399,14 @@ TEST_CASE("async_client get pending delivery token", "[client]")
 	// completion.
 
 	// Messages with QOS=2 are kept by the library
-	mqtt::message_ptr msg2{mqtt::message::create(TOPIC, PAYLOAD, GOOD_QOS_COLL[2], RETAINED)};
+	message_ptr msg2{message::create(TOPIC, PAYLOAD, GOOD_QOS_COLL[2], RETAINED)};
 	token_pub = cli.publish(msg2);
 	REQUIRE(token_pub);
 	token_pending = cli.get_pending_delivery_token(message_id++);
 	REQUIRE(token_pending);
 
 	// Messages with QOS=1 are kept by the library
-	mqtt::message_ptr msg1{mqtt::message::create(TOPIC, PAYLOAD, GOOD_QOS_COLL[1], RETAINED)};
+	message_ptr msg1{message::create(TOPIC, PAYLOAD, GOOD_QOS_COLL[1], RETAINED)};
 	token_pub = cli.publish(msg1);
 	REQUIRE(token_pub);
 	token_pending = cli.get_pending_delivery_token(message_id++);
@@ -421,13 +419,13 @@ TEST_CASE("async_client get pending delivery token", "[client]")
 	// have a msgID that is always zero.
 
 	// Messages with QOS=0 are NOT kept by the library
-	mqtt::message_ptr msg0{mqtt::message::create(TOPIC, PAYLOAD, GOOD_QOS_COLL[0], RETAINED)};
+	message_ptr msg0{message::create(TOPIC, PAYLOAD, GOOD_QOS_COLL[0], RETAINED)};
 	token_pub = cli.publish(msg0);
 	REQUIRE(token_pub);
 	token_pending = cli.get_pending_delivery_token(message_id++);
 	REQUIRE(!token_pending);
 
-	mqtt::token_ptr token_disconn{cli.disconnect()};
+	token_ptr token_disconn{cli.disconnect()};
 	REQUIRE(token_disconn);
 	token_disconn->wait();
 	REQUIRE(!cli.is_connected());
@@ -435,45 +433,45 @@ TEST_CASE("async_client get pending delivery token", "[client]")
 
 TEST_CASE("async_client get pending delivery tokens", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
 	REQUIRE(0 == GOOD_QOS_COLL[0]);
 	REQUIRE(1 == GOOD_QOS_COLL[1]);
 	REQUIRE(2 == GOOD_QOS_COLL[2]);
 
-	mqtt::token_ptr token_conn{cli.connect()};
+	token_ptr token_conn{cli.connect()};
 	REQUIRE(token_conn);
 	token_conn->wait();
 	REQUIRE(cli.is_connected());
 
-	mqtt::delivery_token_ptr token_pub; // { nullptr };
+	delivery_token_ptr token_pub; // { nullptr };
 
 	// NOTE: async_client::publish() is the only method that adds
 	// delivery_token via async_client::add_token(delivery_token_ptr tok).
 	// The other functions add token async_client::add_token(token_ptr tok).
 
 	// Messages with QOS=0 are NOT kept by the library
-	mqtt::message_ptr msg0{mqtt::message::create(TOPIC, PAYLOAD, GOOD_QOS_COLL[0], RETAINED)};
+	message_ptr msg0{message::create(TOPIC, PAYLOAD, GOOD_QOS_COLL[0], RETAINED)};
 	token_pub = cli.publish(msg0);
 	REQUIRE(token_pub);
 
 	// Messages with QOS=1 are kept by the library
-	mqtt::message_ptr msg1{mqtt::message::create(TOPIC, PAYLOAD, GOOD_QOS_COLL[1], RETAINED)};
+	message_ptr msg1{message::create(TOPIC, PAYLOAD, GOOD_QOS_COLL[1], RETAINED)};
 	token_pub = cli.publish(msg1);
 	REQUIRE(token_pub);
 
 	// Messages with QOS=2 are kept by the library
-	mqtt::message_ptr msg2{mqtt::message::create(TOPIC, PAYLOAD, GOOD_QOS_COLL[2], RETAINED)};
+	message_ptr msg2{message::create(TOPIC, PAYLOAD, GOOD_QOS_COLL[2], RETAINED)};
 	token_pub = cli.publish(msg2);
 	REQUIRE(token_pub);
 
 	// NOTE: Only tokens for messages with QOS=1 and QOS=2 are kept. That's
 	// why the vector's size does not account for QOS=0 message tokens
-	std::vector<mqtt::delivery_token_ptr> tokens_pending{cli.get_pending_delivery_tokens()};
+	std::vector<delivery_token_ptr> tokens_pending{cli.get_pending_delivery_tokens()};
 	REQUIRE(2 == static_cast<int>(tokens_pending.size()));
 
-	mqtt::token_ptr token_disconn{cli.disconnect()};
+	token_ptr token_disconn{cli.disconnect()};
 	REQUIRE(token_disconn);
 	token_disconn->wait();
 	REQUIRE(!cli.is_connected());
@@ -485,20 +483,20 @@ TEST_CASE("async_client get pending delivery tokens", "[client]")
 
 TEST_CASE("async_client publish 2 args", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
-	mqtt::token_ptr token_conn{cli.connect()};
+	token_ptr token_conn{cli.connect()};
 	REQUIRE(token_conn);
 	token_conn->wait();
 	REQUIRE(cli.is_connected());
 
-	mqtt::message_ptr msg{mqtt::message::create(TOPIC, PAYLOAD)};
-	mqtt::delivery_token_ptr token_pub{cli.publish(msg)};
+	message_ptr msg{message::create(TOPIC, PAYLOAD)};
+	delivery_token_ptr token_pub{cli.publish(msg)};
 	REQUIRE(token_pub);
 	token_pub->wait_for(TIMEOUT);
 
-	mqtt::token_ptr token_disconn{cli.disconnect()};
+	token_ptr token_disconn{cli.disconnect()};
 	REQUIRE(token_disconn);
 	token_disconn->wait();
 	REQUIRE(!cli.is_connected());
@@ -506,13 +504,13 @@ TEST_CASE("async_client publish 2 args", "[client]")
 
 TEST_CASE("async_client publish 2 args failure", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
 	int return_code = MQTTASYNC_SUCCESS;
 	try {
-		mqtt::message_ptr msg{mqtt::message::create(TOPIC, PAYLOAD)};
-		mqtt::delivery_token_ptr token_pub{cli.publish(msg)};
+		message_ptr msg{message::create(TOPIC, PAYLOAD)};
+		delivery_token_ptr token_pub{cli.publish(msg)};
 		REQUIRE(token_pub);
 		token_pub->wait_for(TIMEOUT);
 	}
@@ -524,22 +522,22 @@ TEST_CASE("async_client publish 2 args failure", "[client]")
 
 TEST_CASE("async_client publish 4 args", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
-	mqtt::token_ptr token_conn{cli.connect()};
+	token_ptr token_conn{cli.connect()};
 	REQUIRE(token_conn);
 	token_conn->wait();
 	REQUIRE(cli.is_connected());
 
-	mqtt::message_ptr msg{mqtt::message::create(TOPIC, PAYLOAD)};
+	message_ptr msg{message::create(TOPIC, PAYLOAD)};
 	mock_action_listener listener;
-	mqtt::delivery_token_ptr token_pub{cli.publish(msg, &CONTEXT, listener)};
+	delivery_token_ptr token_pub{cli.publish(msg, &CONTEXT, listener)};
 	REQUIRE(token_pub);
 	token_pub->wait_for(TIMEOUT);
 	REQUIRE(CONTEXT == *static_cast<int*>(token_pub->get_user_context()));
 
-	mqtt::token_ptr token_disconn{cli.disconnect()};
+	token_ptr token_disconn{cli.disconnect()};
 	REQUIRE(token_disconn);
 	token_disconn->wait();
 	REQUIRE(!cli.is_connected());
@@ -547,14 +545,14 @@ TEST_CASE("async_client publish 4 args", "[client]")
 
 TEST_CASE("async_client publish 4 args failure", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
 	int return_code = MQTTASYNC_SUCCESS;
 	try {
-		mqtt::message_ptr msg{mqtt::message::create(TOPIC, PAYLOAD)};
+		message_ptr msg{message::create(TOPIC, PAYLOAD)};
 		mock_action_listener listener;
-		mqtt::delivery_token_ptr token_pub{cli.publish(msg, &CONTEXT, listener)};
+		delivery_token_ptr token_pub{cli.publish(msg, &CONTEXT, listener)};
 		REQUIRE(token_pub);
 		token_pub->wait_for(TIMEOUT);
 	}
@@ -566,21 +564,21 @@ TEST_CASE("async_client publish 4 args failure", "[client]")
 
 TEST_CASE("async_client publish 5 args", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
-	mqtt::token_ptr token_conn{cli.connect()};
+	token_ptr token_conn{cli.connect()};
 	REQUIRE(token_conn);
 	token_conn->wait();
 	REQUIRE(cli.is_connected());
 
 	const void* payload{PAYLOAD.data()};
 	const size_t payload_size{PAYLOAD.size()};
-	mqtt::delivery_token_ptr token_pub{cli.publish(TOPIC, payload, payload_size, GOOD_QOS, RETAINED)};
+	delivery_token_ptr token_pub{cli.publish(TOPIC, payload, payload_size, GOOD_QOS, RETAINED)};
 	REQUIRE(token_pub);
 	token_pub->wait_for(TIMEOUT);
 
-	mqtt::token_ptr token_disconn{cli.disconnect()};
+	token_ptr token_disconn{cli.disconnect()};
 	REQUIRE(token_disconn);
 	token_disconn->wait();
 	REQUIRE(!cli.is_connected());
@@ -588,10 +586,10 @@ TEST_CASE("async_client publish 5 args", "[client]")
 
 TEST_CASE("async_client publish 7 args", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
-	mqtt::token_ptr token_conn{cli.connect()};
+	token_ptr token_conn{cli.connect()};
 	REQUIRE(token_conn);
 	token_conn->wait();
 	REQUIRE(cli.is_connected());
@@ -599,12 +597,12 @@ TEST_CASE("async_client publish 7 args", "[client]")
 	const void* payload{PAYLOAD.c_str()};
 	const size_t payload_size{PAYLOAD.size()};
 	mock_action_listener listener;
-	mqtt::delivery_token_ptr token_pub{cli.publish(TOPIC, payload, payload_size, GOOD_QOS, RETAINED, &CONTEXT, listener)};
+	delivery_token_ptr token_pub{cli.publish(TOPIC, payload, payload_size, GOOD_QOS, RETAINED, &CONTEXT, listener)};
 	REQUIRE(token_pub);
 	token_pub->wait_for(TIMEOUT);
 	REQUIRE(CONTEXT == *static_cast<int*>(token_pub->get_user_context()));
 
-	mqtt::token_ptr token_disconn{cli.disconnect()};
+	token_ptr token_disconn{cli.disconnect()};
 	REQUIRE(token_disconn);
 	token_disconn->wait();
 	REQUIRE(!cli.is_connected());
@@ -616,7 +614,7 @@ TEST_CASE("async_client publish 7 args", "[client]")
 
 TEST_CASE("async_client set callback", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
 	mock_callback cb;
@@ -631,19 +629,19 @@ TEST_CASE("async_client set callback", "[client]")
 
 TEST_CASE("async_client subscribe single topic 2 args", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
-	mqtt::token_ptr token_conn{cli.connect()};
+	token_ptr token_conn{cli.connect()};
 	REQUIRE(token_conn);
 	token_conn->wait();
 	REQUIRE(cli.is_connected());
 
-	mqtt::token_ptr token_sub{cli.subscribe(TOPIC, GOOD_QOS)};
+	token_ptr token_sub{cli.subscribe(TOPIC, GOOD_QOS)};
 	REQUIRE(token_sub);
 	token_sub->wait_for(TIMEOUT);
 
-	mqtt::token_ptr token_disconn{cli.disconnect()};
+	token_ptr token_disconn{cli.disconnect()};
 	REQUIRE(token_disconn);
 	token_disconn->wait();
 	REQUIRE(!cli.is_connected());
@@ -651,12 +649,12 @@ TEST_CASE("async_client subscribe single topic 2 args", "[client]")
 
 TEST_CASE("async_client subscribe single topic 2 args failure", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
 	int return_code = MQTTASYNC_SUCCESS;
 	try {
-		mqtt::token_ptr token_sub{cli.subscribe(TOPIC, BAD_QOS)};
+		token_ptr token_sub{cli.subscribe(TOPIC, BAD_QOS)};
 		REQUIRE(token_sub);
 		token_sub->wait_for(TIMEOUT);
 	}
@@ -668,21 +666,21 @@ TEST_CASE("async_client subscribe single topic 2 args failure", "[client]")
 
 TEST_CASE("async_client subscribe single topic 4 args", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
-	mqtt::token_ptr token_conn{cli.connect()};
+	token_ptr token_conn{cli.connect()};
 	REQUIRE(token_conn);
 	token_conn->wait();
 	REQUIRE(cli.is_connected());
 
 	mock_action_listener listener;
-	mqtt::token_ptr token_sub{cli.subscribe(TOPIC, GOOD_QOS, &CONTEXT, listener)};
+	token_ptr token_sub{cli.subscribe(TOPIC, GOOD_QOS, &CONTEXT, listener)};
 	REQUIRE(token_sub);
 	token_sub->wait_for(TIMEOUT);
 	REQUIRE(CONTEXT == *static_cast<int*>(token_sub->get_user_context()));
 
-	mqtt::token_ptr token_disconn{cli.disconnect()};
+	token_ptr token_disconn{cli.disconnect()};
 	REQUIRE(token_disconn);
 	token_disconn->wait();
 	REQUIRE(!cli.is_connected());
@@ -690,13 +688,13 @@ TEST_CASE("async_client subscribe single topic 4 args", "[client]")
 
 TEST_CASE("async_client subscribe single topic 4 args failure", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
 	int return_code = MQTTASYNC_SUCCESS;
 	try {
 		mock_action_listener listener;
-		mqtt::token_ptr token_sub{cli.subscribe(TOPIC, BAD_QOS, &CONTEXT, listener)};
+		token_ptr token_sub{cli.subscribe(TOPIC, BAD_QOS, &CONTEXT, listener)};
 		REQUIRE(token_sub);
 		token_sub->wait_for(TIMEOUT);
 	}
@@ -708,7 +706,7 @@ TEST_CASE("async_client subscribe single topic 4 args failure", "[client]")
 
 TEST_CASE("async_client subscribe many topics 2 args", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	cli.connect()->wait();
 	REQUIRE(cli.is_connected());
 
@@ -719,7 +717,7 @@ TEST_CASE("async_client subscribe many topics 2 args", "[client]")
 		FAIL(exc.what());
 	}
 
-	mqtt::token_ptr token_disconn{cli.disconnect()};
+	token_ptr token_disconn{cli.disconnect()};
 	REQUIRE(token_disconn);
 	token_disconn->wait();
 	REQUIRE(!cli.is_connected());
@@ -728,14 +726,14 @@ TEST_CASE("async_client subscribe many topics 2 args", "[client]")
 // There was an odd failure when subscribe_many was given a single topic.
 TEST_CASE("async_client subscribe many topics 2 args_single", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	cli.connect()->wait();
 	REQUIRE(cli.is_connected());
 
 	mqtt::const_string_collection_ptr TOPIC_1_COLL{
 		mqtt::string_collection::create({ "TOPIC0" })
 	};
-	mqtt::iasync_client::qos_collection GOOD_QOS_1_COLL{0};
+	iasync_client::qos_collection GOOD_QOS_1_COLL{0};
 	try {
 		cli.subscribe(TOPIC_1_COLL, GOOD_QOS_1_COLL)->wait_for(TIMEOUT);
 	}
@@ -743,7 +741,7 @@ TEST_CASE("async_client subscribe many topics 2 args_single", "[client]")
 		FAIL(exc.what());
 	}
 
-	mqtt::token_ptr token_disconn{cli.disconnect()};
+	token_ptr token_disconn{cli.disconnect()};
 	REQUIRE(token_disconn);
 	token_disconn->wait();
 	REQUIRE(!cli.is_connected());
@@ -751,11 +749,11 @@ TEST_CASE("async_client subscribe many topics 2 args_single", "[client]")
 
 TEST_CASE("async_client subscribe many topics 2 args failure", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
 	try {
-		mqtt::token_ptr token_sub{cli.subscribe(TOPIC_COLL, BAD_QOS_COLL)};
+		token_ptr token_sub{cli.subscribe(TOPIC_COLL, BAD_QOS_COLL)};
 		REQUIRE(token_sub);
 		token_sub->wait_for(TIMEOUT);
 	}
@@ -765,7 +763,7 @@ TEST_CASE("async_client subscribe many topics 2 args failure", "[client]")
 
 	int return_code = MQTTASYNC_SUCCESS;
 	try {
-		mqtt::token_ptr token_sub{cli.subscribe(TOPIC_COLL, GOOD_QOS_COLL)};
+		token_ptr token_sub{cli.subscribe(TOPIC_COLL, GOOD_QOS_COLL)};
 		REQUIRE(token_sub);
 		token_sub->wait_for(TIMEOUT);
 	}
@@ -777,21 +775,21 @@ TEST_CASE("async_client subscribe many topics 2 args failure", "[client]")
 
 TEST_CASE("async_client subscribe many topics 4 args", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
-	mqtt::token_ptr token_conn{cli.connect()};
+	token_ptr token_conn{cli.connect()};
 	REQUIRE(token_conn);
 	token_conn->wait();
 	REQUIRE(cli.is_connected());
 
 	mock_action_listener listener;
-	mqtt::token_ptr token_sub{cli.subscribe(TOPIC_COLL, GOOD_QOS_COLL, &CONTEXT, listener)};
+	token_ptr token_sub{cli.subscribe(TOPIC_COLL, GOOD_QOS_COLL, &CONTEXT, listener)};
 	REQUIRE(token_sub);
 	token_sub->wait_for(TIMEOUT);
 	REQUIRE(CONTEXT == *static_cast<int*>(token_sub->get_user_context()));
 
-	mqtt::token_ptr token_disconn{cli.disconnect()};
+	token_ptr token_disconn{cli.disconnect()};
 	REQUIRE(token_disconn);
 	token_disconn->wait();
 	REQUIRE(!cli.is_connected());
@@ -799,7 +797,7 @@ TEST_CASE("async_client subscribe many topics 4 args", "[client]")
 
 TEST_CASE("async_client subscribe many topics 4 args failure", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
 	mock_action_listener listener;
@@ -813,7 +811,7 @@ TEST_CASE("async_client subscribe many topics 4 args failure", "[client]")
 
 	int return_code = MQTTASYNC_SUCCESS;
 	try {
-		mqtt::token_ptr token_sub{cli.subscribe(TOPIC_COLL, GOOD_QOS_COLL, &CONTEXT, listener)};
+		token_ptr token_sub{cli.subscribe(TOPIC_COLL, GOOD_QOS_COLL, &CONTEXT, listener)};
 		REQUIRE(token_sub);
 		token_sub->wait_for(TIMEOUT);
 	}
@@ -829,19 +827,19 @@ TEST_CASE("async_client subscribe many topics 4 args failure", "[client]")
 
 TEST_CASE("async_client unsubscribe single topic 1 arg", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
-	mqtt::token_ptr token_conn{cli.connect()};
+	token_ptr token_conn{cli.connect()};
 	REQUIRE(token_conn);
 	token_conn->wait();
 	REQUIRE(cli.is_connected());
 
-	mqtt::token_ptr token_unsub{cli.unsubscribe(TOPIC)};
+	token_ptr token_unsub{cli.unsubscribe(TOPIC)};
 	REQUIRE(token_unsub);
 	token_unsub->wait_for(TIMEOUT);
 
-	mqtt::token_ptr token_disconn{cli.disconnect()};
+	token_ptr token_disconn{cli.disconnect()};
 	REQUIRE(token_disconn);
 	token_disconn->wait();
 	REQUIRE(!cli.is_connected());
@@ -849,12 +847,12 @@ TEST_CASE("async_client unsubscribe single topic 1 arg", "[client]")
 
 TEST_CASE("async_client unsubscribe single topic 1 arg failure", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
 	int return_code = MQTTASYNC_SUCCESS;
 	try {
-		mqtt::token_ptr token_unsub{cli.unsubscribe(TOPIC)};
+		token_ptr token_unsub{cli.unsubscribe(TOPIC)};
 		REQUIRE(token_unsub);
 		token_unsub->wait_for(TIMEOUT);
 	}
@@ -866,21 +864,21 @@ TEST_CASE("async_client unsubscribe single topic 1 arg failure", "[client]")
 
 TEST_CASE("async_client unsubscribe single topic 3 args", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
-	mqtt::token_ptr token_conn{cli.connect()};
+	token_ptr token_conn{cli.connect()};
 	REQUIRE(token_conn);
 	token_conn->wait();
 	REQUIRE(cli.is_connected());
 
 	mock_action_listener listener;
-	mqtt::token_ptr token_unsub{cli.unsubscribe(TOPIC, &CONTEXT, listener)};
+	token_ptr token_unsub{cli.unsubscribe(TOPIC, &CONTEXT, listener)};
 	REQUIRE(token_unsub);
 	token_unsub->wait_for(TIMEOUT);
 	REQUIRE(CONTEXT == *static_cast<int*>(token_unsub->get_user_context()));
 
-	mqtt::token_ptr token_disconn{cli.disconnect()};
+	token_ptr token_disconn{cli.disconnect()};
 	REQUIRE(token_disconn);
 	token_disconn->wait();
 	REQUIRE(!cli.is_connected());
@@ -888,13 +886,13 @@ TEST_CASE("async_client unsubscribe single topic 3 args", "[client]")
 
 TEST_CASE("async_client unsubscribe single topic 3 args failure", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
 	int return_code = MQTTASYNC_SUCCESS;
 	try {
 		mock_action_listener listener;
-		mqtt::token_ptr token_unsub{cli.unsubscribe(TOPIC, &CONTEXT, listener)};
+		token_ptr token_unsub{cli.unsubscribe(TOPIC, &CONTEXT, listener)};
 		REQUIRE(token_unsub);
 		token_unsub->wait_for(TIMEOUT);
 	}
@@ -906,19 +904,19 @@ TEST_CASE("async_client unsubscribe single topic 3 args failure", "[client]")
 
 TEST_CASE("async_client unsubscribe many topics 1 arg", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
-	mqtt::token_ptr token_conn{cli.connect()};
+	token_ptr token_conn{cli.connect()};
 	REQUIRE(token_conn);
 	token_conn->wait();
 	REQUIRE(cli.is_connected());
 
-	mqtt::token_ptr token_unsub{cli.unsubscribe(TOPIC_COLL)};
+	token_ptr token_unsub{cli.unsubscribe(TOPIC_COLL)};
 	REQUIRE(token_unsub);
 	token_unsub->wait_for(TIMEOUT);
 
-	mqtt::token_ptr token_disconn{cli.disconnect()};
+	token_ptr token_disconn{cli.disconnect()};
 	REQUIRE(token_disconn);
 	token_disconn->wait();
 	REQUIRE(!cli.is_connected());
@@ -926,12 +924,12 @@ TEST_CASE("async_client unsubscribe many topics 1 arg", "[client]")
 
 TEST_CASE("async_client unsubscribe many topics 1 arg_failure", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
 	int return_code = MQTTASYNC_SUCCESS;
 	try {
-		mqtt::token_ptr token_unsub{cli.unsubscribe(TOPIC_COLL)};
+		token_ptr token_unsub{cli.unsubscribe(TOPIC_COLL)};
 		REQUIRE(token_unsub);
 		token_unsub->wait_for(TIMEOUT);
 	}
@@ -943,21 +941,21 @@ TEST_CASE("async_client unsubscribe many topics 1 arg_failure", "[client]")
 
 TEST_CASE("async_client unsubscribe many topics 3 args", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
-	mqtt::token_ptr token_conn{cli.connect()};
+	token_ptr token_conn{cli.connect()};
 	REQUIRE(token_conn);
 	token_conn->wait();
 	REQUIRE(cli.is_connected());
 
 	mock_action_listener listener;
-	mqtt::token_ptr token_unsub{cli.unsubscribe(TOPIC_COLL, &CONTEXT, listener)};
+	token_ptr token_unsub{cli.unsubscribe(TOPIC_COLL, &CONTEXT, listener)};
 	REQUIRE(token_unsub);
 	token_unsub->wait_for(TIMEOUT);
 	REQUIRE(CONTEXT == *static_cast<int*>(token_unsub->get_user_context()));
 
-	mqtt::token_ptr token_disconn{cli.disconnect()};
+	token_ptr token_disconn{cli.disconnect()};
 	REQUIRE(token_disconn);
 	token_disconn->wait();
 	REQUIRE(!cli.is_connected());
@@ -965,13 +963,13 @@ TEST_CASE("async_client unsubscribe many topics 3 args", "[client]")
 
 TEST_CASE("async_client unsubscribe many topics 3 args failure", "[client]")
 {
-	mqtt::async_client cli{GOOD_SERVER_URI, CLIENT_ID};
+	async_client cli{GOOD_SERVER_URI, CLIENT_ID};
 	REQUIRE(!cli.is_connected());
 
 	mock_action_listener listener;
 	int return_code = MQTTASYNC_SUCCESS;
 	try {
-		mqtt::token_ptr token_unsub{cli.unsubscribe(TOPIC_COLL, &CONTEXT, listener)};
+		token_ptr token_unsub{cli.unsubscribe(TOPIC_COLL, &CONTEXT, listener)};
 		REQUIRE(token_unsub);
 		token_unsub->wait_for(TIMEOUT);
 	}
