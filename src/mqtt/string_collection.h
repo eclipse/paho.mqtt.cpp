@@ -266,6 +266,7 @@ public:
 	/** Smart/shared pointer to a const object of this type */
 	using const_ptr_t = std::shared_ptr<const name_value_collection>;
 
+	using value_type = collection_type::value_type;
     /**
      * Default construtor for an empty collection.
      */
@@ -298,6 +299,49 @@ public:
      */
     name_value_collection(name_value_collection&& other) = default;
 	/**
+	 * Constructs the collection with an initializer list.
+	 *
+	 * This works identically to initializing a std::map<> with string/tring
+	 * pairs.
+	 *
+	 * @param init Initializer list to construct the members of the
+	 *  		   collection.
+	 */
+	name_value_collection(std::initializer_list<value_type> init)
+			: map_{ init } {
+		update_c_arr();
+	}
+	/**
+	 * Determines if the collection is empty.
+	 * @return @em true if the container is empty, @em false if it contains
+	 *  	   one or more items.
+	 */
+	bool empty() const { return map_.empty(); }
+	/**
+	 * Gets the number of name/value pairs in the collection.
+	 * @return The number of name/value pairs in the collection.
+	 */
+	size_t size() const { return map_.size(); }
+	/**
+	 * Removes all items from the collection.
+	 */
+	void clear() {
+		map_.clear();
+		update_c_arr();
+	}
+	/**
+	 * Inserts a name/value pair into the collection.
+	 * @param nvpair The name/value string pair.
+	 * @return @em true if the inert happened, @em false if not.
+	 */
+	bool insert(const value_type& nvpair) {
+		if (map_.insert(nvpair).second) {
+			update_c_arr();
+			return true;
+		}
+		return false;
+	}
+	/**
      * Gets a pointer to an array of NUL-terminated C string pointer pairs.
      * This is a collection type supported by the underlying Paho C
      * library. The returned pointer is guaranteed valid so long as the
@@ -306,7 +350,6 @@ public:
      * rather request the value when needed.
      * @return pointer to an array of NUL-terminated C string pointer pairs
      *         for name/values. The array is terminated by a NULL/NULL pair.
-	 *
 	 */
 	char* const* c_arr() const { return (char* const *) cArr_.data(); }
 };

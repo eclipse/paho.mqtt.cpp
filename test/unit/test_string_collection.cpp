@@ -32,11 +32,18 @@ using namespace mqtt;
 static const string STR { "Some random string" };
 static const std::vector<string> VEC { "test0", "test1", "test2" };
 
+static const std::map<string, string> NV_PAIRS {
+	{ "name0", "value0" },
+	{ "name1", "value1" },
+	{ "name2", "value2" }
+};
+
+
 // ----------------------------------------------------------------------
 // Test the default constructor
 // ----------------------------------------------------------------------
 
-TEST_CASE("test_dflt_ctor", "[collections]")
+TEST_CASE("string_collection default ctor", "[collections]")
 {
     string_collection sc;
 
@@ -48,7 +55,7 @@ TEST_CASE("test_dflt_ctor", "[collections]")
 // Test the string copy constructor
 // ----------------------------------------------------------------------
 
-TEST_CASE("test_str_copy_ctor", "[collections]")
+TEST_CASE("string_collection str copy ctor", "[collections]")
 {
 	string_collection sc(STR);
 
@@ -64,7 +71,7 @@ TEST_CASE("test_str_copy_ctor", "[collections]")
 // Test the string move constructor
 // ----------------------------------------------------------------------
 
-TEST_CASE("test_str_move_ctor", "[collections]")
+TEST_CASE("string_collection str move ctor", "[collections]")
 {
 	string str(STR);
 	string_collection sc(std::move(str));
@@ -81,7 +88,7 @@ TEST_CASE("test_str_move_ctor", "[collections]")
 // Test the vector copy constructor
 // ----------------------------------------------------------------------
 
-TEST_CASE("test_vec_copy_ctor", "[collections]")
+TEST_CASE("string_collection vec copy ctor", "[collections]")
 {
 	string_collection sc(VEC);
 
@@ -102,7 +109,7 @@ TEST_CASE("test_vec_copy_ctor", "[collections]")
 // Test the vector move constructor
 // ----------------------------------------------------------------------
 
-TEST_CASE("test_vec_move_ctor", "[collections]")
+TEST_CASE("string_collection vec move ctor", "[collections]")
 {
 	std::vector<string> vec{ VEC };
 
@@ -125,7 +132,7 @@ TEST_CASE("test_vec_move_ctor", "[collections]")
 // Test the ini vector constructor
 // ----------------------------------------------------------------------
 
-TEST_CASE("test_ini_str_ctor", "[collections]")
+TEST_CASE("string_collection ini str ctor", "[collections]")
 {
 	string_collection sc( { VEC[0], VEC[1], VEC[2] } );
 
@@ -146,7 +153,7 @@ TEST_CASE("test_ini_str_ctor", "[collections]")
 // Test the ini vector constructor
 // ----------------------------------------------------------------------
 
-TEST_CASE("test_ini_cstr_ctor", "[collections]")
+TEST_CASE("string_collection ini cstr ctor", "[collections]")
 {
 	string_collection sc( { "test0", "test1", "test2" } );
 
@@ -167,7 +174,7 @@ TEST_CASE("test_ini_cstr_ctor", "[collections]")
 // Test the copy constructor
 // ----------------------------------------------------------------------
 
-TEST_CASE("test_copy_ctor", "[collections]")
+TEST_CASE("string_collection copy ctor", "[collections]")
 {
 	string_collection orgSC(VEC);
 	string_collection sc(orgSC);;
@@ -189,7 +196,7 @@ TEST_CASE("test_copy_ctor", "[collections]")
 // Test the move constructor
 // ----------------------------------------------------------------------
 
-TEST_CASE("test_move_ctor", "[collections]")
+TEST_CASE("string_collection move ctor", "[collections]")
  {
 	string_collection orgSC(VEC);
 	string_collection sc(std::move(orgSC));
@@ -211,7 +218,7 @@ TEST_CASE("test_move_ctor", "[collections]")
 // Test the copy assignment
 // ----------------------------------------------------------------------
 
-TEST_CASE("test_copy_assignment", "[collections]")
+TEST_CASE("string_collection copy assignment", "[collections]")
 {
 	string_collection orgSC(VEC);
 	string_collection sc;
@@ -235,7 +242,7 @@ TEST_CASE("test_copy_assignment", "[collections]")
 // Test the move assignment
 // ----------------------------------------------------------------------
 
-TEST_CASE("test_move_assignment", "[collections]")
+TEST_CASE("string_collection move assignment", "[collections]")
 {
 	string_collection orgSC(VEC);
 	string_collection sc;
@@ -259,7 +266,7 @@ TEST_CASE("test_move_assignment", "[collections]")
 // Test the push back of strings
 // ----------------------------------------------------------------------
 
-TEST_CASE("test_push_str", "[collections]")
+TEST_CASE("string_collection push str", "[collections]")
 {
 	string_collection sc;
 
@@ -283,7 +290,7 @@ TEST_CASE("test_push_str", "[collections]")
 // Test the push back of C strings
 // ----------------------------------------------------------------------
 
-TEST_CASE("test_push_cstr", "[collections]")
+TEST_CASE("string_collection push cstr", "[collections]")
 {
 	string_collection sc;
 
@@ -307,7 +314,7 @@ TEST_CASE("test_push_cstr", "[collections]")
 // Test the clear method
 // ----------------------------------------------------------------------
 
-TEST_CASE("test_clear", "[collections]")
+TEST_CASE("string_collection clear", "[collections]")
 {
 	string_collection sc(VEC);
 
@@ -317,5 +324,102 @@ TEST_CASE("test_clear", "[collections]")
 
 	REQUIRE(sc.empty());
 	REQUIRE(size_t(0) == sc.size());
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// 							name_value_collection
+/////////////////////////////////////////////////////////////////////////////
+
+TEST_CASE("name_value_collection default ctor", "[collections]")
+{
+	name_value_collection nvc;
+	REQUIRE(nvc.empty());
+	REQUIRE(0 == nvc.size());
+}
+
+TEST_CASE("name_value_collection initializer ctor", "[collections]")
+{
+	name_value_collection nvc {
+		{ "name0", "value0" },
+		{ "name1", "value1" },
+		{ "name2", "value2" }
+	};
+
+	REQUIRE_FALSE(nvc.empty());
+	REQUIRE(3 == nvc.size());
+
+	auto cArr = nvc.c_arr();
+
+	REQUIRE(0 == strcmp("name0",   cArr[0]));
+	REQUIRE(0 == strcmp("value0",  cArr[1]));
+	REQUIRE(0 == strcmp("name1",   cArr[2]));
+	REQUIRE(0 == strcmp("value1",  cArr[3]));
+	REQUIRE(0 == strcmp("name2",   cArr[4]));
+	REQUIRE(0 == strcmp("value2",  cArr[5]));
+
+	REQUIRE(nullptr == cArr[6]);
+	REQUIRE(nullptr == cArr[7]);
+}
+
+TEST_CASE("name_value_collection coll ctor", "[collections]")
+{
+	name_value_collection nvc { NV_PAIRS };
+
+	std::map<string, string> nvPairs { NV_PAIRS };
+	const size_t SZ = nvPairs.size();
+
+	REQUIRE_FALSE(nvc.empty());
+	REQUIRE(SZ == nvc.size());
+
+	auto cArr = nvc.c_arr();
+
+	for (size_t i=0; i<SZ; ++i) {
+		auto key = string(cArr[i*2+0]);
+		auto val = string(cArr[i*2+1]);
+
+		auto it = nvPairs.find(key);
+		if (it == nvPairs.end()) {
+			FAIL("Can't find name/value key");
+		}
+
+		REQUIRE(it->first == key);
+		REQUIRE(it->second == val);
+		nvPairs.erase(it);
+	}
+
+	REQUIRE(nvPairs.empty());
+}
+
+TEST_CASE("name_value_collection insert", "[collections]")
+{
+	name_value_collection nvc;
+
+	std::map<string, string> nvPairs { NV_PAIRS };
+	for (const auto& nv : nvPairs) {
+		nvc.insert(nv);
+	}
+
+	const size_t SZ = nvPairs.size();
+
+	REQUIRE_FALSE(nvc.empty());
+	REQUIRE(SZ == nvc.size());
+
+	auto cArr = nvc.c_arr();
+
+	for (size_t i=0; i<SZ; ++i) {
+		auto key = string(cArr[i*2+0]);
+		auto val = string(cArr[i*2+1]);
+
+		auto it = nvPairs.find(key);
+		if (it == nvPairs.end()) {
+			FAIL("Can't find name/value key");
+		}
+
+		REQUIRE(it->first == key);
+		REQUIRE(it->second == val);
+		nvPairs.erase(it);
+	}
+
+	REQUIRE(nvPairs.empty());
 }
 

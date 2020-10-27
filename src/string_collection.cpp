@@ -99,12 +99,13 @@ void string_collection::clear()
 void name_value_collection::update_c_arr()
 {
 	cArr_.clear();
-	cArr_.reserve(map_.size());
+	cArr_.reserve(map_.size()+1);
 	for (const auto& m : map_) {
 		cArr_.push_back(
             MQTTAsync_nameValue{ m.first.c_str(), m.second.c_str() }
         );
     }
+	cArr_.push_back(MQTTAsync_nameValue{ nullptr, nullptr });
 }
 
 /////////////////////////////////////////////////////////////////////////////
