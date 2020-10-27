@@ -73,6 +73,9 @@ class connect_options
 	/** The connect properties */
 	properties props_;
 
+	/** HTTP Headers */
+	name_value_collection httpHeaders_;
+
 	/** The client has special access */
 	friend class async_client;
 	friend class connect_options_test;
@@ -436,8 +439,31 @@ public:
 	 * @param props The properties to move into the connect object.
 	 */
 	void set_properties(properties&& props) {
-		props_ = props;
+		props_ = std::move(props);
 		opts_.connectProperties = const_cast<MQTTProperties*>(&props_.c_struct());
+	}
+	/**
+	 * Gets the HTTP headers
+	 * @return A const reference to the HTTP headers name/value collection.
+	 */
+	const name_value_collection& get_http_headers() const {
+		return httpHeaders_;
+	}
+	/**
+	 * Sets the HTTP headers for the connection.
+	 * @param httpHeaders The header nam/value collection.
+	 */
+	void set_http_headers(const name_value_collection& httpHeaders) {
+		httpHeaders_ = httpHeaders;
+		opts_.httpHeaders = httpHeaders_.empty() ? nullptr : httpHeaders_.c_arr();
+	}
+	/**
+	 * Sets the HTTP headers for the connection.
+	 * @param httpHeaders The header nam/value collection.
+	 */
+	void set_http_headers(name_value_collection&& httpHeaders) {
+		httpHeaders_ = std::move(httpHeaders);
+		opts_.httpHeaders = httpHeaders_.empty() ? nullptr : httpHeaders_.c_arr();
 	}
 	/**
 	 * Gets a string representation of the object.
@@ -645,6 +671,22 @@ public:
 	 */
 	auto properties(mqtt::properties&& props) -> self& {
 		opts_.set_properties(std::move(props));
+		return *this;
+	}
+	/**
+	 * Sets the HTTP headers for the connection.
+	 * @param httpHeaders The header nam/value collection.
+	 */
+	auto http_headers(const name_value_collection& headers) -> self& {
+		opts_.set_http_headers(headers);
+		return *this;
+	}
+	/**
+	 * Sets the HTTP headers for the connection.
+	 * @param httpHeaders The header nam/value collection.
+	 */
+	auto set_http_headers(name_value_collection&& headers) -> self& {
+		opts_.set_http_headers(std::move(headers));
 		return *this;
 	}
 	/**

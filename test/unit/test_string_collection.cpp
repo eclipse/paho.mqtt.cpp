@@ -350,15 +350,15 @@ TEST_CASE("name_value_collection initializer ctor", "[collections]")
 
 	auto cArr = nvc.c_arr();
 
-	REQUIRE(0 == strcmp("name0",   cArr[0]));
-	REQUIRE(0 == strcmp("value0",  cArr[1]));
-	REQUIRE(0 == strcmp("name1",   cArr[2]));
-	REQUIRE(0 == strcmp("value1",  cArr[3]));
-	REQUIRE(0 == strcmp("name2",   cArr[4]));
-	REQUIRE(0 == strcmp("value2",  cArr[5]));
+	REQUIRE(0 == strcmp("name0",   cArr[0].name));
+	REQUIRE(0 == strcmp("value0",  cArr[0].value));
+	REQUIRE(0 == strcmp("name1",   cArr[1].name));
+	REQUIRE(0 == strcmp("value1",  cArr[1].value));
+	REQUIRE(0 == strcmp("name2",   cArr[2].name));
+	REQUIRE(0 == strcmp("value2",  cArr[2].value));
 
-	REQUIRE(nullptr == cArr[6]);
-	REQUIRE(nullptr == cArr[7]);
+	REQUIRE(nullptr == cArr[3].name);
+	REQUIRE(nullptr == cArr[3].value);
 }
 
 TEST_CASE("name_value_collection coll ctor", "[collections]")
@@ -374,8 +374,8 @@ TEST_CASE("name_value_collection coll ctor", "[collections]")
 	auto cArr = nvc.c_arr();
 
 	for (size_t i=0; i<SZ; ++i) {
-		auto key = string(cArr[i*2+0]);
-		auto val = string(cArr[i*2+1]);
+		auto key = string(cArr[i].name);
+		auto val = string(cArr[i].value);
 
 		auto it = nvPairs.find(key);
 		if (it == nvPairs.end()) {
@@ -407,8 +407,8 @@ TEST_CASE("name_value_collection insert", "[collections]")
 	auto cArr = nvc.c_arr();
 
 	for (size_t i=0; i<SZ; ++i) {
-		auto key = string(cArr[i*2+0]);
-		auto val = string(cArr[i*2+1]);
+		auto key = string(cArr[i].name);
+		auto val = string(cArr[i].value);
 
 		auto it = nvPairs.find(key);
 		if (it == nvPairs.end()) {

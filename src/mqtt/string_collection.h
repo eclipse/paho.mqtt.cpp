@@ -265,7 +265,7 @@ public:
 	using ptr_t = std::shared_ptr<name_value_collection>;
 	/** Smart/shared pointer to a const object of this type */
 	using const_ptr_t = std::shared_ptr<const name_value_collection>;
-
+	/** The type of the string/string pair of values */
 	using value_type = collection_type::value_type;
     /**
      * Default construtor for an empty collection.
@@ -311,6 +311,20 @@ public:
 			: map_{ init } {
 		update_c_arr();
 	}
+    /**
+     * Copy assignment.
+     * @param other Another collection of name/value pairs.
+     */
+    name_value_collection& operator=(const name_value_collection& other) {
+		map_ = other.map_;
+        update_c_arr();
+		return *this;
+    }
+    /**
+     * Move constructor.
+     * @param other Another collection of name/value pairs
+     */
+    name_value_collection& operator=(name_value_collection&& other) = default;
 	/**
 	 * Determines if the collection is empty.
 	 * @return @em true if the container is empty, @em false if it contains
@@ -351,7 +365,7 @@ public:
      * @return pointer to an array of NUL-terminated C string pointer pairs
      *         for name/values. The array is terminated by a NULL/NULL pair.
 	 */
-	char* const* c_arr() const { return (char* const *) cArr_.data(); }
+	const MQTTAsync_nameValue* c_arr() const { return cArr_.data(); }
 };
 
 
