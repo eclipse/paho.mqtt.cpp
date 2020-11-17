@@ -18,6 +18,7 @@
  * Contributors:
  *    Frank Pagliughi - initial implementation and documentation
  *    Guilherme M. Ferreira - add more test cases
+ *    Frank Pagliughi - Converted to Catch2
  *******************************************************************************/
 
 #define UNIT_TESTS

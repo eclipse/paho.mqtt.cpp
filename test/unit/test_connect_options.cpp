@@ -17,6 +17,7 @@
  *
  * Contributors:
  *    Frank Pagliughi - initial implementation and documentation
+ *    Frank Pagliughi - Converted to Catch2
  *******************************************************************************/
 
 #define UNIT_TESTS
@@ -51,6 +52,10 @@ const const_string_collection_ptr URIs = std::make_shared<const string_collectio
 
 static constexpr token::Type TOKEN_TYPE = token::Type::CONNECT;
 
+static const std::string HTTP_PROXY  { "http://localhost:80" };
+static const std::string HTTPS_PROXY { "https://localhost:443" };
+
+
 // ----------------------------------------------------------------------
 // Test the default constructor
 // ----------------------------------------------------------------------
@@ -65,6 +70,9 @@ TEST_CASE("connect_options default ctor", "[options]")
 	REQUIRE(DFLT_CONNECT_TIMEOUT == (int) opts.get_connect_timeout().count());
 	REQUIRE_FALSE(opts.get_servers());
 	REQUIRE(DFLT_AUTO_RECONNECT == opts.get_automatic_reconnect());
+
+	REQUIRE(opts.get_http_proxy().empty());
+	REQUIRE(opts.get_https_proxy().empty());
 
 	const auto& c_struct = opts.c_struct();
 	REQUIRE(0 == memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
@@ -81,13 +89,22 @@ TEST_CASE("connect_options default ctor", "[options]")
 	REQUIRE(c_struct.context == nullptr);
 	REQUIRE(c_struct.onSuccess == nullptr);
 	REQUIRE(c_struct.onFailure == nullptr);
+	REQUIRE(c_struct.onSuccess5 == nullptr);
+	REQUIRE(c_struct.onFailure5 == nullptr);
 
 	// No will or SSL, for default
 	REQUIRE(c_struct.will == nullptr);
 	REQUIRE(c_struct.ssl == nullptr);
 
+	REQUIRE(c_struct.connectProperties == nullptr);
+	REQUIRE(c_struct.willProperties == nullptr);
+
+
 	REQUIRE(0 == c_struct.serverURIcount);
 	REQUIRE(nullptr == c_struct.serverURIs);
+
+	REQUIRE(nullptr == c_struct.httpProxy);
+	REQUIRE(nullptr == c_struct.httpsProxy);
 }
 
 // ----------------------------------------------------------------------
@@ -97,6 +114,9 @@ TEST_CASE("connect_options default ctor", "[options]")
 TEST_CASE("connect_options user_constructor", "[options]")
 {
 	mqtt::connect_options opts { USER, PASSWD };
+
+	REQUIRE(opts.get_http_proxy().empty());
+	REQUIRE(opts.get_https_proxy().empty());
 
 	const auto& c_struct = opts.c_struct();
 	REQUIRE(0 == memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
@@ -113,6 +133,9 @@ TEST_CASE("connect_options user_constructor", "[options]")
 	REQUIRE(c_struct.context == nullptr);
 	REQUIRE(c_struct.onSuccess == nullptr);
 	REQUIRE(c_struct.onFailure == nullptr);
+
+	REQUIRE(c_struct.httpProxy == nullptr);
+	REQUIRE(c_struct.httpsProxy == nullptr);
 }
 
 // ----------------------------------------------------------------------
@@ -122,26 +145,45 @@ TEST_CASE("connect_options user_constructor", "[options]")
 TEST_CASE("connect_options copy ctor", "[options]")
 {
 	mqtt::connect_options orgOpts { USER, PASSWD };
-	mqtt::connect_options opts { orgOpts };
 
-	REQUIRE(USER == opts.get_user_name());
-	REQUIRE(PASSWD == opts.get_password_str());
+	SECTION("simple options") {
+    	mqtt::connect_options opts { orgOpts };
 
-	const auto& c_struct = opts.c_struct();
+    	REQUIRE(USER == opts.get_user_name());
+    	REQUIRE(PASSWD == opts.get_password_str());
 
-	REQUIRE(0 == memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
+    	const auto& c_struct = opts.c_struct();
 
-	REQUIRE(0 == strcmp(USER.c_str(), c_struct.username));
-	REQUIRE(c_struct.password == nullptr);
-	REQUIRE(PASSWD.size() == size_t(c_struct.binarypwd.len));
-	REQUIRE(0 == memcmp(PASSWD.data(), c_struct.binarypwd.data, PASSWD.size()));
+    	REQUIRE(0 == memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
 
-	// Make sure it's a true copy, not linked to the original
-	orgOpts.set_user_name(EMPTY_STR);
-	orgOpts.set_password(EMPTY_STR);
+    	REQUIRE(0 == strcmp(USER.c_str(), c_struct.username));
+    	REQUIRE(c_struct.password == nullptr);
+    	REQUIRE(PASSWD.size() == size_t(c_struct.binarypwd.len));
+    	REQUIRE(0 == memcmp(PASSWD.data(), c_struct.binarypwd.data, PASSWD.size()));
 
-	REQUIRE(USER == opts.get_user_name());
-	REQUIRE(PASSWD == opts.get_password_str());
+    	// Make sure it's a true copy, not linked to the original
+    	orgOpts.set_user_name(EMPTY_STR);
+    	orgOpts.set_password(EMPTY_STR);
+
+    	REQUIRE(USER == opts.get_user_name());
+    	REQUIRE(PASSWD == opts.get_password_str());
+	}
+
+	SECTION("proxy options") {
+		orgOpts.set_http_proxy(HTTP_PROXY);
+
+		mqtt::connect_options opts { orgOpts };
+		REQUIRE(HTTP_PROXY == opts.get_http_proxy());
+		REQUIRE(opts.get_https_proxy().empty());
+	}
+
+	SECTION("secure proxy options") {
+		orgOpts.set_https_proxy(HTTPS_PROXY);
+
+		mqtt::connect_options opts { orgOpts };
+		REQUIRE(HTTPS_PROXY == opts.get_https_proxy());
+		REQUIRE(opts.get_http_proxy().empty());
+	}
 }
 
 // ----------------------------------------------------------------------

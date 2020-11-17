@@ -76,6 +76,12 @@ class connect_options
 	/** HTTP Headers */
 	name_value_collection httpHeaders_;
 
+	/** HTTP proxy for websockets */
+	string httpProxy_;
+
+	/** Secure HTTPS proxy for websockets */
+	string httpsProxy_;
+
 	/** The client has special access */
 	friend class async_client;
 	friend class connect_options_test;
@@ -94,6 +100,10 @@ class connect_options
 	const char* c_str(const string_ref& sr) {
 		return sr.empty() ? nullptr : sr.c_str();
 	}
+	/**
+	 * Updates the underlying C structure to match our strings.
+	 */
+	void update_c_struct();
 
 public:
 	/** Smart/shared pointer to an object of this class. */
@@ -465,6 +475,26 @@ public:
 		httpHeaders_ = std::move(httpHeaders);
 		opts_.httpHeaders = httpHeaders_.empty() ? nullptr : httpHeaders_.c_arr();
 	}
+	/**
+	 * Gets the HTTP proxy setting.
+	 * @return The HTTP proxy setting. An empty string means no proxy.
+	 */
+	string get_http_proxy() const { return httpProxy_; }
+	/**
+	 * Sets the HTTP proxy setting.
+	 * @httpProxy The HTTP proxy setting. An empty string means no proxy.
+	 */
+	void set_http_proxy(const string& httpProxy);
+	/**
+	 * Gets the secure HTTPS proxy setting.
+	 * @return The HTTPS proxy setting. An empty string means no proxy.
+	 */
+	string get_https_proxy() const { return httpsProxy_; }
+	/**
+	 * Sets the secure HTTPS proxy setting.
+	 * @httpsProxy The HTTPS proxy setting. An empty string means no proxy.
+	 */
+	void set_https_proxy(const string& httpsProxy);
 	/**
 	 * Gets a string representation of the object.
 	 * @return A string representation of the object.

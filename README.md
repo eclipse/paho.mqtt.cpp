@@ -32,6 +32,8 @@ To keep up with the latest announcements for this project, or to ask questions:
 
 ### Unreleased Features in this Branch
 
+**This branch requires Paho MQTT C library _v1.3.7_ or greater.**
+
 - New `create_options` that can be used to construct a client with new features:
     - Send while disconnected before the 1st successful connection
     - Output buffer can delete oldest messages when full
@@ -45,7 +47,7 @@ To keep up with the latest announcements for this project, or to ask questions:
 - [#227] Fixed race condition in thread-safe queue
 - [#224] & [#255] Subscribing to MQTT v3 broker with array of one topic causes segfault.
 
-Targets Paho C v1.3.6
+Targets Paho C v1.3.7
 
 ### New Features in Paho C++ v1.1
 
@@ -87,7 +89,7 @@ Contributions to this project are gladly welcomed. Before submitting a Pull Requ
 
 _CMake_  is a cross-platform build system suitable for Unix and non-Unix platforms such as Microsoft Windows. It is now the only supported build system.
 
-The Paho C++ library requires the Paho C library, v1.3.1 or greater, to be built and installed first. More information below.
+The Paho C++ library requires the Paho C library, v1.3.7 or greater, to be built and installed first. More information below.
 
 CMake allows for options to direct the build. The following are specific to Paho C++:
 
