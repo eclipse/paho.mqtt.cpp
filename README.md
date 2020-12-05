@@ -8,15 +8,24 @@ This code builds a library which enables C++11 applications to connect to an [MQ
 
 The library has the following features:
 
-- Support for MQTT v5, v3.1.1, and v 3.1
-- TCP, SSL/TLS, and WebSocket transports
+- Support for MQTT v3.1, v3.1.1, and v5.
+- Network Transports:
+    - Standard TCP
+    - Secure sockets with SSL/TLS
+    - WebSockets 
+        - Secure and insecure
+        - Proxy support
 - Message persistence
-- Automatic reconnect
-- Offline buffering
-- High availability
+    - User configurable 
+    - Built-in File persistence
+    - User-defined key/value persistence easy to implement
+- Automatic Reconnect
+- Offline Buffering
+- High Availability
 - Blocking and non-blocking API's
+- Modern C++ interface (C++11 and better)
 
-This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) by Ian Craggs, et al., specifically version 1.3.1 or possibly later.
+This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) by Ian Craggs, et al., specifically version 1.3.8 or possibly later.
 
 ## Latest News
 
@@ -32,7 +41,7 @@ To keep up with the latest announcements for this project, or to ask questions:
 
 ### Unreleased Features in this Branch
 
-**This branch requires Paho MQTT C library _v1.3.7_ or greater.**
+**This branch requires Paho MQTT C library _v1.3.8_ or greater.**
 
 - New `create_options` that can be used to construct a client with new features:
     - Send while disconnected before the 1st successful connection
@@ -47,7 +56,7 @@ To keep up with the latest announcements for this project, or to ask questions:
 - [#227] Fixed race condition in thread-safe queue
 - [#224] & [#255] Subscribing to MQTT v3 broker with array of one topic causes segfault.
 
-Targets Paho C v1.3.7
+Targets Paho C v1.3.8
 
 ### New Features in Paho C++ v1.1
 
@@ -76,10 +85,11 @@ _Catch2_ can be found here: [Catch2](https://github.com/catchorg/Catch2)
 
 ## Contributing
 
-Contributions to this project are gladly welcomed. Before submitting a Pull Request, please keep two things in mind:
+Contributions to this project are gladly welcomed and appreciated Before submitting a Pull Request, please keep three things in mind:
 
  - This is an official Eclipse project, so it is required that all contributors sign an [Eclipse Contributor Agreement (ECA)](https://www.eclipse.org/legal/ECA.php)
  - Please submit all Pull Requests against the _develop_ branch (not master).
+ - Please sign all commits.
  
  For full details, see [CONTRIBUTING.md](https://github.com/eclipse/paho.mqtt.cpp/blob/master/CONTRIBUTING.md).
  
@@ -89,7 +99,7 @@ Contributions to this project are gladly welcomed. Before submitting a Pull Requ
 
 _CMake_  is a cross-platform build system suitable for Unix and non-Unix platforms such as Microsoft Windows. It is now the only supported build system.
 
-The Paho C++ library requires the Paho C library, v1.3.7 or greater, to be built and installed first. More information below.
+The Paho C++ library requires the Paho C library, v1.3.8 or greater, to be built and installed first. More information below.
 
 CMake allows for options to direct the build. The following are specific to Paho C++:
 
@@ -146,7 +156,7 @@ Before building the C++ library, first, build and install the Paho C library:
 ```
 $ git clone https://github.com/eclipse/paho.mqtt.c.git
 $ cd paho.mqtt.c
-$ git checkout v1.3.1
+$ git checkout v1.3.8
 
 $ cmake -Bbuild -H. -DPAHO_WITH_SSL=ON -DPAHO_ENABLE_TESTING=OFF
 $ sudo cmake --build build/ --target install
