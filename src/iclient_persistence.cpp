@@ -110,7 +110,7 @@ int iclient_persistence::persistence_keys(void* handle, char*** keys, int* nkeys
 		if (handle && keys && nkeys) {
 			auto& k = static_cast<iclient_persistence*>(handle)->keys();
 			size_t n = k.size();
-			*nkeys = n;
+			*nkeys = int(n);
 			*keys = (n == 0) ? nullptr : const_cast<char**>(k.c_arr());
 			return MQTTASYNC_SUCCESS;
 		}

@@ -69,10 +69,11 @@ connect_options::connect_options(connect_options&& opt) : opts_(opt.opts_),
 						httpProxy_(std::move(opt.httpProxy_)),
 						httpsProxy_(std::move(opt.httpsProxy_))
 {
-	if (opts_.will) {
+	if (opts_.will)
 		opts_.will = &will_.opts_;
+
+	if (opts_.willProperties)
 		opts_.willProperties = const_cast<MQTTProperties*>(&will_.props_.c_struct());
-	}
 
 	if (opts_.ssl)
 		opts_.ssl = &ssl_.opts_;
@@ -80,6 +81,12 @@ connect_options::connect_options(connect_options&& opt) : opts_(opt.opts_),
 	update_c_struct();
 }
 
+// Unfortunately, with the existing implementation, there's no way to know
+// if the will and ssl options were set by looking at the C++ structs.
+// In a major update, we can consider using a pointer or optional<> to
+// indicate that they were set.
+// But, for now, the copy and assignment operations must handle it manually
+// by looking to see if the source C options pointer was set.
 void connect_options::update_c_struct()
 {
 	opts_.username = c_str(userName_);
@@ -126,7 +133,6 @@ void connect_options::update_c_struct()
 	}
 
 	// HTTP & Proxy
-
 
 	opts_.httpProxy = c_str(httpProxy_);
 	opts_.httpsProxy = c_str(httpsProxy_);

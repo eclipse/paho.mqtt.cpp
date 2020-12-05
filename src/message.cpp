@@ -112,7 +112,7 @@ void message::set_payload(binary_ref payload)
 	}
 	else {
 		msg_.payload = const_cast<binary_ref::value_type*>(payload_.data());
-		msg_.payloadlen = payload_.length();
+		msg_.payloadlen = int(payload_.length());
 	}
 }
 

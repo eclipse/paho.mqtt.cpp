@@ -41,6 +41,11 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
+// Don't worry about localtime() in this context
+#if defined(_WIN32)
+	#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <random>
 #include <string>
 #include <thread>

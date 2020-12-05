@@ -99,6 +99,8 @@ public:
 	using ptr_t = std::shared_ptr<ssl_options>;
 	/** Smart/shared pointer to a const object of this class. */
 	using const_ptr_t = std::shared_ptr<const ssl_options>;
+	/** Unique pointer to an object of this class. */
+	using unique_ptr_t = std::unique_ptr<ssl_options>;
 
 	/**
 	 * Constructs a new MqttConnectOptions object using the default values.
@@ -283,6 +285,11 @@ public:
  * Shared pointer to the ssl options class.
  */
 using ssl_options_ptr = ssl_options::ptr_t;
+/**
+ * Unique pointer to the ssl options class.
+ */
+using ssl_options_unique_ptr = ssl_options::unique_ptr_t;
+
 
 /////////////////////////////////////////////////////////////////////////////
 

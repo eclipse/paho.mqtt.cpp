@@ -94,10 +94,12 @@ private:
 	}
 
 public:
-	/** Smart/shared pointer to this class. */
+	/** Smart/shared pointer to an object of this class. */
 	using ptr_t = std::shared_ptr<will_options>;
 	/** Smart/shared pointer to a const object of this class. */
 	using const_ptr_t = std::shared_ptr<const will_options>;
+	/** Smart/shared pointer to an object of this class. */
+	using unique_ptr_t = std::unique_ptr<will_options>;
 
 	/**
 	 * Constructs a new object using the default values.
@@ -258,6 +260,9 @@ using will_options_ptr = will_options::ptr_t;
 
 /** Shared pointer to a const will options object. */
 using const_will_options_ptr = will_options::const_ptr_t;
+
+/** Unique pointer to a will options object. */
+using will_options_unique_ptr = will_options::unique_ptr_t;
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
