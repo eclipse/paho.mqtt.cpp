@@ -119,6 +119,9 @@ int main(int argc, char* argv[])
 	auto sslopts = mqtt::ssl_options_builder()
 					   .trust_store(TRUST_STORE)
 					   .key_store(KEY_STORE)
+					   .error_handler([](const std::string& msg) {
+						   std::cerr << "SSL Error: " << msg << std::endl;
+					   })
 					   .finalize();
 
 	auto willmsg = mqtt::message(LWT_TOPIC, LWT_PAYLOAD, QOS, true);

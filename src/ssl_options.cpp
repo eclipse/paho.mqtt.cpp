@@ -96,7 +96,7 @@ int ssl_options::on_error(const char *str, size_t len, void *context)
 			auto& errHandler = opts->errHandler_;
 
 			if (errHandler)
-				errHandler(*opts, errMsg);
+				errHandler(errMsg);
 
 			return MQTTASYNC_SUCCESS;
 		}
@@ -119,8 +119,7 @@ unsigned ssl_options::on_psk(const char *hint, char *identity, unsigned max_iden
 			auto& pskHandler = opts->pskHandler_;
 
 			if (pskHandler) {
-				ret = pskHandler(*opts, hintStr,
-								 identity, size_t(max_identity_len),
+				ret = pskHandler(hintStr, identity, size_t(max_identity_len),
 								 psk, size_t(max_psk_len));
 			}
 		}

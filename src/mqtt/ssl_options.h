@@ -52,13 +52,13 @@ public:
 	using unique_ptr_t = std::unique_ptr<ssl_options>;
 
 	/** Handler type for error message callbacks */
-	using error_handler = std::function<void(const ssl_options&, const string& errMsg)>;
+	using error_handler = std::function<void(const string& errMsg)>;
 	/**
 	 * Handler type for TLS-PSK option callback.
 	 * On success, the callback should return the length of the PSK (in
 	 * bytes). On failure, it should throw or return zero.
 	 */
-	using psk_handler = std::function<unsigned(const ssl_options&, const string& hint,
+	using psk_handler = std::function<unsigned(const string& hint,
 											   char *identity, size_t max_identity_len,
 											   unsigned char *psk, size_t max_psk_len)>;
 
