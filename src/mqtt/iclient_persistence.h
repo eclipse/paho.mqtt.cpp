@@ -32,6 +32,24 @@
 
 namespace mqtt {
 
+/**
+ * Allocate memory for use with user persistence.
+ *
+ * @param n The number of bytes for the buffer.
+ * @return A pointer to the allocated memory
+ */
+inline char* persistence_malloc(size_t n) {
+	return static_cast<char*>(MQTTAsync_malloc(n));
+}
+
+/**
+ * Frees memory allocated with @ref persistence_malloc
+ * @param p Pointer to a buffer obtained by persistence_malloc.
+ */
+inline void persistence_free(char* p) {
+	MQTTAsync_free(p);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -129,7 +147,55 @@ using iclient_persistence_ptr = iclient_persistence::ptr_t;
 using const_iclient_persistence_ptr = iclient_persistence::const_ptr_t;
 
 /////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Interface for objects to encode and decode data going into the
+ * persistence store.
+ *
+ * This is typically used to encrypt the data before writing to
+ * persistence, and then decrypt it when reading it back from persistence.
+ */
+class ipersistence_encoder
+{
+	friend class async_client;
+
+	/** Callbacks from the C library */
+	static int before_write(void* context, int bufcount, char* buffers[], int buflens[]);
+	static int after_read(void* context, char** buffer, int* buflen);
+
+public:
+	/**
+	 * Virtual destructor.
+	 */
+	virtual ~ipersistence_encoder() {}
+	/**
+	 * Callback to let the application encode data before writing it to
+	 * persistence.
+	 *
+	 * This is called just prior to writing the data to persistence. If a
+	 * buffer needs to grow, the application can call @ref
+	 * persistence_malloc to get a new buffer, and then update the pointer
+	 * and side of the buffer. It *should not* free the old buffer. That is
+	 * done automatically.
+	 *
+	 * @param bufs The data buffers that need to be encoded.
+	 * @param n The number of buffers
+	 */
+	virtual void encode(string_view bufs[], size_t n) =0;
+	/**
+	 * Callback to let the application decode data after it is retrieved
+	 * from persistence.
+	 *
+	 * @param buffers The data buffers that need to be decoded.
+	 * @param n The number of buffers
+	 */
+	virtual void decode(string_view& buf) =0;
+};
+
+
+/////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
 }
 
 #endif		// __mqtt_iclient_persistence_h
+

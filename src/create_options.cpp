@@ -24,6 +24,15 @@ namespace mqtt {
 const MQTTAsync_createOptions create_options::DFLT_C_STRUCT =
 			MQTTAsync_createOptions_initializer5;
 
+
+create_options::create_options(int maxBufferedMessages) : create_options()
+{
+	if (maxBufferedMessages != 0) {
+		opts_.sendWhileDisconnected = to_int(true);
+		opts_.maxBufferedMessages = maxBufferedMessages;
+	}
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 } // end namespace mqtt

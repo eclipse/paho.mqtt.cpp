@@ -57,6 +57,12 @@ public:
 	 */
 	create_options() : opts_(DFLT_C_STRUCT) {}
 	/**
+	 * Default create options, but with off-line buffering enabled.
+	 * @param maxBufferedMessages the maximum number of messages allowed to
+	 *  						  be buffered while not connected
+	 */
+	explicit create_options(int maxBufferedMessages);
+	/**
 	 * Gets whether the client will accept message to publish while
 	 * disconnected.
 	 */

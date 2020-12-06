@@ -154,6 +154,9 @@ private:
 			throw exception(rc);
 	}
 
+	/** Installs a persistence encoder/decoder  */
+	void persistence_encoder(ipersistence_encoder* encoder);
+
 public:
 	/**
 	 * Create an async_client that can be used to communicate with an MQTT
@@ -164,10 +167,13 @@ public:
 	 * @param clientId a client identifier that is unique on the server
 	 *  			   being connected to
 	 * @param persistDir The directory to use for persistence data
+	 * @param encoder An object to encode and decode the persistence data.
 	 * @throw exception if an argument is invalid
 	 */
 	async_client(const string& serverURI, const string& clientId,
-				 const string& persistDir);
+				 const string& persistDir,
+				 ipersistence_encoder* encoder=nullptr);
+
 	/**
 	 * Create an async_client that can be used to communicate with an MQTT
 	 * server.
@@ -179,10 +185,12 @@ public:
 	 *  			   being connected to
 	 * @param persistence The user persistence structure. If this is null,
 	 *  				  then no persistence is used.
+	 * @param encoder An object to encode and decode the persistence data.
 	 * @throw exception if an argument is invalid
 	 */
 	async_client(const string& serverURI, const string& clientId,
-				 iclient_persistence* persistence=nullptr);
+				 iclient_persistence* persistence=nullptr,
+				 ipersistence_encoder* encoder=nullptr);
 	/**
 	 * Create an async_client that can be used to communicate with an MQTT
 	 * server, which allows for off-line message buffering.
@@ -194,10 +202,12 @@ public:
 	 * @param maxBufferedMessages the maximum number of messages allowed to
 	 *  						  be buffered while not connected
 	 * @param persistDir The directory to use for persistence data
+	 * @param encoder An object to encode and decode the persistence data.
 	 * @throw exception if an argument is invalid
 	 */
 	async_client(const string& serverURI, const string& clientId,
-				 int maxBufferedMessages, const string& persistDir);
+				 int maxBufferedMessages, const string& persistDir,
+				 ipersistence_encoder* encoder=nullptr);
 	/**
 	 * Create an async_client that can be used to communicate with an MQTT
 	 * server, which allows for off-line message buffering.
@@ -211,11 +221,13 @@ public:
 	 *  						  be buffered while not connected
 	 * @param persistence The user persistence structure. If this is null,
 	 *  				  then no persistence is used.
+	 * @param encoder An object to encode and decode the persistence data.
 	 * @throw exception if an argument is invalid
 	 */
 	async_client(const string& serverURI, const string& clientId,
-				 int maxBufferedMessages, iclient_persistence* persistence=nullptr);
-
+				 int maxBufferedMessages,
+				 iclient_persistence* persistence=nullptr,
+				 ipersistence_encoder* encoder=nullptr);
 	/**
 	 * Create an async_client that can be used to communicate with an MQTT
 	 * server, which allows for off-line message buffering.
@@ -226,10 +238,12 @@ public:
 	 *  			   being connected to
 	 * @param opts The create options
 	 * @param persistDir The directory to use for persistence data
+	 * @param encoder An object to encode and decode the persistence data.
 	 * @throw exception if an argument is invalid
 	 */
 	async_client(const string& serverURI, const string& clientId,
-				 const create_options& opts, const string& persistDir);
+				 const create_options& opts, const string& persistDir,
+				 ipersistence_encoder* encoder=nullptr);
 	/**
 	 * Create an async_client that can be used to communicate with an MQTT
 	 * server, which allows for off-line message buffering.
@@ -243,11 +257,13 @@ public:
 	 *  						  be buffered while not connected
 	 * @param persistence The user persistence structure. If this is null,
 	 *  				  then no persistence is used.
+	 * @param encoder An object to encode and decode the persistence data.
 	 * @throw exception if an argument is invalid
 	 */
 	async_client(const string& serverURI, const string& clientId,
 				 const create_options& opts,
-				 iclient_persistence* persistence=nullptr);
+				 iclient_persistence* persistence=nullptr,
+				 ipersistence_encoder* encoder=nullptr);
 	/**
 	 * Destructor
 	 */

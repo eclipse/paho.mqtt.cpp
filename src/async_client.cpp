@@ -35,101 +35,70 @@ namespace mqtt {
 // Constructors
 
 async_client::async_client(const string& serverURI, const string& clientId,
-						   const string& persistDir)
-				: async_client(serverURI, clientId, 0, persistDir)
+						   const string& persistDir,
+						   ipersistence_encoder* encoder /*=nullptr*/)
+				: async_client(serverURI, clientId, 0, persistDir, encoder)
 {
 }
 
 async_client::async_client(const string& serverURI, const string& clientId,
-						   iclient_persistence* persistence /*=nullptr*/)
-				: async_client(serverURI, clientId, 0, persistence)
+						   iclient_persistence* persistence /*=nullptr*/,
+						   ipersistence_encoder* encoder /*=nullptr*/)
+				: async_client(serverURI, clientId, 0, persistence, encoder)
 {
 }
 
 async_client::async_client(const string& serverURI, const string& clientId,
-						   int maxBufferedMessages, const string& persistDir)
-				: serverURI_(serverURI), clientId_(clientId), mqttVersion_(MQTTVERSION_DEFAULT),
-					persist_(nullptr), userCallback_(nullptr)
+						   int maxBufferedMessages, const string& persistDir,
+						   ipersistence_encoder* encoder /*=nullptr*/)
+				: serverURI_(serverURI), clientId_(clientId),
+					mqttVersion_(MQTTVERSION_DEFAULT), userCallback_(nullptr)
 {
-	create_options opts;
-
-	if (maxBufferedMessages != 0) {
-		opts.set_send_while_disconnected(true);
-		opts.set_max_buffered_messages(maxBufferedMessages);
-	}
+	create_options opts(maxBufferedMessages);
 
 	int rc = MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
 										 MQTTCLIENT_PERSISTENCE_DEFAULT,
 										 const_cast<char*>(persistDir.c_str()),
 										 &opts.opts_);
-
 	if (rc != 0)
 		throw exception(rc);
+
+	persistence_encoder(encoder);
 }
 
 async_client::async_client(const string& serverURI, const string& clientId,
-						   int maxBufferedMessages, iclient_persistence* persistence /*=nullptr*/)
-				: serverURI_(serverURI), clientId_(clientId), mqttVersion_(MQTTVERSION_DEFAULT),
-					persist_(nullptr), userCallback_(nullptr)
+						   int maxBufferedMessages,
+						   iclient_persistence* persistence /*=nullptr*/,
+						   ipersistence_encoder* encoder /*=nullptr*/)
+				: async_client(serverURI, clientId,
+							   create_options(maxBufferedMessages),
+							   persistence, encoder)
 {
-	create_options opts;
-
-	if (maxBufferedMessages != 0) {
-		opts.set_send_while_disconnected(true);
-		opts.set_max_buffered_messages(maxBufferedMessages);
-	}
-
-	int rc = MQTTASYNC_SUCCESS;
-
-	if (!persistence) {
-		rc = MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
-										 MQTTCLIENT_PERSISTENCE_NONE, nullptr,
-										 &opts.opts_);
-	}
-	else {
-		persist_.reset(new MQTTClient_persistence {
-			persistence,
-			&iclient_persistence::persistence_open,
-			&iclient_persistence::persistence_close,
-			&iclient_persistence::persistence_put,
-			&iclient_persistence::persistence_get,
-			&iclient_persistence::persistence_remove,
-			&iclient_persistence::persistence_keys,
-			&iclient_persistence::persistence_clear,
-			&iclient_persistence::persistence_containskey
-		});
-
-		rc = MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
-										 MQTTCLIENT_PERSISTENCE_USER, persist_.get(),
-										 &opts.opts_);
-	}
-	if (rc != 0)
-		throw exception(rc);
 }
-
 
 async_client::async_client(const string& serverURI, const string& clientId,
 						   const create_options& opts,
-						   const string& persistDir)
+						   const string& persistDir,
+						   ipersistence_encoder* encoder /*=nullptr*/)
 				: serverURI_(serverURI), clientId_(clientId),
-					mqttVersion_(opts.opts_.MQTTVersion),
-					persist_(nullptr), userCallback_(nullptr)
+					mqttVersion_(opts.opts_.MQTTVersion), userCallback_(nullptr)
 {
 	int rc = MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
 										 MQTTCLIENT_PERSISTENCE_DEFAULT,
 										 const_cast<char*>(persistDir.c_str()),
 										 const_cast<MQTTAsync_createOptions*>(&opts.opts_));
-
 	if (rc != 0)
 		throw exception(rc);
+
+	persistence_encoder(encoder);
 }
 
 async_client::async_client(const string& serverURI, const string& clientId,
 						   const create_options& opts,
-						   iclient_persistence* persistence /*=nullptr*/)
+						   iclient_persistence* persistence /*=nullptr*/,
+						   ipersistence_encoder* encoder /*=nullptr*/)
 				: serverURI_(serverURI), clientId_(clientId),
-					mqttVersion_(opts.opts_.MQTTVersion),
-					persist_(nullptr), userCallback_(nullptr)
+					mqttVersion_(opts.opts_.MQTTVersion), userCallback_(nullptr)
 {
 	int rc = MQTTASYNC_SUCCESS;
 
@@ -154,6 +123,9 @@ async_client::async_client(const string& serverURI, const string& clientId,
 		rc = MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
 										 MQTTCLIENT_PERSISTENCE_USER, persist_.get(),
 										 const_cast<MQTTAsync_createOptions*>(&opts.opts_));
+
+		if (rc == 0)
+			persistence_encoder(encoder);
 	}
 	if (rc != 0)
 		throw exception(rc);
@@ -350,6 +322,13 @@ void async_client::remove_token(token* tok)
 	}
 }
 
+void async_client::persistence_encoder(ipersistence_encoder* encoder)
+{
+	if (encoder && cli_) {
+		MQTTAsync_setBeforePersistenceWrite(cli_, encoder, &ipersistence_encoder::before_write);
+		MQTTAsync_setAfterPersistenceRead(cli_, encoder, &ipersistence_encoder::after_read);
+	}
+}
 
 // --------------------------------------------------------------------------
 // Callback management

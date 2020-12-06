@@ -60,6 +60,7 @@ using namespace std;
 using namespace std::chrono;
 
 const std::string DFLT_ADDRESS { "tcp://localhost:1883" };
+const std::string CLIENT_ID { "paho-cpp-data-publish" };
 
 const string TOPIC { "data/rand" };
 const int	 QOS = 1;
@@ -72,11 +73,45 @@ const string PERSIST_DIR { "data-persist" };
 
 /////////////////////////////////////////////////////////////////////////////
 
+class persistence_encoder : virtual public mqtt::ipersistence_encoder
+{
+	/**
+	 * Callback to let the application encode data before writing it to
+	 * persistence.
+	 */
+	void encode(mqtt::string_view bufs[], size_t n) override {
+		cout << "Encoding " << n << " buffers" << endl;
+		auto sz = bufs[0].size();
+		auto buf = mqtt::persistence_malloc(sz+6);
+		strcpy(buf, "bubba");
+		memcpy(buf+6, bufs[0].data(), sz);
+		bufs[0] = mqtt::string_view(buf, n+6);
+	}
+	/**
+	 * Callback to let the application decode data after it is retrieved
+	 * from persistence.
+	 *
+	 * @param buffers The data buffers that need to be decoded.
+	 * @param n The number of buffers
+	 */
+	void decode(mqtt::string_view& buf) override {
+		cout << "Decoding buffer: " << buf.data() << endl;
+		auto n = buf.size();
+		auto newBuf = mqtt::persistence_malloc(n-6);
+		memcpy(newBuf, buf.data(), n-6);
+		buf = mqtt::string_view(newBuf, n-6);
+	}
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 int main(int argc, char* argv[])
 {
 	string address = (argc > 1) ? string(argv[1]) : DFLT_ADDRESS;
 
-	mqtt::async_client cli(address, "", MAX_BUFFERED_MSGS, PERSIST_DIR);
+	persistence_encoder encoder;
+	mqtt::async_client cli(address, CLIENT_ID, MAX_BUFFERED_MSGS,
+						   PERSIST_DIR, &encoder);
 
 	mqtt::connect_options connOpts;
 	connOpts.set_keep_alive_interval(MAX_BUFFERED_MSGS * PERIOD);

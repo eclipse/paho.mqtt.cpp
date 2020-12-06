@@ -146,6 +146,58 @@ int iclient_persistence::persistence_containskey(void* handle, char* key)
 }
 
 /////////////////////////////////////////////////////////////////////////////
+// Encoder
+
+int ipersistence_encoder::before_write(void* context, int nbuf, char* bufs[], int buflens[])
+{
+	try {
+		if (context && nbuf > 0 && bufs && buflens) {
+			std::vector<string_view> vec;
+			auto n = size_t(nbuf);
+			vec.reserve(n);
+
+			for (size_t i=0; i<n; ++i)
+				vec.push_back(string_view(bufs[i], buflens[i]));
+
+			static_cast<ipersistence_encoder*>(context)->encode(&vec[0], n);
+
+			for (size_t i=0; i<n; ++i) {
+				if (bufs[i] != vec[i].data()) {
+					MQTTAsync_free(bufs[i]);
+					bufs[i] = const_cast<char*>(vec[i].data());
+				}
+				buflens[i] = vec[i].size();
+			}
+			return MQTTASYNC_SUCCESS;
+		}
+	}
+	catch (...) {}
+
+	return MQTTCLIENT_PERSISTENCE_ERROR;
+}
+
+int ipersistence_encoder::after_read(void* context, char** buf, int* buflen)
+{
+	try {
+		if (context && buf && *buf && buflen && *buflen > 0) {
+			string_view sv(*buf, *buflen);
+
+			static_cast<ipersistence_encoder*>(context)->decode(sv);
+
+			if (*buf != sv.data()) {
+				MQTTAsync_free(*buf);
+				*buf = const_cast<char*>(sv.data());
+			}
+			*buflen = sv.size();
+			return MQTTASYNC_SUCCESS;
+		}
+	}
+	catch (...) {}
+
+	return MQTTCLIENT_PERSISTENCE_ERROR;
+}
+
+/////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
 }
 
