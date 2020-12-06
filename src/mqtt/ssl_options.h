@@ -7,7 +7,7 @@
 
 /*******************************************************************************
  * Copyright (c) 2016 Guilherme Ferreira <guilherme.maciel.ferreira@gmail.com>
- * Copyright (c) 2016-2019 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2016-2020 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -32,6 +32,7 @@
 #include "mqtt/topic.h"
 #include "mqtt/types.h"
 #include <vector>
+#include <functional>
 
 namespace mqtt {
 
@@ -42,6 +43,26 @@ namespace mqtt {
  */
 class ssl_options
 {
+public:
+	/** Smart/shared pointer to an object of this class. */
+	using ptr_t = std::shared_ptr<ssl_options>;
+	/** Smart/shared pointer to a const object of this class. */
+	using const_ptr_t = std::shared_ptr<const ssl_options>;
+	/** Unique pointer to an object of this class. */
+	using unique_ptr_t = std::unique_ptr<ssl_options>;
+
+	/** Handler type for error message callbacks */
+	using error_handler = std::function<void(const ssl_options&, const string& errMsg)>;
+	/**
+	 * Handler type for TLS-PSK option callback.
+	 * On success, the callback should return the length of the PSK (in
+	 * bytes). On failure, it should throw or return zero.
+	 */
+	using psk_handler = std::function<unsigned(const ssl_options&, const string& hint,
+											   char *identity, size_t max_identity_len,
+											   unsigned char *psk, size_t max_psk_len)>;
+
+private:
 	/** The default C struct */
 	static const MQTTAsync_SSLOptions DFLT_C_STRUCT ;
 
@@ -72,9 +93,18 @@ class ssl_options
 	 */
 	string enabledCipherSuites_;
 
+	/** Error message callback handler  */
+	error_handler errHandler_;
+	/** PSK callback handler */
+	psk_handler pskHandler_;
+
+	/** Callbacks from the C library */
+	static int on_error(const char *str, size_t len, void *context);
+	static unsigned on_psk(const char *hint, char *identity, unsigned int max_identity_len,
+						   unsigned char *psk, unsigned int max_psk_len, void *context);
+
 	/** The connect options has special access */
 	friend class connect_options;
-	//friend class connect_options_test;
 
 	/**
 	 * Gets a pointer to the C-language NUL-terminated strings for the
@@ -95,13 +125,6 @@ class ssl_options
 	void update_c_struct();
 
 public:
-	/** Smart/shared pointer to an object of this class. */
-	using ptr_t = std::shared_ptr<ssl_options>;
-	/** Smart/shared pointer to a const object of this class. */
-	using const_ptr_t = std::shared_ptr<const ssl_options>;
-	/** Unique pointer to an object of this class. */
-	using unique_ptr_t = std::unique_ptr<ssl_options>;
-
 	/**
 	 * Constructs a new MqttConnectOptions object using the default values.
 	 */
@@ -279,6 +302,17 @@ public:
 	 *  	   format.
 	 */
 	void ca_path(const string& path);
+	/**
+	 * Registers the error message callback handler.
+	 * @param cb The callback to receive error messages.
+	 */
+	void set_error_handler(error_handler cb);
+	/**
+	 * Registers a callback handler to set the TLS-PSK options.
+	 * See: OpenSSL SSL_CTX_set_psk_client_callback()
+	 * @param cb The callback.
+	 */
+	void set_psk_handler(psk_handler cb);
 };
 
 /**
@@ -400,6 +434,23 @@ public:
 	 */
 	auto ca_path(const string& path) -> self& {
 		opts_.ca_path(path);
+		return *this;
+	}
+	/**
+	 * Registers an error callback handler.
+	 * @param cb The callback to receive error messages.
+	 */
+	auto error_handler(ssl_options::error_handler cb) -> self& {
+		opts_.set_error_handler(cb);
+		return *this;
+	}
+	/**
+	 * Registers a callback handler to set the TLS-PSK options.
+	 * See: OpenSSL SSL_CTX_set_psk_client_callback()
+	 * @param cb The callback.
+	 */
+	auto psk_handler(ssl_options::psk_handler cb) -> self& {
+		opts_.set_psk_handler(cb);
 		return *this;
 	}
 	/**

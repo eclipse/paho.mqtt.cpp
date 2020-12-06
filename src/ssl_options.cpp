@@ -64,7 +64,73 @@ void ssl_options::update_c_struct()
 	opts_.privateKey = c_str(privateKey_);
 	opts_.privateKeyPassword = c_str(privateKeyPassword_);
 	opts_.enabledCipherSuites = c_str(enabledCipherSuites_);
+
+	if (errHandler_) {
+		opts_.ssl_error_cb = &ssl_options::on_error;
+		opts_.ssl_error_context = this;
+	}
+	else {
+		opts_.ssl_error_cb = nullptr;
+		opts_.ssl_error_context = nullptr;
+	}
+
+	if (pskHandler_) {
+		opts_.ssl_psk_cb = &ssl_options::on_psk;
+		opts_.ssl_psk_context = this;
+	}
+	else {
+		opts_.ssl_psk_cb = nullptr;
+		opts_.ssl_psk_context = nullptr;
+	}
 }
+
+// --------------------------------------------------------------------------
+
+int ssl_options::on_error(const char *str, size_t len, void *context)
+{
+	try {
+		if (context && str && len > 0) {
+			string errMsg { str, str+len };
+
+			ssl_options* opts = static_cast<ssl_options*>(context);
+			auto& errHandler = opts->errHandler_;
+
+			if (errHandler)
+				errHandler(*opts, errMsg);
+
+			return MQTTASYNC_SUCCESS;
+		}
+	}
+	catch (...) {}
+
+	return MQTTASYNC_FAILURE;
+}
+
+unsigned ssl_options::on_psk(const char *hint, char *identity, unsigned max_identity_len,
+							 unsigned char *psk, unsigned max_psk_len, void *context)
+{
+	unsigned ret = 0;
+
+	try {
+		if (context) {
+			auto hintStr = (hint) ? string(hint) : string();
+
+			ssl_options* opts = static_cast<ssl_options*>(context);
+			auto& pskHandler = opts->pskHandler_;
+
+			if (pskHandler) {
+				ret = pskHandler(*opts, hintStr,
+								 identity, size_t(max_identity_len),
+								 psk, size_t(max_psk_len));
+			}
+		}
+	}
+	catch (...) {}
+
+	return ret;
+}
+
+// --------------------------------------------------------------------------
 
 ssl_options& ssl_options::operator=(const ssl_options& rhs)
 {
@@ -99,6 +165,8 @@ ssl_options& ssl_options::operator=(ssl_options&& rhs)
 	update_c_struct();
 	return *this;
 }
+
+// --------------------------------------------------------------------------
 
 void ssl_options::set_trust_store(const string& trustStore)
 {
@@ -139,6 +207,34 @@ void ssl_options::ca_path(const string& path)
 {
 	caPath_ = path;
 	opts_.CApath = c_str(caPath_);
+}
+
+void ssl_options::set_error_handler(error_handler cb)
+{
+	errHandler_ = cb;
+
+	if (errHandler_) {
+		opts_.ssl_error_cb = &ssl_options::on_error;
+		opts_.ssl_error_context = this;
+	}
+	else {
+		opts_.ssl_error_cb = nullptr;
+		opts_.ssl_error_context = nullptr;
+	}
+}
+
+void ssl_options::set_psk_handler(psk_handler cb)
+{
+	pskHandler_ = cb;
+
+	if (pskHandler_) {
+		opts_.ssl_psk_cb = &ssl_options::on_psk;
+		opts_.ssl_psk_context = this;
+	}
+	else {
+		opts_.ssl_psk_cb = nullptr;
+		opts_.ssl_psk_context = nullptr;
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////
