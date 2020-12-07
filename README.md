@@ -116,6 +116,7 @@ PAHO_BUILD_DOCUMENTATION | FALSE | Create and install the HTML based API documen
 PAHO_BUILD_SAMPLES | FALSE | Build sample programs
 PAHO_BUILD_TESTS | FALSE | Build the unit tests. (This currently requires both _CppUnit_ and _Catch2_)
 PAHO_WITH_SSL | TRUE (Linux), FALSE (Win32) | Flag that defines whether to build ssl-enabled binaries too
+PAHO_BUILD_DEB_PACKAGE | FALSE | Flag that configures cpack to build a Debian/Ubuntu package
 
 In addition, the C++ build might commonly use `CMAKE_PREFIX_PATH` to help the build system find the location of the Paho C library.
 
@@ -203,6 +204,16 @@ or the `CMAKE_CXX_COMPILER` flag can be used:
 ```
 $ cmake -DCMAKE_CXX_COMPILER=clang++
 ```
+
+#### Building a Debian/Ubuntu package
+
+```
+$ cmake -Bbuild -H. -DPAHO_WITH_SSL=ON -DPAHO_ENABLE_TESTING=OFF -DPAHO_BUILD_DEB_PACKAGE=ON
+$ cmake --build build
+$ (cd build && cpack)
+```
+will generate a `.deb` file.
+
 
 #### Updating CMake on Ubuntu 14.04 or 16.04
 
