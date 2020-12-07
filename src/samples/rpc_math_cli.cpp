@@ -34,7 +34,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <string>
-#include <thread>	// For sleep
+#include <thread>
 #include <atomic>
 #include <chrono>
 #include <cstring>
@@ -59,9 +59,10 @@ int main(int argc, char* argv[])
 	constexpr int QOS = 1;
 	const string REQ_TOPIC_HDR { "requests/math/" };
 
-	mqtt::async_client cli(SERVER_ADDRESS, "");
+	mqtt::create_options createOpts(MQTTVERSION_5);
+	mqtt::async_client cli(SERVER_ADDRESS, "", createOpts);
 
-	auto connopts = mqtt::connect_options_builder()
+	auto connOpts = mqtt::connect_options_builder()
 					    .mqtt_version(MQTTVERSION_5)
 					    .clean_start()
 						.finalize();
@@ -70,7 +71,7 @@ int main(int argc, char* argv[])
 
 	try {
 		cout << "Connecting..." << flush;
-		mqtt::token_ptr tok = cli.connect(connopts);
+		mqtt::token_ptr tok = cli.connect(connOpts);
 		auto connRsp = tok->get_connect_response();
 		cout << "OK (" << connRsp.get_server_uri() << ")" << endl;
 

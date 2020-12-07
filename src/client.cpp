@@ -31,34 +31,49 @@ const std::chrono::minutes client::DFLT_TIMEOUT = std::chrono::minutes(5);
 
 /////////////////////////////////////////////////////////////////////////////
 
-
 client::client(const string& serverURI, const string& clientId,
-			   iclient_persistence* persistence /*=nullptr*/)
-		: cli_(serverURI, clientId, persistence),
+			   iclient_persistence* persistence /*=nullptr*/,
+			   ipersistence_encoder* encoder /*=nullptr*/)
+		: cli_(serverURI, clientId, persistence, encoder),
 			timeout_(DFLT_TIMEOUT), userCallback_(nullptr)
 {
 }
 
 client::client(const string& serverURI, const string& clientId,
-			   const string& persistDir)
-		: cli_(serverURI, clientId, persistDir),
+			   const string& persistDir,
+			   ipersistence_encoder* encoder /*=nullptr*/)
+		: cli_(serverURI, clientId, persistDir, encoder),
 			timeout_(DFLT_TIMEOUT), userCallback_(nullptr)
 {
 }
 
 client::client(const string& serverURI, const string& clientId,
-			   int maxBufferedMessages, iclient_persistence* persistence /*=nullptr*/)
-		: cli_(serverURI, clientId, maxBufferedMessages, persistence),
+			   int maxBufferedMessages,
+			   iclient_persistence* persistence /*=nullptr*/,
+			   ipersistence_encoder* encoder /*=nullptr*/)
+		: cli_(serverURI, clientId, maxBufferedMessages, persistence, encoder),
 			timeout_(DFLT_TIMEOUT), userCallback_(nullptr)
 {
 }
 
 client::client(const string& serverURI, const string& clientId,
-			   int maxBufferedMessages, const string& persistDir)
-		: cli_(serverURI, clientId, maxBufferedMessages, persistDir),
+			   int maxBufferedMessages, const string& persistDir,
+			   ipersistence_encoder* encoder /*=nullptr*/)
+		: cli_(serverURI, clientId, maxBufferedMessages, persistDir, encoder),
 			timeout_(DFLT_TIMEOUT), userCallback_(nullptr)
 {
 }
+
+client::client(const string& serverURI, const string& clientId,
+			   const create_options& opts,
+			   iclient_persistence* persistence /*=nullptr*/,
+			   ipersistence_encoder* encoder /*=nullptr*/)
+		: cli_(serverURI, clientId, opts, persistence, encoder),
+			timeout_(DFLT_TIMEOUT), userCallback_(nullptr)
+{
+}
+
+// --------------------------------------------------------------------------
 
 void client::set_callback(callback& cb)
 {

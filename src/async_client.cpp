@@ -54,7 +54,7 @@ async_client::async_client(const string& serverURI, const string& clientId,
 				: serverURI_(serverURI), clientId_(clientId),
 					mqttVersion_(MQTTVERSION_DEFAULT), userCallback_(nullptr)
 {
-	create_options opts(maxBufferedMessages);
+	create_options opts(MQTTVERSION_DEFAULT, maxBufferedMessages);
 
 	int rc = MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
 										 MQTTCLIENT_PERSISTENCE_DEFAULT,
@@ -71,7 +71,7 @@ async_client::async_client(const string& serverURI, const string& clientId,
 						   iclient_persistence* persistence /*=nullptr*/,
 						   ipersistence_encoder* encoder /*=nullptr*/)
 				: async_client(serverURI, clientId,
-							   create_options(maxBufferedMessages),
+							   create_options(MQTTVERSION_DEFAULT, maxBufferedMessages),
 							   persistence, encoder)
 {
 }

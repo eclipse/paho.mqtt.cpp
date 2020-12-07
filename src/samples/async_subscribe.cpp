@@ -168,11 +168,11 @@ public:
 
 int main(int argc, char* argv[])
 {
+	mqtt::async_client client(SERVER_ADDRESS, CLIENT_ID);
+
 	mqtt::connect_options connOpts;
 	connOpts.set_keep_alive_interval(20);
 	connOpts.set_clean_session(true);
-
-	mqtt::async_client client(SERVER_ADDRESS, CLIENT_ID);
 
 	callback cb(client, connOpts);
 	client.set_callback(cb);

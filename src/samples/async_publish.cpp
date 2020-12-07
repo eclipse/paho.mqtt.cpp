@@ -32,7 +32,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <string>
-#include <thread>	// For sleep
+#include <thread>
 #include <atomic>
 #include <chrono>
 #include <cstring>
@@ -132,16 +132,15 @@ int main(int argc, char* argv[])
 	callback cb;
 	client.set_callback(cb);
 
-	mqtt::connect_options conopts;
-	mqtt::message willmsg(TOPIC, LWT_PAYLOAD, 1, true);
-	mqtt::will_options will(willmsg);
-	conopts.set_will(will);
+	auto connopts = mqtt::connect_options_builder()
+		.will(mqtt::message(TOPIC, LWT_PAYLOAD, QOS))
+		.finalize();
 
 	cout << "  ...OK" << endl;
 
 	try {
 		cout << "\nConnecting..." << endl;
-		mqtt::token_ptr conntok = client.connect(conopts);
+		mqtt::token_ptr conntok = client.connect(connopts);
 		cout << "Waiting for the connection..." << endl;
 		conntok->wait();
 		cout << "  ...OK" << endl;

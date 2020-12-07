@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013-2019 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2020 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -253,8 +253,7 @@ public:
 	 *  				as a URI.
 	 * @param clientId a client identifier that is unique on the server
 	 *  			   being connected to
-	 * @param maxBufferedMessages the maximum number of messages allowed to
-	 *  						  be buffered while not connected
+	 * @param opts The create options
 	 * @param persistence The user persistence structure. If this is null,
 	 *  				  then no persistence is used.
 	 * @param encoder An object to encode and decode the persistence data.

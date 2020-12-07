@@ -113,10 +113,11 @@ int main(int argc, char* argv[])
 	mqtt::async_client cli(address, CLIENT_ID, MAX_BUFFERED_MSGS,
 						   PERSIST_DIR, &encoder);
 
-	mqtt::connect_options connOpts;
-	connOpts.set_keep_alive_interval(MAX_BUFFERED_MSGS * PERIOD);
-	connOpts.set_clean_session(true);
-	connOpts.set_automatic_reconnect(true);
+	auto connOpts = mqtt::connect_options_builder()
+		.keep_alive_interval(MAX_BUFFERED_MSGS * PERIOD)
+		.clean_session(true)
+		.automatic_reconnect(true)
+		.finalize();
 
 	// Create a topic object. This is a conventience since we will
 	// repeatedly publish messages with the same parameters.

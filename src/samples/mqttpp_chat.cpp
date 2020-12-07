@@ -70,17 +70,19 @@ int main(int argc, char* argv[])
 
 	// LWT message is broadcast to other users if out connection is lost
 
-	auto lwt = mqtt::make_message(chatTopic, "<<<"+chatUser+" was disconnected>>>", QOS, false);
+	auto lwt = mqtt::message(chatTopic, "<<<"+chatUser+" was disconnected>>>", QOS, false);
 
 	// Set up the connect options
 
-	mqtt::connect_options connOpts;
-	connOpts.set_keep_alive_interval(20);
-	connOpts.set_mqtt_version(MQTTVERSION_5);
-	connOpts.set_clean_start(true);
-	connOpts.set_will_message(lwt);
+	auto connOpts = mqtt::connect_options_builder()
+		.keep_alive_interval(std::chrono::seconds(20))
+		.mqtt_version(MQTTVERSION_5)
+		.clean_start(true)
+		.will(std::move(lwt))
+		.finalize();
 
-	mqtt::async_client cli(SERVER_ADDRESS, "");
+	mqtt::async_client cli(SERVER_ADDRESS, "",
+						   mqtt::create_options(MQTTVERSION_5));
 
 	// Set a callback for connection lost.
 	// This just exits the app.

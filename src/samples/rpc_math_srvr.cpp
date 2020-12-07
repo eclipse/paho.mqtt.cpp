@@ -91,11 +91,8 @@ double mult(const std::vector<double>& nums)
 
 int main(int argc, char* argv[])
 {
-	//auto createOpts = mqtt::create_options_builder()
-	//				      .mqtt_version(MQTTVERSION_5)
-	//					  .finalize();
-
-	mqtt::client cli(SERVER_ADDRESS, CLIENT_ID);
+	mqtt::create_options createOpts(MQTTVERSION_5);
+	mqtt::client cli(SERVER_ADDRESS, CLIENT_ID, createOpts);
 
 	auto connOpts = mqtt::connect_options_builder()
 					    .mqtt_version(MQTTVERSION_5)
@@ -115,6 +112,7 @@ int main(int argc, char* argv[])
 
 		// Consume messages
 
+		cout << "Waiting for RPC requests..." << endl;
 		while (true) {
 			auto msg = cli.consume_message();
 
