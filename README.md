@@ -52,6 +52,9 @@ Note that this branch will be formally released to coincide with the release of 
     - Select whether to persist QoS 0 messages
 - Started classes to create options using the Builder Pattern, with the `create_options_builder`, `connect_options_builder`, `message_ptr_builder`, etc.
 - User-defined websocket HTTP headers.
+- HTTP/S proxy support
+- SSL/TLS error and PSK callback support
+- Support for user-defined persistence encoding/decoding.
 - Converted the unit tests to use Catch2
 - [#231] Added `on_disconnected` callback to handle receipt of disconnect packet from server.
 - [#211, 223, #235] Removed use of Log() function from the Paho C library.
