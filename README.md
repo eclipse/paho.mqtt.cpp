@@ -29,7 +29,7 @@ This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) 
 
 ## Latest News
 
-A new release is underway to fix some minor build issues and missing features. This should be v1.2, due before the end of 2020.
+A new release is underway to add a numer of features and some missing MQTT v5 support, in addition to a number of bug fixes. This should be v1.2, due before the end of 2020.
 
 To keep up with the latest announcements for this project, or to ask questions:
 
@@ -41,7 +41,9 @@ To keep up with the latest announcements for this project, or to ask questions:
 
 ### Unreleased Features in this Branch
 
-**This branch requires Paho MQTT C library _v1.3.8_ or greater.**
+**This branch requires Paho MQTT C library _v1.3.7_ or greater.**
+
+Note that this branch will be formally released to coincide with the release of Paho C v1.3.8. Currently it is being tested against the debug branch of the C lib. This document, however, has mostly been updated to reflect the upcoming v1.3.8 release. That version, v1.3.8, does not yet exist, but should be out shortly.
 
 - New `create_options` that can be used to construct a client with new features:
     - Send while disconnected before the 1st successful connection
