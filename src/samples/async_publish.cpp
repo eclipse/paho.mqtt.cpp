@@ -8,6 +8,7 @@
 // The sample demonstrates:
 //  - Connecting to an MQTT server/broker
 //  - Publishing messages
+//  - Default file persistence
 //  - Last will and testament
 //  - Using asynchronous tokens
 //  - Implementing callbacks and action listeners
@@ -42,6 +43,7 @@ using namespace std;
 
 const std::string DFLT_SERVER_ADDRESS	{ "tcp://localhost:1883" };
 const std::string DFLT_CLIENT_ID		{ "async_publish" };
+const std::string PERSIST_DIR			{ "./persist" };
 
 const string TOPIC { "hello" };
 
@@ -127,7 +129,7 @@ int main(int argc, char* argv[])
 			clientID = (argc > 2) ? string(argv[2]) : DFLT_CLIENT_ID;
 
 	cout << "Initializing for server '" << address << "'..." << endl;
-	mqtt::async_client client(address, clientID);
+	mqtt::async_client client(address, clientID, PERSIST_DIR);
 
 	callback cb;
 	client.set_callback(cb);

@@ -81,8 +81,10 @@ int iclient_persistence::persistence_get(void* handle, char* key,
 	try {
 		if (handle && key && buffer && buflen) {
 			auto sv = static_cast<iclient_persistence*>(handle)->get(key);
-			*buffer = const_cast<char*>(sv.data());
-			*buflen = (int) sv.length();
+			size_t n = sv.length();
+			*buffer = static_cast<char*>(MQTTAsync_malloc(n));
+			memcpy(*buffer, sv.data(), n);
+			*buflen = int(n);
 			return MQTTASYNC_SUCCESS;
 		}
 	}

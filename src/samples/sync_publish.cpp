@@ -100,7 +100,7 @@ public:
 			<< key << "']" << std::endl;
 		std::string str;
 		for (const auto& b : bufs)
-			str += b.str();
+			str.append(b.data(), b.size());	// += b.str();
 		store_[key] = std::move(str);
 	}
 
