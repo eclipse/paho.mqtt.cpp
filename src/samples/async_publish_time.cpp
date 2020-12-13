@@ -84,7 +84,10 @@ uint64_t timestamp()
 
 int main(int argc, char* argv[])
 {
+	// The server URI (address)
 	string address = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS;
+
+	// The amount of time to run (in ms). Zero means "run forever".
 	uint64_t trun = (argc > 2) ? stoll(argv[2]) : 0LL;
 
 	cout << "Initializing for server '" << address << "'..." << endl;
