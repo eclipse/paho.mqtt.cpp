@@ -100,6 +100,9 @@ class connect_options
 	const char* c_str(const string_ref& sr) {
 		return sr.empty() ? nullptr : sr.c_str();
 	}
+	const char* c_str(const string& s) {
+		return s.empty() ? nullptr : s.c_str();
+	}
 	/**
 	 * Updates the underlying C structure to match our strings.
 	 */
@@ -324,11 +327,12 @@ public:
 	}
 	/**
 	 * Sets the user name to use for the connection.
-	 * @param userName
+	 * @param userName The user name for connecting to the MQTT broker.
 	 */
 	void set_user_name(string_ref userName);
 	/**
 	 * Sets the password to use for the connection.
+	 * @param password The password for connecting to the MQTT broker.
 	 */
 	void set_password(binary_ref password);
 	/**
@@ -504,6 +508,89 @@ public:
 
 /** Smart/shared pointer to a connection options object. */
 using connect_options_ptr = connect_options::ptr_t;
+
+/////////////////////////////////////////////////////////////////////////////
+
+/**
+ * The connect options that can be updated before an automatic reconnect.
+ */
+class connect_data
+{
+	/** The default C struct */
+	static const MQTTAsync_connectData DFLT_C_STRUCT;
+
+	/** The underlying C connect data  */
+	MQTTAsync_connectData data_;
+
+	/** The user name to use for the connection. */
+	string_ref userName_;
+
+	/** The password to use for the connection. (Optional) */
+	binary_ref password_;
+
+	/** The client has special access */
+	friend class async_client;
+
+	/**
+	 * Updates the underlying C structure to match our strings.
+	 */
+	void update_c_struct();
+
+	/**
+	 * Create data from a C struct
+	 * This is a deep copy of the data from the C struct.
+	 * @param cdata The C connect data.
+	 */
+	connect_data(const MQTTAsync_connectData& cdata);
+
+public:
+	/**
+	 * Creates an empty set of connection data.
+	 */
+	connect_data();
+	/**
+	 * Creates connection data with a user name, but no password.
+	 * @param userName The user name fopr reconnecting to the MQTT broker.
+	 */
+	explicit connect_data(string_ref userName);
+	/**
+	 * Creates connection data with a user name and password.
+	 * @param userName The user name fopr reconnecting to the MQTT broker.
+	 * @param password The password for connecting to the MQTT broker.
+	 */
+	connect_data(string_ref userName, binary_ref password);
+	/**
+	 * Copy constructor
+	 * @param other Another data struct to copy into this one.
+	 */
+	connect_data(const connect_data& other);
+	/**
+	 * Copy the connection data.
+	 * @param rhs Another data struct to copy into this one.
+	 * @return A reference to this data
+	 */
+	connect_data& operator=(const connect_data& rhs);
+	/**
+	 * Gets the user name to use for the connection.
+	 * @return The user name to use for the connection.
+	 */
+	string get_user_name() const { return userName_ ? userName_.to_string() : string(); }
+	/**
+	 * Gets the password to use for the connection.
+	 * @return The password to use for the connection.
+	 */
+	binary_ref get_password() const { return password_; }
+	/**
+	 * Sets the user name to use for the connection.
+	 * @param userName The user name for connecting to the MQTT broker.
+	 */
+	void set_user_name(string_ref userName);
+	/**
+	 * Sets the password to use for the connection.
+	 * @param password The password for connecting to the MQTT broker.
+	 */
+	void set_password(binary_ref password);
+};
 
 /////////////////////////////////////////////////////////////////////////////
 

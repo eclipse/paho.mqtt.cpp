@@ -266,6 +266,48 @@ void async_client::on_delivery_complete(void* context, MQTTAsync_token msgID)
 }
 #endif
 
+
+// Callback from the C lib for when a registered updateConnectOptions
+// needs to be called.
+int async_client::on_update_connection(void* context,
+									   MQTTAsync_connectData* cdata)
+{
+	if (context) {
+		async_client* cli = static_cast<async_client*>(context);
+		auto& updateConnection = cli->updateConnectionHandler_;
+
+		if (updateConnection) {
+			connect_data data(*cdata);
+			if (updateConnection(data)) {
+				// Copy username and password into newly allocated buffers.
+				// The C lib will take ownership of the memory
+				auto n = data.get_user_name().length();
+				if (n > 0) {
+					char* username = static_cast<char*>(MQTTAsync_malloc(n+1));
+					strcpy(username, data.get_user_name().c_str());
+					cdata->username = username;
+				}
+				else
+					cdata->username = nullptr;
+
+				n = data.get_password().length();
+				if (n > 0) {
+					char* passwd = static_cast<char*>(MQTTAsync_malloc(n));
+					memcpy(passwd, data.get_password().data(), n);
+					cdata->binarypwd.data = passwd;
+				}
+				else
+					cdata->binarypwd.data = nullptr;
+				cdata->binarypwd.len = int(n);
+
+				return to_int(true);
+			}
+		}
+	}
+	return 0;	// false
+}
+
+
 // --------------------------------------------------------------------------
 // Private methods
 
@@ -396,6 +438,14 @@ void async_client::set_message_callback(message_handler cb)
 	check_ret(::MQTTAsync_setMessageArrivedCallback(cli_, this,
 						&async_client::on_message_arrived));
 }
+
+void async_client::set_update_connection_handler(update_connection_handler cb)
+{
+	updateConnectionHandler_ = cb;
+	check_ret(::MQTTAsync_setUpdateConnectOptions(cli_, this,
+						&async_client::on_update_connection));
+}
+
 
 // --------------------------------------------------------------------------
 // Connect

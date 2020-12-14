@@ -88,6 +88,8 @@ public:
 	using connection_handler = std::function<void(const string& cause)>;
 	/** Handler type for when a disconnect packet is received */
 	using disconnected_handler = std::function<void(const properties&, ReasonCode)>;
+	/** Handler for updaing connection data before an auto-reconnect. */
+	using update_connection_handler = std::function<bool(connect_data&)>;
 
 private:
 	/** Lock guard type for this class */
@@ -115,7 +117,9 @@ private:
 	connection_handler connLostHandler_;
 	/** Disconnected handler */
 	disconnected_handler disconnectedHandler_;
-	/** Message handler (if any) */
+	/** Update connect data/options */
+	update_connection_handler updateConnectionHandler_;
+	/** Message handler */
 	message_handler msgHandler_;
 	/** Copy of connect token (for re-connects) */
 	token_ptr connTok_;
@@ -134,6 +138,7 @@ private:
 	static int  on_message_arrived(void* context, char* topicName, int topicLen,
 								   MQTTAsync_message* msg);
 	static void on_delivery_complete(void* context, MQTTAsync_token tok);
+	static int  on_update_connection(void* context, MQTTAsync_connectData* cdata);
 
 	/** Manage internal list of active tokens */
 	friend class token;
@@ -303,6 +308,12 @@ public:
 	 * @param cb The callback functor to register with the library.
 	 */
 	void set_message_callback(message_handler cb) /*override*/;
+	/**
+	 * Stes a callback to allow the application to update the connection
+	 * data on automatic reconnects.
+	 * @param cb The callback functor to register with the library.
+	 */
+	void set_update_connection_handler(update_connection_handler cb);
 	/**
 	 * Connects to an MQTT server using the default options.
 	 * @return token used to track and wait for the connect to complete. The

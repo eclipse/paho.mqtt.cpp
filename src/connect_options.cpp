@@ -304,6 +304,73 @@ void connect_options::set_https_proxy(const string& httpsProxy)
 }
 
 /////////////////////////////////////////////////////////////////////////////
+// connect_data
+
+const MQTTAsync_connectData connect_data::DFLT_C_STRUCT =
+		MQTTAsync_connectData_initializer;
+
+connect_data::connect_data() : data_(DFLT_C_STRUCT)
+{
+}
+
+connect_data::connect_data(string_ref userName)
+		: data_(DFLT_C_STRUCT), userName_(userName)
+{
+	update_c_struct();
+}
+
+connect_data::connect_data(string_ref userName, binary_ref password)
+		: data_(DFLT_C_STRUCT), userName_(userName), password_(password)
+{
+	update_c_struct();
+}
+
+connect_data::connect_data(const MQTTAsync_connectData& cdata)
+		: data_(DFLT_C_STRUCT),
+			password_((char*)cdata.binarypwd.data, size_t(cdata.binarypwd.len))
+{
+	if (cdata.username)
+		userName_ = string_ref(cdata.username, strlen(cdata.username));
+	update_c_struct();
+}
+
+void connect_data::update_c_struct()
+{
+	data_.username = userName_.c_str();
+
+	if (password_.empty()) {
+		data_.binarypwd.len = 0;
+		data_.binarypwd.data = nullptr;
+	}
+	else {
+		data_.binarypwd.len = (int) password_.size();
+		data_.binarypwd.data = password_.data();
+	}
+}
+
+connect_data& connect_data::operator=(const connect_data& rhs)
+{
+	if (&rhs != this) {
+		userName_ = rhs.userName_;
+		password_ = rhs.password_;
+		update_c_struct();
+	}
+	return *this;
+}
+
+void connect_data::set_user_name(string_ref userName)
+{
+	userName_ = std::move(userName);
+	update_c_struct();
+}
+
+void connect_data::set_password(binary_ref password)
+{
+	password_ = std::move(password);
+	update_c_struct();
+}
+
+/////////////////////////////////////////////////////////////////////////////
 
 } // end namespace mqtt
 
