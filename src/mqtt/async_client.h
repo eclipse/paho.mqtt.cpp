@@ -309,7 +309,7 @@ public:
 	 */
 	void set_message_callback(message_handler cb) /*override*/;
 	/**
-	 * Stes a callback to allow the application to update the connection
+	 * Sets a callback to allow the application to update the connection
 	 * data on automatic reconnects.
 	 * @param cb The callback functor to register with the library.
 	 */

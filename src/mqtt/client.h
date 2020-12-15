@@ -92,6 +92,9 @@ public:
 	/** Type for a collection of QOS values */
 	using qos_collection = async_client::qos_collection;
 
+	/** Handler for updating connection data before an auto-reconnect. */
+	using update_connection_handler = async_client::update_connection_handler;
+
 	/**
 	 * Create a client that can be used to communicate with an MQTT server.
 	 * This allows the caller to specify a user-defined persistence object,
@@ -242,6 +245,14 @@ public:
 	 *  	   not.
 	 */
 	virtual bool is_connected() const { return cli_.is_connected(); }
+	/**
+	 * Sets a callback to allow the application to update the connection
+	 * data on automatic reconnects.
+	 * @param cb The callback functor to register with the library.
+	 */
+	void set_update_connection_handler(update_connection_handler cb) {
+		cli_.set_update_connection_handler(cb);
+	}
 
 	/**
 	 * Publishes a message to a topic on the server and return once it is

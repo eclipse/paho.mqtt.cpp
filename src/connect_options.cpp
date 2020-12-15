@@ -336,7 +336,7 @@ connect_data::connect_data(const MQTTAsync_connectData& cdata)
 
 void connect_data::update_c_struct()
 {
-	data_.username = userName_.c_str();
+	data_.username = userName_.empty() ? nullptr : userName_.c_str();
 
 	if (password_.empty()) {
 		data_.binarypwd.len = 0;
