@@ -7,11 +7,12 @@
 //
 // The sample demonstrates:
 //  - Connecting to an MQTT server/broker
+//  - Using a persistent (non-clean) session
 //  - Subscribing to multiple topics
 //  - Receiving messages through the queueing consumer API
 //  - Recieving and acting upon commands via MQTT topics
 //  - Auto reconnect
-//  - Using a persistent (non-clean) session
+//  - Updating auto-reconnect data
 //
 
 /*******************************************************************************
@@ -50,6 +51,8 @@ const string CLIENT_ID		{ "sync_consume_cpp" };
 int main(int argc, char* argv[])
 {
 	auto connOpts = mqtt::connect_options_builder()
+		.user_name("user")
+		.password("passwd")
 		.keep_alive_interval(seconds(30))
 		.automatic_reconnect(seconds(2), seconds(30))
 		.clean_session(false)
@@ -57,11 +60,21 @@ int main(int argc, char* argv[])
 
 	mqtt::client cli(SERVER_ADDRESS, CLIENT_ID);
 
+	// You can install a callback to change some connection data
+	// on auto reconnect attempts. To make a change, update the
+	// `connect_data` and return 'true'.
 	cli.set_update_connection_handler(
 		[](mqtt::connect_data& connData) {
-			if (!connData.get_user_name().empty())
-				cout << "User: " << connData.get_user_name() << endl;
-			return false;
+			string newUserName { "newuser" };
+			if (connData.get_user_name() == newUserName)
+				return false;
+
+			cout << "Previous user: '" << connData.get_user_name()
+				<< "'" << endl;
+			connData.set_user_name(newUserName);
+			cout << "New user name: '" << connData.get_user_name()
+				<< "'" << endl;
+			return true;
 		}
 	);
 
