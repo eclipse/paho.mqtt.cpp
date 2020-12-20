@@ -20,6 +20,9 @@
 #include "mqtt/iclient_persistence.h"
 #include <cstring>
 #include <cstdlib>
+#include <vector>
+
+using namespace std;
 
 namespace mqtt {
 
@@ -150,52 +153,38 @@ int iclient_persistence::persistence_containskey(void* handle, char* key)
 /////////////////////////////////////////////////////////////////////////////
 // Encoder
 
+// Callback before writing the data to persistence.
+// It allows the application to encode/encrypt the data.
 int ipersistence_encoder::before_write(void* context, int nbuf, char* bufs[], int buflens[])
 {
 	try {
 		if (context && nbuf > 0 && bufs && buflens) {
-			std::vector<string_view> vec;
-			auto n = size_t(nbuf);
-			vec.reserve(n);
-
-			for (size_t i=0; i<n; ++i)
-				vec.push_back(string_view(bufs[i], buflens[i]));
-
-			static_cast<ipersistence_encoder*>(context)->encode(&vec[0], n);
-
-			for (size_t i=0; i<n; ++i) {
-				if (bufs[i] != vec[i].data()) {
-					MQTTAsync_free(bufs[i]);
-					bufs[i] = const_cast<char*>(vec[i].data());
-				}
-				buflens[i] = vec[i].size();
-			}
+			vector<size_t> lens;
+			for (int i=0; i<nbuf; ++i)
+				lens.push_back(size_t(buflens[i]));
+			static_cast<ipersistence_encoder*>(context)->encode(size_t(nbuf), bufs, &lens[0]);
+			for (int i=0; i<nbuf; ++i)
+				buflens[i] = int(lens[i]);
 			return MQTTASYNC_SUCCESS;
 		}
 	}
 	catch (...) {}
-
 	return MQTTCLIENT_PERSISTENCE_ERROR;
 }
 
+// Callback after reading the data from persistence.
+// It allows the application to decode/decrypt the data.
 int ipersistence_encoder::after_read(void* context, char** buf, int* buflen)
 {
 	try {
 		if (context && buf && *buf && buflen && *buflen > 0) {
-			string_view sv(*buf, *buflen);
-
-			static_cast<ipersistence_encoder*>(context)->decode(sv);
-
-			if (*buf != sv.data()) {
-				MQTTAsync_free(*buf);
-				*buf = const_cast<char*>(sv.data());
-			}
-			*buflen = sv.size();
+			size_t len = *buflen;
+			static_cast<ipersistence_encoder*>(context)->decode(buf, &len);
+			*buflen = int(len);
 			return MQTTASYNC_SUCCESS;
 		}
 	}
 	catch (...) {}
-
 	return MQTTCLIENT_PERSISTENCE_ERROR;
 }
 

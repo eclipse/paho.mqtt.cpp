@@ -79,13 +79,15 @@ class persistence_encoder : virtual public mqtt::ipersistence_encoder
 	 * Callback to let the application encode data before writing it to
 	 * persistence.
 	 */
-	void encode(mqtt::string_view bufs[], size_t n) override {
-		cout << "Encoding " << n << " buffers" << endl;
-		auto sz = bufs[0].size();
+	//void encode(mqtt::string_view bufs[], size_t n) override {
+	void encode(size_t nbuf, char* bufs[], size_t lens[]) override {
+		cout << "Encoding " << nbuf << " buffers" << endl;
+		auto sz = lens[0];
 		auto buf = mqtt::persistence_malloc(sz+6);
 		strcpy(buf, "bubba");
-		memcpy(buf+6, bufs[0].data(), sz);
-		bufs[0] = mqtt::string_view(buf, n+6);
+		memcpy(buf+6, &bufs[0][0], sz);
+		bufs[0] = buf;
+		lens[0] = sz+6;
 	}
 	/**
 	 * Callback to let the application decode data after it is retrieved
@@ -94,12 +96,13 @@ class persistence_encoder : virtual public mqtt::ipersistence_encoder
 	 * @param buffers The data buffers that need to be decoded.
 	 * @param n The number of buffers
 	 */
-	void decode(mqtt::string_view& buf) override {
-		cout << "Decoding buffer: " << buf.data() << endl;
-		auto n = buf.size();
-		auto newBuf = mqtt::persistence_malloc(n-6);
-		memcpy(newBuf, buf.data(), n-6);
-		buf = mqtt::string_view(newBuf, n-6);
+	//void decode(mqtt::string_view& buf) override {
+	void decode(char** pbuf, size_t* len) override {
+		cout << "Decoding buffer @: 0x" << pbuf << endl;
+		auto buf = *pbuf;
+		auto sz = *len;
+		std::memmove(&buf[0], &buf[6], sz-6);
+		*len = sz-6;
 	}
 };
 

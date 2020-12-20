@@ -149,11 +149,16 @@ using const_iclient_persistence_ptr = iclient_persistence::const_ptr_t;
 /////////////////////////////////////////////////////////////////////////////
 
 /**
- * Interface for objects to encode and decode data going into the
+ * Interface for objects to encode and decode data going to and from the
  * persistence store.
  *
  * This is typically used to encrypt the data before writing to
  * persistence, and then decrypt it when reading it back from persistence.
+ *
+ * For optimized performance, the application can perform encoding in-place
+ * with each of the supplied buffers, if the resulting data fits. But, if
+ * not, it's left to the application to do its own memory management with
+ * @ref persistence_malloc() and @ref persistence_free().
  */
 class ipersistence_encoder
 {
@@ -172,24 +177,33 @@ public:
 	 * Callback to let the application encode data before writing it to
 	 * persistence.
 	 *
-	 * This is called just prior to writing the data to persistence. If a
-	 * buffer needs to grow, the application can call @ref
-	 * persistence_malloc to get a new buffer, and then update the pointer
-	 * and side of the buffer. It *should not* free the old buffer. That is
-	 * done automatically.
+	 * This is called just prior to writing the data to persistence.
 	 *
-	 * @param bufs The data buffers that need to be encoded.
-	 * @param n The number of buffers
+	 * If the encoded data fits into each of the supplied buffers, the
+	 * encoding can be done in place. If a buffer needs to grow, the
+	 * application can call @ref persistence_malloc() to get a new buffer,
+	 * and update the pointer. It then needs to deallocate the old buffer.
+	 * In either case it should update the new size of the buffer.
+	 *
+	 * @param nbuf The number of buffers to encode.
+	 * @param bufs The addresses of the data buffers to be encoded.
+	 * @param lens The length of each buffer.
 	 */
-	virtual void encode(string_view bufs[], size_t n) =0;
+	virtual void encode(size_t nbuf, char* bufs[], size_t lens[]) =0;
 	/**
 	 * Callback to let the application decode data after it is retrieved
 	 * from persistence.
 	 *
-	 * @param buffers The data buffers that need to be decoded.
-	 * @param n The number of buffers
+	 * If the decoded data fits into the supplied buffer, the decoding can
+	 * be done in place. If the buffer needs to grow, the application can
+	 * call @ref persistence_malloc() to get a new buffer, and update the
+	 * pointer. It then needs to deallocate the old buffer. In either case
+	 * it should update the new size of the buffer.
+	 *
+	 * @param pbuf Pointer to the data buffer to decoded.
+	 * @param len Pointer to the length of the buffer.
 	 */
-	virtual void decode(string_view& buf) =0;
+	virtual void decode(char** pbuf, size_t* len) =0;
 };
 
 
