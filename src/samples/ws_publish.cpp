@@ -11,7 +11,7 @@
 //  - Using asynchronous tokens
 //
 // This example requires a broker that is configured to accept websocket
-// connections, and optionally, a proxy.
+// connections, and optionally, an HTTP proxy.
 //
 
 /*******************************************************************************

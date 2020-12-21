@@ -15,7 +15,7 @@
 //
 
 /*******************************************************************************
- * Copyright (c) 2013-2017 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2020 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -40,7 +40,7 @@
 #include "mqtt/async_client.h"
 
 const std::string SERVER_ADDRESS("tcp://localhost:1883");
-const std::string CLIENT_ID("async_subcribe_cpp");
+const std::string CLIENT_ID("paho_cpp_async_subcribe");
 const std::string TOPIC("hello");
 
 const int	QOS = 1;
@@ -168,25 +168,29 @@ public:
 
 int main(int argc, char* argv[])
 {
-	mqtt::async_client client(SERVER_ADDRESS, CLIENT_ID);
+	// A subscriber often wants the server to remember its messages when its
+	// disconnected. In that case, it needs a unique ClientID and a
+	// non-clean session.
+
+	mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
 
 	mqtt::connect_options connOpts;
-	connOpts.set_keep_alive_interval(20);
-	connOpts.set_clean_session(true);
+	connOpts.set_clean_session(false);
 
-	callback cb(client, connOpts);
-	client.set_callback(cb);
+	// Install the callback(s) before connecting.
+	callback cb(cli, connOpts);
+	cli.set_callback(cb);
 
 	// Start the connection.
 	// When completed, the callback will subscribe to topic.
 
 	try {
 		std::cout << "Connecting to the MQTT server..." << std::flush;
-		client.connect(connOpts, nullptr, cb);
+		cli.connect(connOpts, nullptr, cb);
 	}
-	catch (const mqtt::exception&) {
+	catch (const mqtt::exception& exc) {
 		std::cerr << "\nERROR: Unable to connect to MQTT server: '"
-			<< SERVER_ADDRESS << "'" << std::endl;
+			<< SERVER_ADDRESS << "'" << exc << std::endl;
 		return 1;
 	}
 
@@ -199,11 +203,11 @@ int main(int argc, char* argv[])
 
 	try {
 		std::cout << "\nDisconnecting from the MQTT server..." << std::flush;
-		client.disconnect()->wait();
+		cli.disconnect()->wait();
 		std::cout << "OK" << std::endl;
 	}
 	catch (const mqtt::exception& exc) {
-		std::cerr << exc.what() << std::endl;
+		std::cerr << exc << std::endl;
 		return 1;
 	}
 

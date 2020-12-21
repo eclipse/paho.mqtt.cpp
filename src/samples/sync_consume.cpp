@@ -44,12 +44,14 @@ using namespace std;
 using namespace std::chrono;
 
 const string SERVER_ADDRESS	{ "tcp://localhost:1883" };
-const string CLIENT_ID		{ "sync_consume_cpp" };
+const string CLIENT_ID		{ "paho_cpp_sync_consume" };
 
 /////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[])
 {
+	mqtt::client cli(SERVER_ADDRESS, CLIENT_ID);
+
 	auto connOpts = mqtt::connect_options_builder()
 		.user_name("user")
 		.password("passwd")
@@ -57,8 +59,6 @@ int main(int argc, char* argv[])
 		.automatic_reconnect(seconds(2), seconds(30))
 		.clean_session(false)
 		.finalize();
-
-	mqtt::client cli(SERVER_ADDRESS, CLIENT_ID);
 
 	// You can install a callback to change some connection data
 	// on auto reconnect attempts. To make a change, update the

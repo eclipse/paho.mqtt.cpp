@@ -15,7 +15,7 @@
 //
 
 /*******************************************************************************
- * Copyright (c) 2013-2017 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2020 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -42,7 +42,6 @@
 using namespace std;
 
 const std::string DFLT_SERVER_ADDRESS	{ "tcp://localhost:1883" };
-const std::string DFLT_CLIENT_ID		{ "async_publish" };
 const std::string PERSIST_DIR			{ "./persist" };
 
 const string TOPIC { "hello" };
@@ -125,8 +124,11 @@ public:
 
 int main(int argc, char* argv[])
 {
+	// A client that just publishes probably doesn't need a ClientID or
+	// persistent session, but the user can supply an ID, if desired.
+
 	string	address  = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS,
-			clientID = (argc > 2) ? string(argv[2]) : DFLT_CLIENT_ID;
+			clientID = (argc > 2) ? string(argv[2]) : string();
 
 	cout << "Initializing for server '" << address << "'..." << endl;
 	mqtt::async_client client(address, clientID, PERSIST_DIR);
@@ -134,7 +136,8 @@ int main(int argc, char* argv[])
 	callback cb;
 	client.set_callback(cb);
 
-	auto connopts = mqtt::connect_options_builder()
+	auto connOpts = mqtt::connect_options_builder()
+		.clean_session()
 		.will(mqtt::message(TOPIC, LWT_PAYLOAD, QOS))
 		.finalize();
 
@@ -142,7 +145,7 @@ int main(int argc, char* argv[])
 
 	try {
 		cout << "\nConnecting..." << endl;
-		mqtt::token_ptr conntok = client.connect(connopts);
+		mqtt::token_ptr conntok = client.connect(connOpts);
 		cout << "Waiting for the connection..." << endl;
 		conntok->wait();
 		cout << "  ...OK" << endl;
@@ -195,8 +198,7 @@ int main(int argc, char* argv[])
 
 		// Disconnect
 		cout << "\nDisconnecting..." << endl;
-		conntok = client.disconnect();
-		conntok->wait();
+		client.disconnect()->wait();
 		cout << "  ...OK" << endl;
 	}
 	catch (const mqtt::exception& exc) {

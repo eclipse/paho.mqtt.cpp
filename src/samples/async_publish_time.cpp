@@ -116,9 +116,10 @@ int main(int argc, char* argv[])
 
 	auto willMsg = mqtt::message("test/events", "Time publisher disconnected", 1, true);
 	auto connOpts = mqtt::connect_options_builder()
-						.will(willMsg)
-						.automatic_reconnect(seconds(1), seconds(10))
-						.finalize();
+		.clean_session()
+		.will(willMsg)
+		.automatic_reconnect(seconds(1), seconds(10))
+		.finalize();
 
 	try {
 		// Note that we start the connection, but don't wait for completion.

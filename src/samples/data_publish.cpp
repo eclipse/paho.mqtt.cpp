@@ -11,7 +11,7 @@
 //  - Using a topic object to repeatedly publish to the same topic.
 //  - Automatic reconnects
 //  - Off-line buffering
-//  - Default file-based persistence
+//  - User file-based persistence with simple encoding.
 //
 // This just uses the steady clock to run a periodic loop. Each time
 // through, it generates a random number [0-100] as simulated data and
@@ -26,7 +26,7 @@
 //
 
 /*******************************************************************************
- * Copyright (c) 2013-2017 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2020 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0

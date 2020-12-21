@@ -26,6 +26,7 @@
 
 #include "MQTTAsync.h"
 #include "mqtt/types.h"
+#include <iostream>
 #include <vector>
 #include <memory>
 #include <exception>
@@ -153,6 +154,17 @@ public:
 	 */
 	string to_string() const { return string(what()); }
 };
+
+/**
+ * Stream inserter writes a fairly verbose message
+ * @param os The stream.
+ * @param exc The exception to write.
+ * @return A reference to the stream.
+ */
+inline std::ostream& operator<<(std::ostream& os, const exception& exc) {
+	os << exc.what();
+	return os;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 

@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
 		cout << "  ...OK" << endl;
 	}
 	catch (const mqtt::exception& exc) {
-		cerr << exc.what() << endl;
+		cerr << exc << endl;
 		return 1;
 	}
 

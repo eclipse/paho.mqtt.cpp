@@ -47,8 +47,18 @@ const char* PAYLOAD3 = "Is anyone listening?";
 const int QOS = 1;
 
 /////////////////////////////////////////////////////////////////////////////
-// Example of a simple, in-memory persistence class.
 
+// Example of a simple, in-memory persistence class.
+//
+// This is an extremely silly example, because if you want to use
+// persistence, you actually need it to be out of process so that if the
+// client crashes and restarts, the persistence data still exists.
+//
+// This is just here to show how the persistence API callbacks work. It maps
+// well to key/value stores, like Redis, but only if it's on the local host,
+// as it wouldn't make sense to persist data over the network, since that's
+// what the MQTT client it trying to do.
+//
 class sample_mem_persistence : virtual public mqtt::iclient_persistence
 {
 	// Whether the store is open
