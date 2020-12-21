@@ -46,6 +46,7 @@
 #include <thread>
 #include <chrono>
 #include <iostream>
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
@@ -78,76 +79,92 @@ const int MAX_BUFFERED_MSGS = 120;	// 120 * 5sec => 10min off-line buffering
 const string PERSIST_DIR { "data-persist" };
 
 /////////////////////////////////////////////////////////////////////////////
-// Example of a simple, in-memory persistence class.
 
+// Example of user-based file persistence with a simple XOR encoding scheme.
+//
+// Similar to the built-in file persistence, this just creates a
+// subdirectory for the persistence data, then places each key into a
+// separate file using the key as the file name.
+//
+// With user-defined persistence, you can transform the data in any way you
+// like, such as with encryption/decryption, and you can store the data any
+// place you want, such as here with disk files, or use a local DB like
+// SQLite or a local key/value store like Redis.
 class encoded_file_persistence : virtual public mqtt::iclient_persistence
 {
 	// The name of the store
 	// Used as the directory name
-	std::string name_;
-
-	// Whether the store is open
-	bool open_;
+	string name_;
 
 	// A key for encoding the data
-	std::string encodeKey_;
+	string encodeKey_;
+
+	// Simple, in-place XOR encoding and decoding
+	void encode(string& s) const {
+		size_t n = encodeKey_.size();
+		if (n == 0 || s.empty()) return;
+
+		for (size_t i=0; i<s.size(); ++i)
+			s[i] ^= encodeKey_[i%n];
+	}
+
+	// Gets the persistence file name for the supplied key.
+	string path_name(const string& key) const { return name_ + "/" + key; }
 
 public:
-	encoded_file_persistence(const std::string& encodeKey)
-			: open_(false), encodeKey_(encodeKey) {}
+	// Create the persistence object with the specified encoding key
+	encoded_file_persistence(const string& encodeKey)
+			: encodeKey_(encodeKey) {}
 
-	// "Open" the store
-	void open(const std::string& clientId, const std::string& serverURI) override {
-		if (open_)
-			return;
-
+	// "Open" the persistence store.
+	// Create a directory for persistence files, using the client ID and
+	// serverURI to make a unique directory name. Note that neither can be
+	// empty. In particular, the app can't use an empty `clientID` if it
+	// wants to use persistence. (This isn't an absolute rule for your own
+	// persistence, but you do need a way to keep data from different apps
+	// separate).
+	void open(const string& clientId, const string& serverURI) override {
 		if (clientId.empty() || serverURI.empty())
 			throw mqtt::persistence_exception();
 
 		name_ = serverURI + "-" + clientId;
-		for (char& c : name_) {
-			if (c == ':')
-				c = '-';
-		}
+		std::replace(name_.begin(), name_.end(), ':', '-');
 
 		mkdir(name_.c_str(), S_IRWXU | S_IRWXG);
-		open_ = true;
 	}
 
 	// Close the persistent store that was previously opened.
+	// Remove the persistence directory, if it's empty.
 	void close() override {
-		if (!open_)
-			return;
-
 		rmdir(name_.c_str());
-		open_ = false;
 	}
 
 	// Clears persistence, so that it no longer contains any persisted data.
+	// Just remove all the files from the persistence directory.
 	void clear() override {
 		DIR* dir = opendir(name_.c_str());
-		if (!dir)
-			return;
+		if (!dir) return;
 
 		dirent *next;
 		while ((next = readdir(dir)) != nullptr) {
-			auto fname = std::string(next->d_name);
+			auto fname = string(next->d_name);
 			if (fname == "." || fname == "..") continue;
-			std::string path = name_ + "/" + fname;
+			string path = name_ + "/" + fname;
 			remove(path.c_str());
 		}
 		closedir(dir);
 	}
 
 	// Returns whether or not data is persisted using the specified key.
-	bool contains_key(const std::string& key) override {
+	// We just look for a file in the store directory with the same name as
+	// the key.
+	bool contains_key(const string& key) override {
 		DIR* dir = opendir(name_.c_str());
-		if (!dir)
-			return false;
+		if (!dir) return false;
 
 		dirent *next;
 		while ((next = readdir(dir)) != nullptr) {
-			if (std::string(next->d_name) == key) {
+			if (string(next->d_name) == key) {
 				closedir(dir);
 				return true;
 			}
@@ -157,15 +174,15 @@ public:
 	}
 
 	// Returns the keys in this persistent data store.
+	// We just make a collection of the file names in the store directory.
 	mqtt::string_collection keys() const override {
 		mqtt::string_collection ks;
 		DIR* dir = opendir(name_.c_str());
-		if (!dir)
-			return ks;
+		if (!dir) return ks;
 
 		dirent *next;
 		while ((next = readdir(dir)) != nullptr) {
-			auto fname = std::string(next->d_name);
+			auto fname = string(next->d_name);
 			if (fname == "." || fname == "..") continue;
 			ks.push_back(fname);
 		}
@@ -175,37 +192,55 @@ public:
 	}
 
 	// Puts the specified data into the persistent store.
-	void put(const std::string& key, const std::vector<mqtt::string_view>& bufs) override {
-		std::string path = name_ + "/" + key;
+	// We just encode the data and write it to a file using the key as the
+	// name of the file. The multiple buffers given here need to be written
+	// in order - and a scatter/gather like writev() would be fine. But...
+	// the data will be read back as a single buffer, so here we first
+	// concat a string so that the encoding key lines up with the data the
+	// same way it will on the read-back.
+	void put(const string& key, const std::vector<mqtt::string_view>& bufs) override {
+		auto path = path_name(key);
 
 		ofstream os(path, ios_base::binary);
 		if (!os)
 			throw mqtt::persistence_exception();
 
+		string s;
 		for (const auto& b : bufs)
-			os.write(b.data(), b.size());
+			s.append(b.data(), b.size());
+
+		encode(s);
+		os.write(s.data(), s.size());
 	}
 
 	// Gets the specified data out of the persistent store.
-	std::string get(const std::string& key) const override {
-		std::string path = name_ + "/" + key;
+	// We look for a file with the name of the key, read the contents,
+	// decode, and return it.
+	string get(const string& key) const override {
+		auto path = path_name(key);
 
 		ifstream is(path, ios_base::ate|ios_base::binary);
 		if (!is)
 			throw mqtt::persistence_exception();
 
+		// Read the whole file into a string
 		streamsize sz = is.tellg();
+		if (sz == 0) return string();
+
 		is.seekg(0);
-		std::string s(sz, '\0');
+		string s(sz, '\0');
 		is.read(&s[0], sz);
 		if (is.gcount() < sz)
 			s.resize(is.gcount());
+
+		encode(s);
 		return s;
 	}
 
 	// Remove the data for the specified key.
-	void remove(const std::string &key) override {
-		std::string path = name_ + "/" + key;
+	// Just remove the file with the same name as the key, if found.
+	void remove(const string &key) override {
+		auto path = path_name(key);
 		::remove(path.c_str());
 	}
 };
@@ -266,9 +301,6 @@ int main(int argc, char* argv[])
 			top.publish(std::move(payload));
 
 			tm += PERIOD;
-
-			// TODO: Get rid of this
-			if (nsample == 5) break;
 		}
 
 		// Disconnect
