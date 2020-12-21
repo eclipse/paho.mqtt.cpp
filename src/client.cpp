@@ -32,43 +32,38 @@ const std::chrono::minutes client::DFLT_TIMEOUT = std::chrono::minutes(5);
 /////////////////////////////////////////////////////////////////////////////
 
 client::client(const string& serverURI, const string& clientId,
-			   iclient_persistence* persistence /*=nullptr*/,
-			   ipersistence_encoder* encoder /*=nullptr*/)
-		: cli_(serverURI, clientId, persistence, encoder),
+			   iclient_persistence* persistence /*=nullptr*/)
+		: cli_(serverURI, clientId, persistence),
 			timeout_(DFLT_TIMEOUT), userCallback_(nullptr)
 {
 }
 
 client::client(const string& serverURI, const string& clientId,
-			   const string& persistDir,
-			   ipersistence_encoder* encoder /*=nullptr*/)
-		: cli_(serverURI, clientId, persistDir, encoder),
+			   const string& persistDir)
+		: cli_(serverURI, clientId, persistDir),
 			timeout_(DFLT_TIMEOUT), userCallback_(nullptr)
 {
 }
 
 client::client(const string& serverURI, const string& clientId,
 			   int maxBufferedMessages,
-			   iclient_persistence* persistence /*=nullptr*/,
-			   ipersistence_encoder* encoder /*=nullptr*/)
-		: cli_(serverURI, clientId, maxBufferedMessages, persistence, encoder),
+			   iclient_persistence* persistence /*=nullptr*/)
+		: cli_(serverURI, clientId, maxBufferedMessages, persistence),
 			timeout_(DFLT_TIMEOUT), userCallback_(nullptr)
 {
 }
 
 client::client(const string& serverURI, const string& clientId,
-			   int maxBufferedMessages, const string& persistDir,
-			   ipersistence_encoder* encoder /*=nullptr*/)
-		: cli_(serverURI, clientId, maxBufferedMessages, persistDir, encoder),
+			   int maxBufferedMessages, const string& persistDir)
+		: cli_(serverURI, clientId, maxBufferedMessages, persistDir),
 			timeout_(DFLT_TIMEOUT), userCallback_(nullptr)
 {
 }
 
 client::client(const string& serverURI, const string& clientId,
 			   const create_options& opts,
-			   iclient_persistence* persistence /*=nullptr*/,
-			   ipersistence_encoder* encoder /*=nullptr*/)
-		: cli_(serverURI, clientId, opts, persistence, encoder),
+			   iclient_persistence* persistence /*=nullptr*/)
+		: cli_(serverURI, clientId, opts, persistence),
 			timeout_(DFLT_TIMEOUT), userCallback_(nullptr)
 {
 }

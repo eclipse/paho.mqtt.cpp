@@ -83,10 +83,10 @@ int iclient_persistence::persistence_get(void* handle, char* key,
 {
 	try {
 		if (handle && key && buffer && buflen) {
-			auto sv = static_cast<iclient_persistence*>(handle)->get(key);
-			size_t n = sv.length();
+			auto s = static_cast<iclient_persistence*>(handle)->get(key);
+			size_t n = s.length();
 			*buffer = static_cast<char*>(MQTTAsync_malloc(n));
-			memcpy(*buffer, sv.data(), n);
+			memcpy(*buffer, s.data(), n);
 			*buflen = int(n);
 			return MQTTASYNC_SUCCESS;
 		}
@@ -113,10 +113,20 @@ int iclient_persistence::persistence_keys(void* handle, char*** keys, int* nkeys
 {
 	try {
 		if (handle && keys && nkeys) {
-			auto& k = static_cast<iclient_persistence*>(handle)->keys();
+			auto k = static_cast<iclient_persistence*>(handle)->keys();
 			size_t n = k.size();
 			*nkeys = int(n);
-			*keys = (n == 0) ? nullptr : const_cast<char**>(k.c_arr());
+			if (n == 0) {
+				*keys = nullptr;
+			}
+			else {
+				*keys = static_cast<char**>(MQTTAsync_malloc(n*sizeof(char*)));
+				for (size_t i=0; i<n; ++i) {
+					char* buf = static_cast<char*>(MQTTAsync_malloc(k[i].size()+1));
+					strcpy(buf, k[i].c_str());
+					(*keys)[i] = buf;
+				}
+			}
 			return MQTTASYNC_SUCCESS;
 		}
 	}
@@ -147,44 +157,6 @@ int iclient_persistence::persistence_containskey(void* handle, char* key)
 	}
 	catch (...) {}
 
-	return MQTTCLIENT_PERSISTENCE_ERROR;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// Encoder
-
-// Callback before writing the data to persistence.
-// It allows the application to encode/encrypt the data.
-int ipersistence_encoder::before_write(void* context, int nbuf, char* bufs[], int buflens[])
-{
-	try {
-		if (context && nbuf > 0 && bufs && buflens) {
-			vector<size_t> lens;
-			for (int i=0; i<nbuf; ++i)
-				lens.push_back(size_t(buflens[i]));
-			static_cast<ipersistence_encoder*>(context)->encode(size_t(nbuf), bufs, &lens[0]);
-			for (int i=0; i<nbuf; ++i)
-				buflens[i] = int(lens[i]);
-			return MQTTASYNC_SUCCESS;
-		}
-	}
-	catch (...) {}
-	return MQTTCLIENT_PERSISTENCE_ERROR;
-}
-
-// Callback after reading the data from persistence.
-// It allows the application to decode/decrypt the data.
-int ipersistence_encoder::after_read(void* context, char** buf, int* buflen)
-{
-	try {
-		if (context && buf && *buf && buflen && *buflen > 0) {
-			size_t len = *buflen;
-			static_cast<ipersistence_encoder*>(context)->decode(buf, &len);
-			*buflen = int(len);
-			return MQTTASYNC_SUCCESS;
-		}
-	}
-	catch (...) {}
 	return MQTTCLIENT_PERSISTENCE_ERROR;
 }
 

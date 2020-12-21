@@ -107,8 +107,7 @@ public:
 	 *  				  then no persistence is used.
 	 */
 	client(const string& serverURI, const string& clientId,
-		   iclient_persistence* persistence=nullptr,
-		   ipersistence_encoder* encoder=nullptr);
+		   iclient_persistence* persistence=nullptr);
 	/**
 	 * Create an async_client that can be used to communicate with an MQTT
 	 * server.
@@ -120,8 +119,7 @@ public:
 	 * @param persistDir The directory to use for persistence data
 	 */
 	client(const string& serverURI, const string& clientId,
-		   const string& persistDir,
-		   ipersistence_encoder* encoder=nullptr);
+		   const string& persistDir);
 	/**
 	 * Create a client that can be used to communicate with an MQTT server,
 	 * which allows for off-line message buffering.
@@ -138,8 +136,7 @@ public:
 	 */
 	client(const string& serverURI, const string& clientId,
 		   int maxBufferedMessages,
-		   iclient_persistence* persistence=nullptr,
-		   ipersistence_encoder* encoder=nullptr);
+		   iclient_persistence* persistence=nullptr);
 	/**
 	 * Create a client that can be used to communicate with an MQTT server,
 	 * which allows for off-line message buffering.
@@ -151,11 +148,9 @@ public:
 	 * @param maxBufferedMessages the maximum number of messages allowed to
 	 *  						  be buffered while not connected
 	 * @param persistDir The directory to use for persistence data
-	 * @param encoder An object to encode and decode the persistence data.
 	 */
 	client(const string& serverURI, const string& clientId,
-		   int maxBufferedMessages, const string& persistDir,
-		   ipersistence_encoder* encoder=nullptr);
+		   int maxBufferedMessages, const string& persistDir);
 	/**
 	 * Create an async_client that can be used to communicate with an MQTT
 	 * server, which allows for off-line message buffering.
@@ -168,13 +163,10 @@ public:
 	 * @param opts The create options
 	 * @param persistence The user persistence structure. If this is null,
 	 *  				  then no persistence is used.
-	 * @param encoder An object to encode and decode the persistence data.
-	 * @param encoder An object to encode and decode the persistence data.
 	 */
 	client(const string& serverURI, const string& clientId,
 		   const create_options& opts,
-		   iclient_persistence* persistence=nullptr,
-		   ipersistence_encoder* encoder=nullptr);
+		   iclient_persistence* persistence=nullptr);
 	/**
 	 * Virtual destructor
 	 */

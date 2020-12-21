@@ -41,11 +41,6 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
-// Don't worry about localtime() in this context
-#if defined(_WIN32)
-	#define _CRT_SECURE_NO_WARNINGS
-#endif
-
 #include <random>
 #include <string>
 #include <thread>
@@ -55,6 +50,17 @@
 #include <cstring>
 #include <ctime>
 #include "mqtt/async_client.h"
+
+// Don't worry about localtime() in this context
+#if defined(_WIN32)
+	#define _CRT_SECURE_NO_WARNINGS
+#else
+	#include <sys/stat.h>
+	#include <sys/types.h>
+	#include <dirent.h>
+	#include <unistd.h>
+	#include <fstream>
+#endif
 
 using namespace std;
 using namespace std::chrono;
@@ -72,49 +78,136 @@ const int MAX_BUFFERED_MSGS = 120;	// 120 * 5sec => 10min off-line buffering
 const string PERSIST_DIR { "data-persist" };
 
 /////////////////////////////////////////////////////////////////////////////
+// Example of a simple, in-memory persistence class.
 
-class persistence_encoder : virtual public mqtt::ipersistence_encoder
+class encoded_file_persistence : virtual public mqtt::iclient_persistence
 {
-	// XOR bit mask for data.
-	uint16_t mask_;
+	// The name of the store
+	// Used as the directory name
+	std::string name_;
 
-	/**
-	 * Callback to let the application encode data before writing it to
-	 * persistence.
-	 */
-	void encode(size_t nbuf, char* bufs[], size_t lens[]) override {
-		for (size_t i=0; i<nbuf; ++i) {
-			auto sz = lens[i];
-			auto buf16 = static_cast<uint16_t*>(mqtt::persistence_malloc(sz*2));
+	// Whether the store is open
+	bool open_;
 
-			for (size_t j=0; j<sz; ++j)
-				buf16[j] = uint16_t(bufs[i][j] ^ mask_);
-
-			mqtt::persistence_free(bufs[i]);
-			bufs[i] = reinterpret_cast<char*>(buf16);
-			lens[i] = sz*2;
-		}
-	}
-	/**
-	 * Callback to let the application decode data after it is retrieved
-	 * from persistence.
-	 *
-	 * We do an in-place decode taking care with the overlapped data.
-	 */
-	void decode(char** pbuf, size_t* len) override {
-		cout << "Decoding buffer @: 0x" << pbuf << endl;
-		char* buf = *pbuf;
-		uint16_t* buf16 = reinterpret_cast<uint16_t*>(*pbuf);
-		size_t sz = *len / 2;
-
-		for (size_t i=0; i<sz; ++i)
-			buf[i] = char(buf16[i] ^ mask_);
-
-		*len = sz;
-	}
+	// A key for encoding the data
+	std::string encodeKey_;
 
 public:
-	persistence_encoder() : mask_(0x0055) {}
+	encoded_file_persistence(const std::string& encodeKey)
+			: open_(false), encodeKey_(encodeKey) {}
+
+	// "Open" the store
+	void open(const std::string& clientId, const std::string& serverURI) override {
+		if (open_)
+			return;
+
+		if (clientId.empty() || serverURI.empty())
+			throw mqtt::persistence_exception();
+
+		name_ = serverURI + "-" + clientId;
+		for (char& c : name_) {
+			if (c == ':')
+				c = '-';
+		}
+
+		mkdir(name_.c_str(), S_IRWXU | S_IRWXG);
+		open_ = true;
+	}
+
+	// Close the persistent store that was previously opened.
+	void close() override {
+		if (!open_)
+			return;
+
+		rmdir(name_.c_str());
+		open_ = false;
+	}
+
+	// Clears persistence, so that it no longer contains any persisted data.
+	void clear() override {
+		DIR* dir = opendir(name_.c_str());
+		if (!dir)
+			return;
+
+		dirent *next;
+		while ((next = readdir(dir)) != nullptr) {
+			auto fname = std::string(next->d_name);
+			if (fname == "." || fname == "..") continue;
+			std::string path = name_ + "/" + fname;
+			remove(path.c_str());
+		}
+		closedir(dir);
+	}
+
+	// Returns whether or not data is persisted using the specified key.
+	bool contains_key(const std::string& key) override {
+		DIR* dir = opendir(name_.c_str());
+		if (!dir)
+			return false;
+
+		dirent *next;
+		while ((next = readdir(dir)) != nullptr) {
+			if (std::string(next->d_name) == key) {
+				closedir(dir);
+				return true;
+			}
+		}
+		closedir(dir);
+		return false;
+	}
+
+	// Returns the keys in this persistent data store.
+	mqtt::string_collection keys() const override {
+		mqtt::string_collection ks;
+		DIR* dir = opendir(name_.c_str());
+		if (!dir)
+			return ks;
+
+		dirent *next;
+		while ((next = readdir(dir)) != nullptr) {
+			auto fname = std::string(next->d_name);
+			if (fname == "." || fname == "..") continue;
+			ks.push_back(fname);
+		}
+
+		closedir(dir);
+		return ks;
+	}
+
+	// Puts the specified data into the persistent store.
+	void put(const std::string& key, const std::vector<mqtt::string_view>& bufs) override {
+		std::string path = name_ + "/" + key;
+
+		ofstream os(path, ios_base::binary);
+		if (!os)
+			throw mqtt::persistence_exception();
+
+		for (const auto& b : bufs)
+			os.write(b.data(), b.size());
+	}
+
+	// Gets the specified data out of the persistent store.
+	std::string get(const std::string& key) const override {
+		std::string path = name_ + "/" + key;
+
+		ifstream is(path, ios_base::ate|ios_base::binary);
+		if (!is)
+			throw mqtt::persistence_exception();
+
+		streamsize sz = is.tellg();
+		is.seekg(0);
+		std::string s(sz, '\0');
+		is.read(&s[0], sz);
+		if (is.gcount() < sz)
+			s.resize(is.gcount());
+		return s;
+	}
+
+	// Remove the data for the specified key.
+	void remove(const std::string &key) override {
+		std::string path = name_ + "/" + key;
+		::remove(path.c_str());
+	}
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -123,9 +216,8 @@ int main(int argc, char* argv[])
 {
 	string address = (argc > 1) ? string(argv[1]) : DFLT_ADDRESS;
 
-	persistence_encoder encoder;
-	mqtt::async_client cli(address, CLIENT_ID, MAX_BUFFERED_MSGS,
-						   PERSIST_DIR, &encoder);
+	encoded_file_persistence persist("elephant");
+	mqtt::async_client cli(address, CLIENT_ID, MAX_BUFFERED_MSGS, &persist);
 
 	auto connOpts = mqtt::connect_options_builder()
 		.keep_alive_interval(MAX_BUFFERED_MSGS * PERIOD)
@@ -176,7 +268,7 @@ int main(int argc, char* argv[])
 			tm += PERIOD;
 
 			// TODO: Get rid of this
-			break;
+			if (nsample == 5) break;
 		}
 
 		// Disconnect

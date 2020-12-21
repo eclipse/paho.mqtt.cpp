@@ -87,9 +87,8 @@ public:
 
 	// Returns the keys in this persistent data store.
 	// This could be more efficient, but you get the point.
-	const mqtt::string_collection& keys() const override {
-		static mqtt::string_collection ks;
-		ks.clear();
+	mqtt::string_collection keys() const override {
+		mqtt::string_collection ks;
 		for (const auto& k : store_)
 			ks.push_back(k.first);
 		return ks;
@@ -104,11 +103,11 @@ public:
 	}
 
 	// Gets the specified data out of the persistent store.
-	mqtt::string_view get(const std::string& key) const override {
+	std::string get(const std::string& key) const override {
 		auto p = store_.find(key);
 		if (p == store_.end())
 			throw mqtt::persistence_exception();
-		return mqtt::string_view(p->second);
+		return p->second;
 	}
 
 	// Remove the data for the specified key.
