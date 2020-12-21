@@ -75,35 +75,46 @@ const string PERSIST_DIR { "data-persist" };
 
 class persistence_encoder : virtual public mqtt::ipersistence_encoder
 {
+	// XOR bit mask for data.
+	uint16_t mask_;
+
 	/**
 	 * Callback to let the application encode data before writing it to
 	 * persistence.
 	 */
-	//void encode(mqtt::string_view bufs[], size_t n) override {
 	void encode(size_t nbuf, char* bufs[], size_t lens[]) override {
-		cout << "Encoding " << nbuf << " buffers" << endl;
-		auto sz = lens[0];
-		auto buf = mqtt::persistence_malloc(sz+6);
-		strcpy(buf, "bubba");
-		memcpy(buf+6, &bufs[0][0], sz);
-		bufs[0] = buf;
-		lens[0] = sz+6;
+		for (size_t i=0; i<nbuf; ++i) {
+			auto sz = lens[i];
+			auto buf16 = static_cast<uint16_t*>(mqtt::persistence_malloc(sz*2));
+
+			for (size_t j=0; j<sz; ++j)
+				buf16[j] = uint16_t(bufs[i][j] ^ mask_);
+
+			mqtt::persistence_free(bufs[i]);
+			bufs[i] = reinterpret_cast<char*>(buf16);
+			lens[i] = sz*2;
+		}
 	}
 	/**
 	 * Callback to let the application decode data after it is retrieved
 	 * from persistence.
 	 *
-	 * @param buffers The data buffers that need to be decoded.
-	 * @param n The number of buffers
+	 * We do an in-place decode taking care with the overlapped data.
 	 */
-	//void decode(mqtt::string_view& buf) override {
 	void decode(char** pbuf, size_t* len) override {
 		cout << "Decoding buffer @: 0x" << pbuf << endl;
-		auto buf = *pbuf;
-		auto sz = *len;
-		std::memmove(&buf[0], &buf[6], sz-6);
-		*len = sz-6;
+		char* buf = *pbuf;
+		uint16_t* buf16 = reinterpret_cast<uint16_t*>(*pbuf);
+		size_t sz = *len / 2;
+
+		for (size_t i=0; i<sz; ++i)
+			buf[i] = char(buf16[i] ^ mask_);
+
+		*len = sz;
 	}
+
+public:
+	persistence_encoder() : mask_(0x0055) {}
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -163,6 +174,9 @@ int main(int argc, char* argv[])
 			top.publish(std::move(payload));
 
 			tm += PERIOD;
+
+			// TODO: Get rid of this
+			break;
 		}
 
 		// Disconnect

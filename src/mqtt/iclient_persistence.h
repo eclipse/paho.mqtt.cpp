@@ -38,15 +38,15 @@ namespace mqtt {
  * @param n The number of bytes for the buffer.
  * @return A pointer to the allocated memory
  */
-inline char* persistence_malloc(size_t n) {
-	return static_cast<char*>(MQTTAsync_malloc(n));
+inline void* persistence_malloc(size_t n) {
+	return MQTTAsync_malloc(n);
 }
 
 /**
  * Frees memory allocated with @ref persistence_malloc
  * @param p Pointer to a buffer obtained by persistence_malloc.
  */
-inline void persistence_free(char* p) {
+inline void persistence_free(void* p) {
 	MQTTAsync_free(p);
 }
 
