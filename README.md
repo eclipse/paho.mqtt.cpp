@@ -41,9 +41,9 @@ To keep up with the latest announcements for this project, or to ask questions:
 
 ### Unreleased Features in this Branch
 
-**This branch requires Paho MQTT C library _v1.3.7_ or greater.**
+**This branch requires Paho MQTT C library _v1.3.7_ or greater, preferably the soon-to-be-released v.1.3.8 (Paho C GitHub _develop_ branch).**
 
-Note that this branch will be formally released to coincide with the release of Paho C v1.3.8. Currently it is being tested against the debug branch of the C lib. This document, however, has mostly been updated to reflect the upcoming v1.3.8 release. That version, v1.3.8, does not yet exist, but should be out shortly.
+Note that this branch will be formally released to coincide with the release of Paho C v1.3.8. Currently it is being tested against the _develop_ branch of the C lib. This document, however, has mostly been updated to reflect the upcoming v1.3.8 release. That version, v1.3.8, does not yet exist, but should be out shortly.
 
 - New `create_options` that can be used to construct a client with new features:
     - Send while disconnected before the 1st successful connection
@@ -54,12 +54,18 @@ Note that this branch will be formally released to coincide with the release of 
 - User-defined websocket HTTP headers.
 - HTTP/S proxy support
 - SSL/TLS error and PSK callback support
-- Support for user-defined persistence encoding/decoding.
+- Update connection callback support (change credentials when using auto-reconnect)
+- Updates to the sample apps:
+    - Overall cleanup with better consistency
+    - Example of using websockets and a proxy
+    - User-based file persistence with simple encoding/encryption
+    - Sharing a client between multiple threads
 - Converted the unit tests to use Catch2
 - [#231] Added `on_disconnected` callback to handle receipt of disconnect packet from server.
 - [#211, 223, #235] Removed use of Log() function from the Paho C library.
 - [#227] Fixed race condition in thread-safe queue
 - [#224] & [#255] Subscribing to MQTT v3 broker with array of one topic causes segfault.
+- [#282] Ability to build Debian/Ubuntu package
 
 Targets Paho C v1.3.8
 
@@ -114,7 +120,7 @@ PAHO_BUILD_SHARED | TRUE (Linux), FALSE (Win32) | Whether to build the shared li
 PAHO_BUILD_STATIC | FALSE (Linux), TRUE (Win32) | Whether to build the static library
 PAHO_BUILD_DOCUMENTATION | FALSE | Create and install the HTML based API documentation (requires Doxygen)
 PAHO_BUILD_SAMPLES | FALSE | Build sample programs
-PAHO_BUILD_TESTS | FALSE | Build the unit tests. (This currently requires both _CppUnit_ and _Catch2_)
+PAHO_BUILD_TESTS | FALSE | Build the unit tests. (This requires _Catch2_)
 PAHO_WITH_SSL | TRUE (Linux), FALSE (Win32) | Flag that defines whether to build ssl-enabled binaries too
 PAHO_BUILD_DEB_PACKAGE | FALSE | Flag that configures cpack to build a Debian/Ubuntu package
 
@@ -148,11 +154,7 @@ Building the documentation requires doxygen and optionally graphviz to be instal
 $ sudo apt-get install doxygen graphviz
 ```
 
-Unite tests are currently being built using both _CppUnit_ and _Catch2_. The _CppUnit_ tests are being deprecated and replaced with _Catch2_ equivalents. In the meantime, however, both systems are required to build the tests.
-
-```
-$ sudo apt-get install libcppunit-dev
-```
+Unite tests are being built using _Catch2_. 
 
 _Catch2_ can be found here: [Catch2](https://github.com/catchorg/Catch2)
 
@@ -199,7 +201,6 @@ $ CXX=clang++ cmake ..
 ```
 
 or the `CMAKE_CXX_COMPILER` flag can be used:
-
 
 ```
 $ cmake -DCMAKE_CXX_COMPILER=clang++
@@ -293,6 +294,18 @@ Then use it to build the C++ library:
 
 *Note that it is very important that you use the same generator (target) to build BOTH libraries, otherwise you will get lots of linker errors when you try to build the C++ library.*
 
+## Supported Protocols
+
+The library supports connecting to an MQTT server/broker using TCP, SSL/TLS, and websockets (secure and unsecure). This is chosen by the URI supplied to the connect() call. It can be specified as:
+
+```
+"tcp://<host>:<port>"  - TCP (unsecure)
+"ssl://<host>:<port>"  - SSL/TLS
+"ws://<host>:<port>"   - Unsecure websockets
+"wss://<host>:<port>"  - Secure websockets
+```
+
+Note that to use "ssl://" or "wss://" you must compile the library with OpenSSL, and you _must_ supply a set of `ssl_options` with the `connect_options`.
 
 ## Example
 
@@ -305,31 +318,32 @@ This is a partial example of what a typical example might look like:
 int main(int argc, char* argv[])
 {
     sample_mem_persistence persist;
-    mqtt::client client(ADDRESS, CLIENTID, &persist);
+    mqtt::client cli(ADDRESS, CLIENT_ID, &persist);
 
     callback cb;
-    client.set_callback(cb);
+    cli.set_callback(cb);
 
-    mqtt::connect_options connOpts;
-    connOpts.set_keep_alive_interval(20);
-    connOpts.set_clean_session(true);
+    auto connOpts = mqtt::connect_options_builder() 
+        .keep_alive_interval(20);
+        .clean_session()
+        .finalize();
 
     try {
-        client.connect(connOpts);
+        cli.connect(connOpts);
 
         // First use a message pointer.
 
         mqtt::message_ptr pubmsg = mqtt::make_message(PAYLOAD1);
         pubmsg->set_qos(QOS);
-        client.publish(TOPIC, pubmsg);
+        cli.publish(TOPIC, pubmsg);
 
         // Now try with itemized publish.
 
-        client.publish(TOPIC, PAYLOAD2, strlen(PAYLOAD2)+1, 0, false);
+        cli.publish(TOPIC, PAYLOAD2, strlen(PAYLOAD2)+1, 0, false);
 
         // Disconnect
         
-        client.disconnect();
+        cli.disconnect();
     }
     catch (const mqtt::persistence_exception& exc) {
         cerr << "Persistence Error: " << exc.what() << " ["
