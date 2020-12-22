@@ -122,8 +122,10 @@ int iclient_persistence::persistence_keys(void* handle, char*** keys, int* nkeys
 			else {
 				*keys = static_cast<char**>(MQTTAsync_malloc(n*sizeof(char*)));
 				for (size_t i=0; i<n; ++i) {
-					char* buf = static_cast<char*>(MQTTAsync_malloc(k[i].size()+1));
-					strcpy(buf, k[i].c_str());
+					auto sz = k[i].size();
+					char* buf = static_cast<char*>(MQTTAsync_malloc(sz+1));
+					strncpy(buf, k[i].c_str(), sz+1);
+					buf[sz] = '\0';
 					(*keys)[i] = buf;
 				}
 			}

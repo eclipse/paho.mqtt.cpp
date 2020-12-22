@@ -64,6 +64,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 include(GNUInstallDirs)
 
 if(WIN32)
+	  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
     set(LIBS_SYSTEM ws2_32)
 elseif(UNIX)

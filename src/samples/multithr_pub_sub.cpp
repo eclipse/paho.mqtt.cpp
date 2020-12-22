@@ -60,7 +60,7 @@
 using namespace std;
 using namespace std::chrono;
 
-const std::string SERVER_ADDRESS("tcp://localhost:1883");
+const std::string DFLT_SERVER_ADDRESS("tcp://localhost:1883");
 const std::string CLIENT_ID("multithr_pub_sub_cpp");
 
 /////////////////////////////////////////////////////////////////////////////
@@ -139,8 +139,10 @@ void publisher_func(mqtt::async_client_ptr cli, multithr_counter::ptr_t counter)
 
 int main(int argc, char* argv[])
 {
+	 string address = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS;
+
 	// Create an MQTT client using a smart pointer to be shared among threads.
-	auto cli = std::make_shared<mqtt::async_client>(SERVER_ADDRESS, CLIENT_ID);
+	auto cli = std::make_shared<mqtt::async_client>(address, CLIENT_ID);
 
 	// Make a counter object also with a shared pointer.
 	auto counter = std::make_shared <multithr_counter>();
@@ -160,7 +162,7 @@ int main(int argc, char* argv[])
 		// we're using a persistent (non-clean) session with the broker.
 		cli->start_consuming();
 
-		cout << "Connecting to the MQTT server..." << flush;
+		cout << "Connecting to the MQTT server at " << address << "..." << flush;
 		auto rsp = cli->connect(connOpts)->get_connect_response();
 		cout << "OK\n" << endl;
 

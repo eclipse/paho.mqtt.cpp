@@ -41,6 +41,14 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
+#if !defined(_WIN32)
+	#include <sys/stat.h>
+	#include <sys/types.h>
+	#include <dirent.h>
+	#include <unistd.h>
+	#include <fstream>
+#endif
+
 #include <random>
 #include <string>
 #include <thread>
@@ -51,17 +59,6 @@
 #include <cstring>
 #include <ctime>
 #include "mqtt/async_client.h"
-
-// Don't worry about localtime() in this context
-#if defined(_WIN32)
-	#define _CRT_SECURE_NO_WARNINGS
-#else
-	#include <sys/stat.h>
-	#include <sys/types.h>
-	#include <dirent.h>
-	#include <unistd.h>
-	#include <fstream>
-#endif
 
 using namespace std;
 using namespace std::chrono;
@@ -79,6 +76,11 @@ const int MAX_BUFFERED_MSGS = 120;	// 120 * 5sec => 10min off-line buffering
 const string PERSIST_DIR { "data-persist" };
 
 /////////////////////////////////////////////////////////////////////////////
+
+// At some point, when the library gets updated to C++17, we can use
+// std::filesystem to make a portable version of this.
+
+#if !defined(_WIN32)
 
 // Example of user-based file persistence with a simple XOR encoding scheme.
 //
@@ -244,6 +246,7 @@ public:
 		::remove(path.c_str());
 	}
 };
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -251,8 +254,12 @@ int main(int argc, char* argv[])
 {
 	string address = (argc > 1) ? string(argv[1]) : DFLT_ADDRESS;
 
-	encoded_file_persistence persist("elephant");
-	mqtt::async_client cli(address, CLIENT_ID, MAX_BUFFERED_MSGS, &persist);
+	#if defined(_WIN32)
+		mqtt::async_client cli(address, CLIENT_ID, MAX_BUFFERED_MSGS);
+	#else
+		encoded_file_persistence persist("elephant");
+		mqtt::async_client cli(address, CLIENT_ID, MAX_BUFFERED_MSGS, &persist);
+	#endif
 
 	auto connOpts = mqtt::connect_options_builder()
 		.keep_alive_interval(MAX_BUFFERED_MSGS * PERIOD)

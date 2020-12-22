@@ -271,7 +271,8 @@ int async_client::on_update_connection(void* context,
 				auto n = data.get_user_name().length();
 				if (n > 0) {
 					char* username = static_cast<char*>(MQTTAsync_malloc(n+1));
-					strcpy(username, data.get_user_name().c_str());
+					strncpy(username, data.get_user_name().c_str(), n+1);
+					username[n] = '\0';
 					cdata->username = username;
 				}
 				else
