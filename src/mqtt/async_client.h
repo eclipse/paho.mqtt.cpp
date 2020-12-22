@@ -570,7 +570,8 @@ public:
 	 *  	   The token will be passed to callback methods if set.
 	 */
 	token_ptr subscribe(const string& topicFilter, int qos,
-						const subscribe_options& opts=subscribe_options()) override;
+						const subscribe_options& opts=subscribe_options(),
+						const properties& props=properties()) override;
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 * @param topicFilter the topic to subscribe to, which can include
@@ -588,7 +589,8 @@ public:
 	 */
 	token_ptr subscribe(const string& topicFilter, int qos,
 						void* userContext, iaction_listener& cb,
-						const subscribe_options& opts=subscribe_options()) override;
+						const subscribe_options& opts=subscribe_options(),
+						const properties& props=properties()) override;
 	/**
 	 * Subscribe to multiple topics, each of which may include wildcards.
 	 * @param topicFilters
@@ -602,7 +604,8 @@ public:
 	 */
 	token_ptr subscribe(const_string_collection_ptr topicFilters,
 						const qos_collection& qos,
-						const std::vector<subscribe_options>& opts=std::vector<subscribe_options>()) override;
+						const std::vector<subscribe_options>& opts=std::vector<subscribe_options>(),
+						const properties& props=properties()) override;
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
 	 * @param topicFilters
@@ -620,7 +623,8 @@ public:
 	token_ptr subscribe(const_string_collection_ptr topicFilters,
 						const qos_collection& qos,
 						void* userContext, iaction_listener& cb,
-						const std::vector<subscribe_options>& opts=std::vector<subscribe_options>()) override;
+						const std::vector<subscribe_options>& opts=std::vector<subscribe_options>(),
+						const properties& props=properties()) override;
 	/**
 	 * Requests the server unsubscribe the client from a topic.
 	 * @param topicFilter the topic to unsubscribe from. It must match a
@@ -628,7 +632,8 @@ public:
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	token_ptr unsubscribe(const string& topicFilter) override;
+	token_ptr unsubscribe(const string& topicFilter,
+						  const properties& props=properties()) override;
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
 	 * @param topicFilters one or more topics to unsubscribe from. Each
@@ -637,7 +642,8 @@ public:
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	token_ptr unsubscribe(const_string_collection_ptr topicFilters) override;
+	token_ptr unsubscribe(const_string_collection_ptr topicFilters,
+						  const properties& props=properties()) override;
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
 	 * @param topicFilters
@@ -649,7 +655,8 @@ public:
 	 *  	   The token will be passed to callback methods if set.
 	 */
 	token_ptr unsubscribe(const_string_collection_ptr topicFilters,
-						   void* userContext, iaction_listener& cb) override;
+						  void* userContext, iaction_listener& cb,
+						  const properties& props=properties()) override;
 	/**
 	 * Requests the server unsubscribe the client from a topics.
 	 * @param topicFilter the topic to unsubscribe from. It must match a
@@ -662,8 +669,8 @@ public:
 	 *  	   The token will be passed to callback methods if set.
 	 */
 	token_ptr unsubscribe(const string& topicFilter,
-						  void* userContext, iaction_listener& cb) override;
-
+						  void* userContext, iaction_listener& cb,
+						  const properties& props=properties()) override;
 	/**
 	 * Start consuming messages.
 	 * This initializes the client to receive messages through a queue that

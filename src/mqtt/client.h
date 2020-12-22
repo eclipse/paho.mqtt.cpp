@@ -311,36 +311,46 @@ public:
 	 * Subscribe to a topic, which may include wildcards using a QoS of 1.
 	 * @param topicFilter
 	 */
-	virtual subscribe_response subscribe(const string& topicFilter);
+	virtual subscribe_response subscribe(const string& topicFilter,
+										 const subscribe_options& opts=subscribe_options(),
+										 const properties& props=properties());
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 * @param topicFilter A single topic to subscribe
 	 * @param qos The QoS of the subscription
 	 */
-	virtual subscribe_response subscribe(const string& topicFilter, int qos);
+	virtual subscribe_response subscribe(const string& topicFilter, int qos,
+										 const subscribe_options& opts=subscribe_options(),
+										 const properties& props=properties());
 	/**
 	 * Subscribes to a one or more topics, which may include wildcards using
 	 * a QoS of 1.
 	 * @param topicFilters A set of topics to subscribe
 	 */
-	virtual subscribe_response subscribe(const string_collection& topicFilters);
+	virtual subscribe_response subscribe(const string_collection& topicFilters,
+										 const std::vector<subscribe_options>& opts=std::vector<subscribe_options>(),
+										 const properties& props=properties());
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
 	 * @param topicFilters A collection of topics to subscribe
 	 * @param qos A collection of QoS for each topic
 	 */
 	virtual subscribe_response subscribe(const string_collection& topicFilters,
-										 const qos_collection& qos);
+										 const qos_collection& qos,
+										 const std::vector<subscribe_options>& opts=std::vector<subscribe_options>(),
+										 const properties& props=properties());
 	/**
 	 * Requests the server unsubscribe the client from a topic.
 	 * @param topicFilter A single topic to unsubscribe.
 	 */
-	virtual unsubscribe_response unsubscribe(const string& topicFilter);
+	virtual unsubscribe_response unsubscribe(const string& topicFilter,
+											 const properties& props=properties());
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
 	 * @param topicFilters A collection of topics to unsubscribe.
 	 */
-	virtual unsubscribe_response unsubscribe(const string_collection& topicFilters);
+	virtual unsubscribe_response unsubscribe(const string_collection& topicFilters,
+											 const properties& props=properties());
 	/**
 	 * Start consuming messages.
 	 * This initializes the client to receive messages through a queue that

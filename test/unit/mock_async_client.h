@@ -161,44 +161,52 @@ public:
 	void disable_callbacks() override {}
 
 	mqtt::token_ptr subscribe(const string& topicFilter, int qos,
-							  const subscribe_options& opts=subscribe_options()) override {
+							  const subscribe_options& opts=subscribe_options(),
+							  const properties& props=properties()) override {
 		return mqtt::token_ptr{};
 	}
 
 	mqtt::token_ptr subscribe(const string& topicFilter, int qos,
 							  void* userContext, iaction_listener& callback,
-							  const subscribe_options& opts=subscribe_options()) override {
+							  const subscribe_options& opts=subscribe_options(),
+							  const properties& props=properties()) override {
 		return mqtt::token_ptr{};
 	}
 
 	mqtt::token_ptr subscribe(const_string_collection_ptr topicFilters,
 							  const qos_collection& qos,
-							  const std::vector<subscribe_options>& opts=std::vector<subscribe_options>()) override {
+							  const std::vector<subscribe_options>& opts=std::vector<subscribe_options>(),
+							  const properties& props=properties()) override {
 		return mqtt::token_ptr{};
 	}
 
 	mqtt::token_ptr subscribe(const_string_collection_ptr topicFilters,
 							  const qos_collection& qos,
 							  void* userContext, iaction_listener& callback,
-							  const std::vector<subscribe_options>& opts=std::vector<subscribe_options>()) override {
-		return mqtt::token_ptr{};
-	}
-
-	mqtt::token_ptr unsubscribe(const string& topicFilter) override {
-		return mqtt::token_ptr{};
-	}
-
-	mqtt::token_ptr unsubscribe(const_string_collection_ptr topicFilters) override {
-		return mqtt::token_ptr{};
-	}
-
-	mqtt::token_ptr unsubscribe(const_string_collection_ptr topicFilters,
-								void* userContext, mqtt::iaction_listener& cb) override {
+							  const std::vector<subscribe_options>& opts=std::vector<subscribe_options>(),
+							  const properties& props=properties()) override {
 		return mqtt::token_ptr{};
 	}
 
 	mqtt::token_ptr unsubscribe(const string& topicFilter,
-								void* userContext, mqtt::iaction_listener& cb) override {
+								const properties& props=properties()) override {
+		return mqtt::token_ptr{};
+	}
+
+	mqtt::token_ptr unsubscribe(const_string_collection_ptr topicFilters,
+								const properties& props=properties()) override {
+		return mqtt::token_ptr{};
+	}
+
+	mqtt::token_ptr unsubscribe(const_string_collection_ptr topicFilters,
+								void* userContext, mqtt::iaction_listener& cb,
+								const properties& props=properties()) override {
+		return mqtt::token_ptr{};
+	}
+
+	mqtt::token_ptr unsubscribe(const string& topicFilter,
+								void* userContext, mqtt::iaction_listener& cb,
+								const properties& props=properties()) override {
 		return mqtt::token_ptr{};
 	}
 };

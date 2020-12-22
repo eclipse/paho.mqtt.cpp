@@ -657,14 +657,18 @@ delivery_token_ptr async_client::publish(const_message_ptr msg,
 // Subscribe
 
 token_ptr async_client::subscribe(const string& topicFilter, int qos,
-								  const subscribe_options& opts /*=subscribe_options()*/)
+								  const subscribe_options& opts /*=subscribe_options()*/,
+								  const properties& props /*=properties()*/)
 {
 	auto tok = token::create(token::Type::SUBSCRIBE, *this, topicFilter);
 	tok->set_num_expected(0);	// Indicates non-array response for single val
 	add_token(tok);
 
-	response_options rspOpts(tok, mqttVersion_);
-	rspOpts.set_subscribe_options(opts);
+	auto rspOpts = response_options_builder(mqttVersion_)
+		.token(tok)
+		.subscribe_opts(opts)
+		.properties(props)
+		.finalize();
 
 	int rc = MQTTAsync_subscribe(cli_, topicFilter.c_str(), qos, &rspOpts.opts_);
 
@@ -678,15 +682,19 @@ token_ptr async_client::subscribe(const string& topicFilter, int qos,
 
 token_ptr async_client::subscribe(const string& topicFilter, int qos,
 								  void* userContext, iaction_listener& cb,
-								  const subscribe_options& opts /*=subscribe_options()*/)
+								  const subscribe_options& opts /*=subscribe_options()*/,
+								  const properties& props /*=properties()*/)
 {
 	auto tok = token::create(token::Type::SUBSCRIBE, *this, topicFilter,
 							 userContext, cb);
 	tok->set_num_expected(0);
 	add_token(tok);
 
-	response_options rspOpts(tok, mqttVersion_);
-	rspOpts.set_subscribe_options(opts);
+	auto rspOpts = response_options_builder(mqttVersion_)
+		.token(tok)
+		.subscribe_opts(opts)
+		.properties(props)
+		.finalize();
 
 	int rc = MQTTAsync_subscribe(cli_, topicFilter.c_str(), qos, &rspOpts.opts_);
 
@@ -701,7 +709,8 @@ token_ptr async_client::subscribe(const string& topicFilter, int qos,
 token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 								  const qos_collection& qos,
 								  const std::vector<subscribe_options>& opts
-									/*=std::vector<subscribe_options>()*/)
+									/*=std::vector<subscribe_options>()*/,
+								  const properties& props /*=properties()*/)
 {
 	size_t n = topicFilters->size();
 
@@ -710,11 +719,13 @@ token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 
 	auto tok = token::create(token::Type::SUBSCRIBE, *this, topicFilters);
 	tok->set_num_expected(n);
-
 	add_token(tok);
 
-	response_options rspOpts(tok, mqttVersion_);
-	rspOpts.set_subscribe_options(opts);
+	auto rspOpts = response_options_builder(mqttVersion_)
+		.token(tok)
+		.subscribe_opts(opts)
+		.properties(props)
+		.finalize();
 
 	int rc = MQTTAsync_subscribeMany(cli_, int(n), topicFilters->c_arr(),
 									 const_cast<int*>(qos.data()), &rspOpts.opts_);
@@ -731,7 +742,8 @@ token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 								  const qos_collection& qos,
 								  void* userContext, iaction_listener& cb,
 								  const std::vector<subscribe_options>& opts
-									/*=std::vector<subscribe_options>()*/)
+									/*=std::vector<subscribe_options>()*/,
+								  const properties& props /*=properties()*/)
 {
 	size_t n = topicFilters->size();
 
@@ -743,8 +755,11 @@ token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 	tok->set_num_expected(n);
 	add_token(tok);
 
-	response_options rspOpts(tok, mqttVersion_);
-	rspOpts.set_subscribe_options(opts);
+	auto rspOpts = response_options_builder(mqttVersion_)
+		.token(tok)
+		.subscribe_opts(opts)
+		.properties(props)
+		.finalize();
 
 	int rc = MQTTAsync_subscribeMany(cli_, int(n), topicFilters->c_arr(),
 									 const_cast<int*>(qos.data()), &rspOpts.opts_);
@@ -760,13 +775,17 @@ token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 // --------------------------------------------------------------------------
 // Unsubscribe
 
-token_ptr async_client::unsubscribe(const string& topicFilter)
+token_ptr async_client::unsubscribe(const string& topicFilter,
+									const properties& props /*=properties()*/)
 {
 	auto tok = token::create(token::Type::UNSUBSCRIBE, *this, topicFilter);
 	tok->set_num_expected(0);	// Indicates non-array response for single val
 	add_token(tok);
 
-	response_options rspOpts(tok, mqttVersion_);
+	auto rspOpts = response_options_builder(mqttVersion_)
+		.token(tok)
+		.properties(props)
+		.finalize();
 
 	int rc = MQTTAsync_unsubscribe(cli_, topicFilter.c_str(), &rspOpts.opts_);
 
@@ -778,7 +797,8 @@ token_ptr async_client::unsubscribe(const string& topicFilter)
 	return tok;
 }
 
-token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters)
+token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters,
+									const properties& props /*=properties()*/)
 {
 	size_t n = topicFilters->size();
 
@@ -786,7 +806,10 @@ token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters)
 	tok->set_num_expected(n);
 	add_token(tok);
 
-	response_options rspOpts(tok, mqttVersion_);
+	auto rspOpts = response_options_builder(mqttVersion_)
+		.token(tok)
+		.properties(props)
+		.finalize();
 
 	int rc = MQTTAsync_unsubscribeMany(cli_, int(n),
 									   topicFilters->c_arr(), &rspOpts.opts_);
@@ -800,7 +823,8 @@ token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters)
 }
 
 token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters,
-									 void* userContext, iaction_listener& cb)
+									void* userContext, iaction_listener& cb,
+									const properties& props /*=properties()*/)
 {
 	size_t n = topicFilters->size();
 
@@ -809,7 +833,10 @@ token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters,
 	tok->set_num_expected(n);
 	add_token(tok);
 
-	response_options rspOpts(tok, mqttVersion_);
+	auto rspOpts = response_options_builder(mqttVersion_)
+		.token(tok)
+		.properties(props)
+		.finalize();
 
 	int rc = MQTTAsync_unsubscribeMany(cli_, int(n), topicFilters->c_arr(), &rspOpts.opts_);
 
@@ -822,13 +849,17 @@ token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters,
 }
 
 token_ptr async_client::unsubscribe(const string& topicFilter,
-									void* userContext, iaction_listener& cb)
+									void* userContext, iaction_listener& cb,
+									const properties& props /*=properties()*/)
 {
 	auto tok = token::create(token::Type::UNSUBSCRIBE , *this, topicFilter,
 							 userContext, cb);
 	add_token(tok);
 
-	response_options rspOpts(tok, mqttVersion_);
+	auto rspOpts = response_options_builder(mqttVersion_)
+		.token(tok)
+		.properties(props)
+		.finalize();
 
 	int rc = MQTTAsync_unsubscribe(cli_, topicFilter.c_str(), &rspOpts.opts_);
 

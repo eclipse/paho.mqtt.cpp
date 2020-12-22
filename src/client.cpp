@@ -99,49 +99,59 @@ connect_response client::reconnect()
 	return tok->get_connect_response();
 }
 
-subscribe_response client::subscribe(const string& topicFilter)
+subscribe_response client::subscribe(const string& topicFilter,
+									 const subscribe_options& opts /*=subscribe_options()*/,
+									 const properties& props /*=properties()*/)
 {
-	auto tok = cli_.subscribe(topicFilter, DFLT_QOS);
+	auto tok = cli_.subscribe(topicFilter, DFLT_QOS, opts, props);
 	tok->wait_for(timeout_);
 	return tok->get_subscribe_response();
 }
 
-subscribe_response client::subscribe(const string& topicFilter, int qos)
+subscribe_response client::subscribe(const string& topicFilter, int qos,
+									 const subscribe_options& opts /*=subscribe_options()*/,
+									 const properties& props /*=properties()*/)
 {
-	auto tok = cli_.subscribe(topicFilter, qos);
-	tok->wait_for(timeout_);
-	return tok->get_subscribe_response();
-}
-
-subscribe_response client::subscribe(const string_collection& topicFilters)
-{
-	qos_collection qos;
-	for (size_t i=0; i<topicFilters.size(); ++i)
-		qos.push_back(DFLT_QOS);
-
-	auto tok = cli_.subscribe(ptr(topicFilters), qos);
+	auto tok = cli_.subscribe(topicFilter, qos, opts, props);
 	tok->wait_for(timeout_);
 	return tok->get_subscribe_response();
 }
 
 subscribe_response client::subscribe(const string_collection& topicFilters,
-									 const qos_collection& qos)
+									 const std::vector<subscribe_options>& opts /*=std::vector<subscribe_options>()*/,
+									 const properties& props /*=properties()*/)
 {
-	auto tok = cli_.subscribe(ptr(topicFilters), qos);
+	qos_collection qos;
+	for (size_t i=0; i<topicFilters.size(); ++i)
+		qos.push_back(DFLT_QOS);
+
+	auto tok = cli_.subscribe(ptr(topicFilters), qos, opts, props);
 	tok->wait_for(timeout_);
 	return tok->get_subscribe_response();
 }
 
-unsubscribe_response client::unsubscribe(const string& topicFilter)
+subscribe_response client::subscribe(const string_collection& topicFilters,
+									 const qos_collection& qos,
+									 const std::vector<subscribe_options>& opts /*=std::vector<subscribe_options>()*/,
+									 const properties& props /*=properties()*/)
 {
-	auto tok = cli_.unsubscribe(topicFilter);
+	auto tok = cli_.subscribe(ptr(topicFilters), qos, opts, props);
+	tok->wait_for(timeout_);
+	return tok->get_subscribe_response();
+}
+
+unsubscribe_response client::unsubscribe(const string& topicFilter,
+										 const properties& props /*=properties()*/)
+{
+	auto tok = cli_.unsubscribe(topicFilter, props);
 	tok->wait_for(timeout_);
 	return tok->get_unsubscribe_response();
 }
 
-unsubscribe_response client::unsubscribe(const string_collection& topicFilters)
+unsubscribe_response client::unsubscribe(const string_collection& topicFilters,
+										 const properties& props /*=properties()*/)
 {
-	auto tok = cli_.unsubscribe(ptr(topicFilters));
+	auto tok = cli_.unsubscribe(ptr(topicFilters), props);
 	tok->wait_for(timeout_);
 	return tok->get_unsubscribe_response();
 }

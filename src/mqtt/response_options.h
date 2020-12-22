@@ -24,8 +24,12 @@ class token_test;
  * The response options for various asynchronous calls.
  *
  * This is an internal data structure, only used within the library.
-   Therefor it is not totally fleshed out, but rather only exposes the
-   functionality currently required by the library.
+ * Therefore it is not totally fleshed out, but rather only exposes the
+ * functionality currently required by the library.
+ *
+ * Note, too, in the C lib, this became a place to add MQTT v5 options for
+ * the outgoing calls without breaking the API, so is also refered to as the
+ * "call options".
  */
 class response_options
 {
@@ -35,12 +39,18 @@ class response_options
 	/** The token to which we are connected */
 	token::weak_ptr_t tok_;
 
+	/** Packet Properties (Subscribe/Unsubscribe) */
+	properties props_;
+
 	/** A list of subscription options for subscribe-many */
 	std::vector<MQTTSubscribe_options> subOpts_;
 
 	/** The client has special access */
 	friend class async_client;
 	friend class token_test;
+
+	/** Update the underlying C struct to match our data */
+	void update_c_struct();
 
 public:
 	/**
@@ -53,16 +63,48 @@ public:
 	 */
 	response_options(const token_ptr& tok, int mqttVersion=MQTTVERSION_DEFAULT);
 	/**
+	 * Copy constructor.
+	 * @param other The other options to copy to this one.
+	 */
+	response_options(const response_options& other);
+	/**
+	 * Copy operator.
+	 * @param rhs The other options to copy to this one.
+	 */
+	response_options& operator=(const response_options& rhs);
+	/**
 	 * Expose the underlying C struct for the unit tests.
 	 */
 	#if defined(UNIT_TESTS)
 		const MQTTAsync_responseOptions& c_struct() const { return opts_; }
 	#endif
 	/**
+	 * Sets the MQTT protocol version used for the response.
+	 * This sets up proper callbacks for MQTT v5 or versions prior to that.
+	 * @param mqttVersion The MQTT version used by the connection.
+	 */
+	void set_mqtt_version(int mqttVersion);
+	/**
 	 * Sets the callback context to a generic token.
 	 * @param tok The token to be used as the callback context.
 	 */
 	void set_token(const token_ptr& tok);
+	/**
+	 * Sets the properties for the connect.
+	 * @param props The properties to place into the message.
+	 */
+	void set_properties(const properties& props) {
+		props_ = props;
+		opts_.properties = props_.c_struct();
+	}
+	/**
+	 * Moves the properties for the connect.
+	 * @param props The properties to move into the connect object.
+	 */
+	void set_properties(properties&& props) {
+		props_ = std::move(props);
+		opts_.properties = props_.c_struct();
+	}
 	/**
 	 * Sets the options for a single topic subscription.
 	 * @param opts The subscribe options.
@@ -73,6 +115,80 @@ public:
 	 * @param opts A vector of the subscribe options.
 	 */
 	void set_subscribe_options(const std::vector<subscribe_options>& opts);
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Class to build response options.
+ */
+class response_options_builder
+{
+	/** The underlying options */
+	response_options opts_;
+
+public:
+	/** This class */
+	using self = response_options_builder;
+	/**
+	 * Default constructor.
+	 */
+	explicit response_options_builder(int mqttVersion=MQTTVERSION_DEFAULT)
+		: opts_(mqttVersion) {}
+	/**
+	 * Sets the MQTT protocol version used for the response.
+	 * This sets up proper callbacks for MQTT v5 or versions prior to that.
+	 * @param mqttVersion The MQTT version used by the connection.
+	 */
+	auto mqtt_version(int mqttVersion) -> self& {
+		opts_.set_mqtt_version(mqttVersion);
+		return *this;
+	}
+	/**
+	 * Sets the callback context to a generic token.
+	 * @param tok The token to be used as the callback context.
+	 */
+	auto token(const token_ptr& tok) -> self& {
+		opts_.set_token(tok);
+		return *this;
+	}
+	/**
+	 * Sets the properties for the response options.
+	 * @param props The properties for the response options.
+	 */
+	auto properties(mqtt::properties&& props) -> self& {
+		opts_.set_properties(std::move(props));
+		return *this;
+	}
+	/**
+	 * Sets the properties for the disconnect message.
+	 * @param props The properties for the disconnect message.
+	 */
+	auto properties(const mqtt::properties& props) -> self& {
+		opts_.set_properties(props);
+		return *this;
+	}
+	/**
+	 * Sets the options for a single topic subscription.
+	 * @param opts The subscribe options.
+	 */
+	auto subscribe_opts(const subscribe_options& opts) -> self& {
+		opts_.set_subscribe_options(opts);
+		return *this;
+	}
+	/**
+	 * Sets the options for a multi-topic subscription.
+	 * @param opts A vector of the subscribe options.
+	 */
+	auto subscribe_opts(const std::vector<subscribe_options>& opts) -> self& {
+		opts_.set_subscribe_options(opts);
+		return *this;
+	}
+	/**
+	 * Finish building the options and return them.
+	 * @return The option struct as built.
+	 */
+	response_options finalize() { return opts_; }
 };
 
 /////////////////////////////////////////////////////////////////////////////

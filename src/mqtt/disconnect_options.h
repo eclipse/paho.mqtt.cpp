@@ -155,7 +155,7 @@ public:
 	 * @param props The properties to move into the connect object.
 	 */
 	void set_properties(properties&& props) {
-		props_ = props;
+		props_ = std::move(props);
 		opts_.properties = props_.c_struct();
 	}
 	/**
