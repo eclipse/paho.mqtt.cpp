@@ -41,8 +41,9 @@
 
 using namespace std;
 
-const std::string DFLT_SERVER_ADDRESS	{ "tcp://localhost:1883" };
-const std::string PERSIST_DIR			{ "./persist" };
+const string DFLT_SERVER_ADDRESS	{ "tcp://localhost:1883" };
+const string CLIENT_ID				{ "paho_cpp_async_publish" };
+const string PERSIST_DIR			{ "./persist" };
 
 const string TOPIC { "hello" };
 
@@ -124,11 +125,12 @@ public:
 
 int main(int argc, char* argv[])
 {
-	// A client that just publishes probably doesn't need a ClientID or
-	// persistent session, but the user can supply an ID, if desired.
+	// A client that just publishes normally doesn't need a persistent
+	// session or Client ID unless it's using persistence, then the local
+	// library requires an ID to identify the persistence files.
 
 	string	address  = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS,
-			clientID = (argc > 2) ? string(argv[2]) : string();
+			clientID = (argc > 2) ? string(argv[2]) : CLIENT_ID;
 
 	cout << "Initializing for server '" << address << "'..." << endl;
 	mqtt::async_client client(address, clientID, PERSIST_DIR);
