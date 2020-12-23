@@ -43,8 +43,11 @@ To keep up with the latest announcements for this project, or to ask questions:
 
 **This branch requires Paho MQTT C library _v1.3.7_ or greater, preferably the soon-to-be-released v.1.3.8 (Paho C GitHub _develop_ branch).**
 
-Note that this branch will be formally released to coincide with the release of Paho C v1.3.8. Currently it is being tested against the _develop_ branch of the C lib. This document, however, has mostly been updated to reflect the upcoming v1.3.8 release. That version, v1.3.8, does not yet exist, but should be out shortly.
+Note that this branch will be formally released to coincide with the release of Paho C v1.3.8. Currently it is being tested against the _develop_ branch of the C lib. This document, however, has mostly been updated to reflect the upcoming v1.3.8 release. That version does not yet exist, but should be out shortly.
 
+- Missing MQTT v5 features:
+    - Ability to add properties to Subscribe and Unsubscribe packets (i.e. subscription identifiers)
+    - "Disconnected" callback gives reason code and properties for server disconnect
 - New `create_options` that can be used to construct a client with new features:
     - Send while disconnected before the 1st successful connection
     - Output buffer can delete oldest messages when full
@@ -66,31 +69,13 @@ Note that this branch will be formally released to coincide with the release of 
 - [#227] Fixed race condition in thread-safe queue
 - [#224] & [#255] Subscribing to MQTT v3 broker with array of one topic causes segfault.
 - [#282] Ability to build Debian/Ubuntu package
+- Several memory issues and bug fixes from updated Paho C library support.
 
 Targets Paho C v1.3.8
 
-### New Features in Paho C++ v1.1
-
-- MQTT v5 support:
-    - **Properties**
-        - New `property` class acts something like a std::variant to hold a property of any supported type.
-        - New `properties` class is a collection type to hold all the properties for a single transmitted packet.
-        - Properties can be added to outbound messages and obtained from received messages.
-        - Properties can also be obtained from server responses to requests such as from a _connect_ call. These are available in the `token` objects when they complete.
-    - The client object tracks the desired MQTT version that the app requested and/or is currently connected at. Internally this is now required by the `response_options` the need to distinguish between pre-v5 and post-v5 callback functions.
-    - MQTT v5 reason codes for requests are available via `token` objects when they complete. They are also available in `exception` objects that are thrown by tokens.
-    - Support for subscibe options, like no local subscriptions, etc.
-    - Sample applications were added showing how to do basic Remote Procedure Calls (RPC's) with MQTT v5 using the *RESPONSE_TOPIC* and *CORRELATION_DATA* properties. These are *rpc_math_cli* and *rpc_math_srvr* in the _src/samples_ directory.
-    - A sample "chat" application was added, showing how to use subscribe options, such as "no local".
-- More descriptive error messages (PR #154), integrated into the `mqtt::exception` class. MQTT v5 reason codes are also included in the exceptions when an error occurs.
-- Applications can (finally) get server responses from the various ACK packets. These are available through the tokens after they complete, as `connect_response`, `subscribe_response`, and `unsubscribe_response`.
-- The `topic` objects can be used to subscribe.
-- Applications can register individual callback functions instead of using a `callback` interface object. This allows easy use of lambda functions for callbacks.
-- The connect options can take a LWT as a plain message, via `connect_options::set_will_message()` 
-
 ### _Catch2_ Unit Tests
 
-Unit tests are being converted to use _Catch2_ for the test framework. The legacy unit tests are still using _CppUnit_, compiled into a separate test executable. If everything goes well with _Catch2_, the older unit tests will be ported to _Catch2_ as well.
+Unit tests were converted to use _Catch2_ for the test framework. 
 
 _Catch2_ can be found here: [Catch2](https://github.com/catchorg/Catch2)
 
@@ -154,44 +139,57 @@ Building the documentation requires doxygen and optionally graphviz to be instal
 $ sudo apt-get install doxygen graphviz
 ```
 
-Unite tests are being built using _Catch2_. 
+Unit tests are being built using _Catch2_. 
 
-_Catch2_ can be found here: [Catch2](https://github.com/catchorg/Catch2)
+_Catch2_ can be found here: [Catch2](https://github.com/catchorg/Catch2).  You must download and install _Catch2_ to build and run the unit tests locally.
 
+#### Building the Paho C library
 
-Before building the C++ library, first, build and install the Paho C library:
+Before building the C++ library, first, build and install the Paho C library, if not already present. Note, this version of the C++ library requires Paho C v1.3.8 or greater.
 
 ```
 $ git clone https://github.com/eclipse/paho.mqtt.c.git
 $ cd paho.mqtt.c
 $ git checkout v1.3.8
 
-$ cmake -Bbuild -H. -DPAHO_WITH_SSL=ON -DPAHO_ENABLE_TESTING=OFF
+$ cmake -Bbuild -H. -DPAHO_ENABLE_TESTING=OFF -DPAHO_BUILD_STATIC=ON \
+    -DPAHO_WITH_SSL=ON -DPAHO_HIGH_PERFORMANCE=ON
 $ sudo cmake --build build/ --target install
 $ sudo ldconfig
 ```
 
 This builds with SSL/TLS enabled. If that is not desired, omit the `-DPAHO_WITH_SSL=ON`.
 
-If you installed the C library on a non-standard path, you might want to pass it as value to the `CMAKE_PREFIX_PATH` option.
+It also uses the "high performace" option of the C library to disable more extensive internal memory checks. Remove the _PAHO_HIGH_PERFORMANCE_ option (i.e. turn it off) to debug memory issues, but for most production systems, leave it on for better performance.
 
-Using these variables CMake can be used to generate your Makefiles. The out-of-source build is the default on CMake. Therefore it is recommended to invoke all build commands inside your chosen build directory.
+To install the library to a non-standard location, use the `CMAKE_INSTALL_PREFIX` to specify a location. For example, to install into under the build directory, perhaps for local testing, do this:
 
-An example build session might look like this:
+```
+$ cmake -Bbuild -H. -DPAHO_ENABLE_TESTING=OFF -DPAHO_BUILD_STATIC=ON \
+    -DPAHO_WITH_SSL=ON -DPAHO_HIGH_PERFORMANCE=ON \
+    -DCMAKE_INSTALL_PREFIX=./build/_install
+```
+
+#### Building the Paho C++ library
+
+An example CMake build session might look like this:
 
 ```
 $ git clone https://github.com/eclipse/paho.mqtt.cpp
 $ cd paho.mqtt.cpp
-$ cmake -Bbuild -H. -DPAHO_BUILD_DOCUMENTATION=TRUE -DPAHO_BUILD_SAMPLES=TRUE
+
+$ cmake -Bbuild -H. -DPAHO_BUILD_STATIC=ON \
+    -DPAHO_BUILD_DOCUMENTATION=TRUE -DPAHO_BUILD_SAMPLES=TRUE
 $ sudo cmake --build build/ --target install
 $ sudo ldconfig
 ```
 
-If you did not install Paho C library to a default system location or you want to build against a different version, use the `CMAKE_PREFIX_PATH` to specify its install location:
+If you did not install Paho C library to a default system location or you want to build against a different version, use the `CMAKE_PREFIX_PATH` to specify its install location. Perhaps something like this:
 
 ```
-$ cmake -Bbuild -H. -DPAHO_BUILD_DOCUMENTATION=TRUE -DPAHO_BUILD_SAMPLES=TRUE \
-    -DCMAKE_PREFIX_PATH=../../paho.mqtt.c/build/install/usr/local
+$ cmake -Bbuild -H. -DPAHO_BUILD_DOCUMENTATION=ON -DPAHO_BUILD_SAMPLES=ON \
+    -DPAHO_BUILD_STATIC=ON \
+    -DCMAKE_PREFIX_PATH=$HOME/mqtt/paho.mqtt.c/build/_install
 ```
 
 To use another compiler, either the CXX environment variable can be specified in the configuration step:
@@ -215,33 +213,6 @@ $ (cd build && cpack)
 ```
 will generate a `.deb` file.
 
-
-#### Updating CMake on Ubuntu 14.04 or 16.04
-
-The versions of CMake on Ubuntu 14.04 or 16.04 LTS are pretty old and have some problems with Paho C++ library. A newer version can be added by downloading the source and building it. If the older cmake can be removed from the system using the package manager, or it can be kept, using the Ububtu alternatives to chose between the versions. 
-
-For example, here's how to install CMake v3.6 on Ubuntu 14.04, while keeping the older CMake available as _cmake-2.8:_
-
-```
-$ wget http://www.cmake.org/files/v3.6/cmake-3.6.3.tar.gz 
-$ tar -xvzf cmake-3.6.3.tar.gz 
-$ cd cmake-3.6.3/
-$ ./configure
-$ make
-$ sudo make install
-$ sudo mv /usr/bin/cmake /usr/bin/cmake-2.8
-$ sudo update-alternatives --install /usr/bin/cmake cmake /usr/local/bin/cmake 100
-$ sudo update-alternatives --install /usr/bin/cmake cmake /usr/bin/cmake-2.8 200
-$ cmake --version
-cmake version 3.6.3
-```
-
-You can speed up the CMake build on multi-core systems, by specifying parallel buid jobs for the configure and make steps, above, such as the following for a 4-core system:
-```
-$ ./configure --parallel=4
-$ make -j4
-$ sudo make install
-```
 
 ### Windows
 
@@ -294,7 +265,7 @@ Then use it to build the C++ library:
 
 *Note that it is very important that you use the same generator (target) to build BOTH libraries, otherwise you will get lots of linker errors when you try to build the C++ library.*
 
-## Supported Protocols
+## Supported Network Protocols
 
 The library supports connecting to an MQTT server/broker using TCP, SSL/TLS, and websockets (secure and unsecure). This is chosen by the URI supplied to the connect() call. It can be specified as:
 
@@ -365,7 +336,7 @@ int main(int argc, char* argv[])
 The original API organization and documentation were adapted from:
 
 The Paho Java library
-by Dave Locke.
+by Dave Locke et al.
 Copyright (c) 2012, IBM Corp
 
  All rights reserved. This program and the accompanying materials
