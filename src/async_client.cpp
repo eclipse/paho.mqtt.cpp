@@ -132,20 +132,23 @@ async_client::~async_client()
 
 // Callback for MQTTAsync_setConnected()
 // This is installed with the normall callbacks and with a call to 
-// reconnect() to indicate that it succeeded. It is called after the token 
-// is notified of success on a normal connect with callbacks. 
+// reconnect() to indicate that it succeeded. It signals the client's
+// connect token then calls any registered callbacks.
 void async_client::on_connected(void* context, char* cause)
 {
 	if (context) {
 		async_client* cli = static_cast<async_client*>(context);
-		callback* cb = cli->userCallback_;
-		auto& connHandler = cli->connHandler_;
-
 		string cause_str = cause ? string(cause) : string();
 
+		auto tok = cli->connTok_;
+		if (tok)
+			tok->on_success(nullptr);
+
+		callback* cb = cli->userCallback_;
 		if (cb)
 			cb->connected(cause_str);
 
+		auto& connHandler = cli->connHandler_;
 		if (connHandler)
 			connHandler(cause_str);
 	}
@@ -153,23 +156,25 @@ void async_client::on_connected(void* context, char* cause)
 
 // Callback for when the connection is lost.
 // This is called from the MQTTAsync_connectionLost registered via 
-// MQTTAsync_setCallbacks(). 
+// MQTTAsync_setCallbacks().
+// It calls the registered handlers then, if there's a consumer queue, it
+// places a null pointer in the queue to alert the consumer to a closed
+// connection.
 void async_client::on_connection_lost(void *context, char *cause)
 {
 	if (context) {
 		async_client* cli = static_cast<async_client*>(context);
-		callback* cb = cli->userCallback_;
-		consumer_queue_type& que = cli->que_;
-		auto& connLostHandler = cli->connLostHandler_;
-
 		string cause_str = cause ? string(cause) : string();
 
+		callback* cb = cli->userCallback_;
 		if (cb)
 			cb->connection_lost(cause_str);
 
+		auto& connLostHandler = cli->connLostHandler_;
 		if (connLostHandler)
 			connLostHandler(cause_str);
 
+		consumer_queue_type& que = cli->que_;
 		if (que)
 			que->put(const_message_ptr{});
 	}
@@ -182,8 +187,8 @@ void async_client::on_disconnected(void* context, MQTTProperties* cprops,
 {
 	if (context) {
 		async_client* cli = static_cast<async_client*>(context);
-		auto& disconnectedHandler = cli->disconnectedHandler_;
 
+		auto& disconnectedHandler = cli->disconnectedHandler_;
 		if (disconnectedHandler) {
 			properties props(*cprops);
 			disconnectedHandler(props, ReasonCode(reasonCode));

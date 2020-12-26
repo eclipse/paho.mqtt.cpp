@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013-2017 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2020 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -38,7 +38,7 @@ namespace mqtt {
 class client : private callback
 {
 	/** An arbitrary, but relatively long timeout */
-	static const std::chrono::minutes DFLT_TIMEOUT;
+	static const std::chrono::seconds DFLT_TIMEOUT;
 	/** The default quality of service */
 	static constexpr int DFLT_QOS = 1;
 
@@ -195,10 +195,7 @@ public:
 	 *  			  existing work to finish before disconnecting. A value
 	 *  			  of zero or less means the client will not quiesce.
 	 */
-	virtual void disconnect(int timeoutMS) {
-		cli_.stop_consuming();
-		cli_.disconnect(timeoutMS)->wait_for(timeout_);
-	}
+	virtual void disconnect(int timeoutMS);
 	/**
 	 * Disconnects from the server.
 	 * @param to the amount of time in milliseconds to allow for
@@ -230,7 +227,10 @@ public:
 	 * @param top The topic name
 	 * @return A topic attached to this client.
 	 */
-	virtual topic get_topic(const string& top) { return topic(cli_, top); }
+	virtual topic get_topic(const string& top, int qos=message::DFLT_QOS,
+							bool retained=message::DFLT_RETAINED) {
+		return topic(cli_, top);
+	}
 	/**
 	 * Determines if this client is currently connected to the server.
 	 * @return @em true if the client is currently connected, @em false if
@@ -257,7 +257,8 @@ public:
 	 */
 	virtual void publish(string_ref top, const void* payload, size_t n,
 						 int qos, bool retained) {
-		cli_.publish(std::move(top), payload, n, qos, retained)->wait_for(timeout_);
+		if (!cli_.publish(std::move(top), payload, n, qos, retained)->wait_for(timeout_))
+			throw timeout_error();
 	}
 	/**
 	 * Publishes a message to a topic on the server and return once it is
@@ -267,14 +268,16 @@ public:
 	 * @param n The size in bytes of the data
 	 */
 	virtual void publish(string_ref top, const void* payload, size_t n) {
-		cli_.publish(std::move(top), payload, n)->wait_for(timeout_);
+		if (!cli_.publish(std::move(top), payload, n)->wait_for(timeout_))
+			throw timeout_error();
 	}
 	/**
 	 * Publishes a message to a topic on the server.
 	 * @param msg The message
 	 */
 	virtual void publish(const_message_ptr msg) {
-		cli_.publish(msg)->wait_for(timeout_);
+		if (!cli_.publish(msg)->wait_for(timeout_))
+			throw timeout_error();
 	}
 	/**
 	 * Publishes a message to a topic on the server.

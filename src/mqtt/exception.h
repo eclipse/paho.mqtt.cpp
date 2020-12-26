@@ -168,11 +168,20 @@ inline std::ostream& operator<<(std::ostream& os, const exception& exc) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-class missing_response : public std::runtime_error
+class missing_response : public exception
 {
 public:
 	missing_response(const string& rsp)
-		: std::runtime_error("Missing "+rsp+" response") {}
+		: exception(MQTTASYNC_FAILURE, "Missing "+rsp+" response") {}
+};
+
+
+/////////////////////////////////////////////////////////////////////////////
+
+class timeout_error : public exception
+{
+public:
+	timeout_error() : exception(MQTTASYNC_FAILURE, "Timeout") {}
 };
 
 /////////////////////////////////////////////////////////////////////////////
