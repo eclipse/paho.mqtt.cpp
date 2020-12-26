@@ -2,7 +2,7 @@
 /// @file ssl_options.h
 /// Declaration of MQTT ssl_options class
 /// @date Jul 7, 2016
-/// @author Guilherme Ferreira
+/// @author Frank Pagliughi, Guilherme Ferreira
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
@@ -95,8 +95,12 @@ private:
 
 	/** Error message callback handler  */
 	error_handler errHandler_;
+
 	/** PSK callback handler */
 	psk_handler pskHandler_;
+
+	/** ALPN protocol list, in wire format */
+	std::basic_string<unsigned char> protos_;
 
 	/** Callbacks from the C library */
 	static int on_error(const char *str, size_t len, void *context);
@@ -145,7 +149,8 @@ public:
 	 */
 	ssl_options(const string& trustStore, const string& keyStore,
 				const string& privateKey, const string& privateKeyPassword,
-				const string& enabledCipherSuites, bool enableServerCertAuth);
+				const string& enabledCipherSuites, bool enableServerCertAuth,
+				const std::vector<string> alpnProtos=std::vector<string>());
 	/**
 	 * Copy constructor.
 	 * @param opt The other options to copy.
@@ -313,6 +318,18 @@ public:
 	 * @param cb The callback.
 	 */
 	void set_psk_handler(psk_handler cb);
+	/**
+	 * Gets the list of supported ALPN protocols.
+	 * @return A vector containing the supported ALPN protocols.
+	 */
+	std::vector<string> get_alpn_protos() const;
+	/**
+	 * Sets the list of supported ALPN protolols.
+	 * See:
+	 * https://www.openssl.org/docs/man1.1.0/man3/SSL_CTX_set_alpn_protos.html
+	 * @param protos The list of ALPN protocols to be negotiated.
+	 */
+	void set_alpn_protos(const std::vector<string>& protos);
 };
 
 /**
@@ -451,6 +468,14 @@ public:
 	 */
 	auto psk_handler(ssl_options::psk_handler cb) -> self& {
 		opts_.set_psk_handler(cb);
+		return *this;
+	}
+	/**
+	 * Sets the list of supported ALPN protocols.
+	 * @param protos The list of ALPN protocols to be negotiated.
+	 */
+	auto alpn_protos(const std::vector<string>& protos) -> self& {
+		opts_.set_alpn_protos(protos);
 		return *this;
 	}
 	/**

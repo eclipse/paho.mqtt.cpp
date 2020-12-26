@@ -45,13 +45,17 @@ static const std::string PRIVATE_KEY_PASSWORD { "private key password" };
 static const std::string ENABLED_CIPHER_SUITES { "cipher suite" };
 static const bool SERVER_CERT { false };
 
+static const std::string ALPN0 { "mqtt" };
+static const std::string ALPN1 { "x-iot-mqtt" };
+
 static mqtt::ssl_options orgOpts {
-			TRUST_STORE,
-			KEY_STORE,
-			PRIVATE_KEY,
-			PRIVATE_KEY_PASSWORD,
-			ENABLED_CIPHER_SUITES,
-			SERVER_CERT
+	TRUST_STORE,
+	KEY_STORE,
+	PRIVATE_KEY,
+	PRIVATE_KEY_PASSWORD,
+	ENABLED_CIPHER_SUITES,
+	SERVER_CERT,
+	{ ALPN0, ALPN1 }
 };
 
 
@@ -63,13 +67,14 @@ TEST_CASE("ssl_options dflt constructor", "[options]")
 {
 	mqtt::ssl_options opts;
 
-	REQUIRE(EMPTY_STR == opts.get_trust_store());
-	REQUIRE(EMPTY_STR == opts.get_key_store());
-	REQUIRE(EMPTY_STR == opts.get_private_key());
-	REQUIRE(EMPTY_STR == opts.get_private_key_password());
+	REQUIRE(opts.get_trust_store().empty());
+	REQUIRE(opts.get_key_store().empty());
+	REQUIRE(opts.get_private_key().empty());
+	REQUIRE(opts.get_private_key_password().empty());
 	REQUIRE(DFLT_SERVER_CERT == opts.get_enable_server_cert_auth());
+	REQUIRE(opts.get_alpn_protos().empty());
 
-	// Make sure the empty string represents a nullptr for C library
+	//  Make sure the empty string represents a nullptr for C library
 	const auto& c_struct = opts.c_struct();
 
 	REQUIRE(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
@@ -79,6 +84,8 @@ TEST_CASE("ssl_options dflt constructor", "[options]")
 	REQUIRE(c_struct.privateKeyPassword == nullptr);
 	REQUIRE(c_struct.enabledCipherSuites == nullptr);
 	//REQUIRE(DFLT_SERVER_CERT == c_struct.enableServerCertAuth != 0);
+	REQUIRE(c_struct.protos == nullptr);
+	REQUIRE(c_struct.protos_len == 0);
 }
 
 // ----------------------------------------------------------------------
@@ -87,8 +94,15 @@ TEST_CASE("ssl_options dflt constructor", "[options]")
 
 TEST_CASE("ssl_options user constructor", "[options]")
 {
-	mqtt::ssl_options opts { TRUST_STORE, KEY_STORE, PRIVATE_KEY,
-		PRIVATE_KEY_PASSWORD, ENABLED_CIPHER_SUITES, SERVER_CERT };
+	mqtt::ssl_options opts {
+		TRUST_STORE,
+		KEY_STORE,
+		PRIVATE_KEY,
+		PRIVATE_KEY_PASSWORD,
+		ENABLED_CIPHER_SUITES,
+		SERVER_CERT,
+		{ ALPN0, ALPN1 }
+	};
 
 	REQUIRE(TRUST_STORE == opts.get_trust_store());
 	REQUIRE(KEY_STORE == opts.get_key_store());
@@ -96,6 +110,11 @@ TEST_CASE("ssl_options user constructor", "[options]")
 	REQUIRE(PRIVATE_KEY_PASSWORD == opts.get_private_key_password());
 	REQUIRE(ENABLED_CIPHER_SUITES == opts.get_enabled_cipher_suites());
 	REQUIRE(SERVER_CERT == opts.get_enable_server_cert_auth());
+
+	auto protos = opts.get_alpn_protos();
+	REQUIRE(2 == protos.size());
+	REQUIRE(ALPN0 == protos[0]);
+	REQUIRE(ALPN1 == protos[1]);
 
 	// Check the underlying C struct
 	const auto& c_struct = opts.c_struct();
@@ -107,6 +126,15 @@ TEST_CASE("ssl_options user constructor", "[options]")
 	REQUIRE(!strcmp(c_struct.privateKeyPassword, PRIVATE_KEY_PASSWORD.c_str()));
 	REQUIRE(!strcmp(c_struct.enabledCipherSuites, ENABLED_CIPHER_SUITES.c_str()));
 	//REQUIRE(SERVER_CERT == c_struct.enableServerCertAuth != 0);
+
+	auto n0 = ALPN0.length();
+	auto n1 = ALPN1.length();
+
+	REQUIRE(c_struct.protos_len == n0+n1+2);
+	REQUIRE(c_struct.protos[0] == n0);
+	REQUIRE(memcmp(c_struct.protos+1, ALPN0.data(), n0) == 0);
+	REQUIRE(c_struct.protos[n0+1] == n1);
+	REQUIRE(memcmp(c_struct.protos+n0+2, ALPN1.data(), n1) == 0);
 }
 
 // ----------------------------------------------------------------------
@@ -115,7 +143,17 @@ TEST_CASE("ssl_options user constructor", "[options]")
 
 TEST_CASE("ssl_options copy constructor", "[options]")
 {
-	mqtt::ssl_options opts{orgOpts};
+	mqtt::ssl_options org {
+		TRUST_STORE,
+		KEY_STORE,
+		PRIVATE_KEY,
+		PRIVATE_KEY_PASSWORD,
+		ENABLED_CIPHER_SUITES,
+		SERVER_CERT,
+		{ ALPN0, ALPN1 }
+	};
+
+	mqtt::ssl_options opts{ org };
 
 	REQUIRE(TRUST_STORE == opts.get_trust_store());
 	REQUIRE(KEY_STORE == opts.get_key_store());
@@ -123,6 +161,11 @@ TEST_CASE("ssl_options copy constructor", "[options]")
 	REQUIRE(PRIVATE_KEY_PASSWORD == opts.get_private_key_password());
 	REQUIRE(ENABLED_CIPHER_SUITES == opts.get_enabled_cipher_suites());
 	REQUIRE(SERVER_CERT == opts.get_enable_server_cert_auth());
+
+	auto protos = opts.get_alpn_protos();
+	REQUIRE(2 == protos.size());
+	REQUIRE(ALPN0 == protos[0]);
+	REQUIRE(ALPN1 == protos[1]);
 
 	// Check the underlying C struct
 	const auto& c_struct = opts.c_struct();
@@ -136,12 +179,12 @@ TEST_CASE("ssl_options copy constructor", "[options]")
 	//REQUIRE(SERVER_CERT == c_struct.enableServerCertAuth != 0);
 
 	// Make sure it's a true copy, not linked to the original
-	orgOpts.set_trust_store(EMPTY_STR);
-	orgOpts.set_key_store(EMPTY_STR);
-	orgOpts.set_private_key(EMPTY_STR);
-	orgOpts.set_private_key_password(EMPTY_STR);
-	orgOpts.set_enabled_cipher_suites(EMPTY_STR);
-	orgOpts.set_enable_server_cert_auth(!SERVER_CERT);
+	org.set_trust_store(EMPTY_STR);
+	org.set_key_store(EMPTY_STR);
+	org.set_private_key(EMPTY_STR);
+	org.set_private_key_password(EMPTY_STR);
+	org.set_enabled_cipher_suites(EMPTY_STR);
+	org.set_enable_server_cert_auth(!SERVER_CERT);
 
 	REQUIRE(TRUST_STORE == opts.get_trust_store());
 	REQUIRE(KEY_STORE == opts.get_key_store());
@@ -149,6 +192,15 @@ TEST_CASE("ssl_options copy constructor", "[options]")
 	REQUIRE(PRIVATE_KEY_PASSWORD == opts.get_private_key_password());
 	REQUIRE(ENABLED_CIPHER_SUITES == opts.get_enabled_cipher_suites());
 	REQUIRE(SERVER_CERT == opts.get_enable_server_cert_auth());
+
+	auto n0 = ALPN0.length();
+	auto n1 = ALPN1.length();
+
+	REQUIRE(c_struct.protos_len == n0+n1+2);
+	REQUIRE(c_struct.protos[0] == n0);
+	REQUIRE(memcmp(c_struct.protos+1, ALPN0.data(), n0) == 0);
+	REQUIRE(c_struct.protos[n0+1] == n1);
+	REQUIRE(memcmp(c_struct.protos+n0+2, ALPN1.data(), n1) == 0);
 }
 
 // ----------------------------------------------------------------------
@@ -157,16 +209,8 @@ TEST_CASE("ssl_options copy constructor", "[options]")
 
 TEST_CASE("ssl_options move constructor", "[options]")
 {
-    mqtt::ssl_options orgOpts {
-			TRUST_STORE,
-			KEY_STORE,
-			PRIVATE_KEY,
-			PRIVATE_KEY_PASSWORD,
-			ENABLED_CIPHER_SUITES,
-			SERVER_CERT
-    };
-
-	mqtt::ssl_options opts(std::move(orgOpts));
+    mqtt::ssl_options org { orgOpts };
+	mqtt::ssl_options opts(std::move(org));
 
 	REQUIRE(TRUST_STORE == opts.get_trust_store());
 	REQUIRE(KEY_STORE == opts.get_key_store());
@@ -175,12 +219,30 @@ TEST_CASE("ssl_options move constructor", "[options]")
 	REQUIRE(ENABLED_CIPHER_SUITES == opts.get_enabled_cipher_suites());
 	REQUIRE(SERVER_CERT == opts.get_enable_server_cert_auth());
 
+	auto protos = opts.get_alpn_protos();
+	REQUIRE(2 == protos.size());
+	REQUIRE(ALPN0 == protos[0]);
+	REQUIRE(ALPN1 == protos[1]);
+
 	// Check that the original was moved
-	REQUIRE(EMPTY_STR == orgOpts.get_trust_store());
-	REQUIRE(EMPTY_STR == orgOpts.get_key_store());
-	REQUIRE(EMPTY_STR == orgOpts.get_private_key());
-	REQUIRE(EMPTY_STR == orgOpts.get_private_key_password());
-	REQUIRE(EMPTY_STR == orgOpts.get_enabled_cipher_suites());
+	REQUIRE(org.get_trust_store().empty());
+	REQUIRE(org.get_key_store().empty());
+	REQUIRE(org.get_private_key().empty());
+	REQUIRE(org.get_private_key_password().empty());
+	REQUIRE(org.get_enabled_cipher_suites().empty());
+	REQUIRE(org.get_alpn_protos().empty());
+
+	// Check the underlying C struct
+	const auto& c_struct = opts.c_struct();
+
+	auto n0 = ALPN0.length();
+	auto n1 = ALPN1.length();
+
+	REQUIRE(c_struct.protos_len == n0+n1+2);
+	REQUIRE(c_struct.protos[0] == n0);
+	REQUIRE(memcmp(c_struct.protos+1, ALPN0.data(), n0) == 0);
+	REQUIRE(c_struct.protos[n0+1] == n1);
+	REQUIRE(memcmp(c_struct.protos+n0+2, ALPN1.data(), n1) == 0);
 }
 
 // ----------------------------------------------------------------------
@@ -189,15 +251,7 @@ TEST_CASE("ssl_options move constructor", "[options]")
 
 TEST_CASE("ssl_options copy assignment", "[options]")
 {
-    mqtt::ssl_options orgOpts {
-			TRUST_STORE,
-			KEY_STORE,
-			PRIVATE_KEY,
-			PRIVATE_KEY_PASSWORD,
-			ENABLED_CIPHER_SUITES,
-			SERVER_CERT
-    };
-
+    mqtt::ssl_options org { orgOpts };
 	mqtt::ssl_options opts;
 
 	opts = orgOpts;
@@ -210,12 +264,13 @@ TEST_CASE("ssl_options copy assignment", "[options]")
 	REQUIRE(SERVER_CERT == opts.get_enable_server_cert_auth());
 
 	// Make sure it's a true copy, not linked to the original
-	orgOpts.set_trust_store("");
-	orgOpts.set_key_store("");
-	orgOpts.set_private_key("");
-	orgOpts.set_private_key_password("");
-	orgOpts.set_enabled_cipher_suites("");
-	orgOpts.set_enable_server_cert_auth(!SERVER_CERT);
+	org.set_trust_store("");
+	org.set_key_store("");
+	org.set_private_key("");
+	org.set_private_key_password("");
+	org.set_enabled_cipher_suites("");
+	org.set_enable_server_cert_auth(!SERVER_CERT);
+	org.set_alpn_protos({});
 
 	REQUIRE(TRUST_STORE == opts.get_trust_store());
 	REQUIRE(KEY_STORE == opts.get_key_store());
@@ -241,18 +296,10 @@ TEST_CASE("ssl_options copy assignment", "[options]")
 
 TEST_CASE("ssl_options move assignment", "[options]")
 {
-    mqtt::ssl_options orgOpts {
-			TRUST_STORE,
-			KEY_STORE,
-			PRIVATE_KEY,
-			PRIVATE_KEY_PASSWORD,
-			ENABLED_CIPHER_SUITES,
-			SERVER_CERT
-    };
-
+    mqtt::ssl_options org { orgOpts };
 	mqtt::ssl_options opts;
 
-	opts = std::move(orgOpts);
+	opts = std::move(org);
 
 	REQUIRE(TRUST_STORE == opts.get_trust_store());
 	REQUIRE(KEY_STORE == opts.get_key_store());
@@ -261,12 +308,18 @@ TEST_CASE("ssl_options move assignment", "[options]")
 	REQUIRE(ENABLED_CIPHER_SUITES == opts.get_enabled_cipher_suites());
 	REQUIRE(SERVER_CERT == opts.get_enable_server_cert_auth());
 
+	auto protos = opts.get_alpn_protos();
+	REQUIRE(2 == protos.size());
+	REQUIRE(ALPN0 == protos[0]);
+	REQUIRE(ALPN1 == protos[1]);
+
 	// Check that the original was moved
-	REQUIRE(EMPTY_STR == orgOpts.get_trust_store());
-	REQUIRE(EMPTY_STR == orgOpts.get_key_store());
-	REQUIRE(EMPTY_STR == orgOpts.get_private_key());
-	REQUIRE(EMPTY_STR == orgOpts.get_private_key_password());
-	REQUIRE(EMPTY_STR == orgOpts.get_enabled_cipher_suites());
+	REQUIRE(org.get_trust_store().empty());
+	REQUIRE(org.get_key_store().empty());
+	REQUIRE(org.get_private_key().empty());
+	REQUIRE(org.get_private_key_password().empty());
+	REQUIRE(org.get_enabled_cipher_suites().empty());
+	REQUIRE(org.get_alpn_protos().empty());
 
 	// Self assignment should cause no harm
 	// (clang++ is smart enough to warn about this)
@@ -295,6 +348,7 @@ TEST_CASE("ssl_options set user", "[options]")
 	opts.set_private_key_password(PRIVATE_KEY_PASSWORD);
 	opts.set_enabled_cipher_suites(ENABLED_CIPHER_SUITES);
 	opts.set_enable_server_cert_auth(SERVER_CERT);
+	opts.set_alpn_protos({ ALPN0, ALPN1 });
 
 	REQUIRE(TRUST_STORE == opts.get_trust_store());
 	REQUIRE(KEY_STORE == opts.get_key_store());
@@ -302,6 +356,11 @@ TEST_CASE("ssl_options set user", "[options]")
 	REQUIRE(PRIVATE_KEY_PASSWORD == opts.get_private_key_password());
 	REQUIRE(ENABLED_CIPHER_SUITES == opts.get_enabled_cipher_suites());
 	REQUIRE(SERVER_CERT == opts.get_enable_server_cert_auth());
+
+	auto protos = opts.get_alpn_protos();
+	REQUIRE(2 == protos.size());
+	REQUIRE(ALPN0 == protos[0]);
+	REQUIRE(ALPN1 == protos[1]);
 }
 
 // ----------------------------------------------------------------------
@@ -310,14 +369,17 @@ TEST_CASE("ssl_options set user", "[options]")
 
 TEST_CASE("ssl_options set empty strings", "[options]")
 {
-	orgOpts.set_trust_store(EMPTY_STR);
-	orgOpts.set_key_store(EMPTY_STR);
-	orgOpts.set_private_key(EMPTY_STR);
-	orgOpts.set_private_key_password(EMPTY_STR);
-	orgOpts.set_enabled_cipher_suites(EMPTY_STR);
+    mqtt::ssl_options opts { orgOpts };
+
+	opts.set_trust_store(EMPTY_STR);
+	opts.set_key_store(EMPTY_STR);
+	opts.set_private_key(EMPTY_STR);
+	opts.set_private_key_password(EMPTY_STR);
+	opts.set_enabled_cipher_suites(EMPTY_STR);
+	opts.set_alpn_protos({});
 
 	// Make sure the empty string represents a nullptr for C library
-	const auto& c_struct = orgOpts.c_struct();
+	const auto& c_struct = opts.c_struct();
 
 	REQUIRE(!memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
 	REQUIRE(c_struct.trustStore == nullptr);
@@ -325,5 +387,7 @@ TEST_CASE("ssl_options set empty strings", "[options]")
 	REQUIRE(c_struct.privateKey == nullptr);
 	REQUIRE(c_struct.privateKeyPassword == nullptr);
 	REQUIRE(c_struct.enabledCipherSuites == nullptr);
+	REQUIRE(c_struct.protos == nullptr);
+	REQUIRE(c_struct.protos_len == 0);
 }
 

@@ -168,6 +168,9 @@ inline std::ostream& operator<<(std::ostream& os, const exception& exc) {
 
 /////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Exception thrown when an expected server response is missing.
+ */
 class missing_response : public exception
 {
 public:
@@ -178,6 +181,9 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////
 
+/**
+ * A timeout exception, particularly from the synchronous client.
+ */
 class timeout_error : public exception
 {
 public:
