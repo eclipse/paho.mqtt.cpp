@@ -56,6 +56,7 @@ Note that this branch will be formally released to coincide with the release of 
 - Started classes to create options using the Builder Pattern, with the `create_options_builder`, `connect_options_builder`, `message_ptr_builder`, etc.
 - User-defined websocket HTTP headers.
 - HTTP/S proxy support
+- Added ALPN protocol support to SSL/TLS options
 - SSL/TLS error and PSK callback support
 - Update connection callback support (change credentials when using auto-reconnect)
 - Updates to the sample apps:
@@ -66,7 +67,7 @@ Note that this branch will be formally released to coincide with the release of 
 - Converted the unit tests to use Catch2
 - All library exceptions are now properly derived from the `mqtt::exception` base class.
 - [#231] Added `on_disconnected` callback to handle receipt of disconnect packet from server.
-- [#211, 223, #235] Removed use of Log() function from the Paho C library.
+- [#211, #223, #235] Removed use of Log() function from the Paho C library.
 - [#227] Fixed race condition in thread-safe queue
 - [#224] & [#255] Subscribing to MQTT v3 broker with array of one topic causes segfault.
 - [#282] Ability to build Debian/Ubuntu package
