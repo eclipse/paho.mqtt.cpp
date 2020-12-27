@@ -43,7 +43,7 @@ inline void* persistence_malloc(size_t n) {
 }
 
 /**
- * Frees memory allocated with @ref persistence_malloc
+ * Frees memory allocated with @ref persistence_malloc().
  * @param p Pointer to a buffer obtained by persistence_malloc.
  */
 inline void persistence_free(void* p) {

@@ -126,6 +126,10 @@ struct subscribe_response : public server_response
 
 	friend class token;
 
+	/**
+	 * Create v5 subscribe response.
+	 * @param rsp The v5 response struct from the C lib
+	 */
 	subscribe_response(MQTTAsync_successData5* rsp)
 			: server_response(properties(rsp->properties)) {
 		if (rsp->alt.sub.reasonCodeCount < 2)
@@ -136,6 +140,11 @@ struct subscribe_response : public server_response
 		}
 	}
 
+	/**
+	 * Create v3 subscribe response.
+	 * @param n The number of subscription topics
+	 * @param rsp The v3 response struct from the C lib
+	 */
 	subscribe_response(size_t n, MQTTAsync_successData* rsp) {
 		if (n < 2)
 			reasonCodes_.push_back(ReasonCode(rsp->alt.qos));

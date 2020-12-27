@@ -34,6 +34,7 @@
 
 namespace mqtt {
 
+/** Bring std::bad_cast into the mqtt namespace */
 using bad_cast = std::bad_cast;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -107,6 +108,7 @@ public:
 	/**
 	 * Gets a detailed error message for an error code.
 	 * @param rc The error code from the C lib
+	 * @param reasonCode The MQTT v5 reason code
 	 * @param msg An optional additional message. If none is provided, the
 	 *  		  error_str message is used.
 	 * @return A string error message that includes the error code and an
@@ -174,6 +176,10 @@ inline std::ostream& operator<<(std::ostream& os, const exception& exc) {
 class missing_response : public exception
 {
 public:
+	/**
+	 * Create a missing response error.
+	 * @param rsp A string for the type of response expected.
+	 */
 	missing_response(const string& rsp)
 		: exception(MQTTASYNC_FAILURE, "Missing "+rsp+" response") {}
 };
@@ -187,6 +193,9 @@ public:
 class timeout_error : public exception
 {
 public:
+	/**
+	 * Create a timeout error.
+	 */
 	timeout_error() : exception(MQTTASYNC_FAILURE, "Timeout") {}
 };
 

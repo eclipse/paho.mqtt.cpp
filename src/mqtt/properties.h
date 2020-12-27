@@ -38,6 +38,7 @@ extern "C" {
 
 namespace mqtt {
 
+/** A pair of strings as a tuple. */
 using string_pair = std::tuple<string, string>;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -55,6 +56,9 @@ class property
 	void copy(const MQTTProperty& other);
 
 public:
+	/**
+	 * The integer codes for the different v5 properties.
+	 */
 	enum code {
         PAYLOAD_FORMAT_INDICATOR = 1,
         MESSAGE_EXPIRY_INTERVAL = 2,
@@ -169,37 +173,65 @@ public:
 template <typename T>
 inline T get(const property&) { throw bad_cast(); }
 
+/**
+ * Extracts the value from the property as an unsigned 8-bit integer.
+ * @return The value from the property as an unsigned 8-bit integer.
+ */
 template <>
 inline uint8_t get<uint8_t>(const property& prop) {
 	return (uint8_t) prop.c_struct().value.byte;
 }
 
+/**
+ * Extracts the value from the property as an unsigned 16-bit integer.
+ * @return The value from the property as an unsigned 16-bit integer.
+ */
 template <>
 inline uint16_t get<uint16_t>(const property& prop) {
 	return (uint16_t) prop.c_struct().value.integer2;
 }
 
+/**
+ * Extracts the value from the property as a signed 16-bit integer.
+ * @return The value from the property as a signed 16-bit integer.
+ */
 template <>
 inline int16_t get<int16_t>(const property& prop) {
 	return (int16_t) prop.c_struct().value.integer2;
 }
 
+/**
+ * Extracts the value from the property as an unsigned 32-bit integer.
+ * @return The value from the property as an unsigned 32-bit integer.
+ */
 template <>
 inline uint32_t get<uint32_t>(const property& prop) {
 	return (uint32_t) prop.c_struct().value.integer4;
 }
 
+/**
+ * Extracts the value from the property as a signed 32-bit integer.
+ * @return The value from the property as a signed 32-bit integer.
+ */
 template <>
 inline int32_t get<int32_t>(const property& prop) {
 	return (int32_t) prop.c_struct().value.integer4;
 }
 
+/**
+ * Extracts the value from the property as a string.
+ * @return The value from the property as a string.
+ */
 template <>
 inline string get<string>(const property& prop) {
 	return (!prop.c_struct().value.data.data) ? string()
 		: string(prop.c_struct().value.data.data, prop.c_struct().value.data.len);
 }
 
+/**
+ * Extracts the value from the property as a pair of strings.
+ * @return The value from the property as a pair of strings.
+ */
 template <>
 inline string_pair get<string_pair>(const property& prop) {
 	string name = (!prop.c_struct().value.data.data) ? string()
@@ -260,7 +292,7 @@ public:
 	}
 	/**
 	 * Constructs from a list of property objects.
-	 * @param An initializer list of property objects.
+	 * @param props An initializer list of property objects.
 	 */
 	properties(std::initializer_list<property> props);
 	/**
@@ -285,8 +317,8 @@ public:
 		return *this;
 	}
 	/**
-	 * Move assignment
-	 * @param rht The property list to move to this one.
+	 * Move assignment.
+	 * @param rhs The property list to move to this one.
 	 * @return A reference to this object.
 	 */
 	properties& operator=(properties&& rhs) {
@@ -367,6 +399,15 @@ public:
 
 // --------------------------------------------------------------------------
 
+/**
+ * Retrieves a single value from a property list for when there may be
+ * multiple identical propert ID's.
+ * @tparam T The type of the value to retrieve
+ * @param props The property list
+ * @param propid The property ID code for the desired value.
+ * @param idx Index of the desired property ID
+ * @return The requested value of type T
+ */
 template<typename T>
 inline T get(const properties& props, property::code propid, size_t idx)
 {
@@ -379,6 +420,13 @@ inline T get(const properties& props, property::code propid, size_t idx)
 	return get<T>(property(*prop));
 }
 
+/**
+ * Retrieves a single value from a property list.
+ * @tparam T The type of the value to retrieve
+ * @param props The property list
+ * @param propid The property ID code for the desired value.
+ * @return The requested value of type T
+ */
 template<typename T>
 inline T get(const properties& props, property::code propid)
 {

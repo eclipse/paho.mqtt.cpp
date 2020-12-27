@@ -225,6 +225,8 @@ public:
 	 * Get a topic object which can be used to publish messages on this
 	 * client.
 	 * @param top The topic name
+	 * @param qos The Quality of Service for the topic
+	 * @param retained Whether the published messages set the retain flag.
 	 * @return A topic attached to this client.
 	 */
 	virtual topic get_topic(const string& top, int qos=message::DFLT_QOS,
@@ -313,6 +315,9 @@ public:
 	/**
 	 * Subscribe to a topic, which may include wildcards using a QoS of 1.
 	 * @param topicFilter
+	 * @param props The MQTT v5 properties.
+	 * @param opts The MQTT v5 subscribe options for the topic
+	 * @return The "subscribe" response from the server.
 	 */
 	virtual subscribe_response subscribe(const string& topicFilter,
 										 const subscribe_options& opts=subscribe_options(),
@@ -321,6 +326,9 @@ public:
 	 * Subscribe to a topic, which may include wildcards.
 	 * @param topicFilter A single topic to subscribe
 	 * @param qos The QoS of the subscription
+	 * @param opts The MQTT v5 subscribe options for the topic
+	 * @param props The MQTT v5 properties.
+	 * @return The "subscribe" response from the server.
 	 */
 	virtual subscribe_response subscribe(const string& topicFilter, int qos,
 										 const subscribe_options& opts=subscribe_options(),
@@ -329,6 +337,9 @@ public:
 	 * Subscribes to a one or more topics, which may include wildcards using
 	 * a QoS of 1.
 	 * @param topicFilters A set of topics to subscribe
+	 * @param opts The MQTT v5 subscribe options (one for each topic)
+	 * @param props The MQTT v5 properties.
+	 * @return The "subscribe" response from the server.
 	 */
 	virtual subscribe_response subscribe(const string_collection& topicFilters,
 										 const std::vector<subscribe_options>& opts=std::vector<subscribe_options>(),
@@ -337,6 +348,9 @@ public:
 	 * Subscribes to multiple topics, each of which may include wildcards.
 	 * @param topicFilters A collection of topics to subscribe
 	 * @param qos A collection of QoS for each topic
+	 * @param opts The MQTT v5 subscribe options (one for each topic)
+	 * @param props The MQTT v5 properties.
+	 * @return The "subscribe" response from the server.
 	 */
 	virtual subscribe_response subscribe(const string_collection& topicFilters,
 										 const qos_collection& qos,
@@ -345,12 +359,16 @@ public:
 	/**
 	 * Requests the server unsubscribe the client from a topic.
 	 * @param topicFilter A single topic to unsubscribe.
+	 * @param props The MQTT v5 properties.
+	 * @return The "unsubscribe" response from the server.
 	 */
 	virtual unsubscribe_response unsubscribe(const string& topicFilter,
 											 const properties& props=properties());
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
 	 * @param topicFilters A collection of topics to unsubscribe.
+	 * @param props The MQTT v5 properties.
+	 * @return The "unsubscribe" response from the server.
 	 */
 	virtual unsubscribe_response unsubscribe(const string_collection& topicFilters,
 											 const properties& props=properties());

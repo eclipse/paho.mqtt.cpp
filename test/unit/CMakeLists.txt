@@ -47,7 +47,9 @@ add_executable(unit_tests unit_tests.cpp
 )
 
 if(PAHO_WITH_SSL)
-  target_sources(unit_tests PUBLIC test_ssl_options.cpp)
+  target_sources(unit_tests PUBLIC 
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_ssl_options.cpp
+  )
 endif()
 
 # --- Link for executables ---

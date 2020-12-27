@@ -564,8 +564,9 @@ public:
 	 * Subscribe to a topic, which may include wildcards.
 	 * @param topicFilter the topic to subscribe to, which can include
 	 *  				  wildcards.
-	 * @param qos
-	 *
+	 * @param qos The quality of service for the subscription
+	 * @param opts The MQTT v5 subscribe options for the topic
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
@@ -584,6 +585,8 @@ public:
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb listener that will be notified when subscribe has completed
+	 * @param opts The MQTT v5 subscribe options for the topic
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
@@ -599,6 +602,8 @@ public:
 	 *  		  received at the published QoS. Messages published at a
 	 *  		  higher quality of service will be received using the QoS
 	 *  		  specified on the subscribe.
+	 * @param opts The MQTT v5 subscribe options (one for each topic)
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
@@ -617,6 +622,8 @@ public:
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb listener that will be notified when subscribe has completed
+	 * @param opts The MQTT v5 subscribe options (one for each topic)
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
@@ -629,6 +636,7 @@ public:
 	 * Requests the server unsubscribe the client from a topic.
 	 * @param topicFilter the topic to unsubscribe from. It must match a
 	 *  				  topicFilter specified on an earlier subscribe.
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
@@ -639,6 +647,7 @@ public:
 	 * @param topicFilters one or more topics to unsubscribe from. Each
 	 *  				   topicFilter must match one specified on an
 	 *  				   earlier subscribe.
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
@@ -651,6 +660,7 @@ public:
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb listener that will be notified when unsubscribe has
 	 *  		 completed
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
@@ -665,6 +675,7 @@ public:
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb listener that will be notified when unsubscribe has
 	 *  		 completed
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
@@ -736,10 +747,8 @@ public:
 	}
 	/**
 	 * Waits until a specific time for a message to appear.
-	 * @param msg Pointer to the value to receive the message
 	 * @param absTime The time point to wait until, before timing out.
-	 * @return @em true if a message was read, @em false if a timeout
-	 *  	   occurred.
+	 * @return The message, if read, an empty pointer if not.
 	 */
 	template <class Clock, class Duration>
 	const_message_ptr try_consume_message_until(const std::chrono::time_point<Clock,Duration>& absTime) {

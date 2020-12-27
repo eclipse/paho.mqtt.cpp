@@ -146,6 +146,7 @@ public:
 	 * will present to the server during the SSL handshake.
 	 * @param enableServerCertAuth True/False option to enable verification of
 	 * the server certificate
+	 * @param alpnProtos The ALPN protocols to try.
 	 */
 	ssl_options(const string& trustStore, const string& keyStore,
 				const string& privateKey, const string& privateKeyPassword,

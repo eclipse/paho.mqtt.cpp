@@ -55,11 +55,13 @@ class response_options
 public:
 	/**
 	 * Create an empty response object.
+	 * @param mqttVersion The MQTT versoion for the response.
 	 */
 	explicit response_options(int mqttVersion=MQTTVERSION_DEFAULT);
 	/**
 	 * Creates a response object with the specified callbacks.
 	 * @param tok A token to be used as the context.
+	 * @param mqttVersion The MQTT versoion for the response.
 	 */
 	response_options(const token_ptr& tok, int mqttVersion=MQTTVERSION_DEFAULT);
 	/**
@@ -219,6 +221,7 @@ public:
 	/**
 	 * Creates a response object tied to the specific delivery token.
 	 * @param dtok A delivery token to be used as the context.
+	 * @param mqttVersion The MQTT version for the response
 	 */
 	delivery_response_options(const delivery_token_ptr& dtok,
 							  int mqttVersion=MQTTVERSION_DEFAULT);

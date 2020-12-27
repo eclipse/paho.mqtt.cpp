@@ -80,7 +80,7 @@ public:
 	 * disconnected.
 	 *
 	 * @param on @em true to allow the application to publish messages while
-	 *  		 disconnected, @false returns an error on publish if
+	 *  		 disconnected, @em false returns an error on publish if
 	 *  		 disconnected.
 	 * @param anyTime If @em true, allows you to publish messages before the
 	 *  			  first successful connection.
@@ -136,7 +136,6 @@ public:
 	/**
 	 * Whether the messages will be restored from persistence or the store
 	 * will be cleared.
-	 *
 	 * @return @em true if the messages will be restored from persistence,
 	 *  	   @em false if the persistence store will be cleared.
 	 */
@@ -146,9 +145,8 @@ public:
 	/**
 	 * Determine whether to restore messages from persistence or clear the
 	 * persistence store.
-	 *
-	 * @param on @true to restore messages from persistence, @false to clear
-	 *  		 the persistence store.
+	 * @param on @em true to restore messages from persistence, @em false to
+	 *  		 clear the persistence store.
 	 */
 	void set_restore_messages(bool on) {
 		opts_.restoreMessages = to_int(on);
@@ -197,7 +195,7 @@ public:
 	 * disconnected.
 	 *
 	 * @param on @em true to allow the application to publish messages while
-	 *  		 disconnected, @false returns an error on publish if
+	 *  		 disconnected, @em false returns an error on publish if
 	 *  		 disconnected.
 	 * @param anyTime If @em true, allows you to publish messages before the
 	 *  			  first successful connection.

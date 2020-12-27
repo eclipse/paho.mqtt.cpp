@@ -216,10 +216,18 @@ public:
 	/**
 	 * Sets the SSL for the connection.
 	 * These will only have an effect if compiled against the SSL version of
-	 * the Paho C library.
+	 * the Paho C library, and using a secure connection, "ssl://" or
+	 * "wss://".
 	 * @param ssl The SSL options.
 	 */
 	void set_ssl(const ssl_options& ssl);
+	/**
+	 * Sets the SSL for the connection.
+	 * These will only have an effect if compiled against the SSL version of
+	 * the Paho C library, and using a secure connection, "ssl://" or
+	 * "wss://".
+	 * @param ssl The SSL options.
+	 */
 	void set_ssl(ssl_options&& ssl);
 	/**
 	 * Returns whether the server should remember state for the client
@@ -346,6 +354,10 @@ public:
 	 * @param will The LWT options.
 	 */
 	void set_will(const will_options& will);
+	/**
+	 * Sets the "Last Will and Testament" (LWT) for the connection.
+	 * @param will The LWT options.
+	 */
 	void set_will(will_options&& will);
 	/**
 	 * Sets the "Last Will and Testament" (LWT) as a message
@@ -486,7 +498,8 @@ public:
 	string get_http_proxy() const { return httpProxy_; }
 	/**
 	 * Sets the HTTP proxy setting.
-	 * @httpProxy The HTTP proxy setting. An empty string means no proxy.
+	 * @param httpProxy The HTTP proxy setting. An empty string means no
+	 *  			  proxy.
 	 */
 	void set_http_proxy(const string& httpProxy);
 	/**
@@ -496,7 +509,8 @@ public:
 	string get_https_proxy() const { return httpsProxy_; }
 	/**
 	 * Sets the secure HTTPS proxy setting.
-	 * @httpsProxy The HTTPS proxy setting. An empty string means no proxy.
+	 * @param httpsProxy The HTTPS proxy setting. An empty string means no
+	 *  			 proxy.
 	 */
 	void set_https_proxy(const string& httpsProxy);
 	/**
@@ -673,7 +687,10 @@ public:
 		opts_.set_will(will);
 		return *this;
 	}
-
+	/**
+	 * Sets the "Last Will and Testament" (LWT) for the connection.
+	 * @param will The LWT options.
+	 */
 	auto will(will_options&& will) -> self& {
 		opts_.set_will(std::move(will));
 		return *this;
@@ -792,7 +809,7 @@ public:
 	}
 	/**
 	 * Sets the HTTP headers for the connection.
-	 * @param httpHeaders The header nam/value collection.
+	 * @param headers The header nam/value collection.
 	 */
 	auto http_headers(const name_value_collection& headers) -> self& {
 		opts_.set_http_headers(headers);
@@ -800,7 +817,7 @@ public:
 	}
 	/**
 	 * Sets the HTTP headers for the connection.
-	 * @param httpHeaders The header nam/value collection.
+	 * @param headers The header nam/value collection.
 	 */
 	auto http_headers(name_value_collection&& headers) -> self& {
 		opts_.set_http_headers(std::move(headers));
@@ -808,7 +825,8 @@ public:
 	}
 	/**
 	 * Sets the HTTP proxy setting.
-	 * @httpProxy The HTTP proxy setting. An empty string means no proxy.
+	 * @param httpProxy The HTTP proxy setting. An empty string means no
+	 *  			  proxy.
 	 */
 	auto http_proxy(const string& httpProxy) -> self& {
 		opts_.set_http_proxy(httpProxy);
@@ -816,7 +834,8 @@ public:
 	}
 	/**
 	 * Sets the secure HTTPS proxy setting.
-	 * @httpsProxy The HTTPS proxy setting. An empty string means no proxy.
+	 * @param httpsProxy The HTTPS proxy setting. An empty string means no
+	 *  			 proxy.
 	 */
 	auto https_proxy(const string& httpsProxy) -> self& {
 		opts_.set_https_proxy(httpsProxy);

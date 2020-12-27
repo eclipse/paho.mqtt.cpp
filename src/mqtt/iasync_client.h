@@ -299,6 +299,7 @@ public:
 	 *  		  higher quality of service will be received using the QoS
 	 *  		  specified on the subscribe.
 	 * @param opts The options for the subscription.
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
@@ -319,6 +320,7 @@ public:
 	 * @param callback listener that will be notified when subscribe has
 	 *  			   completed
 	 * @param opts The options for the subscription.
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
@@ -339,6 +341,7 @@ public:
 	 *  		  specified on the subscribe.
 	 * @param opts A collection of subscription optsions (one for each
 	 *  		   topic)
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
@@ -361,6 +364,7 @@ public:
 	 *  			   completed
 	 * @param opts A collection of subscription optsions (one for each
 	 *  		   topic)
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
@@ -373,6 +377,7 @@ public:
 	 * Requests the server unsubscribe the client from a topic.
 	 * @param topicFilter the topic to unsubscribe from. It must match a
 	 *  				  topicFilter specified on an earlier subscribe.
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
@@ -383,6 +388,7 @@ public:
 	 * @param topicFilters one or more topics to unsubscribe from. Each
 	 *  				   topicFilter must match one specified on an
 	 *  				   earlier subscribe.
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
@@ -397,6 +403,7 @@ public:
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb listener that will be notified when unsubscribe has
 	 *  		 completed
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
@@ -410,8 +417,9 @@ public:
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb listener that will be notified when unsubscribe has
-	 *  		 completed
-	 * @return token used to track and wait for the unsubscribe to complete.
+	 *  		 completed.
+	 * @param props The MQTT v5 properties.
+	 * @return Token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
 	virtual token_ptr unsubscribe(const string& topicFilter,
