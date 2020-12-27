@@ -29,7 +29,7 @@ cmake_minimum_required(VERSION 3.5)
 
 ## project name
 project("paho-mqtt-cpp" 
-    VERSION "1.1.0"
+    VERSION "1.2.0"
     LANGUAGES CXX
 )
 
