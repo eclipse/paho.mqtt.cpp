@@ -115,6 +115,7 @@ public:
 	 * @param qos The message Quality of Service.
 	 * @param retained Tell the broker to keep the LWT message after send to
 	 *  			   subscribers.
+	 * @param props MQTT v5 properties for the will message.
 	 */
 	will_options(string_ref top, const void *payload, size_t payload_len,
 				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED,
@@ -127,6 +128,7 @@ public:
 	 * @param qos The message Quality of Service.
 	 * @param retained Tell the broker to keep the LWT message after send to
 	 *  			   subscribers.
+	 * @param props MQTT v5 properties for the will message.
 	 */
 	will_options(const topic& top, const void *payload, size_t payload_len,
 				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED,
@@ -139,6 +141,7 @@ public:
 	 * @param qos The message Quality of Service.
 	 * @param retained Tell the broker to keep the LWT message after send to
 	 *  			   subscribers.
+	 * @param props MQTT v5 properties for the will message.
 	 */
 	will_options(string_ref top, binary_ref payload,
 				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED,
@@ -151,6 +154,7 @@ public:
 	 * @param qos The message Quality of Service.
 	 * @param retained Tell the broker to keep the LWT message after send to
 	 *  			   subscribers.
+	 * @param props MQTT v5 properties for the will message.
 	 */
 	will_options(string_ref top, const string& payload,
 				 int qos=DFLT_QOS, bool retained=DFLT_QOS,
