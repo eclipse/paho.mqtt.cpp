@@ -1,4 +1,5 @@
 /*******************************************************************************
+ * Copyright (c) 2017-2020 Frank Pagliughi <fpagliughi@mindspring.com>
  * Copyright (c) 2016 Guilherme M. Ferreira <guilherme.maciel.ferreira@gmail.com>
  *
  * All rights reserved. This program and the accompanying materials
@@ -33,13 +34,13 @@ const MQTTAsync_willOptions will_options::DFLT_C_STRUCT = MQTTAsync_willOptions_
 will_options::will_options() : opts_(DFLT_C_STRUCT)
 {
 	set_topic(string());
-//	set_payload(binary_ref());
 }
 
 will_options::will_options(string_ref top,
 						   const void *payload, size_t payloadlen,
-						   int qos, bool retained)
-		: opts_(DFLT_C_STRUCT)
+						   int qos, bool retained,
+						   const properties& props /*=properties()*/)
+		: opts_(DFLT_C_STRUCT), props_(props)
 {
 	opts_.qos = qos;
 	opts_.retained = retained;
@@ -49,15 +50,16 @@ will_options::will_options(string_ref top,
 
 will_options::will_options(const topic& top,
 						   const void *payload, size_t payloadlen,
-						   int qos, bool retained)
-		: will_options(top.get_name(), payload, payloadlen, qos, retained)
+						   int qos, bool retained,
+						   const properties& props /*=properties()*/)
+		: will_options(top.get_name(), payload, payloadlen, qos, retained, props)
 {
 }
 
-
 will_options::will_options(string_ref top, binary_ref payload,
-						   int qos, bool retained)
-		: opts_(DFLT_C_STRUCT)
+						   int qos, bool retained,
+						   const properties& props /*=properties()*/)
+		: opts_(DFLT_C_STRUCT), props_(props)
 {
 	opts_.qos = qos;
 	opts_.retained = retained;
@@ -66,8 +68,9 @@ will_options::will_options(string_ref top, binary_ref payload,
 }
 
 will_options::will_options(string_ref top, const string& payload,
-						   int qos, bool retained)
-		: opts_(DFLT_C_STRUCT)
+						   int qos, bool retained,
+						   const properties& props /*=properties()*/)
+		: opts_(DFLT_C_STRUCT), props_(props)
 {
 	opts_.qos = qos;
 	opts_.retained = retained;
@@ -76,17 +79,20 @@ will_options::will_options(string_ref top, const string& payload,
 }
 
 will_options::will_options(const message& msg)
-	: will_options(msg.get_topic(), msg.get_payload(), msg.get_qos(), msg.is_retained())
+	: will_options(msg.get_topic(), msg.get_payload(), msg.get_qos(),
+				   msg.is_retained(), msg.get_properties())
 {
 }
 
-will_options::will_options(const will_options& opt) : opts_(opt.opts_)
+will_options::will_options(const will_options& other)
+	: opts_(other.opts_), props_(other.props_)
 {
-	set_topic(opt.topic_);
-	set_payload(opt.payload_);
+	set_topic(other.topic_);
+	set_payload(other.payload_);
 }
 
-will_options::will_options(will_options&& other) : opts_(other.opts_)
+will_options::will_options(will_options&& other)
+	: opts_(other.opts_), props_(std::move(other.props_))
 {
 	set_topic(std::move(other.topic_));
 	set_payload(std::move(other.payload_));
@@ -98,6 +104,7 @@ will_options& will_options::operator=(const will_options& rhs)
 		opts_ = rhs.opts_;
 		set_topic(rhs.topic_);
 		set_payload(rhs.payload_);
+		props_ = rhs.props_;
 	}
 	return *this;
 }
@@ -108,6 +115,7 @@ will_options& will_options::operator=(will_options&& rhs)
 		opts_ = rhs.opts_;
 		set_topic(std::move(rhs.topic_));
 		set_payload(std::move(rhs.payload_));
+		props_ = std::move(rhs.props_);
 	}
 	return *this;
 }
@@ -128,6 +136,6 @@ void will_options::set_payload(binary_ref msg)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-
-} // end namespace mqtt
+// end namespace mqtt
+}
 

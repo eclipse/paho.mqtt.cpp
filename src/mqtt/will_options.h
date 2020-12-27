@@ -70,6 +70,8 @@ private:
 	 * The properties for the LWT message.
 	 * Strangely, in the C lib, the will properties are not in the
 	 * willOptions struct, but are rather in the connectOptions.
+	 * So we keep the cached properties here, but need to transfer them to
+	 * the connect_options when we're added to that struct.
 	 */
 	properties props_;
 
@@ -115,7 +117,8 @@ public:
 	 *  			   subscribers.
 	 */
 	will_options(string_ref top, const void *payload, size_t payload_len,
-				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED);
+				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED,
+				 const properties& props=properties());
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
 	 * @param top The LWT message is published to the this topic.
@@ -126,7 +129,8 @@ public:
 	 *  			   subscribers.
 	 */
 	will_options(const topic& top, const void *payload, size_t payload_len,
-				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED);
+				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED,
+				 const properties& props=properties());
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
 	 * @param top The LWT message is published to the this topic.
@@ -137,7 +141,8 @@ public:
 	 *  			   subscribers.
 	 */
 	will_options(string_ref top, binary_ref payload,
-				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED);
+				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED,
+				 const properties& props=properties());
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
 	 * @param top The LWT message is published to the this topic.
@@ -148,7 +153,8 @@ public:
 	 *  			   subscribers.
 	 */
 	will_options(string_ref top, const string& payload,
-				 int qos=DFLT_QOS, bool retained=DFLT_QOS);
+				 int qos=DFLT_QOS, bool retained=DFLT_QOS,
+				 const properties& props=properties());
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
 	 * @param msg The message that is published to the Will Topic.
