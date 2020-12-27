@@ -1,5 +1,42 @@
 # Change Log
 
+## Version 1.2.0 (2020-12-27)
+
+This release bring in some missing MQTT v5 features, brings in support for websocket headers and proxies, ALPN protocol lists, adds the builder pattern for options, and fixes a number of bugs in both the C++ library and the underlying C lib.
+
+Requires Paho C v1.3.8
+
+- Missing MQTT v5 features:
+    - Ability to add properties to Subscribe and Unsubscribe packets (i.e. subscription identifiers)
+    - "Disconnected" callback gives reason code and properties for server disconnect
+- New `create_options` that can be used to construct a client with new features:
+    - Send while disconnected before the 1st successful connection
+    - Output buffer can delete oldest messages when full
+    - Can choose to clear the persistence store on startup
+    - Select whether to persist QoS 0 messages
+- Started classes to create options using the Builder Pattern, with the `create_options_builder`, `connect_options_builder`, `message_ptr_builder`, etc.
+- User-defined websocket HTTP headers.
+- HTTP/S proxy support
+- Added ALPN protocol support to SSL/TLS options
+- SSL/TLS error and PSK callback support
+- Update connection callback support (change credentials when using auto-reconnect)
+- Updates to the sample apps:
+    - Overall cleanup with better consistency
+    - Example of using websockets and a proxy
+    - User-based file persistence with simple encoding/encryption
+    - Sharing a client between multiple threads
+- Converted the unit tests to use Catch2
+- All library exceptions are now properly derived from the `mqtt::exception` base class.
+- [#231] Added `on_disconnected` callback to handle receipt of disconnect packet from server.
+- [#211, #223, #235] Removed use of Log() function from the Paho C library.
+- [#227] Fixed race condition in thread-safe queue
+- [#224] & [#255] Subscribing to MQTT v3 broker with array of one topic causes segfault.
+- [#282] Ability to build Debian/Ubuntu package
+- [#300] Calling `reconnect()` was hanging forever, even when successful. In addition several of the synchronous `client` calls were hanging forever on failure. They now properly throw a `timeout_error` exception.
+- Several memory issues and bug fixes from updated Paho C library support.
+
+
+
 ## Version 1.1 (2019-10-12)
 
 This release was primarily to add MQTT v5 support and server responses.

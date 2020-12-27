@@ -39,11 +39,11 @@ To keep up with the latest announcements for this project, or to ask questions:
 
 **Mattermost:** [Eclipse Mattermost Paho Channel](https://mattermost.eclipse.org/eclipse/channels/paho)
 
-### Unreleased Features in this Branch
+### What's new in Version 1.2.0
 
-**This branch requires Paho MQTT C library _v1.3.7_ or greater, preferably the soon-to-be-released v.1.3.8 (Paho C GitHub _develop_ branch).**
+This release bring in some missing MQTT v5 features, brings in support for websocket headers and proxies, ALPN protocol lists, adds the builder pattern for options, and fixes a number of bugs in both the C++ library and the underlying C lib.
 
-Note that this branch will be formally released to coincide with the release of Paho C v1.3.8. Currently it is being tested against the _develop_ branch of the C lib. This document, however, has mostly been updated to reflect the upcoming v1.3.8 release. That version does not yet exist, but should be out shortly.
+Requires Paho C v1.3.8
 
 - Missing MQTT v5 features:
     - Ability to add properties to Subscribe and Unsubscribe packets (i.e. subscription identifiers)
@@ -74,8 +74,6 @@ Note that this branch will be formally released to coincide with the release of 
 - [#300] Calling `reconnect()` was hanging forever, even when successful. In addition several of the synchronous `client` calls were hanging forever on failure. They now properly throw a `timeout_error` exception.
 - Several memory issues and bug fixes from updated Paho C library support.
 
-Targets Paho C v1.3.8
-
 ### _Catch2_ Unit Tests
 
 Unit tests were converted to use _Catch2_ for the test framework. 
@@ -93,8 +91,6 @@ Contributions to this project are gladly welcomed and appreciated Before submitt
  For full details, see [CONTRIBUTING.md](https://github.com/eclipse/paho.mqtt.cpp/blob/master/CONTRIBUTING.md).
  
 ## Building from source
-
-*GNU Make and autotools were deprecated and removed in the v1.1 release.*
 
 _CMake_  is a cross-platform build system suitable for Unix and non-Unix platforms such as Microsoft Windows. It is now the only supported build system.
 
