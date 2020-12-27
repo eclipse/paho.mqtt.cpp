@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013-2019 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2020 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -100,9 +100,11 @@ public:
 	 * @param len the number of bytes in the payload
 	 * @param qos The quality of service for the message.
 	 * @param retained Whether the message should be retained by the broker.
+	 * @param props The MQTT v5 properties for the message.
 	 */
 	message(string_ref topic, const void* payload, size_t len,
-			int qos, bool retained);
+			int qos, bool retained,
+			const properties& props=properties());
 	/**
 	 * Constructs a message with the specified array as a payload, and all
 	 * other values set to defaults.
@@ -119,8 +121,10 @@ public:
 	 * @param payload A byte buffer to use as the message payload.
 	 * @param qos The quality of service for the message.
 	 * @param retained Whether the message should be retained by the broker.
+	 * @param props The MQTT v5 properties for the message.
 	 */
-	message(string_ref topic, binary_ref payload, int qos, bool retained);
+	message(string_ref topic, binary_ref payload, int qos, bool retained,
+			const properties& props=properties());
 	/**
 	 * Constructs a message from a byte buffer.
 	 * Note that the payload accepts copy or move semantics.
@@ -132,9 +136,9 @@ public:
 	/**
 	 * Constructs a message as a copy of the message structure.
 	 * @param topic The message topic
-	 * @param msg A "C" MQTTAsync_message structure.
+	 * @param cmsg A "C" MQTTAsync_message structure.
 	 */
-	message(string_ref topic, const MQTTAsync_message& msg);
+	message(string_ref topic, const MQTTAsync_message& cmsg);
 	/**
 	 * Constructs a message as a copy of the other message.
 	 * @param other The message to copy into this one.
@@ -158,11 +162,12 @@ public:
 	 * @param len the number of bytes in the payload
 	 * @param qos The quality of service for the message.
 	 * @param retained Whether the message should be retained by the broker.
+	 * @param props The MQTT v5 properties for the message.
 	 */
 	static ptr_t create(string_ref topic, const void* payload, size_t len,
-						int qos, bool retained) {
+						int qos, bool retained, const properties& props=properties()) {
 		return std::make_shared<message>(std::move(topic), payload, len,
-										 qos, retained);
+										 qos, retained, props);
 	}
 	/**
 	 * Constructs a message with the specified array as a payload, and all
@@ -182,10 +187,12 @@ public:
 	 * @param payload A byte buffer to use as the message payload.
 	 * @param qos The quality of service for the message.
 	 * @param retained Whether the message should be retained by the broker.
+	 * @param props The MQTT v5 properties for the message.
 	 */
-	static ptr_t create(string_ref topic, binary_ref payload, int qos, bool retained) {
+	static ptr_t create(string_ref topic, binary_ref payload, int qos, bool retained,
+						const properties& props=properties()) {
 		return std::make_shared<message>(std::move(topic), std::move(payload),
-										 qos, retained);
+										 qos, retained, props);
 	}
 	/**
 	 * Constructs a message from a byte buffer.
