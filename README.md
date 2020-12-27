@@ -29,8 +29,6 @@ This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) 
 
 ## Latest News
 
-A new release is underway to add a numer of features and some missing MQTT v5 support, in addition to a number of bug fixes. This should be v1.2, due before the end of 2020.
-
 To keep up with the latest announcements for this project, or to ask questions:
 
 **Twitter:** [@eclipsepaho](https://twitter.com/eclipsepaho) and [@fmpagliughi](https://twitter.com/fmpagliughi)
