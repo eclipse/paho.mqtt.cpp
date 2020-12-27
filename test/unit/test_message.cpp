@@ -35,8 +35,10 @@ static const bool DFLT_DUP = false;
 static const std::string TOPIC { "hello" };
 static const char* BUF = "Hello there";
 static const size_t N = std::strlen(BUF);
-static const std::string PAYLOAD = std::string(BUF);
+static const std::string PAYLOAD { BUF };;
 static const int QOS = 1;
+static const std::string RESPONSE_TOPIC { "replies" };
+static const properties PROPS { { property::RESPONSE_TOPIC, RESPONSE_TOPIC } };
 
 // --------------------------------------------------------------------------
 // Test the default constructor
@@ -46,10 +48,11 @@ TEST_CASE("default constructor", "[message]")
 {
     mqtt::message msg;
 
-    REQUIRE(EMPTY_STR == msg.get_payload_str());
+    REQUIRE(msg.get_payload_str().empty());
     REQUIRE(DFLT_QOS == msg.get_qos());
     REQUIRE(DFLT_RETAINED == msg.is_retained());
     REQUIRE(DFLT_DUP == msg.is_duplicate());
+	REQUIRE(msg.get_properties().empty());
 
     const auto& c_struct = msg.c_struct();
 
@@ -58,6 +61,7 @@ TEST_CASE("default constructor", "[message]")
 	REQUIRE(DFLT_QOS == c_struct.qos);
 	REQUIRE(DFLT_RETAINED == (c_struct.retained != 0));
 	REQUIRE(DFLT_DUP == (c_struct.dup != 0));
+	REQUIRE(0 == c_struct.properties.count);
 }
 
 // --------------------------------------------------------------------------
@@ -89,13 +93,17 @@ TEST_CASE("buf len constructor", "[message]")
 
 TEST_CASE("buf constructor", "[message]")
 {
-	mqtt::message msg(TOPIC, BUF, N, QOS, true);
+	mqtt::message msg(TOPIC, BUF, N, QOS, true, PROPS);
 
 	REQUIRE(TOPIC == msg.get_topic());
 	REQUIRE(PAYLOAD == msg.get_payload_str());
 	REQUIRE(QOS == msg.get_qos());
 	REQUIRE(msg.is_retained());
 	REQUIRE(DFLT_DUP == msg.is_duplicate());
+
+	const auto& props = msg.get_properties();
+	REQUIRE(1 == props.count(property::RESPONSE_TOPIC));
+	REQUIRE(RESPONSE_TOPIC == get<std::string>(props, property::RESPONSE_TOPIC));
 
 	const auto& c_struct = msg.c_struct();
 
@@ -119,6 +127,7 @@ TEST_CASE("string constructor", "[message]")
 	REQUIRE(DFLT_QOS == msg.get_qos());
 	REQUIRE(!msg.is_retained());
 	REQUIRE(DFLT_DUP == msg.is_duplicate());
+	REQUIRE(msg.get_properties().empty());
 
 	const auto& c_struct = msg.c_struct();
 
@@ -135,13 +144,17 @@ TEST_CASE("string constructor", "[message]")
 
 TEST_CASE("string qos constructor", "[message]")
 {
-	mqtt::message msg(TOPIC, PAYLOAD, QOS, true);
+	mqtt::message msg(TOPIC, PAYLOAD, QOS, true, PROPS);
 
 	REQUIRE(TOPIC == msg.get_topic());
 	REQUIRE(PAYLOAD == msg.get_payload_str());
 	REQUIRE(QOS == msg.get_qos());
 	REQUIRE(msg.is_retained());
 	REQUIRE(DFLT_DUP == msg.is_duplicate());
+
+	const auto& props = msg.get_properties();
+	REQUIRE(1 == props.count(property::RESPONSE_TOPIC));
+	REQUIRE(RESPONSE_TOPIC == get<std::string>(props, property::RESPONSE_TOPIC));
 
 	const auto& c_struct = msg.c_struct();
 
@@ -166,6 +179,8 @@ TEST_CASE("c struct constructor", "[message]")
 	c_msg.retained = 1;
 	c_msg.dup = 1;
 
+	// TODO: Test extracting v5 properties
+
 	mqtt::message msg(TOPIC, c_msg);
 
 	REQUIRE(TOPIC == msg.get_topic());
@@ -189,7 +204,7 @@ TEST_CASE("c struct constructor", "[message]")
 
 TEST_CASE("copy constructor", "[message]")
 {
-    auto orgMsg = mqtt::message(TOPIC, PAYLOAD, QOS, true);
+    auto orgMsg = mqtt::message(TOPIC, PAYLOAD, QOS, true, PROPS);
 
 	mqtt::message msg(orgMsg);
 
@@ -197,6 +212,10 @@ TEST_CASE("copy constructor", "[message]")
 	REQUIRE(PAYLOAD == msg.get_payload_str());
 	REQUIRE(QOS == msg.get_qos());
 	REQUIRE(msg.is_retained());
+
+	const auto& props = msg.get_properties();
+	REQUIRE(1 == props.count(property::RESPONSE_TOPIC));
+	REQUIRE(RESPONSE_TOPIC == get<std::string>(props, property::RESPONSE_TOPIC));
 
 	const auto& c_struct = msg.c_struct();
 
@@ -222,7 +241,7 @@ TEST_CASE("copy constructor", "[message]")
 
 TEST_CASE("move constructor", "[message]")
 {
-    auto orgMsg = mqtt::message(TOPIC, PAYLOAD, QOS, true);
+    auto orgMsg = mqtt::message(TOPIC, PAYLOAD, QOS, true, PROPS);
 
 	mqtt::message msg(std::move(orgMsg));
 
@@ -230,6 +249,10 @@ TEST_CASE("move constructor", "[message]")
 	REQUIRE(PAYLOAD == msg.get_payload_str());
 	REQUIRE(QOS == msg.get_qos());
 	REQUIRE(msg.is_retained());
+
+	const auto& props = msg.get_properties();
+	REQUIRE(1 == props.count(property::RESPONSE_TOPIC));
+	REQUIRE(RESPONSE_TOPIC == get<std::string>(props, property::RESPONSE_TOPIC));
 
 	const auto& c_struct = msg.c_struct();
 
@@ -241,6 +264,7 @@ TEST_CASE("move constructor", "[message]")
 
 	// Check that the original was moved
 	REQUIRE(size_t(0) == orgMsg.get_payload().size());
+	REQUIRE(orgMsg.get_properties().empty());
 }
 
 // --------------------------------------------------------------------------
@@ -249,15 +273,25 @@ TEST_CASE("move constructor", "[message]")
 
 TEST_CASE("copy assignment", "[message]")
 {
-    auto orgMsg = mqtt::message(TOPIC, PAYLOAD, QOS, true);
+    auto orgMsg = mqtt::message(TOPIC, PAYLOAD, QOS, true, PROPS);
 
     mqtt::message msg;
 	msg = orgMsg;
+
+	// Make sure it's a true copy, not linked to the original
+	orgMsg.set_payload(EMPTY_STR);
+	orgMsg.set_qos(DFLT_QOS);
+	orgMsg.set_retained(false);
+	orgMsg.set_properties({});
 
 	REQUIRE(TOPIC == msg.get_topic());
 	REQUIRE(PAYLOAD == msg.get_payload_str());
 	REQUIRE(QOS == msg.get_qos());
 	REQUIRE(msg.is_retained());
+
+	const auto& props = msg.get_properties();
+	REQUIRE(1 == props.count(property::RESPONSE_TOPIC));
+	REQUIRE(RESPONSE_TOPIC == get<std::string>(props, property::RESPONSE_TOPIC));
 
 	const auto& c_struct = msg.c_struct();
 
@@ -266,16 +300,6 @@ TEST_CASE("copy assignment", "[message]")
 	REQUIRE(QOS == c_struct.qos);
 	REQUIRE(c_struct.retained != 0);
 	REQUIRE(DFLT_DUP == (c_struct.dup != 0));
-
-	// Make sure it's a true copy, not linked to the original
-	orgMsg.set_payload(EMPTY_STR);
-	orgMsg.set_qos(DFLT_QOS);
-	orgMsg.set_retained(false);
-
-	REQUIRE(TOPIC == msg.get_topic());
-	REQUIRE(PAYLOAD == msg.get_payload_str());
-	REQUIRE(QOS == msg.get_qos());
-	REQUIRE(msg.is_retained());
 
 	// Self assignment should cause no harm
 	msg = msg;
@@ -291,7 +315,7 @@ TEST_CASE("copy assignment", "[message]")
 
 TEST_CASE("move assignment", "[message]")
 {
-    auto orgMsg = mqtt::message(TOPIC, PAYLOAD, QOS, true);
+    auto orgMsg = mqtt::message(TOPIC, PAYLOAD, QOS, true, PROPS);
 
     mqtt::message msg;
 	msg = std::move(orgMsg);
@@ -300,6 +324,10 @@ TEST_CASE("move assignment", "[message]")
 	REQUIRE(PAYLOAD == msg.get_payload_str());
 	REQUIRE(QOS == msg.get_qos());
 	REQUIRE(msg.is_retained());
+
+	const auto& props = msg.get_properties();
+	REQUIRE(1 == props.count(property::RESPONSE_TOPIC));
+	REQUIRE(RESPONSE_TOPIC == get<std::string>(props, property::RESPONSE_TOPIC));
 
 	const auto& c_struct = msg.c_struct();
 
@@ -311,6 +339,7 @@ TEST_CASE("move assignment", "[message]")
 
 	// Check that the original was moved
 	REQUIRE(size_t(0) == orgMsg.get_payload().size());
+	REQUIRE(orgMsg.get_properties().empty());
 
 	// Self assignment should cause no harm
 	// (clang++ is smart enough to warn about this)
@@ -369,6 +398,7 @@ TEST_CASE("builder", "[message]")
 			       .payload(PAYLOAD)
 				   .qos(QOS)
 				   .retained(true)
+				   .properties(PROPS)
 				   .finalize();
 
 	REQUIRE(TOPIC == msg->get_topic());
@@ -376,6 +406,10 @@ TEST_CASE("builder", "[message]")
 	REQUIRE(QOS == msg->get_qos());
 	REQUIRE(msg->is_retained());
 	REQUIRE(DFLT_DUP == msg->is_duplicate());
+
+	const auto& props = msg->get_properties();
+	REQUIRE(1 == props.count(property::RESPONSE_TOPIC));
+	REQUIRE(RESPONSE_TOPIC == get<std::string>(props, property::RESPONSE_TOPIC));
 
 	const auto& c_struct = msg->c_struct();
 

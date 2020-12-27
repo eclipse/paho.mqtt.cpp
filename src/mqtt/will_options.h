@@ -262,7 +262,7 @@ public:
 	 * Moves the properties for the connect.
 	 * @param props The properties to move into the connect object.
 	 */
-	void set_properties(properties&& props) { props_ = props; }
+	void set_properties(properties&& props) { props_ = std::move(props); }
 };
 
 /** Shared pointer to a will options object. */

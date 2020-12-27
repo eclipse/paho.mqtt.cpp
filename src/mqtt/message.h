@@ -350,7 +350,7 @@ public:
 	 * @param props The properties to move into the message.
 	 */
 	void set_properties(properties&& props) {
-		props_ = props;
+		props_ = std::move(props);
 		msg_.properties = props_.c_struct();
 	}
 	/**

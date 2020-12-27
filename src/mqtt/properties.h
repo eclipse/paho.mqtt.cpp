@@ -383,8 +383,9 @@ public:
 	 * @param propid The property ID (code).
 	 * @return The number of properties in the list with the specified ID.
 	 */
-	size_t count(property::code propid) {
-		return size_t(::MQTTProperties_propertyCount(&props_, MQTTPropertyCodes(propid)));
+	size_t count(property::code propid) const {
+		return size_t(::MQTTProperties_propertyCount(
+						const_cast<MQTTProperties*>(&props_), MQTTPropertyCodes(propid)));
 	}
 	/**
 	 * Gets the property with the specified ID.
