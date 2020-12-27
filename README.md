@@ -39,7 +39,7 @@ To keep up with the latest announcements for this project, or to ask questions:
 
 ### What's new in Version 1.2.0
 
-This release bring in some missing MQTT v5 features, brings in support for websocket headers and proxies, ALPN protocol lists, adds the builder pattern for options, and fixes a number of bugs in both the C++ library and the underlying C lib.
+This release brings in some missing MQTT v5 features, support for websocket headers and proxies, ALPN protocol lists, adds the builder pattern for options, and fixes a number of bugs in both the C++ library and the underlying C lib.
 
 Requires Paho C v1.3.8
 
