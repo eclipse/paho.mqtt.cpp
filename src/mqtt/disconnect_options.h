@@ -52,7 +52,6 @@ class disconnect_options
 
 	/** The client has special access */
 	friend class async_client;
-	friend class disconnect_options_test;
 
 public:
 	/**

@@ -77,8 +77,6 @@ private:
 
 	/** The connect options has special access */
 	friend class connect_options;
-	friend class connect_options_test;
-	friend class will_options_test;
 
 	/**
 	 * Gets a pointer to the C-language NUL-terminated strings for the

@@ -42,9 +42,9 @@ class subscribe_options
 	/** The underlying C structure */
 	MQTTSubscribe_options opts_;
 
+	/** The client and response have special access */
 	friend class async_client;
 	friend class response_options;
-	friend class subscribe_options_test;
 
 public:
 	/** Smart/shared pointer to an object of this class. */

@@ -84,8 +84,6 @@ class connect_options
 
 	/** The client has special access */
 	friend class async_client;
-	friend class connect_options_test;
-	friend class token_test;
 
 	/**
 	 * Gets a pointer to the C-language NUL-terminated strings for the

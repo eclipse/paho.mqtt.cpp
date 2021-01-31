@@ -47,7 +47,6 @@ class response_options
 
 	/** The client has special access */
 	friend class async_client;
-	friend class token_test;
 
 	/** Update the underlying C struct to match our data */
 	void update_c_struct();
@@ -211,7 +210,6 @@ class delivery_response_options
 
 	/** The client has special access */
 	friend class async_client;
-	friend class delivery_response_options_test;
 
 public:
 	/**
