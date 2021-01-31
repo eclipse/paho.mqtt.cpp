@@ -211,7 +211,7 @@ int async_client::on_message_arrived(void* context, char* topicName, int topicLe
 		if (cb || que || msgHandler) {
 			size_t len = (topicLen == 0) ? strlen(topicName) : size_t(topicLen);
 
-			string topic(topicName, topicName+len);
+			string topic { topicName, len };
 			auto m = message::create(std::move(topic), *msg);
 
 			if (msgHandler)

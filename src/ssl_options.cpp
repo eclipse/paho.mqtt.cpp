@@ -105,7 +105,7 @@ int ssl_options::on_error(const char *str, size_t len, void *context)
 {
 	try {
 		if (context && str && len > 0) {
-			string errMsg { str, str+len };
+			string errMsg { str, len };
 
 			ssl_options* opts = static_cast<ssl_options*>(context);
 			auto& errHandler = opts->errHandler_;
