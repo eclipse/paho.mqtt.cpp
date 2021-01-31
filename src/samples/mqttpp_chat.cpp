@@ -74,11 +74,16 @@ int main(int argc, char* argv[])
 
 	// Set up the connect options
 
+	mqtt::properties connectProperties{
+		{mqtt::property::SESSION_EXPIRY_INTERVAL, 604800}
+    };
+
 	auto connOpts = mqtt::connect_options_builder()
-		.keep_alive_interval(std::chrono::seconds(20))
 		.mqtt_version(MQTTVERSION_5)
+		.properties(connectProperties)
 		.clean_start(true)
 		.will(std::move(lwt))
+		.keep_alive_interval(std::chrono::seconds(20))
 		.finalize();
 
 	mqtt::async_client cli(SERVER_ADDRESS, "",
