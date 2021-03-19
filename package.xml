@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="2">
+  <name>paho-mqtt-cpp</name>
+  <version>1.2.0</version>
+  <description>Eclipse Paho MQTT C++ Client Library</description>
+
+  <maintainer email="paho-success@eclipse.org"></maintainer>
+  <license>Eclipse Public License - v 1.0</license>
+  <url>https://github.com/eclipse/paho.mqtt.cpp.git</url>
+
+  <buildtool_depend>cmake</buildtool_depend>
+  <depend>paho-mqtt-c</depend>
+
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+</package>
