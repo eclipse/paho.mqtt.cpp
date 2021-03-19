@@ -142,6 +142,3 @@ if(PAHO_BUILD_STATIC)
         set_target_properties(paho-mqttpp3-static PROPERTIES OUTPUT_NAME paho-mqttpp3)
     endif()
 endif()
-
-INSTALL(FILES "${CMAKE_CURRENT_SOURCE_DIR}/package.xml"
-    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME})

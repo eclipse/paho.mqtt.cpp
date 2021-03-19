@@ -119,4 +119,5 @@ endif()
 include(CPack)
 add_subdirectory(cmake)
 
-
+INSTALL(FILES "${CMAKE_CURRENT_SOURCE_DIR}/package.xml"
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME})
