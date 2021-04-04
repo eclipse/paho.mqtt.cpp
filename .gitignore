@@ -20,4 +20,3 @@ Makefile.in
 *.o
 *.stamp
 /build/
-
