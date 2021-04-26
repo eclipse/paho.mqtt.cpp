@@ -19,3 +19,4 @@ Makefile.in
 *.lo
 *.o
 *.stamp
+/build/
