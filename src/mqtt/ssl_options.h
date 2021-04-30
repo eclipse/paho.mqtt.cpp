@@ -7,7 +7,7 @@
 
 /*******************************************************************************
  * Copyright (c) 2016 Guilherme Ferreira <guilherme.maciel.ferreira@gmail.com>
- * Copyright (c) 2016-2020 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2016-2021 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -153,6 +153,29 @@ public:
 				const string& enabledCipherSuites, bool enableServerCertAuth,
 				const std::vector<string> alpnProtos=std::vector<string>());
 	/**
+	 * Argument constructor.
+	 * @param trustStore The file containing the public digital certificates
+	 *  				 trusted by the client.
+	 * @param keyStore The file containing the public certificate chain of
+	 *  			   the client.
+	 * @param privateKey The file containing the client's private key.
+	 * @param privateKeyPassword The password to load the client's
+	 *  						 privateKey if encrypted.
+	 * @param caPath The name of a directory containing CA certificates in
+	 *  			 PEM format.
+	 * @param enabledCipherSuites The list of cipher suites that the client
+	 *  						  will present to the server during the SSL
+	 *  						  handshake.
+	 * @param enableServerCertAuth True/False option to enable verification
+	 *  						   of the server certificate
+	 * @param alpnProtos The ALPN protocols to try.
+	 */
+	ssl_options(const string& trustStore, const string& keyStore,
+				const string& privateKey, const string& privateKeyPassword,
+				const string& caPath,
+				const string& enabledCipherSuites, bool enableServerCertAuth,
+				const std::vector<string> alpnProtos=std::vector<string>());
+	/**
 	 * Copy constructor.
 	 * @param opt The other options to copy.
 	 */
@@ -192,13 +215,13 @@ public:
 	 */
 	string get_key_store() const { return keyStore_; }
 	/**
-	 * Returns the file containing the client's private key.
-	 * @return string
+	 * Gets the name of file containing the client's private key.
+	 * @return The name of file containing the client's private key.
 	 */
 	string get_private_key() const { return privateKey_; }
 	/**
-	 * Returns the password to load the client's privateKey if encrypted.
-	 * @return string
+	 * Gets the password to load the client's privateKey if encrypted.
+	 * @return The password to load the client's privateKey if encrypted.
 	 */
 	string get_private_key_password() const { return privateKeyPassword_; }
 	/**
@@ -299,6 +322,7 @@ public:
 	 * @return Path to a directory containing CA certificates in PEM format,
 	 *  	   if set. If this isn't set, returns an empty string.
 	 */
+	string get_ca_path() const { return caPath_; }
 	string ca_path() const { return caPath_; }
 	/**
 	 * Sets the path to a directory containing CA certificates in PEM
@@ -307,7 +331,8 @@ public:
 	 * @param path Path to a directory containing CA certificates in PEM
 	 *  	   format.
 	 */
-	void ca_path(const string& path);
+	void set_ca_path(const string& path);
+	void ca_path(const string& path) { set_ca_path(path); }
 	/**
 	 * Registers the error message callback handler.
 	 * @param cb The callback to receive error messages.

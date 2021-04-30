@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2016 Guilherme Ferreira <guilherme.maciel.ferreira@gmail.com>
+ * Copyright (c) 2016-2021 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -33,8 +34,29 @@ ssl_options::ssl_options(const string& trustStore, const string& keyStore,
 						 const string& privateKey, const string& privateKeyPassword,
 						 const string& enabledCipherSuites, bool enableServerCertAuth,
 						 const std::vector<string> alpnProtos /*=std::vector<string>()*/)
-			: opts_(DFLT_C_STRUCT), trustStore_(trustStore), keyStore_(keyStore),
-				privateKey_(privateKey), privateKeyPassword_(privateKeyPassword),
+			: opts_(DFLT_C_STRUCT),
+                trustStore_(trustStore),
+                keyStore_(keyStore),
+				privateKey_(privateKey),
+				privateKeyPassword_(privateKeyPassword),
+				enabledCipherSuites_(enabledCipherSuites)
+{
+	set_alpn_protos(alpnProtos);
+	update_c_struct();
+	opts_.enableServerCertAuth = enableServerCertAuth;
+}
+
+ssl_options::ssl_options(const string& trustStore, const string& keyStore,
+						 const string& privateKey, const string& privateKeyPassword,
+						 const string& caPath,
+						 const string& enabledCipherSuites, bool enableServerCertAuth,
+						 const std::vector<string> alpnProtos /*=std::vector<string>()*/)
+			: opts_(DFLT_C_STRUCT),
+                trustStore_(trustStore),
+                keyStore_(keyStore),
+				privateKey_(privateKey),
+				privateKeyPassword_(privateKeyPassword),
+				caPath_(caPath),
 				enabledCipherSuites_(enabledCipherSuites)
 {
 	set_alpn_protos(alpnProtos);
@@ -43,21 +65,30 @@ ssl_options::ssl_options(const string& trustStore, const string& keyStore,
 }
 
 ssl_options::ssl_options(const ssl_options& other)
-		: opts_(other.opts_), trustStore_(other.trustStore_), keyStore_(other.keyStore_),
-			privateKey_(other.privateKey_), privateKeyPassword_(other.privateKeyPassword_),
+		: opts_(other.opts_),
+            trustStore_(other.trustStore_),
+            keyStore_(other.keyStore_),
+			privateKey_(other.privateKey_),
+			privateKeyPassword_(other.privateKeyPassword_),
+			caPath_(other.caPath_),
 			enabledCipherSuites_(other.enabledCipherSuites_),
-			errHandler_(other.errHandler_), pskHandler_(other.pskHandler_),
+			errHandler_(other.errHandler_),
+			pskHandler_(other.pskHandler_),
 			protos_(other.protos_)
 {
 	update_c_struct();
 }
 
 ssl_options::ssl_options(ssl_options&& other)
-		: opts_(other.opts_), trustStore_(std::move(other.trustStore_)),
-			keyStore_(std::move(other.keyStore_)), privateKey_(std::move(other.privateKey_)),
+		: opts_(other.opts_),
+            trustStore_(std::move(other.trustStore_)),
+			keyStore_(std::move(other.keyStore_)),
+			privateKey_(std::move(other.privateKey_)),
 			privateKeyPassword_(std::move(other.privateKeyPassword_)),
+			caPath_(std::move(other.caPath_)),
 			enabledCipherSuites_(std::move(other.enabledCipherSuites_)),
-			errHandler_(std::move(other.errHandler_)), pskHandler_(std::move(other.pskHandler_)),
+			errHandler_(std::move(other.errHandler_)),
+			pskHandler_(std::move(other.pskHandler_)),
 			protos_(std::move(other.protos_))
 {
 	update_c_struct();
@@ -69,6 +100,7 @@ void ssl_options::update_c_struct()
 	opts_.keyStore = c_str(keyStore_);
 	opts_.privateKey = c_str(privateKey_);
 	opts_.privateKeyPassword = c_str(privateKeyPassword_);
+	opts_.CApath = c_str(caPath_);
 	opts_.enabledCipherSuites = c_str(enabledCipherSuites_);
 
 	if (errHandler_) {
@@ -157,6 +189,7 @@ ssl_options& ssl_options::operator=(const ssl_options& rhs)
 	keyStore_ = rhs.keyStore_;
 	privateKey_ = rhs.privateKey_;
 	privateKeyPassword_ = rhs.privateKeyPassword_;
+	caPath_ = rhs.caPath_;
 	enabledCipherSuites_ = rhs.enabledCipherSuites_;
 
 	errHandler_ = rhs.errHandler_;
@@ -179,6 +212,7 @@ ssl_options& ssl_options::operator=(ssl_options&& rhs)
 	keyStore_ = std::move(rhs.keyStore_);
 	privateKey_ = std::move(rhs.privateKey_);
 	privateKeyPassword_ = std::move(rhs.privateKeyPassword_);
+	caPath_ = std::move(rhs.caPath_);
 	enabledCipherSuites_ = std::move(rhs.enabledCipherSuites_);
 
 	errHandler_ = std::move(rhs.errHandler_);
@@ -227,7 +261,7 @@ void ssl_options::set_enable_server_cert_auth(bool enableServerCertAuth)
 	opts_.enableServerCertAuth = to_int(enableServerCertAuth);
 }
 
-void ssl_options::ca_path(const string& path)
+void ssl_options::set_ca_path(const string& path)
 {
 	caPath_ = path;
 	opts_.CApath = c_str(caPath_);

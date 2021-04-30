@@ -42,6 +42,7 @@ static const std::string TRUST_STORE { "trust store" };
 static const std::string KEY_STORE { "key store" };
 static const std::string PRIVATE_KEY { "private key" };
 static const std::string PRIVATE_KEY_PASSWORD { "private key password" };
+static const std::string CA_PATH { "ca path" };
 static const std::string ENABLED_CIPHER_SUITES { "cipher suite" };
 static const bool SERVER_CERT { false };
 
@@ -53,6 +54,7 @@ static mqtt::ssl_options orgOpts {
 	KEY_STORE,
 	PRIVATE_KEY,
 	PRIVATE_KEY_PASSWORD,
+	CA_PATH,
 	ENABLED_CIPHER_SUITES,
 	SERVER_CERT,
 	{ ALPN0, ALPN1 }
@@ -71,6 +73,7 @@ TEST_CASE("ssl_options dflt constructor", "[options]")
 	REQUIRE(opts.get_key_store().empty());
 	REQUIRE(opts.get_private_key().empty());
 	REQUIRE(opts.get_private_key_password().empty());
+	REQUIRE(opts.get_ca_path().empty());
 	REQUIRE(DFLT_SERVER_CERT == opts.get_enable_server_cert_auth());
 	REQUIRE(opts.get_alpn_protos().empty());
 
@@ -82,6 +85,7 @@ TEST_CASE("ssl_options dflt constructor", "[options]")
 	REQUIRE(c_struct.keyStore == nullptr);
 	REQUIRE(c_struct.privateKey == nullptr);
 	REQUIRE(c_struct.privateKeyPassword == nullptr);
+	REQUIRE(c_struct.CApath == nullptr);
 	REQUIRE(c_struct.enabledCipherSuites == nullptr);
 	//REQUIRE(DFLT_SERVER_CERT == c_struct.enableServerCertAuth != 0);
 	REQUIRE(c_struct.protos == nullptr);
@@ -99,6 +103,7 @@ TEST_CASE("ssl_options user constructor", "[options]")
 		KEY_STORE,
 		PRIVATE_KEY,
 		PRIVATE_KEY_PASSWORD,
+		CA_PATH,
 		ENABLED_CIPHER_SUITES,
 		SERVER_CERT,
 		{ ALPN0, ALPN1 }
@@ -108,6 +113,7 @@ TEST_CASE("ssl_options user constructor", "[options]")
 	REQUIRE(KEY_STORE == opts.get_key_store());
 	REQUIRE(PRIVATE_KEY == opts.get_private_key());
 	REQUIRE(PRIVATE_KEY_PASSWORD == opts.get_private_key_password());
+	REQUIRE(CA_PATH == opts.get_ca_path());
 	REQUIRE(ENABLED_CIPHER_SUITES == opts.get_enabled_cipher_suites());
 	REQUIRE(SERVER_CERT == opts.get_enable_server_cert_auth());
 
@@ -124,6 +130,7 @@ TEST_CASE("ssl_options user constructor", "[options]")
 	REQUIRE(!strcmp(c_struct.keyStore, KEY_STORE.c_str()));
 	REQUIRE(!strcmp(c_struct.privateKey, PRIVATE_KEY.c_str()));
 	REQUIRE(!strcmp(c_struct.privateKeyPassword, PRIVATE_KEY_PASSWORD.c_str()));
+	REQUIRE(!strcmp(c_struct.CApath, CA_PATH.c_str()));
 	REQUIRE(!strcmp(c_struct.enabledCipherSuites, ENABLED_CIPHER_SUITES.c_str()));
 	//REQUIRE(SERVER_CERT == c_struct.enableServerCertAuth != 0);
 
@@ -148,6 +155,7 @@ TEST_CASE("ssl_options copy constructor", "[options]")
 		KEY_STORE,
 		PRIVATE_KEY,
 		PRIVATE_KEY_PASSWORD,
+        CA_PATH,
 		ENABLED_CIPHER_SUITES,
 		SERVER_CERT,
 		{ ALPN0, ALPN1 }
@@ -159,6 +167,7 @@ TEST_CASE("ssl_options copy constructor", "[options]")
 	REQUIRE(KEY_STORE == opts.get_key_store());
 	REQUIRE(PRIVATE_KEY == opts.get_private_key());
 	REQUIRE(PRIVATE_KEY_PASSWORD == opts.get_private_key_password());
+	REQUIRE(CA_PATH == opts.get_ca_path());
 	REQUIRE(ENABLED_CIPHER_SUITES == opts.get_enabled_cipher_suites());
 	REQUIRE(SERVER_CERT == opts.get_enable_server_cert_auth());
 
@@ -175,6 +184,7 @@ TEST_CASE("ssl_options copy constructor", "[options]")
 	REQUIRE(!strcmp(c_struct.keyStore, KEY_STORE.c_str()));
 	REQUIRE(!strcmp(c_struct.privateKey, PRIVATE_KEY.c_str()));
 	REQUIRE(!strcmp(c_struct.privateKeyPassword, PRIVATE_KEY_PASSWORD.c_str()));
+	REQUIRE(!strcmp(c_struct.CApath, CA_PATH.c_str()));
 	REQUIRE(!strcmp(c_struct.enabledCipherSuites, ENABLED_CIPHER_SUITES.c_str()));
 	//REQUIRE(SERVER_CERT == c_struct.enableServerCertAuth != 0);
 
@@ -183,6 +193,7 @@ TEST_CASE("ssl_options copy constructor", "[options]")
 	org.set_key_store(EMPTY_STR);
 	org.set_private_key(EMPTY_STR);
 	org.set_private_key_password(EMPTY_STR);
+	org.set_ca_path(EMPTY_STR);
 	org.set_enabled_cipher_suites(EMPTY_STR);
 	org.set_enable_server_cert_auth(!SERVER_CERT);
 
@@ -190,6 +201,7 @@ TEST_CASE("ssl_options copy constructor", "[options]")
 	REQUIRE(KEY_STORE == opts.get_key_store());
 	REQUIRE(PRIVATE_KEY == opts.get_private_key());
 	REQUIRE(PRIVATE_KEY_PASSWORD == opts.get_private_key_password());
+	REQUIRE(CA_PATH == opts.get_ca_path());
 	REQUIRE(ENABLED_CIPHER_SUITES == opts.get_enabled_cipher_suites());
 	REQUIRE(SERVER_CERT == opts.get_enable_server_cert_auth());
 
@@ -216,6 +228,7 @@ TEST_CASE("ssl_options move constructor", "[options]")
 	REQUIRE(KEY_STORE == opts.get_key_store());
 	REQUIRE(PRIVATE_KEY == opts.get_private_key());
 	REQUIRE(PRIVATE_KEY_PASSWORD == opts.get_private_key_password());
+	REQUIRE(CA_PATH == opts.get_ca_path());
 	REQUIRE(ENABLED_CIPHER_SUITES == opts.get_enabled_cipher_suites());
 	REQUIRE(SERVER_CERT == opts.get_enable_server_cert_auth());
 
@@ -229,6 +242,7 @@ TEST_CASE("ssl_options move constructor", "[options]")
 	REQUIRE(org.get_key_store().empty());
 	REQUIRE(org.get_private_key().empty());
 	REQUIRE(org.get_private_key_password().empty());
+	REQUIRE(org.get_ca_path().empty());
 	REQUIRE(org.get_enabled_cipher_suites().empty());
 	REQUIRE(org.get_alpn_protos().empty());
 
@@ -260,15 +274,17 @@ TEST_CASE("ssl_options copy assignment", "[options]")
 	REQUIRE(KEY_STORE == opts.get_key_store());
 	REQUIRE(PRIVATE_KEY == opts.get_private_key());
 	REQUIRE(PRIVATE_KEY_PASSWORD == opts.get_private_key_password());
+	REQUIRE(CA_PATH == opts.get_ca_path());
 	REQUIRE(ENABLED_CIPHER_SUITES == opts.get_enabled_cipher_suites());
 	REQUIRE(SERVER_CERT == opts.get_enable_server_cert_auth());
 
 	// Make sure it's a true copy, not linked to the original
-	org.set_trust_store("");
-	org.set_key_store("");
-	org.set_private_key("");
-	org.set_private_key_password("");
-	org.set_enabled_cipher_suites("");
+    org.set_trust_store(EMPTY_STR);
+    org.set_key_store(EMPTY_STR);
+    org.set_private_key(EMPTY_STR);
+    org.set_private_key_password(EMPTY_STR);
+    org.set_ca_path(EMPTY_STR);
+    org.set_enabled_cipher_suites(EMPTY_STR);
 	org.set_enable_server_cert_auth(!SERVER_CERT);
 	org.set_alpn_protos({});
 
@@ -276,6 +292,7 @@ TEST_CASE("ssl_options copy assignment", "[options]")
 	REQUIRE(KEY_STORE == opts.get_key_store());
 	REQUIRE(PRIVATE_KEY == opts.get_private_key());
 	REQUIRE(PRIVATE_KEY_PASSWORD == opts.get_private_key_password());
+	REQUIRE(CA_PATH == opts.get_ca_path());
 	REQUIRE(ENABLED_CIPHER_SUITES == opts.get_enabled_cipher_suites());
 	REQUIRE(SERVER_CERT == opts.get_enable_server_cert_auth());
 
@@ -286,6 +303,7 @@ TEST_CASE("ssl_options copy assignment", "[options]")
 	REQUIRE(KEY_STORE == opts.get_key_store());
 	REQUIRE(PRIVATE_KEY == opts.get_private_key());
 	REQUIRE(PRIVATE_KEY_PASSWORD == opts.get_private_key_password());
+	REQUIRE(CA_PATH == opts.get_ca_path());
 	REQUIRE(ENABLED_CIPHER_SUITES == opts.get_enabled_cipher_suites());
 	REQUIRE(SERVER_CERT == opts.get_enable_server_cert_auth());
 }
@@ -305,6 +323,7 @@ TEST_CASE("ssl_options move assignment", "[options]")
 	REQUIRE(KEY_STORE == opts.get_key_store());
 	REQUIRE(PRIVATE_KEY == opts.get_private_key());
 	REQUIRE(PRIVATE_KEY_PASSWORD == opts.get_private_key_password());
+	REQUIRE(CA_PATH == opts.get_ca_path());
 	REQUIRE(ENABLED_CIPHER_SUITES == opts.get_enabled_cipher_suites());
 	REQUIRE(SERVER_CERT == opts.get_enable_server_cert_auth());
 
@@ -318,6 +337,7 @@ TEST_CASE("ssl_options move assignment", "[options]")
 	REQUIRE(org.get_key_store().empty());
 	REQUIRE(org.get_private_key().empty());
 	REQUIRE(org.get_private_key_password().empty());
+	REQUIRE(org.get_ca_path().empty());
 	REQUIRE(org.get_enabled_cipher_suites().empty());
 	REQUIRE(org.get_alpn_protos().empty());
 
@@ -329,6 +349,7 @@ TEST_CASE("ssl_options move assignment", "[options]")
 		REQUIRE(KEY_STORE == opts.get_key_store());
 		REQUIRE(PRIVATE_KEY == opts.get_private_key());
 		REQUIRE(PRIVATE_KEY_PASSWORD == opts.get_private_key_password());
+		REQUIRE(CA_PATH == opts.get_ca_path());
 		REQUIRE(ENABLED_CIPHER_SUITES == opts.get_enabled_cipher_suites());
 		REQUIRE(SERVER_CERT == opts.get_enable_server_cert_auth());
 	#endif
@@ -346,6 +367,7 @@ TEST_CASE("ssl_options set user", "[options]")
 	opts.set_key_store(KEY_STORE);
 	opts.set_private_key(PRIVATE_KEY);
 	opts.set_private_key_password(PRIVATE_KEY_PASSWORD);
+	opts.set_ca_path(CA_PATH);
 	opts.set_enabled_cipher_suites(ENABLED_CIPHER_SUITES);
 	opts.set_enable_server_cert_auth(SERVER_CERT);
 	opts.set_alpn_protos({ ALPN0, ALPN1 });
@@ -354,6 +376,7 @@ TEST_CASE("ssl_options set user", "[options]")
 	REQUIRE(KEY_STORE == opts.get_key_store());
 	REQUIRE(PRIVATE_KEY == opts.get_private_key());
 	REQUIRE(PRIVATE_KEY_PASSWORD == opts.get_private_key_password());
+	REQUIRE(CA_PATH == opts.get_ca_path());
 	REQUIRE(ENABLED_CIPHER_SUITES == opts.get_enabled_cipher_suites());
 	REQUIRE(SERVER_CERT == opts.get_enable_server_cert_auth());
 
@@ -375,6 +398,7 @@ TEST_CASE("ssl_options set empty strings", "[options]")
 	opts.set_key_store(EMPTY_STR);
 	opts.set_private_key(EMPTY_STR);
 	opts.set_private_key_password(EMPTY_STR);
+	opts.set_ca_path(EMPTY_STR);
 	opts.set_enabled_cipher_suites(EMPTY_STR);
 	opts.set_alpn_protos({});
 
@@ -386,6 +410,7 @@ TEST_CASE("ssl_options set empty strings", "[options]")
 	REQUIRE(c_struct.keyStore == nullptr);
 	REQUIRE(c_struct.privateKey == nullptr);
 	REQUIRE(c_struct.privateKeyPassword == nullptr);
+	REQUIRE(c_struct.CApath == nullptr);
 	REQUIRE(c_struct.enabledCipherSuites == nullptr);
 	REQUIRE(c_struct.protos == nullptr);
 	REQUIRE(c_struct.protos_len == 0);
