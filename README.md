@@ -37,6 +37,15 @@ To keep up with the latest announcements for this project, or to ask questions:
 
 **Mattermost:** [Eclipse Mattermost Paho Channel](https://mattermost.eclipse.org/eclipse/channels/paho)
 
+
+### Unreleased features in this branch
+
+- Minor cleanup of the tests
+- Added Session Expiry Interval to v5 chat sample
+[#317](https://github.com/eclipse/paho.mqtt.cpp/issues/317) String constructor using just len instead of end iterator.
+[#337](https://github.com/eclipse/paho.mqtt.cpp/issues/337) Copy and move constructors/assignment of `ssl_options` not handling CA path.
+
+
 ### What's new in Version 1.2.0
 
 This release brings in some missing MQTT v5 features, support for websocket headers and proxies, ALPN protocol lists, adds the builder pattern for options, and fixes a number of bugs in both the C++ library and the underlying C lib.
