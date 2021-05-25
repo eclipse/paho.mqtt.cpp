@@ -8,13 +8,14 @@
 // The sample demonstrates:
 //  - Connecting to an MQTT server/broker
 //  - Publishing messages
+//  - Default file persistence
 //  - Last will and testament
 //  - Using asynchronous tokens
 //  - Implementing callbacks and action listeners
 //
 
 /*******************************************************************************
- * Copyright (c) 2013-2017 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2020 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -32,7 +33,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <string>
-#include <thread>	// For sleep
+#include <thread>
 #include <atomic>
 #include <chrono>
 #include <cstring>
@@ -40,8 +41,9 @@
 
 using namespace std;
 
-const std::string DFLT_SERVER_ADDRESS	{ "tcp://localhost:1883" };
-const std::string DFLT_CLIENT_ID		{ "async_publish" };
+const string DFLT_SERVER_ADDRESS	{ "tcp://localhost:1883" };
+const string CLIENT_ID				{ "paho_cpp_async_publish" };
+const string PERSIST_DIR			{ "./persist" };
 
 const string TOPIC { "hello" };
 
@@ -123,25 +125,29 @@ public:
 
 int main(int argc, char* argv[])
 {
+	// A client that just publishes normally doesn't need a persistent
+	// session or Client ID unless it's using persistence, then the local
+	// library requires an ID to identify the persistence files.
+
 	string	address  = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS,
-			clientID = (argc > 2) ? string(argv[2]) : DFLT_CLIENT_ID;
+			clientID = (argc > 2) ? string(argv[2]) : CLIENT_ID;
 
 	cout << "Initializing for server '" << address << "'..." << endl;
-	mqtt::async_client client(address, clientID);
+	mqtt::async_client client(address, clientID, PERSIST_DIR);
 
 	callback cb;
 	client.set_callback(cb);
 
-	mqtt::connect_options conopts;
-	mqtt::message willmsg(TOPIC, LWT_PAYLOAD, 1, true);
-	mqtt::will_options will(willmsg);
-	conopts.set_will(will);
+	auto connOpts = mqtt::connect_options_builder()
+		.clean_session()
+		.will(mqtt::message(TOPIC, LWT_PAYLOAD, QOS))
+		.finalize();
 
 	cout << "  ...OK" << endl;
 
 	try {
 		cout << "\nConnecting..." << endl;
-		mqtt::token_ptr conntok = client.connect(conopts);
+		mqtt::token_ptr conntok = client.connect(connOpts);
 		cout << "Waiting for the connection..." << endl;
 		conntok->wait();
 		cout << "  ...OK" << endl;
@@ -194,8 +200,7 @@ int main(int argc, char* argv[])
 
 		// Disconnect
 		cout << "\nDisconnecting..." << endl;
-		conntok = client.disconnect();
-		conntok->wait();
+		client.disconnect()->wait();
 		cout << "  ...OK" << endl;
 	}
 	catch (const mqtt::exception& exc) {

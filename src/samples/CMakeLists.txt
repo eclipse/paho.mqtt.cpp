@@ -38,12 +38,16 @@ add_executable(async_subscribe async_subscribe.cpp)
 add_executable(async_consume async_consume.cpp)
 add_executable(sync_publish sync_publish.cpp)
 add_executable(sync_consume sync_consume.cpp)
+add_executable(sync_consume_v5 sync_consume_v5.cpp)
+add_executable(sync_reconnect sync_reconnect.cpp)
 add_executable(data_publish data_publish.cpp)
+add_executable(topic_publish topic_publish.cpp)
 add_executable(rpc_math_cli rpc_math_cli.cpp)
 add_executable(rpc_math_srvr rpc_math_srvr.cpp)
-add_executable(pub_speed_test pub_speed_test.cpp)
 add_executable(mqttpp_chat mqttpp_chat.cpp)
-add_executable(topic_publish topic_publish.cpp)
+add_executable(multithr_pub_sub multithr_pub_sub.cpp)
+add_executable(ws_publish ws_publish.cpp)
+add_executable(pub_speed_test pub_speed_test.cpp)
 
 ## link binaries
 target_link_libraries(async_publish ${PAHO_CPP_LIB})
@@ -52,11 +56,15 @@ target_link_libraries(async_subscribe ${PAHO_CPP_LIB})
 target_link_libraries(async_consume ${PAHO_CPP_LIB})
 target_link_libraries(sync_publish ${PAHO_CPP_LIB})
 target_link_libraries(sync_consume ${PAHO_CPP_LIB})
+target_link_libraries(sync_consume_v5 ${PAHO_CPP_LIB})
+target_link_libraries(sync_reconnect ${PAHO_CPP_LIB})
 target_link_libraries(data_publish ${PAHO_CPP_LIB})
+target_link_libraries(topic_publish ${PAHO_CPP_LIB})
 target_link_libraries(rpc_math_cli ${PAHO_CPP_LIB})
 target_link_libraries(rpc_math_srvr ${PAHO_CPP_LIB})
 target_link_libraries(mqttpp_chat ${PAHO_CPP_LIB})
-target_link_libraries(topic_publish ${PAHO_CPP_LIB})
+target_link_libraries(multithr_pub_sub ${PAHO_CPP_LIB})
+target_link_libraries(ws_publish ${PAHO_CPP_LIB})
 target_link_libraries(pub_speed_test ${PAHO_CPP_LIB})
 
 set(INSTALL_TARGETS
@@ -65,12 +73,16 @@ set(INSTALL_TARGETS
 	async_subscribe
 	async_consume
 	sync_publish
-	sync_consume
+  sync_consume
+  sync_consume_v5
+  sync_reconnect
 	data_publish
 	rpc_math_cli
 	rpc_math_srvr
 	mqttpp_chat
-	topic_publish
+  topic_publish
+  multithr_pub_sub
+  ws_publish
 	pub_speed_test
 )
 

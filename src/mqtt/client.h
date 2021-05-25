@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013-2017 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2020 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -38,7 +38,7 @@ namespace mqtt {
 class client : private callback
 {
 	/** An arbitrary, but relatively long timeout */
-	static const std::chrono::minutes DFLT_TIMEOUT;
+	static const std::chrono::seconds DFLT_TIMEOUT;
 	/** The default quality of service */
 	static constexpr int DFLT_QOS = 1;
 
@@ -92,6 +92,9 @@ public:
 	/** Type for a collection of QOS values */
 	using qos_collection = async_client::qos_collection;
 
+	/** Handler for updating connection data before an auto-reconnect. */
+	using update_connection_handler = async_client::update_connection_handler;
+
 	/**
 	 * Create a client that can be used to communicate with an MQTT server.
 	 * This allows the caller to specify a user-defined persistence object,
@@ -132,7 +135,8 @@ public:
 	 *  				  then no persistence is used.
 	 */
 	client(const string& serverURI, const string& clientId,
-		   int maxBufferedMessages, iclient_persistence* persistence=nullptr);
+		   int maxBufferedMessages,
+		   iclient_persistence* persistence=nullptr);
 	/**
 	 * Create a client that can be used to communicate with an MQTT server,
 	 * which allows for off-line message buffering.
@@ -147,6 +151,22 @@ public:
 	 */
 	client(const string& serverURI, const string& clientId,
 		   int maxBufferedMessages, const string& persistDir);
+	/**
+	 * Create an async_client that can be used to communicate with an MQTT
+	 * server, which allows for off-line message buffering.
+	 * This allows the caller to specify a user-defined persistence object,
+	 * or use no persistence.
+	 * @param serverURI the address of the server to connect to, specified
+	 *  				as a URI.
+	 * @param clientId a client identifier that is unique on the server
+	 *  			   being connected to
+	 * @param opts The create options
+	 * @param persistence The user persistence structure. If this is null,
+	 *  				  then no persistence is used.
+	 */
+	client(const string& serverURI, const string& clientId,
+		   const create_options& opts,
+		   iclient_persistence* persistence=nullptr);
 	/**
 	 * Virtual destructor
 	 */
@@ -175,10 +195,7 @@ public:
 	 *  			  existing work to finish before disconnecting. A value
 	 *  			  of zero or less means the client will not quiesce.
 	 */
-	virtual void disconnect(int timeoutMS) {
-		cli_.stop_consuming();
-		cli_.disconnect(timeoutMS)->wait_for(timeout_);
-	}
+	virtual void disconnect(int timeoutMS);
 	/**
 	 * Disconnects from the server.
 	 * @param to the amount of time in milliseconds to allow for
@@ -208,15 +225,28 @@ public:
 	 * Get a topic object which can be used to publish messages on this
 	 * client.
 	 * @param top The topic name
+	 * @param qos The Quality of Service for the topic
+	 * @param retained Whether the published messages set the retain flag.
 	 * @return A topic attached to this client.
 	 */
-	virtual topic get_topic(const string& top) { return topic(cli_, top); }
+	virtual topic get_topic(const string& top, int qos=message::DFLT_QOS,
+							bool retained=message::DFLT_RETAINED) {
+		return topic(cli_, top);
+	}
 	/**
 	 * Determines if this client is currently connected to the server.
 	 * @return @em true if the client is currently connected, @em false if
 	 *  	   not.
 	 */
 	virtual bool is_connected() const { return cli_.is_connected(); }
+	/**
+	 * Sets a callback to allow the application to update the connection
+	 * data on automatic reconnects.
+	 * @param cb The callback functor to register with the library.
+	 */
+	void set_update_connection_handler(update_connection_handler cb) {
+		cli_.set_update_connection_handler(cb);
+	}
 
 	/**
 	 * Publishes a message to a topic on the server and return once it is
@@ -229,7 +259,8 @@ public:
 	 */
 	virtual void publish(string_ref top, const void* payload, size_t n,
 						 int qos, bool retained) {
-		cli_.publish(std::move(top), payload, n, qos, retained)->wait_for(timeout_);
+		if (!cli_.publish(std::move(top), payload, n, qos, retained)->wait_for(timeout_))
+			throw timeout_error();
 	}
 	/**
 	 * Publishes a message to a topic on the server and return once it is
@@ -239,14 +270,16 @@ public:
 	 * @param n The size in bytes of the data
 	 */
 	virtual void publish(string_ref top, const void* payload, size_t n) {
-		cli_.publish(std::move(top), payload, n)->wait_for(timeout_);
+		if (!cli_.publish(std::move(top), payload, n)->wait_for(timeout_))
+			throw timeout_error();
 	}
 	/**
 	 * Publishes a message to a topic on the server.
 	 * @param msg The message
 	 */
 	virtual void publish(const_message_ptr msg) {
-		cli_.publish(msg)->wait_for(timeout_);
+		if (!cli_.publish(msg)->wait_for(timeout_))
+			throw timeout_error();
 	}
 	/**
 	 * Publishes a message to a topic on the server.
@@ -282,37 +315,63 @@ public:
 	/**
 	 * Subscribe to a topic, which may include wildcards using a QoS of 1.
 	 * @param topicFilter
+	 * @param props The MQTT v5 properties.
+	 * @param opts The MQTT v5 subscribe options for the topic
+	 * @return The "subscribe" response from the server.
 	 */
-	virtual subscribe_response subscribe(const string& topicFilter);
+	virtual subscribe_response subscribe(const string& topicFilter,
+										 const subscribe_options& opts=subscribe_options(),
+										 const properties& props=properties());
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 * @param topicFilter A single topic to subscribe
 	 * @param qos The QoS of the subscription
+	 * @param opts The MQTT v5 subscribe options for the topic
+	 * @param props The MQTT v5 properties.
+	 * @return The "subscribe" response from the server.
 	 */
-	virtual subscribe_response subscribe(const string& topicFilter, int qos);
+	virtual subscribe_response subscribe(const string& topicFilter, int qos,
+										 const subscribe_options& opts=subscribe_options(),
+										 const properties& props=properties());
 	/**
 	 * Subscribes to a one or more topics, which may include wildcards using
 	 * a QoS of 1.
 	 * @param topicFilters A set of topics to subscribe
+	 * @param opts The MQTT v5 subscribe options (one for each topic)
+	 * @param props The MQTT v5 properties.
+	 * @return The "subscribe" response from the server.
 	 */
-	virtual subscribe_response subscribe(const string_collection& topicFilters);
+	virtual subscribe_response subscribe(const string_collection& topicFilters,
+										 const std::vector<subscribe_options>& opts=std::vector<subscribe_options>(),
+										 const properties& props=properties());
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
 	 * @param topicFilters A collection of topics to subscribe
 	 * @param qos A collection of QoS for each topic
+	 * @param opts The MQTT v5 subscribe options (one for each topic)
+	 * @param props The MQTT v5 properties.
+	 * @return The "subscribe" response from the server.
 	 */
 	virtual subscribe_response subscribe(const string_collection& topicFilters,
-										 const qos_collection& qos);
+										 const qos_collection& qos,
+										 const std::vector<subscribe_options>& opts=std::vector<subscribe_options>(),
+										 const properties& props=properties());
 	/**
 	 * Requests the server unsubscribe the client from a topic.
 	 * @param topicFilter A single topic to unsubscribe.
+	 * @param props The MQTT v5 properties.
+	 * @return The "unsubscribe" response from the server.
 	 */
-	virtual unsubscribe_response unsubscribe(const string& topicFilter);
+	virtual unsubscribe_response unsubscribe(const string& topicFilter,
+											 const properties& props=properties());
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
 	 * @param topicFilters A collection of topics to unsubscribe.
+	 * @param props The MQTT v5 properties.
+	 * @return The "unsubscribe" response from the server.
 	 */
-	virtual unsubscribe_response unsubscribe(const string_collection& topicFilters);
+	virtual unsubscribe_response unsubscribe(const string_collection& topicFilters,
+											 const properties& props=properties());
 	/**
 	 * Start consuming messages.
 	 * This initializes the client to receive messages through a queue that

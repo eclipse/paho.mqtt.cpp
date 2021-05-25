@@ -29,7 +29,7 @@ cmake_minimum_required(VERSION 3.5)
 
 ## project name
 project("paho-mqtt-cpp" 
-    VERSION "1.1.0"
+    VERSION "1.2.0"
     LANGUAGES CXX
 )
 
@@ -43,6 +43,7 @@ else()
   option(PAHO_BUILD_STATIC "Build static library" FALSE)
   option(PAHO_BUILD_SHARED "Build shared library" TRUE)
   option(PAHO_WITH_SSL "Build SSL-enabled library" TRUE)
+  option(PAHO_BUILD_DEB_PACKAGE "Build debian package" FALSE)
 endif()
 
 option(PAHO_BUILD_SAMPLES "Build sample programs" FALSE)
@@ -63,6 +64,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 include(GNUInstallDirs)
 
 if(WIN32)
+	  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
     set(LIBS_SYSTEM ws2_32)
 elseif(UNIX)
@@ -99,7 +101,6 @@ endif()
 
 if(PAHO_BUILD_TESTS)
     add_subdirectory(test/unit)
-    add_subdirectory(test/cppunit)
 endif()
 
 ## --- Packaging settings ---
@@ -107,7 +108,12 @@ endif()
 if(WIN32)
     set(CPACK_GENERATOR "ZIP")
 elseif(UNIX)
-    set(CPACK_GENERATOR "TGZ")
+    if(PAHO_BUILD_DEB_PACKAGE)
+        set(CPACK_GENERATOR "DEB")
+        include(cmake/CPackDebConfig.cmake)
+    else()
+        set(CPACK_GENERATOR "TGZ")
+	endif()
 endif()
 
 include(CPack)

@@ -32,6 +32,24 @@
 
 namespace mqtt {
 
+/**
+ * Allocate memory for use with user persistence.
+ *
+ * @param n The number of bytes for the buffer.
+ * @return A pointer to the allocated memory
+ */
+inline void* persistence_malloc(size_t n) {
+	return MQTTAsync_malloc(n);
+}
+
+/**
+ * Frees memory allocated with @ref persistence_malloc().
+ * @param p Pointer to a buffer obtained by persistence_malloc.
+ */
+inline void persistence_free(void* p) {
+	MQTTAsync_free(p);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -54,7 +72,7 @@ namespace mqtt {
 class iclient_persistence
 {
 	friend class async_client;
-	friend class iclient_persistence_test;
+	friend class mock_persistence;
 
 	/** Callbacks from the C library */
 	static int persistence_open(void** handle, const char* clientID, const char* serverURI, void* context);
@@ -102,7 +120,7 @@ public:
 	 * Returns a collection of keys in this persistent data store.
 	 * @return A collection of strings representing the keys in the store.
 	 */
-	virtual const string_collection& keys() const =0;
+	virtual string_collection keys() const =0;
 	/**
 	 * Puts the specified data into the persistent store.
 	 * @param key The key.
@@ -114,7 +132,7 @@ public:
 	 * @param key The key
 	 * @return A const view of the data associated with the key.
 	 */
-	virtual string_view get(const string& key) const =0;
+	virtual string get(const string& key) const =0;
 	/**
 	 * Remove the data for the specified key.
 	 * @param key The key
@@ -133,3 +151,4 @@ using const_iclient_persistence_ptr = iclient_persistence::const_ptr_t;
 }
 
 #endif		// __mqtt_iclient_persistence_h
+

@@ -18,14 +18,16 @@
 // The sample demonstrates:
 //  - Connecting to an MQTT server/broker
 //  - Sampling a value
-//  - Publishing messages
+//  - Publishing messages using a `topic` object
 //  - Last will and testament
 //  - Callbacks with lambdas
-//  - Implementing callbacks and action listeners
+//  - Using `create_options`
+//  - Creating options with builder classes
+//  - Offline buffering in the client
 //
 
 /*******************************************************************************
- * Copyright (c) 2019 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2019-2020 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -82,13 +84,25 @@ uint64_t timestamp()
 
 int main(int argc, char* argv[])
 {
+	// The server URI (address)
 	string address = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS;
+
+	// The amount of time to run (in ms). Zero means "run forever".
 	uint64_t trun = (argc > 2) ? stoll(argv[2]) : 0LL;
 
 	cout << "Initializing for server '" << address << "'..." << endl;
-	mqtt::async_client cli(address, "", MAX_BUFFERED_MESSAGES);
 
-	// Set callbacks for connected and connection lost.
+	// We configure to allow publishing to the client while off-line,
+	// and that it's OK to do so before the 1st successful connection.
+	auto createOpts = mqtt::create_options_builder()
+						  .send_while_disconnected(true, true)
+					      .max_buffered_messages(MAX_BUFFERED_MESSAGES)
+						  .delete_oldest_messages()
+						  .finalize();
+
+	mqtt::async_client cli(address, "", createOpts);
+
+	// Set callbacks for when connected and connection lost.
 
 	cli.set_connected_handler([&cli](const std::string&) {
 		std::cout << "*** Connected ("
@@ -100,18 +114,24 @@ int main(int argc, char* argv[])
 			<< timestamp() << ") ***" << std::endl;
 	});
 
-	mqtt::connect_options connopts;
-	mqtt::message willmsg("test/events", "Time publisher disconnected", 1, true);
-	mqtt::will_options will(willmsg);
-	connopts.set_will(will);
-	connopts.set_automatic_reconnect(1, 10);
+	auto willMsg = mqtt::message("test/events", "Time publisher disconnected", 1, true);
+	auto connOpts = mqtt::connect_options_builder()
+		.clean_session()
+		.will(willMsg)
+		.automatic_reconnect(seconds(1), seconds(10))
+		.finalize();
 
 	try {
-		cout << "Connecting..." << endl;
-		cli.connect(connopts)->wait();
+		// Note that we start the connection, but don't wait for completion.
+		// We configured to allow publishing before a successful connection.
+		cout << "Starting connection..." << endl;
+		cli.connect(connOpts);
 
-		mqtt::topic top(cli, "data/time", QOS);
+		auto top = mqtt::topic(cli, "data/time", QOS);
 		cout << "Publishing data..." << endl;
+
+		while (timestamp() % DELTA_MS != 0)
+			;
 
 		uint64_t	t = timestamp(),
 					tlast = t,
@@ -123,6 +143,7 @@ int main(int argc, char* argv[])
 			this_thread::sleep_for(SAMPLE_PERIOD);
 
 			t = timestamp();
+			//cout << t << endl;
 			if (abs(int(t - tlast)) >= DELTA_MS)
 				top.publish(to_string(tlast = t));
 

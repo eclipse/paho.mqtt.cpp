@@ -15,7 +15,7 @@
 //
 
 /*******************************************************************************
- * Copyright (c) 2013-2017 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2019 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -91,13 +91,14 @@ double mult(const std::vector<double>& nums)
 
 int main(int argc, char* argv[])
 {
-	mqtt::connect_options connOpts;
-	connOpts.set_mqtt_version(MQTTVERSION_5);
-	connOpts.set_keep_alive_interval(20);
-	connOpts.set_clean_start(true);
+	mqtt::create_options createOpts(MQTTVERSION_5);
+	mqtt::client cli(SERVER_ADDRESS, CLIENT_ID, createOpts);
 
-
-	mqtt::client cli(SERVER_ADDRESS, CLIENT_ID);
+	auto connOpts = mqtt::connect_options_builder()
+					    .mqtt_version(MQTTVERSION_5)
+					    .keep_alive_interval(seconds(20))
+					    .clean_start(true)
+						.finalize();
 
 	const vector<string> TOPICS { "requests/math", "requests/math/#" };
 	const vector<int> QOS { 1, 1 };
@@ -110,6 +111,7 @@ int main(int argc, char* argv[])
 
 		// Consume messages
 
+		cout << "Waiting for RPC requests..." << endl;
 		while (true) {
 			auto msg = cli.consume_message();
 

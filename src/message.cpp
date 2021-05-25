@@ -1,7 +1,7 @@
 // message.cpp
 
 /*******************************************************************************
- * Copyright (c) 2013-2017 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2020 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -38,39 +38,48 @@ message::message() : msg_(DFLT_C_STRUCT)
 {
 }
 
-message::message(string_ref topic, const void* payload, size_t len, int qos, bool retained)
-						: msg_(DFLT_C_STRUCT), topic_(std::move(topic))
+message::message(string_ref topic, const void* payload, size_t len, int qos, bool retained,
+				 const properties& props /*=properties()*/)
+		: msg_(DFLT_C_STRUCT), topic_(std::move(topic))
 {
 	set_payload(payload, len);
 	set_qos(qos);
 	set_retained(retained);
+	set_properties(props);
 }
 
-message::message(string_ref topic, binary_ref payload, int qos, bool retained)
-						: msg_(DFLT_C_STRUCT), topic_(std::move(topic))
+message::message(string_ref topic, binary_ref payload, int qos, bool retained,
+				 const properties& props /*=properties()*/)
+		: msg_(DFLT_C_STRUCT), topic_(std::move(topic))
 {
 	set_payload(std::move(payload));
 	set_qos(qos);
 	set_retained(retained);
+	set_properties(props);
 }
 
-message::message(string_ref topic, const MQTTAsync_message& msg)
-						: msg_(msg), topic_(std::move(topic)), props_(msg.properties)
+message::message(string_ref topic, const MQTTAsync_message& cmsg)
+		: msg_(cmsg), topic_(std::move(topic)), props_(cmsg.properties)
 {
+	set_payload(cmsg.payload, cmsg.payloadlen);
 	msg_.properties = props_.c_struct();
-	set_payload(msg.payload, msg.payloadlen);
 }
 
-message::message(const message& other) : msg_(other.msg_), topic_(other.topic_)
+message::message(const message& other)
+		: msg_(other.msg_), topic_(other.topic_), props_(other.props_)
 {
 	set_payload(other.payload_);
+	msg_.properties = props_.c_struct();
 }
 
-message::message(message&& other) : msg_(other.msg_), topic_(std::move(other.topic_))
+message::message(message&& other)
+		: msg_(other.msg_), topic_(std::move(other.topic_)),
+			props_(std::move(other.props_))
 {
 	set_payload(std::move(other.payload_));
 	other.msg_.payloadlen = 0;
 	other.msg_.payload = nullptr;
+	msg_.properties = props_.c_struct();
 }
 
 message& message::operator=(const message& rhs)
@@ -79,6 +88,7 @@ message& message::operator=(const message& rhs)
 		msg_ = rhs.msg_;
 		topic_ = rhs.topic_;
 		set_payload(rhs.payload_);
+		set_properties(rhs.props_);
 	}
 	return *this;
 }
@@ -89,8 +99,9 @@ message& message::operator=(message&& rhs)
 		msg_ = rhs.msg_;
 		topic_ = std::move(rhs.topic_);
 		set_payload(std::move(rhs.payload_));
-		rhs.msg_.payloadlen = 0;
-		rhs.msg_.payload = nullptr;
+		set_properties(std::move(rhs.props_));
+
+		rhs.msg_ = DFLT_C_STRUCT;
 	}
 	return *this;
 }
@@ -112,7 +123,7 @@ void message::set_payload(binary_ref payload)
 	}
 	else {
 		msg_.payload = const_cast<binary_ref::value_type*>(payload_.data());
-		msg_.payloadlen = payload_.length();
+		msg_.payloadlen = int(payload_.length());
 	}
 }
 

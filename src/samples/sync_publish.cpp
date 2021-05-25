@@ -47,8 +47,18 @@ const char* PAYLOAD3 = "Is anyone listening?";
 const int QOS = 1;
 
 /////////////////////////////////////////////////////////////////////////////
-// Example of a simple, in-memory persistence class.
 
+// Example of a simple, in-memory persistence class.
+//
+// This is an extremely silly example, because if you want to use
+// persistence, you actually need it to be out of process so that if the
+// client crashes and restarts, the persistence data still exists.
+//
+// This is just here to show how the persistence API callbacks work. It maps
+// well to key/value stores, like Redis, but only if it's on the local host,
+// as it wouldn't make sense to persist data over the network, since that's
+// what the MQTT client it trying to do.
+//
 class sample_mem_persistence : virtual public mqtt::iclient_persistence
 {
 	// Whether the store is open
@@ -86,9 +96,8 @@ public:
 	}
 
 	// Returns the keys in this persistent data store.
-	const mqtt::string_collection& keys() const override {
-		static mqtt::string_collection ks;
-		ks.clear();
+	mqtt::string_collection keys() const override {
+		mqtt::string_collection ks;
 		for (const auto& k : store_)
 			ks.push_back(k.first);
 		return ks;
@@ -100,12 +109,12 @@ public:
 			<< key << "']" << std::endl;
 		std::string str;
 		for (const auto& b : bufs)
-			str += b.str();
+			str.append(b.data(), b.size());	// += b.str();
 		store_[key] = std::move(str);
 	}
 
 	// Gets the specified data out of the persistent store.
-	mqtt::string_view get(const std::string& key) const override {
+	std::string get(const std::string& key) const override {
 		std::cout << "[Searching persistence for key '"
 			<< key << "']" << std::endl;
 		auto p = store_.find(key);
@@ -114,7 +123,7 @@ public:
 		std::cout << "[Found persistence data for key '"
 			<< key << "']" << std::endl;
 
-		return mqtt::string_view(p->second);
+		return p->second;
 	}
 
 	// Remove the data for the specified key.

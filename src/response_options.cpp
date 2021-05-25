@@ -25,14 +25,7 @@ namespace mqtt {
 response_options::response_options(int mqttVersion /*=MQTTVERSION_DEFAULT*/)
 		: opts_(MQTTAsync_responseOptions_initializer)
 {
-	if (mqttVersion < MQTTVERSION_5) {
-		opts_.onSuccess  = &token::on_success;
-		opts_.onFailure  = &token::on_failure;
-	}
-	else {
-		opts_.onSuccess5 = &token::on_success5;
-		opts_.onFailure5 = &token::on_failure5;
-	}
+	set_mqtt_version(mqttVersion);
 }
 
 response_options::response_options(const token_ptr& tok,
@@ -40,6 +33,47 @@ response_options::response_options(const token_ptr& tok,
 		: response_options(mqttVersion)
 {
 	set_token(tok);
+}
+
+response_options::response_options(const response_options& other)
+	: opts_(other.opts_), tok_(other.tok_), props_(other.props_)
+{
+	update_c_struct();
+}
+
+response_options& response_options::operator=(const response_options& rhs)
+{
+	opts_ = rhs.opts_;
+	tok_  = rhs.tok_;
+	props_ = rhs.props_;
+
+	update_c_struct();
+	return *this;
+}
+
+
+void response_options::update_c_struct()
+{
+	opts_.properties = props_.c_struct();
+
+	if (opts_.subscribeOptionsCount != 0)
+		opts_.subscribeOptionsList = const_cast<MQTTSubscribe_options*>(subOpts_.data());
+}
+
+void response_options::set_mqtt_version(int mqttVersion)
+{
+	if (mqttVersion < MQTTVERSION_5) {
+		opts_.onSuccess  = &token::on_success;
+		opts_.onFailure  = &token::on_failure;
+		opts_.onSuccess5 = nullptr;
+		opts_.onFailure5 = nullptr;
+	}
+	else {
+		opts_.onSuccess5 = &token::on_success5;
+		opts_.onFailure5 = &token::on_failure5;
+		opts_.onSuccess  = nullptr;
+		opts_.onFailure  = nullptr;
+	}
 }
 
 void response_options::set_token(const token_ptr& tok)

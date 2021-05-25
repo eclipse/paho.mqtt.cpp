@@ -2,12 +2,12 @@
 /// @file ssl_options.h
 /// Declaration of MQTT ssl_options class
 /// @date Jul 7, 2016
-/// @author Guilherme Ferreira
+/// @author Frank Pagliughi, Guilherme Ferreira
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
  * Copyright (c) 2016 Guilherme Ferreira <guilherme.maciel.ferreira@gmail.com>
- * Copyright (c) 2016-2019 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2016-2020 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -32,6 +32,7 @@
 #include "mqtt/topic.h"
 #include "mqtt/types.h"
 #include <vector>
+#include <functional>
 
 namespace mqtt {
 
@@ -42,6 +43,26 @@ namespace mqtt {
  */
 class ssl_options
 {
+public:
+	/** Smart/shared pointer to an object of this class. */
+	using ptr_t = std::shared_ptr<ssl_options>;
+	/** Smart/shared pointer to a const object of this class. */
+	using const_ptr_t = std::shared_ptr<const ssl_options>;
+	/** Unique pointer to an object of this class. */
+	using unique_ptr_t = std::unique_ptr<ssl_options>;
+
+	/** Handler type for error message callbacks */
+	using error_handler = std::function<void(const string& errMsg)>;
+	/**
+	 * Handler type for TLS-PSK option callback.
+	 * On success, the callback should return the length of the PSK (in
+	 * bytes). On failure, it should throw or return zero.
+	 */
+	using psk_handler = std::function<unsigned(const string& hint,
+											   char *identity, size_t max_identity_len,
+											   unsigned char *psk, size_t max_psk_len)>;
+
+private:
 	/** The default C struct */
 	static const MQTTAsync_SSLOptions DFLT_C_STRUCT ;
 
@@ -72,10 +93,22 @@ class ssl_options
 	 */
 	string enabledCipherSuites_;
 
+	/** Error message callback handler  */
+	error_handler errHandler_;
+
+	/** PSK callback handler */
+	psk_handler pskHandler_;
+
+	/** ALPN protocol list, in wire format */
+	std::basic_string<unsigned char> protos_;
+
+	/** Callbacks from the C library */
+	static int on_error(const char *str, size_t len, void *context);
+	static unsigned on_psk(const char *hint, char *identity, unsigned int max_identity_len,
+						   unsigned char *psk, unsigned int max_psk_len, void *context);
+
 	/** The connect options has special access */
 	friend class connect_options;
-	friend class connect_options_test;
-	friend class ssl_options_test;
 
 	/**
 	 * Gets a pointer to the C-language NUL-terminated strings for the
@@ -96,11 +129,6 @@ class ssl_options
 	void update_c_struct();
 
 public:
-	/** Smart/shared pointer to an object of this class. */
-	using ptr_t = std::shared_ptr<ssl_options>;
-	/** Smart/shared pointer to a const object of this class. */
-	using const_ptr_t = std::shared_ptr<const ssl_options>;
-
 	/**
 	 * Constructs a new MqttConnectOptions object using the default values.
 	 */
@@ -118,10 +146,12 @@ public:
 	 * will present to the server during the SSL handshake.
 	 * @param enableServerCertAuth True/False option to enable verification of
 	 * the server certificate
+	 * @param alpnProtos The ALPN protocols to try.
 	 */
 	ssl_options(const string& trustStore, const string& keyStore,
 				const string& privateKey, const string& privateKeyPassword,
-				const string& enabledCipherSuites, bool enableServerCertAuth);
+				const string& enabledCipherSuites, bool enableServerCertAuth,
+				const std::vector<string> alpnProtos=std::vector<string>());
 	/**
 	 * Copy constructor.
 	 * @param opt The other options to copy.
@@ -144,6 +174,12 @@ public:
 	 * @return A reference to this object.
 	 */
 	ssl_options& operator=(ssl_options&& opt);
+	/**
+	 * Expose the underlying C struct for the unit tests.
+	 */
+	 #if defined(UNIT_TESTS)
+		const MQTTAsync_SSLOptions& c_struct() const { return opts_; }
+	#endif
 	/**
 	 * Returns the file containing the public digital certificates trusted by
 	 * the client.
@@ -272,12 +308,183 @@ public:
 	 *  	   format.
 	 */
 	void ca_path(const string& path);
+	/**
+	 * Registers the error message callback handler.
+	 * @param cb The callback to receive error messages.
+	 */
+	void set_error_handler(error_handler cb);
+	/**
+	 * Registers a callback handler to set the TLS-PSK options.
+	 * See: OpenSSL SSL_CTX_set_psk_client_callback()
+	 * @param cb The callback.
+	 */
+	void set_psk_handler(psk_handler cb);
+	/**
+	 * Gets the list of supported ALPN protocols.
+	 * @return A vector containing the supported ALPN protocols.
+	 */
+	std::vector<string> get_alpn_protos() const;
+	/**
+	 * Sets the list of supported ALPN protolols.
+	 * See:
+	 * https://www.openssl.org/docs/man1.1.0/man3/SSL_CTX_set_alpn_protos.html
+	 * @param protos The list of ALPN protocols to be negotiated.
+	 */
+	void set_alpn_protos(const std::vector<string>& protos);
 };
 
 /**
  * Shared pointer to the ssl options class.
  */
 using ssl_options_ptr = ssl_options::ptr_t;
+/**
+ * Unique pointer to the ssl options class.
+ */
+using ssl_options_unique_ptr = ssl_options::unique_ptr_t;
+
+
+/////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Class to build the SSL options for connections.
+ */
+class ssl_options_builder
+{
+	/** The underlying options */
+	ssl_options opts_;
+
+public:
+	/** This class */
+	using self = ssl_options_builder;
+	/**
+	 * Default constructor.
+	 */
+	ssl_options_builder() {}
+	/**
+	 * Sets the file containing the public digital certificates trusted by
+	 * the client.
+	 * @param store The file in PEM format containing the public digital
+	 *  			certificates trusted by the client.
+	 */
+	auto trust_store(const string& store) -> self& {
+		opts_.set_trust_store(store);
+		return *this;
+	}
+	/**
+	 * Sets the file containing the public certificate chain of the client.
+	 * @param store The file in PEM format containing the public certificate
+	 *  			chain of the client. It may also include the client's
+	 *  			private key.
+	 */
+	auto key_store(const string& store) -> self& {
+		opts_.set_key_store(store);
+		return *this;
+	}
+	/**
+	 * Sets the file containing the client's private key.
+	 * @param key If not included in the sslKeyStore, this is the file in
+	 *  		  PEM format containing the client's private key.
+	 */
+	auto private_key(const string& key) -> self& {
+		opts_.set_private_key(key);
+		return *this;
+	}
+	/**
+	 * Sets the password to load the client's privateKey if encrypted.
+	 * @param passwd The password to load the privateKey if encrypted.
+	 */
+	auto private_keypassword(const string& passwd) -> self& {
+		opts_.set_private_key_password(passwd);
+		return *this;
+	}
+	/**
+	 * Sets the list of cipher suites that the client will present to the server
+	 * during the SSL handshake.
+	 * @param suites The list of cipher suites that the client will present to
+	 *  			 the server during the SSL handshake. For a full
+	 *  			 explanation of the cipher list format, please see the
+	 *  			 OpenSSL on-line documentation:
+	 *  			 http://www.openssl.org/docs/apps/ciphers.html#CIPHER_LIST_FORMAT
+	 *  			 If this setting is ommitted, its default value will be
+	 *  			 "ALL", that is, all the cipher suites -excluding those
+	 *  			 offering no encryption- will be considered. This setting
+	 *  			 can be used to set an SSL anonymous connection (empty
+	 *  			 string value, for instance).
+	 */
+	auto enabled_cipher_suites(const string& suites) -> self& {
+		opts_.set_enabled_cipher_suites(suites);
+		return *this;
+	}
+	/**
+	 * Enables or disables verification of the server certificate.
+	 * @param on enable/disable verification of the server certificate
+	 */
+	auto enable_server_cert_auth(bool on) -> self& {
+		opts_.set_enable_server_cert_auth(on);
+		return *this;
+	}
+	/**
+	 * Set the SSL/TLS version to use.
+	 *
+	 * @param ver The desired SSL/TLS version. Specify one of:
+	 *  	@li MQTT_SSL_VERSION_DEFAULT (0)
+	 *  	@li MQTT_SSL_VERSION_TLS_1_0 (1)
+	 *  	@li MQTT_SSL_VERSION_TLS_1_1 (2)
+	 *  	@li MQTT_SSL_VERSION_TLS_1_2 (3)
+	 */
+	auto ssl_version(int ver) -> self& {
+		opts_.set_ssl_version(ver);
+		return *this;
+	}
+	/**
+	 * Sets whether it should carry out post-connect checks, including that
+	 * a certificate matches the given host name.
+	 * @param on Whether it should carry out post-connect checks.
+	 */
+	auto verify(bool on=true) -> self& {
+		opts_.set_verify(on);
+		return *this;
+	}
+	/**
+	 * Sets the path to a directory containing CA certificates in PEM format.
+	 * @param path Path to a directory containing CA certificates in PEM
+	 *  	   format.
+	 */
+	auto ca_path(const string& path) -> self& {
+		opts_.ca_path(path);
+		return *this;
+	}
+	/**
+	 * Registers an error callback handler.
+	 * @param cb The callback to receive error messages.
+	 */
+	auto error_handler(ssl_options::error_handler cb) -> self& {
+		opts_.set_error_handler(cb);
+		return *this;
+	}
+	/**
+	 * Registers a callback handler to set the TLS-PSK options.
+	 * See: OpenSSL SSL_CTX_set_psk_client_callback()
+	 * @param cb The callback.
+	 */
+	auto psk_handler(ssl_options::psk_handler cb) -> self& {
+		opts_.set_psk_handler(cb);
+		return *this;
+	}
+	/**
+	 * Sets the list of supported ALPN protocols.
+	 * @param protos The list of ALPN protocols to be negotiated.
+	 */
+	auto alpn_protos(const std::vector<string>& protos) -> self& {
+		opts_.set_alpn_protos(protos);
+		return *this;
+	}
+	/**
+	 * Finish building the options and return them.
+	 * @return The option struct as built.
+	 */
+	ssl_options finalize() { return opts_; }
+};
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt

@@ -31,28 +31,34 @@ ssl_options::ssl_options() : opts_(DFLT_C_STRUCT)
 
 ssl_options::ssl_options(const string& trustStore, const string& keyStore,
 						 const string& privateKey, const string& privateKeyPassword,
-						 const string& enabledCipherSuites, bool enableServerCertAuth)
+						 const string& enabledCipherSuites, bool enableServerCertAuth,
+						 const std::vector<string> alpnProtos /*=std::vector<string>()*/)
 			: opts_(DFLT_C_STRUCT), trustStore_(trustStore), keyStore_(keyStore),
 				privateKey_(privateKey), privateKeyPassword_(privateKeyPassword),
 				enabledCipherSuites_(enabledCipherSuites)
 {
+	set_alpn_protos(alpnProtos);
 	update_c_struct();
 	opts_.enableServerCertAuth = enableServerCertAuth;
 }
 
-ssl_options::ssl_options(const ssl_options& opt)
-		: opts_(opt.opts_), trustStore_(opt.trustStore_), keyStore_(opt.keyStore_),
-			privateKey_(opt.privateKey_), privateKeyPassword_(opt.privateKeyPassword_),
-			enabledCipherSuites_(opt.enabledCipherSuites_)
+ssl_options::ssl_options(const ssl_options& other)
+		: opts_(other.opts_), trustStore_(other.trustStore_), keyStore_(other.keyStore_),
+			privateKey_(other.privateKey_), privateKeyPassword_(other.privateKeyPassword_),
+			enabledCipherSuites_(other.enabledCipherSuites_),
+			errHandler_(other.errHandler_), pskHandler_(other.pskHandler_),
+			protos_(other.protos_)
 {
 	update_c_struct();
 }
 
-ssl_options::ssl_options(ssl_options&& opt)
-		: opts_(opt.opts_), trustStore_(std::move(opt.trustStore_)),
-			keyStore_(std::move(opt.keyStore_)), privateKey_(std::move(opt.privateKey_)),
-			privateKeyPassword_(std::move(opt.privateKeyPassword_)),
-			enabledCipherSuites_(std::move(opt.enabledCipherSuites_))
+ssl_options::ssl_options(ssl_options&& other)
+		: opts_(other.opts_), trustStore_(std::move(other.trustStore_)),
+			keyStore_(std::move(other.keyStore_)), privateKey_(std::move(other.privateKey_)),
+			privateKeyPassword_(std::move(other.privateKeyPassword_)),
+			enabledCipherSuites_(std::move(other.enabledCipherSuites_)),
+			errHandler_(std::move(other.errHandler_)), pskHandler_(std::move(other.pskHandler_)),
+			protos_(std::move(other.protos_))
 {
 	update_c_struct();
 }
@@ -64,7 +70,81 @@ void ssl_options::update_c_struct()
 	opts_.privateKey = c_str(privateKey_);
 	opts_.privateKeyPassword = c_str(privateKeyPassword_);
 	opts_.enabledCipherSuites = c_str(enabledCipherSuites_);
+
+	if (errHandler_) {
+		opts_.ssl_error_cb = &ssl_options::on_error;
+		opts_.ssl_error_context = this;
+	}
+	else {
+		opts_.ssl_error_cb = nullptr;
+		opts_.ssl_error_context = nullptr;
+	}
+
+	if (pskHandler_) {
+		opts_.ssl_psk_cb = &ssl_options::on_psk;
+		opts_.ssl_psk_context = this;
+	}
+	else {
+		opts_.ssl_psk_cb = nullptr;
+		opts_.ssl_psk_context = nullptr;
+	}
+
+	if (!protos_.empty()) {
+		opts_.protos = protos_.data();
+		opts_.protos_len = unsigned(protos_.length());
+	}
+	else {
+		opts_.protos = nullptr;
+		opts_.protos_len = 0;
+	}
 }
+
+// --------------------------------------------------------------------------
+
+int ssl_options::on_error(const char *str, size_t len, void *context)
+{
+	try {
+		if (context && str && len > 0) {
+			string errMsg { str, str+len };
+
+			ssl_options* opts = static_cast<ssl_options*>(context);
+			auto& errHandler = opts->errHandler_;
+
+			if (errHandler)
+				errHandler(errMsg);
+
+			return MQTTASYNC_SUCCESS;
+		}
+	}
+	catch (...) {}
+
+	return MQTTASYNC_FAILURE;
+}
+
+unsigned ssl_options::on_psk(const char *hint, char *identity, unsigned max_identity_len,
+							 unsigned char *psk, unsigned max_psk_len, void *context)
+{
+	unsigned ret = 0;
+
+	try {
+		if (context) {
+			auto hintStr = (hint) ? string(hint) : string();
+
+			ssl_options* opts = static_cast<ssl_options*>(context);
+			auto& pskHandler = opts->pskHandler_;
+
+			if (pskHandler) {
+				ret = pskHandler(hintStr, identity, size_t(max_identity_len),
+								 psk, size_t(max_psk_len));
+			}
+		}
+	}
+	catch (...) {}
+
+	return ret;
+}
+
+// --------------------------------------------------------------------------
 
 ssl_options& ssl_options::operator=(const ssl_options& rhs)
 {
@@ -78,6 +158,11 @@ ssl_options& ssl_options::operator=(const ssl_options& rhs)
 	privateKey_ = rhs.privateKey_;
 	privateKeyPassword_ = rhs.privateKeyPassword_;
 	enabledCipherSuites_ = rhs.enabledCipherSuites_;
+
+	errHandler_ = rhs.errHandler_;
+	pskHandler_ = rhs.pskHandler_;
+
+	protos_ = rhs.protos_;
 
 	update_c_struct();
 	return *this;
@@ -96,9 +181,16 @@ ssl_options& ssl_options::operator=(ssl_options&& rhs)
 	privateKeyPassword_ = std::move(rhs.privateKeyPassword_);
 	enabledCipherSuites_ = std::move(rhs.enabledCipherSuites_);
 
+	errHandler_ = std::move(rhs.errHandler_);
+	pskHandler_ = std::move(rhs.pskHandler_);
+
+	protos_ = std::move(rhs.protos_);
+
 	update_c_struct();
 	return *this;
 }
+
+// --------------------------------------------------------------------------
 
 void ssl_options::set_trust_store(const string& trustStore)
 {
@@ -141,6 +233,83 @@ void ssl_options::ca_path(const string& path)
 	opts_.CApath = c_str(caPath_);
 }
 
+void ssl_options::set_error_handler(error_handler cb)
+{
+	errHandler_ = cb;
+
+	if (errHandler_) {
+		opts_.ssl_error_cb = &ssl_options::on_error;
+		opts_.ssl_error_context = this;
+	}
+	else {
+		opts_.ssl_error_cb = nullptr;
+		opts_.ssl_error_context = nullptr;
+	}
+}
+
+void ssl_options::set_psk_handler(psk_handler cb)
+{
+	pskHandler_ = cb;
+
+	if (pskHandler_) {
+		opts_.ssl_psk_cb = &ssl_options::on_psk;
+		opts_.ssl_psk_context = this;
+	}
+	else {
+		opts_.ssl_psk_cb = nullptr;
+		opts_.ssl_psk_context = nullptr;
+	}
+}
+
+// Gets the list of ALPN protocols.
+// To do so, it must recover the strings from the wire format.
+std::vector<string> ssl_options::get_alpn_protos() const
+{
+	std::vector<string> protos;
+	size_t i = 0, n = protos_.length();
+
+	while (i < n) {
+		size_t sn = protos_[i++];
+		if (i+sn > n) break;
+
+		string s;
+		s.reserve(sn);
+
+		sn += i;
+		while (i < sn)
+			s.push_back(char(protos_[i++]));
+		protos.push_back(std::move(s));
+	}
+	return protos;
+}
+
+// Converts the vector of names into the binary string in wire format.
+// This is a single string uf unsigned characters with each protocol
+// prepended by a byte of its length.
+void ssl_options::set_alpn_protos(const std::vector<string>& protos)
+{
+	using uchar = unsigned char;
+
+	if (!protos.empty()) {
+		std::basic_string<uchar> protoBin;
+		for (const auto& proto : protos) {
+			protoBin.push_back(uchar(proto.length()));
+			for (const char c : proto)
+				protoBin.push_back(uchar(c));
+		}
+		protos_ = std::move(protoBin);
+
+		opts_.protos = protos_.data();
+		opts_.protos_len = unsigned(protos_.length());
+	}
+	else {
+		protos_ = std::basic_string<uchar>();
+		opts_.protos = nullptr;
+		opts_.protos_len = 0;
+	}
+}
+
 /////////////////////////////////////////////////////////////////////////////
-} // end namespace mqtt
+// end namespace mqtt
+}
 

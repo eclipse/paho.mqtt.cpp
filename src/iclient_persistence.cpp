@@ -20,6 +20,9 @@
 #include "mqtt/iclient_persistence.h"
 #include <cstring>
 #include <cstdlib>
+#include <vector>
+
+using namespace std;
 
 namespace mqtt {
 
@@ -80,9 +83,11 @@ int iclient_persistence::persistence_get(void* handle, char* key,
 {
 	try {
 		if (handle && key && buffer && buflen) {
-			auto sv = static_cast<iclient_persistence*>(handle)->get(key);
-			*buffer = const_cast<char*>(sv.data());
-			*buflen = (int) sv.length();
+			auto s = static_cast<iclient_persistence*>(handle)->get(key);
+			size_t n = s.length();
+			*buffer = static_cast<char*>(MQTTAsync_malloc(n));
+			memcpy(*buffer, s.data(), n);
+			*buflen = int(n);
 			return MQTTASYNC_SUCCESS;
 		}
 	}
@@ -108,10 +113,22 @@ int iclient_persistence::persistence_keys(void* handle, char*** keys, int* nkeys
 {
 	try {
 		if (handle && keys && nkeys) {
-			auto& k = static_cast<iclient_persistence*>(handle)->keys();
+			auto k = static_cast<iclient_persistence*>(handle)->keys();
 			size_t n = k.size();
-			*nkeys = n;
-			*keys = (n == 0) ? nullptr : const_cast<char**>(k.c_arr());
+			*nkeys = int(n);
+			if (n == 0) {
+				*keys = nullptr;
+			}
+			else {
+				*keys = static_cast<char**>(MQTTAsync_malloc(n*sizeof(char*)));
+				for (size_t i=0; i<n; ++i) {
+					auto sz = k[i].size();
+					char* buf = static_cast<char*>(MQTTAsync_malloc(sz+1));
+					strncpy(buf, k[i].c_str(), sz+1);
+					buf[sz] = '\0';
+					(*keys)[i] = buf;
+				}
+			}
 			return MQTTASYNC_SUCCESS;
 		}
 	}

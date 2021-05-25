@@ -29,32 +29,6 @@
 #include <cstring>
 #include <cstdio>
 
-// TODO: Delete this when #680 is merged into the Paho C lib
-#if !defined(MQTTAsync_createOptions_initializer5)
-	#define MQTTAsync_createOptions_initializer5 { {'M', 'Q', 'C', 'O'}, 0, 0, 100, MQTTVERSION_5 }
-#endif
-
-/////////////////////////////////////////////////////////////////////////////
-// Paho C logger
-
-enum LOG_LEVELS {
-	INVALID_LEVEL = -1,
-	TRACE_MAX = 1,
-	TRACE_MED,
-	TRACE_MIN,
-	TRACE_PROTOCOL,
-	LOG_PROTOCOL = TRACE_PROTOCOL,
-	LOG_ERROR,
-	LOG_SEVERE,
-	LOG_FATAL,
-};
-
-extern "C" {
-	void Log(enum LOG_LEVELS, int, const char *, ...);
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
 namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
@@ -74,42 +48,54 @@ async_client::async_client(const string& serverURI, const string& clientId,
 
 async_client::async_client(const string& serverURI, const string& clientId,
 						   int maxBufferedMessages, const string& persistDir)
-				: serverURI_(serverURI), clientId_(clientId), mqttVersion_(MQTTVERSION_DEFAULT),
-					persist_(nullptr), userCallback_(nullptr)
+				: serverURI_(serverURI), clientId_(clientId),
+					mqttVersion_(MQTTVERSION_DEFAULT), userCallback_(nullptr)
 {
-	MQTTAsync_createOptions opts MQTTAsync_createOptions_initializer5;
-
-	if (maxBufferedMessages != 0) {
-		opts.sendWhileDisconnected = to_int(true);
-		opts.maxBufferedMessages = maxBufferedMessages;
-	}
+	create_options opts(MQTTVERSION_DEFAULT, maxBufferedMessages);
 
 	int rc = MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
 										 MQTTCLIENT_PERSISTENCE_DEFAULT,
 										 const_cast<char*>(persistDir.c_str()),
-										 &opts);
-
+										 &opts.opts_);
 	if (rc != 0)
 		throw exception(rc);
 }
 
 async_client::async_client(const string& serverURI, const string& clientId,
-						   int maxBufferedMessages, iclient_persistence* persistence /*=nullptr*/)
-				: serverURI_(serverURI), clientId_(clientId), mqttVersion_(MQTTVERSION_DEFAULT),
-					persist_(nullptr), userCallback_(nullptr)
+						   int maxBufferedMessages,
+						   iclient_persistence* persistence /*=nullptr*/)
+				: async_client(serverURI, clientId,
+							   create_options(MQTTVERSION_DEFAULT, maxBufferedMessages),
+							   persistence)
 {
-	MQTTAsync_createOptions opts MQTTAsync_createOptions_initializer5;
+}
 
-	if (maxBufferedMessages != 0) {
-		opts.sendWhileDisconnected = to_int(true);
-		opts.maxBufferedMessages = maxBufferedMessages;
-	}
+async_client::async_client(const string& serverURI, const string& clientId,
+						   const create_options& opts,
+						   const string& persistDir)
+				: serverURI_(serverURI), clientId_(clientId),
+					mqttVersion_(opts.opts_.MQTTVersion), userCallback_(nullptr)
+{
+	int rc = MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
+										 MQTTCLIENT_PERSISTENCE_DEFAULT,
+										 const_cast<char*>(persistDir.c_str()),
+										 const_cast<MQTTAsync_createOptions*>(&opts.opts_));
+	if (rc != 0)
+		throw exception(rc);
+}
 
+async_client::async_client(const string& serverURI, const string& clientId,
+						   const create_options& opts,
+						   iclient_persistence* persistence /*=nullptr*/)
+				: serverURI_(serverURI), clientId_(clientId),
+					mqttVersion_(opts.opts_.MQTTVersion), userCallback_(nullptr)
+{
 	int rc = MQTTASYNC_SUCCESS;
 
 	if (!persistence) {
 		rc = MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
-										 MQTTCLIENT_PERSISTENCE_NONE, nullptr, &opts);
+										 MQTTCLIENT_PERSISTENCE_NONE, nullptr,
+										 const_cast<MQTTAsync_createOptions*>(&opts.opts_));
 	}
 	else {
 		persist_.reset(new MQTTClient_persistence {
@@ -126,7 +112,7 @@ async_client::async_client(const string& serverURI, const string& clientId,
 
 		rc = MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
 										 MQTTCLIENT_PERSISTENCE_USER, persist_.get(),
-										 &opts);
+										 const_cast<MQTTAsync_createOptions*>(&opts.opts_));
 	}
 	if (rc != 0)
 		throw exception(rc);
@@ -146,22 +132,23 @@ async_client::~async_client()
 
 // Callback for MQTTAsync_setConnected()
 // This is installed with the normall callbacks and with a call to 
-// reconnect() to indicate that it succeeded. It is called after the token 
-// is notified of success on a normal connect with callbacks. 
+// reconnect() to indicate that it succeeded. It signals the client's
+// connect token then calls any registered callbacks.
 void async_client::on_connected(void* context, char* cause)
 {
-	::Log(TRACE_MIN, -1, "[cpp] on_connected");
-
 	if (context) {
 		async_client* cli = static_cast<async_client*>(context);
-		callback* cb = cli->userCallback_;
-		auto& connHandler = cli->connHandler_;
-
 		string cause_str = cause ? string(cause) : string();
 
+		auto tok = cli->connTok_;
+		if (tok)
+			tok->on_success(nullptr);
+
+		callback* cb = cli->userCallback_;
 		if (cb)
 			cb->connected(cause_str);
 
+		auto& connHandler = cli->connHandler_;
 		if (connHandler)
 			connHandler(cause_str);
 	}
@@ -169,27 +156,43 @@ void async_client::on_connected(void* context, char* cause)
 
 // Callback for when the connection is lost.
 // This is called from the MQTTAsync_connectionLost registered via 
-// MQTTAsync_setCallbacks(). 
+// MQTTAsync_setCallbacks().
+// It calls the registered handlers then, if there's a consumer queue, it
+// places a null pointer in the queue to alert the consumer to a closed
+// connection.
 void async_client::on_connection_lost(void *context, char *cause)
 {
-	::Log(TRACE_MIN, -1, "[cpp] on_connection lost");
-
 	if (context) {
 		async_client* cli = static_cast<async_client*>(context);
-		callback* cb = cli->userCallback_;
-		consumer_queue_type& que = cli->que_;
-		auto& connLostHandler = cli->connLostHandler_;
-
 		string cause_str = cause ? string(cause) : string();
 
+		callback* cb = cli->userCallback_;
 		if (cb)
 			cb->connection_lost(cause_str);
 
+		auto& connLostHandler = cli->connLostHandler_;
 		if (connLostHandler)
 			connLostHandler(cause_str);
 
+		consumer_queue_type& que = cli->que_;
 		if (que)
 			que->put(const_message_ptr{});
+	}
+}
+
+// Callback from the C lib for when a disconnect packet is received from
+// the server.
+void async_client::on_disconnected(void* context, MQTTProperties* cprops,
+								   MQTTReasonCodes reasonCode)
+{
+	if (context) {
+		async_client* cli = static_cast<async_client*>(context);
+
+		auto& disconnectedHandler = cli->disconnectedHandler_;
+		if (disconnectedHandler) {
+			properties props(*cprops);
+			disconnectedHandler(props, ReasonCode(reasonCode));
+		}
 	}
 }
 
@@ -255,6 +258,49 @@ void async_client::on_delivery_complete(void* context, MQTTAsync_token msgID)
 }
 #endif
 
+
+// Callback from the C lib for when a registered updateConnectOptions
+// needs to be called.
+int async_client::on_update_connection(void* context,
+									   MQTTAsync_connectData* cdata)
+{
+	if (context) {
+		async_client* cli = static_cast<async_client*>(context);
+		auto& updateConnection = cli->updateConnectionHandler_;
+
+		if (updateConnection) {
+			connect_data data(*cdata);
+			if (updateConnection(data)) {
+				// Copy username and password into newly allocated buffers.
+				// The C lib will take ownership of the memory
+				auto n = data.get_user_name().length();
+				if (n > 0) {
+					char* username = static_cast<char*>(MQTTAsync_malloc(n+1));
+					strncpy(username, data.get_user_name().c_str(), n+1);
+					username[n] = '\0';
+					cdata->username = username;
+				}
+				else
+					cdata->username = nullptr;
+
+				n = data.get_password().length();
+				if (n > 0) {
+					char* passwd = static_cast<char*>(MQTTAsync_malloc(n));
+					memcpy(passwd, data.get_password().data(), n);
+					cdata->binarypwd.data = passwd;
+				}
+				else
+					cdata->binarypwd.data = nullptr;
+				cdata->binarypwd.len = int(n);
+
+				return to_int(true);
+			}
+		}
+	}
+	return 0;	// false
+}
+
+
 // --------------------------------------------------------------------------
 // Private methods
 
@@ -311,7 +357,6 @@ void async_client::remove_token(token* tok)
 	}
 }
 
-
 // --------------------------------------------------------------------------
 // Callback management
 
@@ -365,12 +410,27 @@ void async_client::set_connection_lost_handler(connection_handler cb)
 						&async_client::on_connection_lost));
 }
 
+void async_client::set_disconnected_handler(disconnected_handler cb)
+{
+	disconnectedHandler_ = cb;
+	check_ret(::MQTTAsync_setDisconnected(cli_, this,
+						&async_client::on_disconnected));
+}
+
 void async_client::set_message_callback(message_handler cb)
 {
 	msgHandler_ = cb;
 	check_ret(::MQTTAsync_setMessageArrivedCallback(cli_, this,
 						&async_client::on_message_arrived));
 }
+
+void async_client::set_update_connection_handler(update_connection_handler cb)
+{
+	updateConnectionHandler_ = cb;
+	check_ret(::MQTTAsync_setUpdateConnectOptions(cli_, this,
+						&async_client::on_update_connection));
+}
+
 
 // --------------------------------------------------------------------------
 // Connect
@@ -602,14 +662,18 @@ delivery_token_ptr async_client::publish(const_message_ptr msg,
 // Subscribe
 
 token_ptr async_client::subscribe(const string& topicFilter, int qos,
-								  const subscribe_options& opts /*=subscribe_options()*/)
+								  const subscribe_options& opts /*=subscribe_options()*/,
+								  const properties& props /*=properties()*/)
 {
 	auto tok = token::create(token::Type::SUBSCRIBE, *this, topicFilter);
 	tok->set_num_expected(0);	// Indicates non-array response for single val
 	add_token(tok);
 
-	response_options rspOpts(tok, mqttVersion_);
-	rspOpts.set_subscribe_options(opts);
+	auto rspOpts = response_options_builder(mqttVersion_)
+		.token(tok)
+		.subscribe_opts(opts)
+		.properties(props)
+		.finalize();
 
 	int rc = MQTTAsync_subscribe(cli_, topicFilter.c_str(), qos, &rspOpts.opts_);
 
@@ -623,15 +687,19 @@ token_ptr async_client::subscribe(const string& topicFilter, int qos,
 
 token_ptr async_client::subscribe(const string& topicFilter, int qos,
 								  void* userContext, iaction_listener& cb,
-								  const subscribe_options& opts /*=subscribe_options()*/)
+								  const subscribe_options& opts /*=subscribe_options()*/,
+								  const properties& props /*=properties()*/)
 {
 	auto tok = token::create(token::Type::SUBSCRIBE, *this, topicFilter,
 							 userContext, cb);
 	tok->set_num_expected(0);
 	add_token(tok);
 
-	response_options rspOpts(tok, mqttVersion_);
-	rspOpts.set_subscribe_options(opts);
+	auto rspOpts = response_options_builder(mqttVersion_)
+		.token(tok)
+		.subscribe_opts(opts)
+		.properties(props)
+		.finalize();
 
 	int rc = MQTTAsync_subscribe(cli_, topicFilter.c_str(), qos, &rspOpts.opts_);
 
@@ -646,7 +714,8 @@ token_ptr async_client::subscribe(const string& topicFilter, int qos,
 token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 								  const qos_collection& qos,
 								  const std::vector<subscribe_options>& opts
-									/*=std::vector<subscribe_options>()*/)
+									/*=std::vector<subscribe_options>()*/,
+								  const properties& props /*=properties()*/)
 {
 	size_t n = topicFilters->size();
 
@@ -655,11 +724,13 @@ token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 
 	auto tok = token::create(token::Type::SUBSCRIBE, *this, topicFilters);
 	tok->set_num_expected(n);
-
 	add_token(tok);
 
-	response_options rspOpts(tok, mqttVersion_);
-	rspOpts.set_subscribe_options(opts);
+	auto rspOpts = response_options_builder(mqttVersion_)
+		.token(tok)
+		.subscribe_opts(opts)
+		.properties(props)
+		.finalize();
 
 	int rc = MQTTAsync_subscribeMany(cli_, int(n), topicFilters->c_arr(),
 									 const_cast<int*>(qos.data()), &rspOpts.opts_);
@@ -676,7 +747,8 @@ token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 								  const qos_collection& qos,
 								  void* userContext, iaction_listener& cb,
 								  const std::vector<subscribe_options>& opts
-									/*=std::vector<subscribe_options>()*/)
+									/*=std::vector<subscribe_options>()*/,
+								  const properties& props /*=properties()*/)
 {
 	size_t n = topicFilters->size();
 
@@ -688,8 +760,11 @@ token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 	tok->set_num_expected(n);
 	add_token(tok);
 
-	response_options rspOpts(tok, mqttVersion_);
-	rspOpts.set_subscribe_options(opts);
+	auto rspOpts = response_options_builder(mqttVersion_)
+		.token(tok)
+		.subscribe_opts(opts)
+		.properties(props)
+		.finalize();
 
 	int rc = MQTTAsync_subscribeMany(cli_, int(n), topicFilters->c_arr(),
 									 const_cast<int*>(qos.data()), &rspOpts.opts_);
@@ -705,13 +780,17 @@ token_ptr async_client::subscribe(const_string_collection_ptr topicFilters,
 // --------------------------------------------------------------------------
 // Unsubscribe
 
-token_ptr async_client::unsubscribe(const string& topicFilter)
+token_ptr async_client::unsubscribe(const string& topicFilter,
+									const properties& props /*=properties()*/)
 {
 	auto tok = token::create(token::Type::UNSUBSCRIBE, *this, topicFilter);
 	tok->set_num_expected(0);	// Indicates non-array response for single val
 	add_token(tok);
 
-	response_options rspOpts(tok, mqttVersion_);
+	auto rspOpts = response_options_builder(mqttVersion_)
+		.token(tok)
+		.properties(props)
+		.finalize();
 
 	int rc = MQTTAsync_unsubscribe(cli_, topicFilter.c_str(), &rspOpts.opts_);
 
@@ -723,7 +802,8 @@ token_ptr async_client::unsubscribe(const string& topicFilter)
 	return tok;
 }
 
-token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters)
+token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters,
+									const properties& props /*=properties()*/)
 {
 	size_t n = topicFilters->size();
 
@@ -731,7 +811,10 @@ token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters)
 	tok->set_num_expected(n);
 	add_token(tok);
 
-	response_options rspOpts(tok, mqttVersion_);
+	auto rspOpts = response_options_builder(mqttVersion_)
+		.token(tok)
+		.properties(props)
+		.finalize();
 
 	int rc = MQTTAsync_unsubscribeMany(cli_, int(n),
 									   topicFilters->c_arr(), &rspOpts.opts_);
@@ -745,7 +828,8 @@ token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters)
 }
 
 token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters,
-									 void* userContext, iaction_listener& cb)
+									void* userContext, iaction_listener& cb,
+									const properties& props /*=properties()*/)
 {
 	size_t n = topicFilters->size();
 
@@ -754,7 +838,10 @@ token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters,
 	tok->set_num_expected(n);
 	add_token(tok);
 
-	response_options rspOpts(tok, mqttVersion_);
+	auto rspOpts = response_options_builder(mqttVersion_)
+		.token(tok)
+		.properties(props)
+		.finalize();
 
 	int rc = MQTTAsync_unsubscribeMany(cli_, int(n), topicFilters->c_arr(), &rspOpts.opts_);
 
@@ -767,13 +854,17 @@ token_ptr async_client::unsubscribe(const_string_collection_ptr topicFilters,
 }
 
 token_ptr async_client::unsubscribe(const string& topicFilter,
-									void* userContext, iaction_listener& cb)
+									void* userContext, iaction_listener& cb,
+									const properties& props /*=properties()*/)
 {
 	auto tok = token::create(token::Type::UNSUBSCRIBE , *this, topicFilter,
 							 userContext, cb);
 	add_token(tok);
 
-	response_options rspOpts(tok, mqttVersion_);
+	auto rspOpts = response_options_builder(mqttVersion_)
+		.token(tok)
+		.properties(props)
+		.finalize();
 
 	int rc = MQTTAsync_unsubscribe(cli_, topicFilter.c_str(), &rspOpts.opts_);
 

@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2017 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2017-2020 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -25,6 +25,7 @@
 #define __mqtt_buffer_view_h
 
 #include "mqtt/types.h"
+#include <iostream>
 
 namespace mqtt {
 
@@ -103,6 +104,21 @@ public:
 		return string(reinterpret_cast<const char*>(data_), sz_);
 	}
 };
+
+
+/**
+ * Stream inserter for a buffer view.
+ * This does a binary write of the data in the buffer.
+ * @param os The output stream.
+ * @param buf The buffer reference to write.
+ * @return A reference to the output stream.
+ */
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const buffer_view<T>& buf) {
+	if (buf.size() > 0)
+		os.write(buf.data(), sizeof(T)*buf.size());
+	return os;
+}
 
 /** A buffer view for character string data. */
 using string_view = buffer_view<char>;

@@ -34,7 +34,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <string>
-#include <thread>	// For sleep
+#include <thread>
 #include <atomic>
 #include <chrono>
 #include <cstring>
@@ -59,17 +59,19 @@ int main(int argc, char* argv[])
 	constexpr int QOS = 1;
 	const string REQ_TOPIC_HDR { "requests/math/" };
 
-	mqtt::async_client cli(SERVER_ADDRESS, "");
+	mqtt::create_options createOpts(MQTTVERSION_5);
+	mqtt::async_client cli(SERVER_ADDRESS, "", createOpts);
 
-	mqtt::connect_options connopts;
-	connopts.set_mqtt_version(MQTTVERSION_5);
-	connopts.set_clean_start(true);
+	auto connOpts = mqtt::connect_options_builder()
+					    .mqtt_version(MQTTVERSION_5)
+					    .clean_start()
+						.finalize();
 
 	cli.start_consuming();
 
 	try {
 		cout << "Connecting..." << flush;
-		mqtt::token_ptr tok = cli.connect(connopts);
+		mqtt::token_ptr tok = cli.connect(connOpts);
 		auto connRsp = tok->get_connect_response();
 		cout << "OK (" << connRsp.get_server_uri() << ")" << endl;
 
@@ -116,9 +118,12 @@ int main(int argc, char* argv[])
 		string reqArgs { os.str() };
 
 		cout << "\nSending '" << req << "' request " << os.str() << "..." << flush;
-		mqtt::message_ptr pubmsg = mqtt::make_message(reqTopic, reqArgs);
-		pubmsg->set_qos(QOS);
-		pubmsg->set_properties(props);
+		auto pubmsg = mqtt::message_ptr_builder()
+						  .topic(reqTopic)
+						  .payload(reqArgs)
+						  .qos(QOS)
+						  .properties(props)
+						  .finalize();
 
 		cli.publish(pubmsg)->wait_for(TIMEOUT);
 		cout << "OK" << endl;

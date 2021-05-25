@@ -118,7 +118,7 @@ private:
 
 	/** Client and token-related options have special access */
 	friend class async_client;
-	friend class token_test;
+	friend class mock_async_client;
 
 	friend class connect_options;
 	friend class response_options;
@@ -192,12 +192,14 @@ private:
 public:
 	/**
 	 * Constructs a token object.
+	 * @param typ The type of request that the token is tracking.
 	 * @param cli The client that created the token.
 	 */
 	token(Type typ, iasync_client& cli)
 		: token(typ, cli, MQTTAsync_token(0)) {}
 	/**
 	 * Constructs a token object.
+	 * @param typ The type of request that the token is tracking.
 	 * @param cli The client that created the token.
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
@@ -209,6 +211,7 @@ public:
 
 	/**
 	 * Constructs a token object.
+	 * @param typ The type of request that the token is tracking.
 	 * @param cli The client that created the token.
 	 * @param topic The topic assiciated with the token
 	 */
@@ -216,6 +219,7 @@ public:
 		: token(typ, cli, string_collection::create(topic)) {}
 	/**
 	 * Constructs a token object.
+	 * @param typ The type of request that the token is tracking.
 	 * @param cli The client that created the token.
 	 * @param topic The topic assiciated with the token
 	 * @param userContext optional object used to pass context to the
@@ -229,12 +233,14 @@ public:
 
 	/**
 	 * Constructs a token object.
+	 * @param typ The type of request that the token is tracking.
 	 * @param cli The client that created the token.
 	 * @param topics The topics associated with the token
 	 */
 	token(Type typ, iasync_client& cli, const_string_collection_ptr topics);
 	/**
 	 * Constructs a token object.
+	 * @param typ The type of request that the token is tracking.
 	 * @param cli The client that created the token.
 	 * @param topics The topics associated with the token
 	 * @param userContext optional object used to pass context to the
@@ -246,6 +252,7 @@ public:
 		  void* userContext, iaction_listener& cb);
 	/**
 	 * Constructs a token object.
+	 * @param typ The type of request that the token is tracking.
 	 * @param cli The client that created the token.
 	 * @param tok The message ID
 	 */
@@ -256,6 +263,7 @@ public:
 	virtual ~token() {}
 	/**
 	 * Constructs a token object.
+	 * @param typ The type of request that the token is tracking.
 	 * @param cli The client that created the token.
 	 * @return A smart/shared pointer to a token.
 	 */
@@ -264,6 +272,7 @@ public:
 	}
 	/**
 	 * Constructs a token object.
+	 * @param typ The type of request that the token is tracking.
 	 * @param cli The client that created the token.
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
@@ -276,6 +285,7 @@ public:
 	}
 	/**
 	 * Constructs a token object.
+	 * @param typ The type of request that the token is tracking.
 	 * @param cli The client that created the token.
 	 * @param topic The topic assiciated with the token
 	 */
@@ -284,6 +294,7 @@ public:
 	}
 	/**
 	 * Constructs a token object.
+	 * @param typ The type of request that the token is tracking.
 	 * @param cli The client that created the token.
 	 * @param topic The topic assiciated with the token
 	 * @param userContext optional object used to pass context to the
@@ -297,6 +308,7 @@ public:
 	}
 	/**
 	 * Constructs a token object.
+	 * @param typ The type of request that the token is tracking.
 	 * @param cli The client that created the token.
 	 * @param topics The topics associated with the token
 	 */
@@ -305,6 +317,7 @@ public:
 	}
 	/**
 	 * Constructs a token object.
+	 * @param typ The type of request that the token is tracking.
 	 * @param cli The client that created the token.
 	 * @param topics The topics associated with the token
 	 *
@@ -317,9 +330,9 @@ public:
 		return std::make_shared<token>(typ, cli, topics, userContext, cb);
 	}
 	/**
-	 * Gets the type of action the token is tracking, like CONNECT, PUBLISH,
-	 * etc.
-	 * @return The type of action the token is tracking.
+	 * Gets the type of request the token is tracking, like CONNECT,
+	 * PUBLISH, etc.
+	 * @return The type of request that the token is tracking.
 	 */
 	Type get_type() const { return type_; }
 	/**

@@ -15,6 +15,18 @@ inline bool stringcmp(char* cstr, const string& s) {
 	return std::memcmp(cstr, s.data(), s.length()) == 0;
 }
 
+static const uint8_t  FMT_IND = 42;
+static const uint16_t TOP_ALIAS = 511;
+static const uint32_t MAX_PKT_SZ = 32*1024;
+
+static const string TOPIC	{ "replies/bubba" };
+static const string	NAME1	{ "usr1" },
+					NAME2	{ "usr2" },
+					VALUE1	{ "this is value one" },
+					VALUE2	{ "this is value two" };
+
+static const binary	CORR_ID	{ "\x00\x01\x02\x03\x04", 5 };
+
 /////////////////////////////////////////////////////////////////////////////
 // property
 
@@ -351,38 +363,52 @@ TEST_CASE("string pair property move constructor", "[property]") {
 /////////////////////////////////////////////////////////////////////////////
 // properties
 
-TEST_CASE("properties constructor", "[properties]") {
+TEST_CASE("properties constructors", "[properties]") {
     SECTION("properties default constructor") {
 		properties props;
-
+		REQUIRE(props.empty());
 		REQUIRE(props.size() == 0);
-		REQUIRE(props.byte_length() == 1);
+	}
+
+    SECTION("properties init list constructor") {
+		properties props {
+			{ property::PAYLOAD_FORMAT_INDICATOR, 42 },
+			{ property::MESSAGE_EXPIRY_INTERVAL, 70000 }
+		};
+		REQUIRE(props.size() == 2);
+
+		REQUIRE(42 == get<uint8_t>(props, property::PAYLOAD_FORMAT_INDICATOR));
+		REQUIRE(70000 == get<int>(props, property::MESSAGE_EXPIRY_INTERVAL));
 	}
 }
 
 TEST_CASE("properties add", "[properties]") {
     SECTION("properties adding items") {
 		properties props;
+		REQUIRE(props.empty());
 		REQUIRE(props.size() == 0);
 
 		props.add({property::PAYLOAD_FORMAT_INDICATOR, 42});
+		REQUIRE(!props.empty());
 		REQUIRE(props.size() == 1);
 
 		props.add({property::MESSAGE_EXPIRY_INTERVAL, 70000});
+		REQUIRE(!props.empty());
 		REQUIRE(props.size() == 2);
 	}
 }
 
 TEST_CASE("properties clear", "[properties]") {
     SECTION("properties clear") {
-		properties props;
-		props.add({property::PAYLOAD_FORMAT_INDICATOR, 42});
-		props.add({property::MESSAGE_EXPIRY_INTERVAL, 70000});
+		properties props {
+			{ property::PAYLOAD_FORMAT_INDICATOR, 42 },
+			{ property::MESSAGE_EXPIRY_INTERVAL, 70000 }
+		};
 		REQUIRE(props.size() == 2);
 
 		props.clear();
+		REQUIRE(props.empty());
 		REQUIRE(props.size() == 0);
-		REQUIRE(props.byte_length() == 1);
 	}
 }
 
@@ -436,14 +462,11 @@ TEST_CASE("properties count and contains", "[properties]") {
 
 TEST_CASE("getting properties", "[properties]") {
     SECTION("integer properties") {
-		const uint8_t FMT_IND = 42;
-		const uint16_t TOP_ALIAS = 511;
-		const uint32_t MAX_PKT_SZ = 32*1024;
-
-		properties props;
-		props.add({property::PAYLOAD_FORMAT_INDICATOR, FMT_IND});
-		props.add({property::MAXIMUM_PACKET_SIZE, MAX_PKT_SZ});
-		props.add({property::TOPIC_ALIAS, TOP_ALIAS});
+		properties props {
+			{ property::PAYLOAD_FORMAT_INDICATOR, FMT_IND },
+			{ property::MAXIMUM_PACKET_SIZE, MAX_PKT_SZ },
+			{ property::TOPIC_ALIAS, TOP_ALIAS }
+		};
 
 		auto fmtInd = props.get(property::PAYLOAD_FORMAT_INDICATOR);
 		REQUIRE(get<uint8_t>(fmtInd) == FMT_IND);
@@ -456,14 +479,11 @@ TEST_CASE("getting properties", "[properties]") {
 	}
 
     SECTION("integer properties with typed get") {
-		const uint8_t FMT_IND = 42;
-		const uint16_t TOP_ALIAS = 511;
-		const uint32_t MAX_PKT_SZ = 32*1024;
-
-		properties props;
-		props.add({property::PAYLOAD_FORMAT_INDICATOR, FMT_IND});
-		props.add({property::MAXIMUM_PACKET_SIZE, MAX_PKT_SZ});
-		props.add({property::TOPIC_ALIAS, TOP_ALIAS});
+		properties props {
+			{ property::PAYLOAD_FORMAT_INDICATOR, FMT_IND },
+			{ property::MAXIMUM_PACKET_SIZE, MAX_PKT_SZ },
+			{ property::TOPIC_ALIAS, TOP_ALIAS }
+		};
 
 		REQUIRE(get<uint8_t>(props, property::PAYLOAD_FORMAT_INDICATOR) == FMT_IND);
 		REQUIRE(get<uint16_t>(props, property::TOPIC_ALIAS) == TOP_ALIAS);
@@ -471,26 +491,20 @@ TEST_CASE("getting properties", "[properties]") {
 	}
 
     SECTION("string properties") {
-		string topic { "replies/bubba" };
-		binary corr_id { "\x00\x01\x02\x03\x04", 5 };
+		properties props {
+			{ property::RESPONSE_TOPIC, TOPIC },
+			{ property::CORRELATION_DATA, CORR_ID }
+		};
 
-		properties props;
-		props.add({property::RESPONSE_TOPIC, topic});
-		props.add({property::CORRELATION_DATA, corr_id});
-
-		REQUIRE(get<string>(props, property::RESPONSE_TOPIC) == topic);
-		REQUIRE(get<binary>(props, property::CORRELATION_DATA) == corr_id);
+		REQUIRE(get<string>(props, property::RESPONSE_TOPIC) == TOPIC);
+		REQUIRE(get<binary>(props, property::CORRELATION_DATA) == CORR_ID);
 	}
 
     SECTION("string pair properties") {
-		const string	NAME1  { "usr1" },
-						NAME2  { "usr2" },
-						VALUE1 { "this is value one" },
-						VALUE2 { "this is value two" };
-
-		properties props;
-		props.add({property::USER_PROPERTY, NAME1, VALUE1});
-		props.add({property::USER_PROPERTY, NAME2, VALUE2});
+		properties props {
+			{ property::USER_PROPERTY, NAME1, VALUE1 },
+			{ property::USER_PROPERTY, NAME2, VALUE2 }
+		};
 
 		string	name1, value1,
 				name2, value2;
@@ -504,6 +518,117 @@ TEST_CASE("getting properties", "[properties]") {
 		REQUIRE(name2 == NAME2);
 		REQUIRE(value2 == VALUE2);
 	}
+}
 
+TEST_CASE("properties copy and move", "[properties]") {
+	properties orgProps {
+		{ property::PAYLOAD_FORMAT_INDICATOR, FMT_IND },
+		{ property::MAXIMUM_PACKET_SIZE, MAX_PKT_SZ },
+		{ property::TOPIC_ALIAS, TOP_ALIAS },
+		{ property::RESPONSE_TOPIC, TOPIC },
+		{ property::CORRELATION_DATA, CORR_ID },
+		{ property::USER_PROPERTY, NAME1, VALUE1 },
+		{ property::USER_PROPERTY, NAME2, VALUE2 }
+	};
+
+	string	name1, value1,
+			name2, value2;
+
+	SECTION("copy constructor") {
+		properties props { orgProps };
+
+		// Make sure it's a real copy, not a reference to org
+		orgProps.clear();
+
+		REQUIRE(get<uint8_t>(props, property::PAYLOAD_FORMAT_INDICATOR) == FMT_IND);
+		REQUIRE(get<uint16_t>(props, property::TOPIC_ALIAS) == TOP_ALIAS);
+		REQUIRE(get<uint32_t>(props, property::MAXIMUM_PACKET_SIZE) == MAX_PKT_SZ);
+
+		REQUIRE(get<string>(props, property::RESPONSE_TOPIC) == TOPIC);
+		REQUIRE(get<binary>(props, property::CORRELATION_DATA) == CORR_ID);
+
+		std::tie(name1, value1) = get<string_pair>(props, property::USER_PROPERTY, 0);
+		std::tie(name2, value2) = get<string_pair>(props, property::USER_PROPERTY, 1);
+
+		REQUIRE(name1 == NAME1);
+		REQUIRE(value1 == VALUE1);
+
+		REQUIRE(name2 == NAME2);
+		REQUIRE(value2 == VALUE2);
+	}
+
+
+	SECTION("move constructor") {
+		properties props { std::move(orgProps) };
+
+		REQUIRE(get<uint8_t>(props, property::PAYLOAD_FORMAT_INDICATOR) == FMT_IND);
+		REQUIRE(get<uint16_t>(props, property::TOPIC_ALIAS) == TOP_ALIAS);
+		REQUIRE(get<uint32_t>(props, property::MAXIMUM_PACKET_SIZE) == MAX_PKT_SZ);
+
+		REQUIRE(get<string>(props, property::RESPONSE_TOPIC) == TOPIC);
+		REQUIRE(get<binary>(props, property::CORRELATION_DATA) == CORR_ID);
+
+		std::tie(name1, value1) = get<string_pair>(props, property::USER_PROPERTY, 0);
+		std::tie(name2, value2) = get<string_pair>(props, property::USER_PROPERTY, 1);
+
+		REQUIRE(name1 == NAME1);
+		REQUIRE(value1 == VALUE1);
+
+		REQUIRE(name2 == NAME2);
+		REQUIRE(value2 == VALUE2);
+
+		REQUIRE(orgProps.empty());
+		REQUIRE(0 == orgProps.size());
+	}
+
+
+	SECTION("copy assignment") {
+		properties props;
+		props = orgProps;
+
+		// Make sure it's a real copy, not a reference to org
+		orgProps.clear();
+
+		REQUIRE(get<uint8_t>(props, property::PAYLOAD_FORMAT_INDICATOR) == FMT_IND);
+		REQUIRE(get<uint16_t>(props, property::TOPIC_ALIAS) == TOP_ALIAS);
+		REQUIRE(get<uint32_t>(props, property::MAXIMUM_PACKET_SIZE) == MAX_PKT_SZ);
+
+		REQUIRE(get<string>(props, property::RESPONSE_TOPIC) == TOPIC);
+		REQUIRE(get<binary>(props, property::CORRELATION_DATA) == CORR_ID);
+
+		std::tie(name1, value1) = get<string_pair>(props, property::USER_PROPERTY, 0);
+		std::tie(name2, value2) = get<string_pair>(props, property::USER_PROPERTY, 1);
+
+		REQUIRE(name1 == NAME1);
+		REQUIRE(value1 == VALUE1);
+
+		REQUIRE(name2 == NAME2);
+		REQUIRE(value2 == VALUE2);
+	}
+
+
+	SECTION("move assignment") {
+		properties props;
+		props = std::move(orgProps);
+
+		REQUIRE(get<uint8_t>(props, property::PAYLOAD_FORMAT_INDICATOR) == FMT_IND);
+		REQUIRE(get<uint16_t>(props, property::TOPIC_ALIAS) == TOP_ALIAS);
+		REQUIRE(get<uint32_t>(props, property::MAXIMUM_PACKET_SIZE) == MAX_PKT_SZ);
+
+		REQUIRE(get<string>(props, property::RESPONSE_TOPIC) == TOPIC);
+		REQUIRE(get<binary>(props, property::CORRELATION_DATA) == CORR_ID);
+
+		std::tie(name1, value1) = get<string_pair>(props, property::USER_PROPERTY, 0);
+		std::tie(name2, value2) = get<string_pair>(props, property::USER_PROPERTY, 1);
+
+		REQUIRE(name1 == NAME1);
+		REQUIRE(value1 == VALUE1);
+
+		REQUIRE(name2 == NAME2);
+		REQUIRE(value2 == VALUE2);
+
+		REQUIRE(orgProps.empty());
+		REQUIRE(0 == orgProps.size());
+	}
 }
 

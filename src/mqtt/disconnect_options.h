@@ -96,6 +96,12 @@ public:
 	 */
 	disconnect_options& operator=(disconnect_options&& opt);
 	/**
+	 * Expose the underlying C struct for the unit tests.
+	 */
+	#if defined(UNIT_TESTS)
+		const MQTTAsync_disconnectOptions& c_struct() const { return opts_; }
+	#endif
+	/**
 	 * Gets the timeout used for disconnecting.
 	 * @return The timeout for disconnecting (in milliseconds).
 	 */
@@ -149,7 +155,7 @@ public:
 	 * @param props The properties to move into the connect object.
 	 */
 	void set_properties(properties&& props) {
-		props_ = props;
+		props_ = std::move(props);
 		opts_.properties = props_.c_struct();
 	}
 	/**
@@ -167,6 +173,67 @@ public:
 		opts_.reasonCode = MQTTReasonCodes(code);
 	}
 };
+
+
+/////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Class to build connect options.
+ */
+class disconnect_options_builder
+{
+	/** The underlying options */
+	disconnect_options opts_;
+
+public:
+	/** This class */
+	using self = disconnect_options_builder;
+	/**
+	 * Default constructor.
+	 */
+	disconnect_options_builder() {}
+	/**
+	 * Sets the properties for the disconnect message.
+	 * @param props The properties for the disconnect message.
+	 */
+	auto properties(mqtt::properties&& props) -> self& {
+		opts_.set_properties(std::move(props));
+		return *this;
+	}
+	/**
+	 * Sets the properties for the disconnect message.
+	 * @param props The properties for the disconnect message.
+	 */
+	auto properties(const mqtt::properties& props) -> self& {
+		opts_.set_properties(props);
+		return *this;
+	}
+	/**
+	 * Sets the connect timeout with a chrono duration.
+	 * This is the maximum time that the underlying library will wait for a
+	 * connection before failing.
+	 * @param to The connect timeout in seconds.
+	 */
+	template <class Rep, class Period>
+	auto timeout(const std::chrono::duration<Rep, Period>& to) -> self&{
+		opts_.set_timeout(to);
+		return *this;
+	}
+	/**
+	 * Sets the reason code for the disconnect.
+	 * @param code The reason code for the disconnect.
+	 */
+	auto reason_code(ReasonCode code) -> self& {
+		opts_.set_reason_code(code);
+		return *this;
+	}
+	/**
+	 * Finish building the options and return them.
+	 * @return The option struct as built.
+	 */
+	disconnect_options finalize() { return opts_; }
+};
+
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace 'mqtt'

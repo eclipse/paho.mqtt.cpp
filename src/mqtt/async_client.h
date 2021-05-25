@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013-2019 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2020 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -28,10 +28,12 @@
 #include "MQTTAsync.h"
 #include "mqtt/types.h"
 #include "mqtt/token.h"
+#include "mqtt/create_options.h"
 #include "mqtt/string_collection.h"
 #include "mqtt/delivery_token.h"
 #include "mqtt/iclient_persistence.h"
 #include "mqtt/iaction_listener.h"
+#include "mqtt/properties.h"
 #include "mqtt/exception.h"
 #include "mqtt/message.h"
 #include "mqtt/callback.h"
@@ -52,18 +54,18 @@ namespace mqtt {
 
 #if defined(PAHO_MQTTPP_VERSIONS)
 	/** The version number for the client library. */
-	const uint32_t PAHO_MQTTPP_VERSION = 0x01010000;
+	const uint32_t PAHO_MQTTPP_VERSION = 0x01020000;
 	/** The version string for the client library  */
-	const string PAHO_MQTTPP_VERSION_STR("Paho MQTT C++ (mqttpp) v. 1.1");
+	const string PAHO_MQTTPP_VERSION_STR("Paho MQTT C++ (mqttpp) v. 1.2");
 	/** Copyright notice for the client library */
-	const string PAHO_MQTTPP_COPYRIGHT("Copyright (c) 2013-2019 Frank Pagliughi");
+	const string PAHO_MQTTPP_COPYRIGHT("Copyright (c) 2013-2020 Frank Pagliughi");
 #else
 	/** The version number for the client library. */
-	const uint32_t VERSION = 0x01010000;
+	const uint32_t VERSION = 0x01020000;
 	/** The version string for the client library  */
-	const string VERSION_STR("Paho MQTT C++ (mqttpp) v. 1.1");
+	const string VERSION_STR("Paho MQTT C++ (mqttpp) v. 1.2");
 	/** Copyright notice for the client library */
-	const string COPYRIGHT("Copyright (c) 2013-2019 Frank Pagliughi");
+	const string COPYRIGHT("Copyright (c) 2013-2020 Frank Pagliughi");
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
@@ -84,6 +86,10 @@ public:
 	using message_handler = std::function<void(const_message_ptr)>;
 	/** Handler type for when a connecion is made or lost */
 	using connection_handler = std::function<void(const string& cause)>;
+	/** Handler type for when a disconnect packet is received */
+	using disconnected_handler = std::function<void(const properties&, ReasonCode)>;
+	/** Handler for updaing connection data before an auto-reconnect. */
+	using update_connection_handler = std::function<bool(connect_data&)>;
 
 private:
 	/** Lock guard type for this class */
@@ -105,11 +111,15 @@ private:
 	std::unique_ptr<MQTTClient_persistence> persist_;
 	/** Callback supplied by the user (if any) */
 	callback* userCallback_;
-	/** Connection handler  */
+	/** Connection handler */
 	connection_handler connHandler_;
-	/** Connection lost handler  */
+	/** Connection lost handler */
 	connection_handler connLostHandler_;
-	/** Message handler (if any) */
+	/** Disconnected handler */
+	disconnected_handler disconnectedHandler_;
+	/** Update connect data/options */
+	update_connection_handler updateConnectionHandler_;
+	/** Message handler */
 	message_handler msgHandler_;
 	/** Copy of connect token (for re-connects) */
 	token_ptr connTok_;
@@ -120,12 +130,15 @@ private:
 	/** A queue of messages for consumer API */
 	consumer_queue_type que_;
 
-	/** Callbacks from the C library  */
+	/** Callbacks from the C library */
 	static void on_connected(void* context, char* cause);
 	static void on_connection_lost(void *context, char *cause);
+	static void on_disconnected(void* context, MQTTProperties* cprops,
+								MQTTReasonCodes reasonCode);
 	static int  on_message_arrived(void* context, char* topicName, int topicLen,
 								   MQTTAsync_message* msg);
 	static void on_delivery_complete(void* context, MQTTAsync_token tok);
+	static int  on_update_connection(void* context, MQTTAsync_connectData* cdata);
 
 	/** Manage internal list of active tokens */
 	friend class token;
@@ -206,7 +219,39 @@ public:
 	 * @throw exception if an argument is invalid
 	 */
 	async_client(const string& serverURI, const string& clientId,
-				 int maxBufferedMessages, iclient_persistence* persistence=nullptr);
+				 int maxBufferedMessages,
+				 iclient_persistence* persistence=nullptr);
+	/**
+	 * Create an async_client that can be used to communicate with an MQTT
+	 * server, which allows for off-line message buffering.
+	 * This uses file-based persistence in the specified directory.
+	 * @param serverURI the address of the server to connect to, specified
+	 *  				as a URI.
+	 * @param clientId a client identifier that is unique on the server
+	 *  			   being connected to
+	 * @param opts The create options
+	 * @param persistDir The directory to use for persistence data
+	 * @throw exception if an argument is invalid
+	 */
+	async_client(const string& serverURI, const string& clientId,
+				 const create_options& opts, const string& persistDir);
+	/**
+	 * Create an async_client that can be used to communicate with an MQTT
+	 * server, which allows for off-line message buffering.
+	 * This allows the caller to specify a user-defined persistence object,
+	 * or use no persistence.
+	 * @param serverURI the address of the server to connect to, specified
+	 *  				as a URI.
+	 * @param clientId a client identifier that is unique on the server
+	 *  			   being connected to
+	 * @param opts The create options
+	 * @param persistence The user persistence structure. If this is null,
+	 *  				  then no persistence is used.
+	 * @throw exception if an argument is invalid
+	 */
+	async_client(const string& serverURI, const string& clientId,
+				 const create_options& opts,
+				 iclient_persistence* persistence=nullptr);
 	/**
 	 * Destructor
 	 */
@@ -235,6 +280,11 @@ public:
 	 */
 	void set_connection_lost_handler(connection_handler cb) /*override*/;
 	/**
+	 * Callback for when a disconnect packet is received from the server.
+	 * @param cb Callback for when the disconnect packet is received.
+	 */
+	void set_disconnected_handler(disconnected_handler cb) /*override*/;
+	/**
 	 * Sets the callback for when a message arrives from the broker.
 	 * Note that the application can only have one message handler which can
 	 * be installed individually using this method, or installled as a
@@ -242,6 +292,12 @@ public:
 	 * @param cb The callback functor to register with the library.
 	 */
 	void set_message_callback(message_handler cb) /*override*/;
+	/**
+	 * Sets a callback to allow the application to update the connection
+	 * data on automatic reconnects.
+	 * @param cb The callback functor to register with the library.
+	 */
+	void set_update_connection_handler(update_connection_handler cb);
 	/**
 	 * Connects to an MQTT server using the default options.
 	 * @return token used to track and wait for the connect to complete. The
@@ -508,13 +564,15 @@ public:
 	 * Subscribe to a topic, which may include wildcards.
 	 * @param topicFilter the topic to subscribe to, which can include
 	 *  				  wildcards.
-	 * @param qos
-	 *
+	 * @param qos The quality of service for the subscription
+	 * @param opts The MQTT v5 subscribe options for the topic
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
 	token_ptr subscribe(const string& topicFilter, int qos,
-						const subscribe_options& opts=subscribe_options()) override;
+						const subscribe_options& opts=subscribe_options(),
+						const properties& props=properties()) override;
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 * @param topicFilter the topic to subscribe to, which can include
@@ -527,12 +585,15 @@ public:
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb listener that will be notified when subscribe has completed
+	 * @param opts The MQTT v5 subscribe options for the topic
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
 	token_ptr subscribe(const string& topicFilter, int qos,
 						void* userContext, iaction_listener& cb,
-						const subscribe_options& opts=subscribe_options()) override;
+						const subscribe_options& opts=subscribe_options(),
+						const properties& props=properties()) override;
 	/**
 	 * Subscribe to multiple topics, each of which may include wildcards.
 	 * @param topicFilters
@@ -541,12 +602,15 @@ public:
 	 *  		  received at the published QoS. Messages published at a
 	 *  		  higher quality of service will be received using the QoS
 	 *  		  specified on the subscribe.
+	 * @param opts The MQTT v5 subscribe options (one for each topic)
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
 	token_ptr subscribe(const_string_collection_ptr topicFilters,
 						const qos_collection& qos,
-						const std::vector<subscribe_options>& opts=std::vector<subscribe_options>()) override;
+						const std::vector<subscribe_options>& opts=std::vector<subscribe_options>(),
+						const properties& props=properties()) override;
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
 	 * @param topicFilters
@@ -558,30 +622,37 @@ public:
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb listener that will be notified when subscribe has completed
+	 * @param opts The MQTT v5 subscribe options (one for each topic)
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the subscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
 	token_ptr subscribe(const_string_collection_ptr topicFilters,
 						const qos_collection& qos,
 						void* userContext, iaction_listener& cb,
-						const std::vector<subscribe_options>& opts=std::vector<subscribe_options>()) override;
+						const std::vector<subscribe_options>& opts=std::vector<subscribe_options>(),
+						const properties& props=properties()) override;
 	/**
 	 * Requests the server unsubscribe the client from a topic.
 	 * @param topicFilter the topic to unsubscribe from. It must match a
 	 *  				  topicFilter specified on an earlier subscribe.
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	token_ptr unsubscribe(const string& topicFilter) override;
+	token_ptr unsubscribe(const string& topicFilter,
+						  const properties& props=properties()) override;
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
 	 * @param topicFilters one or more topics to unsubscribe from. Each
 	 *  				   topicFilter must match one specified on an
 	 *  				   earlier subscribe.
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
-	token_ptr unsubscribe(const_string_collection_ptr topicFilters) override;
+	token_ptr unsubscribe(const_string_collection_ptr topicFilters,
+						  const properties& props=properties()) override;
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
 	 * @param topicFilters
@@ -589,11 +660,13 @@ public:
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb listener that will be notified when unsubscribe has
 	 *  		 completed
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
 	token_ptr unsubscribe(const_string_collection_ptr topicFilters,
-						   void* userContext, iaction_listener& cb) override;
+						  void* userContext, iaction_listener& cb,
+						  const properties& props=properties()) override;
 	/**
 	 * Requests the server unsubscribe the client from a topics.
 	 * @param topicFilter the topic to unsubscribe from. It must match a
@@ -602,12 +675,13 @@ public:
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb listener that will be notified when unsubscribe has
 	 *  		 completed
+	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the unsubscribe to complete.
 	 *  	   The token will be passed to callback methods if set.
 	 */
 	token_ptr unsubscribe(const string& topicFilter,
-						  void* userContext, iaction_listener& cb) override;
-
+						  void* userContext, iaction_listener& cb,
+						  const properties& props=properties()) override;
 	/**
 	 * Start consuming messages.
 	 * This initializes the client to receive messages through a queue that
@@ -673,10 +747,8 @@ public:
 	}
 	/**
 	 * Waits until a specific time for a message to appear.
-	 * @param msg Pointer to the value to receive the message
 	 * @param absTime The time point to wait until, before timing out.
-	 * @return @em true if a message was read, @em false if a timeout
-	 *  	   occurred.
+	 * @return The message, if read, an empty pointer if not.
 	 */
 	template <class Clock, class Duration>
 	const_message_ptr try_consume_message_until(const std::chrono::time_point<Clock,Duration>& absTime) {

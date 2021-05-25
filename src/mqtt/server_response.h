@@ -28,6 +28,8 @@
 #include "mqtt/types.h"
 #include "mqtt/properties.h"
 
+#include <iostream>
+
 namespace mqtt {
 
 /**
@@ -124,22 +126,32 @@ struct subscribe_response : public server_response
 
 	friend class token;
 
+	/**
+	 * Create v5 subscribe response.
+	 * @param rsp The v5 response struct from the C lib
+	 */
 	subscribe_response(MQTTAsync_successData5* rsp)
 			: server_response(properties(rsp->properties)) {
-		if (rsp->alt.sub.reasonCodeCount == 1)
+		if (rsp->alt.sub.reasonCodeCount < 2)
 			reasonCodes_.push_back(ReasonCode(rsp->reasonCode));
-		else {
+		else if (rsp->alt.sub.reasonCodes) {
 			for (int i=0; i<rsp->alt.sub.reasonCodeCount; ++i)
 				reasonCodes_.push_back(ReasonCode(rsp->alt.sub.reasonCodes[i]));
 		}
 	}
 
+	/**
+	 * Create v3 subscribe response.
+	 * @param n The number of subscription topics
+	 * @param rsp The v3 response struct from the C lib
+	 */
 	subscribe_response(size_t n, MQTTAsync_successData* rsp) {
-		if (n == 0)
+		if (n < 2)
 			reasonCodes_.push_back(ReasonCode(rsp->alt.qos));
-		else
+		else if (rsp->alt.qosList) {
 			for (size_t i=0; i<n; ++i)
 				reasonCodes_.push_back(ReasonCode(rsp->alt.qosList[i]));
+		}
 	}
 
 public:
@@ -170,9 +182,9 @@ class unsubscribe_response : public server_response
 
 	unsubscribe_response(MQTTAsync_successData5* rsp)
 			: server_response(properties(rsp->properties)) {
-		if (rsp->alt.unsub.reasonCodeCount == 1)
+		if (rsp->alt.unsub.reasonCodeCount < 2)
 			reasonCodes_.push_back(ReasonCode(rsp->reasonCode));
-		else {
+		else if (rsp->alt.unsub.reasonCodes) {
 			for (int i=0; i<rsp->alt.unsub.reasonCodeCount; ++i)
 				reasonCodes_.push_back(ReasonCode(rsp->alt.unsub.reasonCodes[i]));
 		}

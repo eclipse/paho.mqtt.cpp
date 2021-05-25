@@ -29,8 +29,28 @@ find_package(Catch2 REQUIRED)
 # --- Executables ---
 
 add_executable(unit_tests unit_tests.cpp
-	test_properties.cpp
+  test_async_client.cpp
+  test_buffer_ref.cpp
+  test_client.cpp
+  test_connect_options.cpp
+  test_create_options.cpp
+  test_disconnect_options.cpp
+	test_exception.cpp
+  test_message.cpp
+  test_persistence.cpp
+  test_properties.cpp
+  test_response_options.cpp
+  test_string_collection.cpp
+  test_token.cpp
+  test_topic.cpp
+  test_will_options.cpp
 )
+
+if(PAHO_WITH_SSL)
+  target_sources(unit_tests PUBLIC 
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_ssl_options.cpp
+  )
+endif()
 
 # --- Link for executables ---
 

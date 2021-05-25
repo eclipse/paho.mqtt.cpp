@@ -1,8 +1,11 @@
-// dummy_action_listener.h
+// mock_action_listener.h
+//
 // Dummy implementation of mqtt::iaction_listener for Unit Test.
+//
 
 /*******************************************************************************
  * Copyright (c) 2016 Guilherme M. Ferreira <guilherme.maciel.ferreira@gmail.com>
+ * Copyright (c) 2020 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,6 +18,7 @@
  *
  * Contributors:
  *    Guilherme M. Ferreira - initial implementation
+ *    Frank Pagliughi - prepared for Catch2, renamed 'mock'
  *******************************************************************************/
 
 #ifndef __mqtt_dummy_action_listener_h
@@ -23,29 +27,30 @@
 #include "mqtt/token.h"
 
 namespace mqtt {
-namespace test {
 
 /////////////////////////////////////////////////////////////////////////////
 
-class dummy_action_listener : public mqtt::iaction_listener
+/**
+ * Test/mock action listener to determine which callback gets triggered, if
+ * any.
+ */
+class mock_action_listener : public iaction_listener
 {
+	bool onSuccessCalled_ { false };
+	bool onFailureCalled_ { false };
+
+	void on_success(const mqtt::token&) override {
+        onSuccessCalled_ = true;
+    }
+
+    void on_failure(const mqtt::token&) override {
+        onFailureCalled_ = true;
+    }
+
 public:
-	bool on_success_called { false };
-	bool on_failure_called { false };
-
-	void on_success(const mqtt::token& token) override {
-		on_success_called = true;
-	}
-
-	void on_failure(const mqtt::token& token) override {
-		on_failure_called = true;
-	}
-
+    bool succeeded() const { return onSuccessCalled_; }
+    bool failed() const { return onFailureCalled_; }
 };
-
-/////////////////////////////////////////////////////////////////////////////
-// end namespace test
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt

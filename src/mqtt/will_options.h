@@ -47,10 +47,13 @@ class connect_options;
  */
 class will_options
 {
+public:
 	/** The default QoS for the LWT, if unspecified */
 	static constexpr int DFLT_QOS = 0;
 	/** The defalut retained flag for LWT, if unspecified */
 	static constexpr bool DFLT_RETAINED = false;
+
+private:
 	/** A default C struct to support re-initializing variables */
 	static const MQTTAsync_willOptions DFLT_C_STRUCT;
 
@@ -67,6 +70,8 @@ class will_options
 	 * The properties for the LWT message.
 	 * Strangely, in the C lib, the will properties are not in the
 	 * willOptions struct, but are rather in the connectOptions.
+	 * So we keep the cached properties here, but need to transfer them to
+	 * the connect_options when we're added to that struct.
 	 */
 	properties props_;
 
@@ -91,10 +96,12 @@ class will_options
 	}
 
 public:
-	/** Smart/shared pointer to this class. */
+	/** Smart/shared pointer to an object of this class. */
 	using ptr_t = std::shared_ptr<will_options>;
 	/** Smart/shared pointer to a const object of this class. */
 	using const_ptr_t = std::shared_ptr<const will_options>;
+	/** Smart/shared pointer to an object of this class. */
+	using unique_ptr_t = std::unique_ptr<will_options>;
 
 	/**
 	 * Constructs a new object using the default values.
@@ -108,9 +115,11 @@ public:
 	 * @param qos The message Quality of Service.
 	 * @param retained Tell the broker to keep the LWT message after send to
 	 *  			   subscribers.
+	 * @param props MQTT v5 properties for the will message.
 	 */
 	will_options(string_ref top, const void *payload, size_t payload_len,
-				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED);
+				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED,
+				 const properties& props=properties());
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
 	 * @param top The LWT message is published to the this topic.
@@ -119,9 +128,11 @@ public:
 	 * @param qos The message Quality of Service.
 	 * @param retained Tell the broker to keep the LWT message after send to
 	 *  			   subscribers.
+	 * @param props MQTT v5 properties for the will message.
 	 */
 	will_options(const topic& top, const void *payload, size_t payload_len,
-				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED);
+				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED,
+				 const properties& props=properties());
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
 	 * @param top The LWT message is published to the this topic.
@@ -130,9 +141,11 @@ public:
 	 * @param qos The message Quality of Service.
 	 * @param retained Tell the broker to keep the LWT message after send to
 	 *  			   subscribers.
+	 * @param props MQTT v5 properties for the will message.
 	 */
 	will_options(string_ref top, binary_ref payload,
-				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED);
+				 int qos=DFLT_QOS, bool retained=DFLT_RETAINED,
+				 const properties& props=properties());
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
 	 * @param top The LWT message is published to the this topic.
@@ -141,9 +154,11 @@ public:
 	 * @param qos The message Quality of Service.
 	 * @param retained Tell the broker to keep the LWT message after send to
 	 *  			   subscribers.
+	 * @param props MQTT v5 properties for the will message.
 	 */
 	will_options(string_ref top, const string& payload,
-				 int qos=DFLT_QOS, bool retained=DFLT_QOS);
+				 int qos=DFLT_QOS, bool retained=DFLT_QOS,
+				 const properties& props=properties());
 	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
 	 * @param msg The message that is published to the Will Topic.
@@ -169,6 +184,12 @@ public:
 	 * @param opt The other options.
 	 */
 	will_options& operator=(will_options&& opt);
+	/**
+	 * Expose the underlying C struct for the unit tests.
+	 */
+	#if defined(UNIT_TESTS)
+		const MQTTAsync_willOptions& c_struct() const { return opts_; }
+	#endif
 	/**
 	 * Gets the LWT message topic name.
 	 * @return The LWT message topic name.
@@ -241,7 +262,7 @@ public:
 	 * Moves the properties for the connect.
 	 * @param props The properties to move into the connect object.
 	 */
-	void set_properties(properties&& props) { props_ = props; }
+	void set_properties(properties&& props) { props_ = std::move(props); }
 };
 
 /** Shared pointer to a will options object. */
@@ -249,6 +270,9 @@ using will_options_ptr = will_options::ptr_t;
 
 /** Shared pointer to a const will options object. */
 using const_will_options_ptr = will_options::const_ptr_t;
+
+/** Unique pointer to a will options object. */
+using will_options_unique_ptr = will_options::unique_ptr_t;
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt

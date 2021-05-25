@@ -1,8 +1,10 @@
-// dummy_callback.h
+// mock_callback.h
+//
 // Dummy implementation of mqtt::callback for Unit Test.
 
 /*******************************************************************************
  * Copyright (c) 2017 Guilherme M. Ferreira <guilherme.maciel.ferreira@gmail.com>
+ * Copyright (c) 2020 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,45 +17,45 @@
  *
  * Contributors:
  *    Guilherme M. Ferreira - initial implementation
+ *    Frank Pagliughi - Renamed 'mock', and refactored for coding
+ *    conventions
  *******************************************************************************/
 
-#ifndef __mqtt_dummy_callback_h
-#define __mqtt_dummy_callback_h
+#ifndef __mqtt_mock_callback_h
+#define __mqtt_mock_callback_h
 
 #include "mqtt/callback.h"
 
 namespace mqtt {
-namespace test {
 
 /////////////////////////////////////////////////////////////////////////////
 
-class dummy_callback : public mqtt::callback
+class mock_callback : public mqtt::callback
 {
-public:
-	bool connection_lost_called { false };
-	bool message_arrived_called { false };
-	bool delivery_complete_called { false };
+	bool connectionLost_ { false };
+	bool messageArrived_ { false };
+	bool deliveryComplete_ { false };
 
 	void connection_lost(const std::string& cause) override {
-		connection_lost_called = true;
+		connectionLost_ = true;
 	}
 
 	void message_arrived(mqtt::const_message_ptr msg) override {
-		message_arrived_called = true;
+		messageArrived_ = true;
 	}
 
 	void delivery_complete(mqtt::delivery_token_ptr tok) override {
-		delivery_complete_called = true;
+		deliveryComplete_ = true;
 	}
 
+public:
+    bool connection_lost() const { return connectionLost_; }
+    bool message_arrived() const { return messageArrived_; }
+    bool delivery_complete() const { return deliveryComplete_; }
 };
-
-/////////////////////////////////////////////////////////////////////////////
-// end namespace test
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
 }
 
-#endif //  __mqtt_dummy_callback_h
+#endif  //  __mqtt_mock_callback_h

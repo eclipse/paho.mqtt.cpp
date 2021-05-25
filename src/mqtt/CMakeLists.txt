@@ -23,6 +23,7 @@ install(
         callback.h
         client.h
         connect_options.h
+        create_options.h
         delivery_token.h
         disconnect_options.h
         exception.h
@@ -30,12 +31,12 @@ install(
         iasync_client.h
         iclient_persistence.h
         message.h
-				properties.h
+        properties.h
         response_options.h
-				server_response.h
+        server_response.h
         ssl_options.h
         string_collection.h
-				subscribe_options.h
+        subscribe_options.h
         thread_queue.h
         token.h
         topic.h

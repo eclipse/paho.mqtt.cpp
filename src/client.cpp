@@ -23,14 +23,13 @@
 
 namespace mqtt {
 
-const std::chrono::minutes client::DFLT_TIMEOUT = std::chrono::minutes(5);
+const std::chrono::seconds client::DFLT_TIMEOUT = std::chrono::seconds(30);
 
 #if __cplusplus < 201703L
 	constexpr int client::DFLT_QOS;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-
 
 client::client(const string& serverURI, const string& clientId,
 			   iclient_persistence* persistence /*=nullptr*/)
@@ -47,7 +46,8 @@ client::client(const string& serverURI, const string& clientId,
 }
 
 client::client(const string& serverURI, const string& clientId,
-			   int maxBufferedMessages, iclient_persistence* persistence /*=nullptr*/)
+			   int maxBufferedMessages,
+			   iclient_persistence* persistence /*=nullptr*/)
 		: cli_(serverURI, clientId, maxBufferedMessages, persistence),
 			timeout_(DFLT_TIMEOUT), userCallback_(nullptr)
 {
@@ -60,6 +60,16 @@ client::client(const string& serverURI, const string& clientId,
 {
 }
 
+client::client(const string& serverURI, const string& clientId,
+			   const create_options& opts,
+			   iclient_persistence* persistence /*=nullptr*/)
+		: cli_(serverURI, clientId, opts, persistence),
+			timeout_(DFLT_TIMEOUT), userCallback_(nullptr)
+{
+}
+
+// --------------------------------------------------------------------------
+
 void client::set_callback(callback& cb)
 {
 	userCallback_ = &cb;
@@ -70,7 +80,8 @@ connect_response client::connect()
 {
 	cli_.start_consuming();
 	auto tok = cli_.connect();
-	tok->wait_for(timeout_);
+	if (!tok->wait_for(timeout_))
+		throw timeout_error();
 	return tok->get_connect_response();
 }
 
@@ -78,68 +89,94 @@ connect_response client::connect(connect_options opts)
 {
 	cli_.start_consuming();
 	auto tok = cli_.connect(std::move(opts));
-	tok->wait_for(timeout_);
+	if (!tok->wait_for(timeout_))
+		throw timeout_error();
 	return tok->get_connect_response();
 }
 
 connect_response client::reconnect()
 {
 	auto tok = cli_.reconnect();
-	tok->wait_for(timeout_);
+	if (!tok->wait_for(timeout_))
+		throw timeout_error();
 	return tok->get_connect_response();
 }
 
-subscribe_response client::subscribe(const string& topicFilter)
+subscribe_response client::subscribe(const string& topicFilter,
+									 const subscribe_options& opts /*=subscribe_options()*/,
+									 const properties& props /*=properties()*/)
 {
-	auto tok = cli_.subscribe(topicFilter, DFLT_QOS);
-	tok->wait_for(timeout_);
+	auto tok = cli_.subscribe(topicFilter, DFLT_QOS, opts, props);
+	if (!tok->wait_for(timeout_))
+		throw timeout_error();
 	return tok->get_subscribe_response();
 }
 
-subscribe_response client::subscribe(const string& topicFilter, int qos)
+subscribe_response client::subscribe(const string& topicFilter, int qos,
+									 const subscribe_options& opts /*=subscribe_options()*/,
+									 const properties& props /*=properties()*/)
 {
-	auto tok = cli_.subscribe(topicFilter, qos);
-	tok->wait_for(timeout_);
+	auto tok = cli_.subscribe(topicFilter, qos, opts, props);
+	if (!tok->wait_for(timeout_))
+		throw timeout_error();
 	return tok->get_subscribe_response();
 }
 
-subscribe_response client::subscribe(const string_collection& topicFilters)
+subscribe_response client::subscribe(const string_collection& topicFilters,
+									 const std::vector<subscribe_options>& opts /*=std::vector<subscribe_options>()*/,
+									 const properties& props /*=properties()*/)
 {
 	qos_collection qos;
 	for (size_t i=0; i<topicFilters.size(); ++i)
 		qos.push_back(DFLT_QOS);
 
-	auto tok = cli_.subscribe(ptr(topicFilters), qos);
-	tok->wait_for(timeout_);
+	auto tok = cli_.subscribe(ptr(topicFilters), qos, opts, props);
+	if (!tok->wait_for(timeout_))
+		throw timeout_error();
 	return tok->get_subscribe_response();
 }
 
 subscribe_response client::subscribe(const string_collection& topicFilters,
-									 const qos_collection& qos)
+									 const qos_collection& qos,
+									 const std::vector<subscribe_options>& opts /*=std::vector<subscribe_options>()*/,
+									 const properties& props /*=properties()*/)
 {
-	auto tok = cli_.subscribe(ptr(topicFilters), qos);
-	tok->wait_for(timeout_);
+	auto tok = cli_.subscribe(ptr(topicFilters), qos, opts, props);
+	if (!tok->wait_for(timeout_))
+		throw timeout_error();
 	return tok->get_subscribe_response();
 }
 
-unsubscribe_response client::unsubscribe(const string& topicFilter)
+unsubscribe_response client::unsubscribe(const string& topicFilter,
+										 const properties& props /*=properties()*/)
 {
-	auto tok = cli_.unsubscribe(topicFilter);
-	tok->wait_for(timeout_);
+	auto tok = cli_.unsubscribe(topicFilter, props);
+	if (!tok->wait_for(timeout_))
+		throw timeout_error();
 	return tok->get_unsubscribe_response();
 }
 
-unsubscribe_response client::unsubscribe(const string_collection& topicFilters)
+unsubscribe_response client::unsubscribe(const string_collection& topicFilters,
+										 const properties& props /*=properties()*/)
 {
-	auto tok = cli_.unsubscribe(ptr(topicFilters));
-	tok->wait_for(timeout_);
+	auto tok = cli_.unsubscribe(ptr(topicFilters), props);
+	if (!tok->wait_for(timeout_))
+		throw timeout_error();
 	return tok->get_unsubscribe_response();
 }
 
 void client::disconnect()
 {
-	cli_.disconnect()->wait_for(timeout_);
 	cli_.stop_consuming();
+	if (!cli_.disconnect()->wait_for(timeout_))
+		throw timeout_error();
+}
+
+void client::disconnect(int timeoutMS)
+{
+	cli_.stop_consuming();
+	if (!cli_.disconnect(timeoutMS)->wait_for(timeout_))
+		throw timeout_error();
 }
 
 /////////////////////////////////////////////////////////////////////////////

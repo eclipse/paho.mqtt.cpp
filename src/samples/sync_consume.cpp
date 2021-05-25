@@ -7,15 +7,16 @@
 //
 // The sample demonstrates:
 //  - Connecting to an MQTT server/broker
+//  - Using a persistent (non-clean) session
 //  - Subscribing to multiple topics
 //  - Receiving messages through the queueing consumer API
 //  - Recieving and acting upon commands via MQTT topics
-//  - Manual reconnects
-//  - Using a persistent (non-clean) session
+//  - Auto reconnect
+//  - Updating auto-reconnect data
 //
 
 /*******************************************************************************
- * Copyright (c) 2013-2017 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2020 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -43,36 +44,39 @@ using namespace std;
 using namespace std::chrono;
 
 const string SERVER_ADDRESS	{ "tcp://localhost:1883" };
-const string CLIENT_ID		{ "sync_consume_cpp" };
-
-// --------------------------------------------------------------------------
-// Simple function to manually reconect a client.
-
-bool try_reconnect(mqtt::client& cli)
-{
-	constexpr int N_ATTEMPT = 30;
-
-	for (int i=0; i<N_ATTEMPT && !cli.is_connected(); ++i) {
-		try {
-			cli.reconnect();
-			return true;
-		}
-		catch (const mqtt::exception&) {
-			this_thread::sleep_for(seconds(1));
-		}
-	}
-	return false;
-}
+const string CLIENT_ID		{ "paho_cpp_sync_consume" };
 
 /////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[])
 {
-	mqtt::connect_options connOpts;
-	connOpts.set_keep_alive_interval(20);
-	connOpts.set_clean_session(false);
-
 	mqtt::client cli(SERVER_ADDRESS, CLIENT_ID);
+
+	auto connOpts = mqtt::connect_options_builder()
+		.user_name("user")
+		.password("passwd")
+		.keep_alive_interval(seconds(30))
+		.automatic_reconnect(seconds(2), seconds(30))
+		.clean_session(false)
+		.finalize();
+
+	// You can install a callback to change some connection data
+	// on auto reconnect attempts. To make a change, update the
+	// `connect_data` and return 'true'.
+	cli.set_update_connection_handler(
+		[](mqtt::connect_data& connData) {
+			string newUserName { "newuser" };
+			if (connData.get_user_name() == newUserName)
+				return false;
+
+			cout << "Previous user: '" << connData.get_user_name()
+				<< "'" << endl;
+			connData.set_user_name(newUserName);
+			cout << "New user name: '" << connData.get_user_name()
+				<< "'" << endl;
+			return true;
+		}
+	);
 
 	const vector<string> TOPICS { "data/#", "command" };
 	const vector<int> QOS { 0, 1 };
@@ -96,30 +100,22 @@ int main(int argc, char* argv[])
 		while (true) {
 			auto msg = cli.consume_message();
 
-			if (!msg) {
-				if (!cli.is_connected()) {
-					cout << "Lost connection. Attempting reconnect" << endl;
-					if (try_reconnect(cli)) {
-						cli.subscribe(TOPICS, QOS);
-						cout << "Reconnected" << endl;
-						continue;
-					}
-					else {
-						cout << "Reconnect failed." << endl;
-					}
+			if (msg) {
+				if (msg->get_topic() == "command" &&
+						msg->to_string() == "exit") {
+					cout << "Exit command received" << endl;
+					break;
 				}
-				else {
-					cout << "An error occurred retrieving messages." << endl;
-				}
-				break;
-			}
-			if (msg->get_topic() == "command" &&
-					msg->to_string() == "exit") {
-				cout << "Exit command received" << endl;
-				break;
-			}
 
-			cout << msg->get_topic() << ": " << msg->to_string() << endl;
+				cout << msg->get_topic() << ": " << msg->to_string() << endl;
+			}
+			else if (!cli.is_connected()) {
+				cout << "Lost connection" << endl;
+				while (!cli.is_connected()) {
+					this_thread::sleep_for(milliseconds(250));
+				}
+				cout << "Re-established connection" << endl;
+			}
 		}
 
 		// Disconnect

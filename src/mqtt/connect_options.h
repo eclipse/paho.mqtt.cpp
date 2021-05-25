@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2020 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -33,6 +33,7 @@
 #include "mqtt/will_options.h"
 #include "mqtt/ssl_options.h"
 #include <vector>
+#include <map>
 #include <chrono>
 
 namespace mqtt {
@@ -46,7 +47,7 @@ namespace mqtt {
 class connect_options
 {
 	/** The default C struct */
-	static const MQTTAsync_connectOptions DFLT_C_STRUCT ;
+	static const MQTTAsync_connectOptions DFLT_C_STRUCT;
 
 	/** The underlying C connection options */
 	MQTTAsync_connectOptions opts_;
@@ -72,6 +73,15 @@ class connect_options
 	/** The connect properties */
 	properties props_;
 
+	/** HTTP Headers */
+	name_value_collection httpHeaders_;
+
+	/** HTTP proxy for websockets */
+	string httpProxy_;
+
+	/** Secure HTTPS proxy for websockets */
+	string httpsProxy_;
+
 	/** The client has special access */
 	friend class async_client;
 	friend class connect_options_test;
@@ -90,6 +100,13 @@ class connect_options
 	const char* c_str(const string_ref& sr) {
 		return sr.empty() ? nullptr : sr.c_str();
 	}
+	const char* c_str(const string& s) {
+		return s.empty() ? nullptr : s.c_str();
+	}
+	/**
+	 * Updates the underlying C structure to match our strings.
+	 */
+	void update_c_struct();
 
 public:
 	/** Smart/shared pointer to an object of this class. */
@@ -127,6 +144,12 @@ public:
 	 * @param opt Another object to move into this new one.
 	 */
 	connect_options& operator=(connect_options&& opt);
+	/**
+	 * Expose the underlying C struct for the unit tests.
+	 */
+	 #if defined(UNIT_TESTS)
+		const MQTTAsync_connectOptions& c_struct() const { return opts_; }
+	#endif
 	/**
 	 * Gets the "keep alive" interval.
 	 * @return The keep alive interval in seconds.
@@ -193,10 +216,18 @@ public:
 	/**
 	 * Sets the SSL for the connection.
 	 * These will only have an effect if compiled against the SSL version of
-	 * the Paho C library.
+	 * the Paho C library, and using a secure connection, "ssl://" or
+	 * "wss://".
 	 * @param ssl The SSL options.
 	 */
 	void set_ssl(const ssl_options& ssl);
+	/**
+	 * Sets the SSL for the connection.
+	 * These will only have an effect if compiled against the SSL version of
+	 * the Paho C library, and using a secure connection, "ssl://" or
+	 * "wss://".
+	 * @param ssl The SSL options.
+	 */
 	void set_ssl(ssl_options&& ssl);
 	/**
 	 * Returns whether the server should remember state for the client
@@ -252,8 +283,10 @@ public:
 
 	/**
 	 * Sets whether the server should remember state for the client across
-	 * reconnects.
-	 * @param cleanSession
+	 * reconnects. (MQTT v3.x only)
+	 * @param cleanSession @em true if the server should remember state for
+	 *  				   the client across reconnects, @em false
+	 *  				   othherwise.
 	 */
 	void set_clean_session(bool cleanSession) {
 		opts_.cleansession = to_int(cleanSession);
@@ -302,11 +335,12 @@ public:
 	}
 	/**
 	 * Sets the user name to use for the connection.
-	 * @param userName
+	 * @param userName The user name for connecting to the MQTT broker.
 	 */
 	void set_user_name(string_ref userName);
 	/**
 	 * Sets the password to use for the connection.
+	 * @param password The password for connecting to the MQTT broker.
 	 */
 	void set_password(binary_ref password);
 	/**
@@ -320,6 +354,10 @@ public:
 	 * @param will The LWT options.
 	 */
 	void set_will(const will_options& will);
+	/**
+	 * Sets the "Last Will and Testament" (LWT) for the connection.
+	 * @param will The LWT options.
+	 */
 	void set_will(will_options&& will);
 	/**
 	 * Sets the "Last Will and Testament" (LWT) as a message
@@ -427,9 +465,54 @@ public:
 	 * @param props The properties to move into the connect object.
 	 */
 	void set_properties(properties&& props) {
-		props_ = props;
+		props_ = std::move(props);
 		opts_.connectProperties = const_cast<MQTTProperties*>(&props_.c_struct());
 	}
+	/**
+	 * Gets the HTTP headers
+	 * @return A const reference to the HTTP headers name/value collection.
+	 */
+	const name_value_collection& get_http_headers() const {
+		return httpHeaders_;
+	}
+	/**
+	 * Sets the HTTP headers for the connection.
+	 * @param httpHeaders The header nam/value collection.
+	 */
+	void set_http_headers(const name_value_collection& httpHeaders) {
+		httpHeaders_ = httpHeaders;
+		opts_.httpHeaders = httpHeaders_.empty() ? nullptr : httpHeaders_.c_arr();
+	}
+	/**
+	 * Sets the HTTP headers for the connection.
+	 * @param httpHeaders The header nam/value collection.
+	 */
+	void set_http_headers(name_value_collection&& httpHeaders) {
+		httpHeaders_ = std::move(httpHeaders);
+		opts_.httpHeaders = httpHeaders_.empty() ? nullptr : httpHeaders_.c_arr();
+	}
+	/**
+	 * Gets the HTTP proxy setting.
+	 * @return The HTTP proxy setting. An empty string means no proxy.
+	 */
+	string get_http_proxy() const { return httpProxy_; }
+	/**
+	 * Sets the HTTP proxy setting.
+	 * @param httpProxy The HTTP proxy setting. An empty string means no
+	 *  			  proxy.
+	 */
+	void set_http_proxy(const string& httpProxy);
+	/**
+	 * Gets the secure HTTPS proxy setting.
+	 * @return The HTTPS proxy setting. An empty string means no proxy.
+	 */
+	string get_https_proxy() const { return httpsProxy_; }
+	/**
+	 * Sets the secure HTTPS proxy setting.
+	 * @param httpsProxy The HTTPS proxy setting. An empty string means no
+	 *  			 proxy.
+	 */
+	void set_https_proxy(const string& httpsProxy);
 	/**
 	 * Gets a string representation of the object.
 	 * @return A string representation of the object.
@@ -439,6 +522,331 @@ public:
 
 /** Smart/shared pointer to a connection options object. */
 using connect_options_ptr = connect_options::ptr_t;
+
+/////////////////////////////////////////////////////////////////////////////
+
+/**
+ * The connect options that can be updated before an automatic reconnect.
+ */
+class connect_data
+{
+	/** The default C struct */
+	static const MQTTAsync_connectData DFLT_C_STRUCT;
+
+	/** The underlying C connect data  */
+	MQTTAsync_connectData data_;
+
+	/** The user name to use for the connection. */
+	string_ref userName_;
+
+	/** The password to use for the connection. (Optional) */
+	binary_ref password_;
+
+	/** The client has special access */
+	friend class async_client;
+
+	/**
+	 * Updates the underlying C structure to match our strings.
+	 */
+	void update_c_struct();
+
+	/**
+	 * Create data from a C struct
+	 * This is a deep copy of the data from the C struct.
+	 * @param cdata The C connect data.
+	 */
+	connect_data(const MQTTAsync_connectData& cdata);
+
+public:
+	/**
+	 * Creates an empty set of connection data.
+	 */
+	connect_data();
+	/**
+	 * Creates connection data with a user name, but no password.
+	 * @param userName The user name fopr reconnecting to the MQTT broker.
+	 */
+	explicit connect_data(string_ref userName);
+	/**
+	 * Creates connection data with a user name and password.
+	 * @param userName The user name fopr reconnecting to the MQTT broker.
+	 * @param password The password for connecting to the MQTT broker.
+	 */
+	connect_data(string_ref userName, binary_ref password);
+	/**
+	 * Copy constructor
+	 * @param other Another data struct to copy into this one.
+	 */
+	connect_data(const connect_data& other);
+	/**
+	 * Copy the connection data.
+	 * @param rhs Another data struct to copy into this one.
+	 * @return A reference to this data
+	 */
+	connect_data& operator=(const connect_data& rhs);
+	/**
+	 * Gets the user name to use for the connection.
+	 * @return The user name to use for the connection.
+	 */
+	string get_user_name() const { return userName_ ? userName_.to_string() : string(); }
+	/**
+	 * Gets the password to use for the connection.
+	 * @return The password to use for the connection.
+	 */
+	binary_ref get_password() const { return password_; }
+	/**
+	 * Sets the user name to use for the connection.
+	 * @param userName The user name for connecting to the MQTT broker.
+	 */
+	void set_user_name(string_ref userName);
+	/**
+	 * Sets the password to use for the connection.
+	 * @param password The password for connecting to the MQTT broker.
+	 */
+	void set_password(binary_ref password);
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Class to build connect options.
+ */
+class connect_options_builder
+{
+	connect_options opts_;
+
+public:
+	/** This class */
+	using self = connect_options_builder;
+	/**
+	 * Default constructor.
+	 */
+	connect_options_builder() {}
+	/**
+	 * Sets whether the server should remember state for the client across
+	 * reconnects. (MQTT v3.x only)
+	 * @param on @em true if the server should remember state for the client
+	 *  		 across reconnects, @em false othherwise.
+	 */
+	auto clean_session(bool on=true) -> self& {
+		opts_.set_clean_session(on);
+		return *this;
+	}
+	/**
+	 * Sets the "keep alive" interval with a chrono duration.
+	 * This is the maximum time that should pass without communications
+	 * between client and server. If no massages pass in this time, the
+	 * client will ping the broker.
+	 * @param interval The keep alive interval.
+	 */
+	template <class Rep, class Period>
+	auto keep_alive_interval(const std::chrono::duration<Rep, Period>& interval) -> self& {
+		opts_.set_keep_alive_interval(interval);
+		return *this;
+	}
+	/**
+	 * Sets the connect timeout with a chrono duration.
+	 * This is the maximum time that the underlying library will wait for a
+	 * connection before failing.
+	 * @param timeout The connect timeout in seconds.
+	 */
+	template <class Rep, class Period>
+	auto connect_timeout(const std::chrono::duration<Rep, Period>& timeout) -> self& {
+		opts_.set_connect_timeout(timeout);
+		return *this;
+	}
+	/**
+	 * Sets the user name to use for the connection.
+	 * @param userName
+	 */
+	auto user_name(string_ref userName) -> self& {
+		opts_.set_user_name(userName);
+		return *this;
+	}
+	/**
+	 * Sets the password to use for the connection.
+	 */
+	auto password(binary_ref password) -> self& {
+		opts_.set_password(password);
+		return *this;
+	}
+	/**
+	 * Sets the maximum number of messages that can be in-flight
+	 * simultaneously.
+	 * @param n The maximum number of inflight messages.
+	 */
+	auto max_inflight(int n) -> self& {
+		opts_.set_max_inflight(n);
+		return *this;
+	}
+	/**
+	 * Sets the "Last Will and Testament" (LWT) for the connection.
+	 * @param will The LWT options.
+	 */
+	auto will(const will_options& will) -> self& {
+		opts_.set_will(will);
+		return *this;
+	}
+	/**
+	 * Sets the "Last Will and Testament" (LWT) for the connection.
+	 * @param will The LWT options.
+	 */
+	auto will(will_options&& will) -> self& {
+		opts_.set_will(std::move(will));
+		return *this;
+	}
+	/**
+	 * Sets the "Last Will and Testament" (LWT) as a message
+	 * @param msg The LWT message
+	 */
+	auto will(const message& msg) -> self& {
+		opts_.set_will_message(msg);
+		return *this;
+	}
+	/**
+	 * Sets the SSL options for the connection.
+	 * These will only have an effect if compiled against the SSL version of
+	 * the Paho C library, and connecting with a secure URI.
+	 * @param ssl The SSL options.
+	 */
+	auto ssl(const ssl_options& ssl) -> self& {
+		opts_.set_ssl(ssl);
+		return *this;
+	}
+	/**
+	 * Sets the SSL options for the connection.
+	 * These will only have an effect if compiled against the SSL version of
+	 * the Paho C library, and connecting with a secure URI.
+	 * @param ssl The SSL options.
+	 */
+	auto ssl(ssl_options&& ssl) -> self& {
+		opts_.set_ssl(std::move(ssl));
+		return *this;
+	}
+	/**
+	 * Sets the callback context to a delivery token.
+	 * @param tok The delivery token to be used as the callback context.
+	 */
+	auto token(const token_ptr& tok) -> self& {
+		opts_.set_token(tok);
+		return *this;
+	}
+	/**
+	 * Sets the list of servers to which the client will connect.
+	 * @param serverURIs A pointer to a collection of server URI's. Each
+	 *  				 entry should be of the form @em
+	 *  				 protocol://host:port where @em protocol must be
+	 *  				 @em tcp or @em ssl. For @em host, you can specify
+	 *  				 either an IP address or a domain name.
+	 */
+	auto servers(const_string_collection_ptr serverURIs) -> self& {
+		opts_.set_servers(serverURIs);
+		return *this;
+	}
+	/**
+	  * Sets the version of MQTT to be used on the connect.
+	  *
+	  * This will also set other connect options to legal values dependent on
+	  * the selected version.
+	  *
+	  * @param ver The MQTT version to use for the connection:
+	  *   @li MQTTVERSION_DEFAULT (0) = default: start with 3.1.1, and if
+	  *       that fails, fall back to 3.1
+	  *   @li MQTTVERSION_3_1 (3) = only try version 3.1
+	  *   @li MQTTVERSION_3_1_1 (4) = only try version 3.1.1
+	  *   @li MQTTVERSION_5 (5) = only try version 5
+	  */
+	auto mqtt_version(int ver) -> self& {
+		opts_.set_mqtt_version(ver);
+		return *this;
+	}
+	/**
+	 * Enable or disable automatic reconnects.
+	 * The retry intervals are not affected.
+	 * @param on Whether to turn reconnects on or off
+	 */
+	auto automatic_reconnect(bool on=true) -> self& {
+		opts_.set_automatic_reconnect(on);
+		return *this;
+	}
+	/**
+	 * Enable or disable automatic reconnects.
+	 * @param minRetryInterval Minimum retry interval. Doubled on each
+	 *  					   failed retry.
+	 * @param maxRetryInterval Maximum retry interval. The doubling stops
+	 *  					   here on failed retries.
+	 */
+	template <class Rep1, class Period1, class Rep2, class Period2>
+	auto automatic_reconnect(const std::chrono::duration<Rep1, Period1>& minRetryInterval,
+							 const std::chrono::duration<Rep2, Period2>& maxRetryInterval) -> self& {
+		opts_.set_automatic_reconnect(minRetryInterval, maxRetryInterval);
+		return *this;
+	}
+	/**
+	 * Sets the 'clean start' flag for the connection. (MQTT v5 only)
+	 * @param on @em true to set the 'clean start' flag for the connect,
+	 *  		 @em false otherwise.
+	 */
+	auto clean_start(bool on=true) -> self& {
+		opts_.set_clean_start(on);
+		return *this;
+	}
+	/**
+	 * Sets the properties for the connect message.
+	 * @param props The properties for the connect message.
+	 */
+	auto properties(const mqtt::properties& props) -> self& {
+		opts_.set_properties(props);
+		return *this;
+	}
+	/**
+	 * Sets the properties for the connect message.
+	 * @param props The properties for the connect message.
+	 */
+	auto properties(mqtt::properties&& props) -> self& {
+		opts_.set_properties(std::move(props));
+		return *this;
+	}
+	/**
+	 * Sets the HTTP headers for the connection.
+	 * @param headers The header nam/value collection.
+	 */
+	auto http_headers(const name_value_collection& headers) -> self& {
+		opts_.set_http_headers(headers);
+		return *this;
+	}
+	/**
+	 * Sets the HTTP headers for the connection.
+	 * @param headers The header nam/value collection.
+	 */
+	auto http_headers(name_value_collection&& headers) -> self& {
+		opts_.set_http_headers(std::move(headers));
+		return *this;
+	}
+	/**
+	 * Sets the HTTP proxy setting.
+	 * @param httpProxy The HTTP proxy setting. An empty string means no
+	 *  			  proxy.
+	 */
+	auto http_proxy(const string& httpProxy) -> self& {
+		opts_.set_http_proxy(httpProxy);
+		return *this;
+	}
+	/**
+	 * Sets the secure HTTPS proxy setting.
+	 * @param httpsProxy The HTTPS proxy setting. An empty string means no
+	 *  			 proxy.
+	 */
+	auto https_proxy(const string& httpsProxy) -> self& {
+		opts_.set_https_proxy(httpsProxy);
+		return *this;
+	}
+	/**
+	 * Finish building the options and return them.
+	 * @return The option struct as built.
+	 */
+	connect_options finalize() { return opts_; }
+};
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt

@@ -16,7 +16,6 @@ if [ "$TRAVIS_OS_NAME" == "linux" ]; then
 
   # Run the unit tests
   ./build/test/unit/unit_tests  # --success
-  ./build/test/cppunit/paho-mqttpp-test 
 
   #ctest -VV --timeout 600
   #cpack --verbose
@@ -27,6 +26,6 @@ if [ "$TRAVIS_OS_NAME" == "linux" ]; then
 
   # Run the unit tests
   ./build/test/unit/unit_tests  # --success
-  ./build/test/cppunit/paho-mqttpp-test 
 
 fi
+

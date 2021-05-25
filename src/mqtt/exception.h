@@ -26,6 +26,7 @@
 
 #include "MQTTAsync.h"
 #include "mqtt/types.h"
+#include <iostream>
 #include <vector>
 #include <memory>
 #include <exception>
@@ -33,6 +34,7 @@
 
 namespace mqtt {
 
+/** Bring std::bad_cast into the mqtt namespace */
 using bad_cast = std::bad_cast;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -106,6 +108,7 @@ public:
 	/**
 	 * Gets a detailed error message for an error code.
 	 * @param rc The error code from the C lib
+	 * @param reasonCode The MQTT v5 reason code
 	 * @param msg An optional additional message. If none is provided, the
 	 *  		  error_str message is used.
 	 * @return A string error message that includes the error code and an
@@ -154,13 +157,46 @@ public:
 	string to_string() const { return string(what()); }
 };
 
+/**
+ * Stream inserter writes a fairly verbose message
+ * @param os The stream.
+ * @param exc The exception to write.
+ * @return A reference to the stream.
+ */
+inline std::ostream& operator<<(std::ostream& os, const exception& exc) {
+	os << exc.what();
+	return os;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
-class missing_response : public std::runtime_error
+/**
+ * Exception thrown when an expected server response is missing.
+ */
+class missing_response : public exception
 {
 public:
+	/**
+	 * Create a missing response error.
+	 * @param rsp A string for the type of response expected.
+	 */
 	missing_response(const string& rsp)
-		: std::runtime_error("Missing "+rsp+" response") {}
+		: exception(MQTTASYNC_FAILURE, "Missing "+rsp+" response") {}
+};
+
+
+/////////////////////////////////////////////////////////////////////////////
+
+/**
+ * A timeout exception, particularly from the synchronous client.
+ */
+class timeout_error : public exception
+{
+public:
+	/**
+	 * Create a timeout error.
+	 */
+	timeout_error() : exception(MQTTASYNC_FAILURE, "Timeout") {}
 };
 
 /////////////////////////////////////////////////////////////////////////////
