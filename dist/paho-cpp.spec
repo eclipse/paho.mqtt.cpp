@@ -24,14 +24,16 @@ Summary:            MQTT CPP Client development kit
 Requires:           %{name}%{?_isa} = %{version}-%{release}
 
 %description devel
-Development files and samples for the the Paho MQTT CPP Client.
+Development files for the the Paho MQTT CPP Client.
 
 
 %package devel-docs
 Summary:            MQTT CPP Client development kit documentation
+BuildArch:          noarch
 
 %description devel-docs
-Development documentation files for the the Paho MQTT CPP Client.
+Development documentation and code samples for the the Paho MQTT CPP Client.
+
 
 %prep
 %autosetup -n paho.mqtt.cpp-%{version}
@@ -52,7 +54,7 @@ mv %{buildroot}%{_docdir}/html %{buildroot}%{_docdir}/%{name}/html
 
 %files
 %license edl-v10 epl-v10
-%{_libdir}/libpaho-mqttpp3.so.*
+%{_libdir}/libpaho-mqttpp3.so.1*
 
 %files devel
 %license edl-v10 epl-v10
@@ -61,11 +63,12 @@ mv %{buildroot}%{_docdir}/html %{buildroot}%{_docdir}/%{name}/html
 %{_libdir}/cmake/PahoMqttCpp
 
 %files devel-docs
+%license edl-v10 epl-v10
 %doc CHANGELOG.md CONTRIBUTING.md README.md
 %doc %{_docdir}/%{name}
 
 %changelog
-* Fri Feb 26 2021 Joshua Clayton <joshua.clayton@3deolidar.com> - 1.2.0
+* Thu Jun 03 2021 Joshua Clayton <joshua.clayton@3deolidar.com> - 1.2.0
 - Update for version 1.2.0
 - Fix many details for inclusion in fedora
 
