@@ -35,6 +35,7 @@ Development documentation files for the the Paho MQTT CPP Client.
 
 %prep
 %autosetup -n paho.mqtt.cpp-%{version}
+sed -i'' 's|lib/cmake|%{_lib}/cmake|' cmake/CMakeLists.txt
 
 %build
 %cmake -DPAHO_WITH_SSL=TRUE -DPAHO_BUILD_DOCUMENTATION=TRUE
@@ -48,8 +49,6 @@ mkdir -p %{buildroot}%{_docdir}/%{name}/samples/
 cp -a src/samples/*.cpp %{buildroot}%{_docdir}/%{name}/samples/
 # Put paho html docs in a paho subdirectory
 mv %{buildroot}%{_docdir}/html %{buildroot}%{_docdir}/%{name}/html
-mkdir -p %{buildroot}%{_libdir}/cmake
-mv %{buildroot}/usr/lib/cmake/PahoMqttCpp %{buildroot}%{_libdir}/cmake
 
 %files
 %license edl-v10 epl-v10
