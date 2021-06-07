@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
-<package format="2">
+<package format="3">
   <name>paho-mqtt-cpp</name>
   <version>1.2.0</version>
   <description>Eclipse Paho MQTT C++ Client Library</description>
@@ -11,7 +11,8 @@
 
   <buildtool_depend>cmake</buildtool_depend>
   <depend>paho-mqtt-c</depend>
-  <exec_depend>catkin</exec_depend>
+  <exec_depend condition="$ROS_VERSION == 1">catkin</exec_depend>
+  <exec_depend condition="$ROS_VERSION == 2">ament_cmake</exec_depend>
 
   <export>
     <build_type>cmake</build_type>
