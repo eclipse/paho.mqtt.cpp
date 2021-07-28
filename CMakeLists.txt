@@ -11,12 +11,12 @@
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # and Eclipse Distribution License v1.0 which accompany this distribution.
-# 
+#
 # The Eclipse Public License is available at
 #   http://www.eclipse.org/legal/epl-v10.html
 # and the Eclipse Distribution License is available at
 #   http://www.eclipse.org/org/documents/edl-v10.php.
-# 
+#
 # Contributors:
 #   Guilherme Maciel Ferreira - initial version
 #   Frank Pagliughi
@@ -28,7 +28,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 ## project name
-project("paho-mqtt-cpp" 
+project("paho-mqtt-cpp"
     VERSION "1.2.0"
     LANGUAGES CXX
 )
@@ -52,9 +52,10 @@ option(PAHO_BUILD_DOCUMENTATION "Create and install the API documentation (requi
 
 ## --- C++11 build flags ---
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD "11" CACHE STRING "Required C++ standard")
+if(CMAKE_CXX_STANDARD LESS 11)
+  message(FATAL_ERROR "Incorrect C++ standard was set. ${PROJECT_NAME} requires C++11 minimum")
+endif()
 
 # Generate position-independent code (-fPIC on UNIX)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -118,5 +119,3 @@ endif()
 
 include(CPack)
 add_subdirectory(cmake)
-
-
