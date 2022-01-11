@@ -23,7 +23,9 @@
 #     Frank Pagliughi - made the shared library optional
 #*******************************************************************************/
 
-find_package(PahoMqttC REQUIRED)
+if (NOT TARGET PahoMqttC::PahoMqttC)
+    find_package(PahoMqttC REQUIRED)
+endif()
 
 # --- The headers ---
 
