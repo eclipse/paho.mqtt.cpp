@@ -49,6 +49,7 @@ endif()
 option(PAHO_BUILD_SAMPLES "Build sample programs" FALSE)
 option(PAHO_BUILD_TESTS "Build tests" FALSE)
 option(PAHO_BUILD_DOCUMENTATION "Create and install the API documentation (requires Doxygen)" FALSE)
+option(PAHO_WITH_MQTT_C "Build paho.mqtt.c from the internal GIT submodule." FALSE)
 
 ## --- C++11 build flags ---
 
