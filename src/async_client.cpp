@@ -442,9 +442,11 @@ token_ptr async_client::connect()
 
 token_ptr async_client::connect(connect_options opts)
 {
+	// save local version to secure the connect_options pointers
+	connOpts_ = opts;
 	// TODO: We really should get (or update) this value from the response
 	//  	(when the server confirms the requested version)
-	mqttVersion_ = opts.opts_.MQTTVersion;
+	mqttVersion_ = connOpts_.opts_.MQTTVersion;
 
 	// TODO: If connTok_ is non-null, there could be a pending connect
 	// which might complete after creating/assigning a new one. If that
@@ -455,9 +457,9 @@ token_ptr async_client::connect(connect_options opts)
 	connTok_ = token::create(token::Type::CONNECT, *this);
 	add_token(connTok_);
 
-	opts.set_token(connTok_);
+	connOpts_.set_token(connTok_);
 
-	int rc = MQTTAsync_connect(cli_, &opts.opts_);
+	int rc = MQTTAsync_connect(cli_, &connOpts_.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(connTok_);
@@ -471,17 +473,19 @@ token_ptr async_client::connect(connect_options opts)
 token_ptr async_client::connect(connect_options opts, void* userContext,
 										iaction_listener& cb)
 {
+	// save local version to secure the connect_options pointers
+	connOpts_ = opts;
 	// TODO: We really should get this value from the response (when
 	// 		the server confirms the requested version)
-	mqttVersion_ = opts.opts_.MQTTVersion;
+	mqttVersion_ = connOpts_.opts_.MQTTVersion;
 
 	auto tmpTok = connTok_;
 	connTok_ = token::create(token::Type::CONNECT, *this, userContext, cb);
 	add_token(connTok_);
 
-	opts.set_token(connTok_);
+	connOpts_.set_token(connTok_);
 
-	int rc = MQTTAsync_connect(cli_, &opts.opts_);
+	int rc = MQTTAsync_connect(cli_, &connOpts_.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(connTok_);

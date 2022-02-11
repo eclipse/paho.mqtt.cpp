@@ -129,6 +129,8 @@ private:
 	std::list<delivery_token_ptr> pendingDeliveryTokens_;
 	/** A queue of messages for consumer API */
 	consumer_queue_type que_;
+	/** connect options saved */
+	connect_options connOpts_;
 
 	/** Callbacks from the C library */
 	static void on_connected(void* context, char* cause);
