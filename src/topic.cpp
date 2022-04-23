@@ -1,7 +1,7 @@
 // topic.cpp
 
 /*******************************************************************************
- * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2022 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -22,6 +22,33 @@
 namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
+//  							topic
+/////////////////////////////////////////////////////////////////////////////
+
+// This is just a string split around '/'
+std::vector<string> topic::split(const string& s)
+{
+	auto delim = '/';
+	std::vector<std::string> v;
+
+	if (s.empty())
+		return v;
+
+	using size_type = string::size_type;
+	const size_type npos = string::npos;
+
+	size_type startPos = 0, pos;
+
+	do {
+		pos = s.find(delim, startPos);
+		size_type n = (pos == npos) ? pos : (pos - startPos);
+		v.push_back(s.substr(startPos, n));
+		startPos = pos + 1;
+	}
+	while (pos != npos);
+
+	return v;
+}
 
 delivery_token_ptr topic::publish(const void* payload, size_t n)
 {
@@ -47,6 +74,62 @@ delivery_token_ptr topic::publish(binary_ref payload, int qos, bool retained)
 token_ptr topic::subscribe(const subscribe_options& opts)
 {
 	return cli_.subscribe(name_, qos_, opts);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//  						topic_filter
+/////////////////////////////////////////////////////////////////////////////
+
+topic_filter::topic_filter(const string& filter)
+	: fields_(topic::split(filter))
+{
+}
+
+bool topic_filter::has_wildcards(const string& filter)
+{
+	auto n = filter.size();
+
+	if (n == 0)
+		return false;
+
+	// A '#' should only be the last char, if present
+	if (filter[n-1] == '#')
+		return true;
+
+	return filter.find('+') != string::npos;
+}
+
+bool topic_filter::has_wildcards() const {
+	for (auto& f : fields_) {
+		if (f == "+" || f == "#")
+			return true;
+	}
+	return false;
+}
+
+// See if the topic matches this filter.
+// OPTIMIZE: If the filter string doesn't contain any wildcards, then a
+// match is a simple string comparison. We wouldn't need to split the filter
+// or topic into fields.
+bool topic_filter::matches(const string& topic) const
+{
+	auto n = fields_.size();
+	auto topic_fields = topic::split(topic);
+
+	if (n > topic_fields.size()) {
+		return false;
+	}
+
+	for (size_t i=0; i<n; ++i) {
+		if (fields_[i] == "#") {
+			break;
+		}
+		if (fields_[i] != "+" && fields_[i] != topic_fields[i]) {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////

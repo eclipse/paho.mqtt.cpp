@@ -91,6 +91,13 @@ public:
 	 */
 	const string& get_name() const { return name_; }
 	/**
+	 * Splits a topic string into individual fields.
+	 *
+	 * @param topic A slash-delimited MQTT topic string.
+	 * @return A vector containing the fields of the topic.
+	 */
+	static std::vector<std::string> split(const std::string& topic);
+	/**
 	 * Gets the default quality of service for this topic.
 	 * @return The default quality of service for this topic.
 	 */
@@ -171,6 +178,60 @@ using topic_ptr = topic::ptr_t ;
 
 /** A smart/shared pointer to a const topic object. */
 using const_topic_ptr = topic::const_ptr_t ;
+
+/////////////////////////////////////////////////////////////////////////////
+//  						Topic Filter
+/////////////////////////////////////////////////////////////////////////////
+
+/**
+ * An MQTT topic filter.
+ *
+ * This is a multi-field string, delimited by forward slashes, '/', in which
+ *  fields can contain the wildcards:
+ *
+ *     '+' - Matches a single field
+ *     '#' - Matches all subsequent fields (must be last field in filter)
+ *
+ * It can be used to match against specific topics.
+ */
+class topic_filter
+{
+	/** We store the filter as a vector of the individual fields.  */
+	std::vector<string> fields_;
+
+public:
+	/**
+	 * Creates a new topic filter.
+	 *
+	 * @param filter A string MQTT topic filter. This is a slash ('/')
+	 *  			 delimited topic string that can contain wildcards
+	 * 				 '+' and '#'.
+	 */
+	explicit topic_filter(const string& filter);
+	/**
+	 * Determines if the specified topic filter contains any wildcards.
+	 *
+	 * @param filter The topic filter string to check for wildcards.
+	 * @return @em true if any of the fields contain a wildcard, @em false
+	 *  	   if not.
+	 */
+	static bool has_wildcards(const string& topic);
+	/**
+	 * Determines if this topic filter contains any wildcards.
+	 *
+	 * @return @em true if any of the fields contain a wildcard, @em false
+	 *  	   if not.
+	 */
+	bool has_wildcards() const;
+	/**
+	 * Determine if the topic matches this filter.
+	 *
+	 * @param topic An MQTT topic. It should not contain wildcards.
+	 * @return  @em true of the topic matches this filter, @em false
+	 *  		otherwise.
+	 */
+	bool matches(const string& topic) const;
+};
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt

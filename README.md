@@ -40,6 +40,7 @@ To keep up with the latest announcements for this project, or to ask questions:
 
 ### Unreleased features in this branch
 
+- Added `topic_filter` class w/ unit tests
 - Added Session Expiry Interval to v5 chat sample
 - Minor tweaks to prepare for C++20
 - Minor cleanup of the tests
