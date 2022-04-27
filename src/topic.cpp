@@ -28,24 +28,21 @@ namespace mqtt {
 // This is just a string split around '/'
 std::vector<string> topic::split(const string& s)
 {
-	auto delim = '/';
 	std::vector<std::string> v;
 
 	if (s.empty())
 		return v;
 
-	using size_type = string::size_type;
-	const size_type npos = string::npos;
-
-	size_type startPos = 0, pos;
+	const auto delim = '/';
+	string::size_type startPos = 0, pos;
 
 	do {
 		pos = s.find(delim, startPos);
-		size_type n = (pos == npos) ? pos : (pos - startPos);
+		auto n = (pos == string::npos) ? pos : (pos - startPos);
 		v.push_back(s.substr(startPos, n));
 		startPos = pos + 1;
 	}
-	while (pos != npos);
+	while (pos != string::npos);
 
 	return v;
 }
