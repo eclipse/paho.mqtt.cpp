@@ -40,7 +40,8 @@ To keep up with the latest announcements for this project, or to ask questions:
 
 ### Unreleased features in this branch
 
-- Added `topic_filter` class w/ unit tests
+- Added `topic_filter` class for simple topic comparisons (w/ unit tests)
+- Added `topic_matcher` class for matching topics to a collection of filters (w/ unit tests)
 - Added Session Expiry Interval to v5 chat sample
 - Minor tweaks to prepare for C++20
 - Minor cleanup of the tests
@@ -96,9 +97,9 @@ Contributions to this project are gladly welcomed and appreciated Before submitt
  - This is an official Eclipse project, so it is required that all contributors sign an [Eclipse Contributor Agreement (ECA)](https://www.eclipse.org/legal/ECA.php)
  - Please submit all Pull Requests against the _develop_ branch (not master).
  - Please sign all commits.
- 
+
  For full details, see [CONTRIBUTING.md](https://github.com/eclipse/paho.mqtt.cpp/blob/master/CONTRIBUTING.md).
- 
+
 ## Building from source
 
 _CMake_  is a cross-platform build system suitable for Unix and non-Unix platforms such as Microsoft Windows. It is now the only supported build system.
@@ -138,7 +139,7 @@ $ sudo apt-get install build-essential gcc make cmake cmake-gui cmake-curses-gui
 If you will be using secure sockets (and you probably should):
 
 ```
-$ sudo apt-get install libssl-dev 
+$ sudo apt-get install libssl-dev
 ```
 
 Building the documentation requires doxygen and optionally graphviz to be installed:
@@ -147,7 +148,7 @@ Building the documentation requires doxygen and optionally graphviz to be instal
 $ sudo apt-get install doxygen graphviz
 ```
 
-Unit tests are being built using _Catch2_. 
+Unit tests are being built using _Catch2_.
 
 _Catch2_ can be found here: [Catch2](https://github.com/catchorg/Catch2).  You must download and install _Catch2_ to build and run the unit tests locally.
 
@@ -321,7 +322,7 @@ int main(int argc, char* argv[])
         cli.publish(TOPIC, PAYLOAD2, strlen(PAYLOAD2)+1, 0, false);
 
         // Disconnect
-        
+
         cli.disconnect();
     }
     catch (const mqtt::persistence_exception& exc) {
