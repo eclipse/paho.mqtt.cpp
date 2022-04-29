@@ -41,6 +41,7 @@ add_executable(unit_tests unit_tests.cpp
   test_properties.cpp
   test_response_options.cpp
   test_string_collection.cpp
+	test_thread_queue.cpp
   test_token.cpp
   test_topic.cpp
   test_topic_matcher.cpp
