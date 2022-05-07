@@ -33,13 +33,16 @@ ssl_options::ssl_options() : opts_(DFLT_C_STRUCT)
 ssl_options::ssl_options(const string& trustStore, const string& keyStore,
 						 const string& privateKey, const string& privateKeyPassword,
 						 const string& enabledCipherSuites, bool enableServerCertAuth,
+						 const string& keyType, const string& engineId, const string& engineConfFile,
 						 const std::vector<string> alpnProtos /*=std::vector<string>()*/)
 			: opts_(DFLT_C_STRUCT),
                 trustStore_(trustStore),
                 keyStore_(keyStore),
 				privateKey_(privateKey),
 				privateKeyPassword_(privateKeyPassword),
-				enabledCipherSuites_(enabledCipherSuites)
+				enabledCipherSuites_(enabledCipherSuites),
+				keyType_(keyType), engineId_(engineId),
+                engineConfFile_(engineConfFile)
 {
 	set_alpn_protos(alpnProtos);
 	update_c_struct();
@@ -50,6 +53,7 @@ ssl_options::ssl_options(const string& trustStore, const string& keyStore,
 						 const string& privateKey, const string& privateKeyPassword,
 						 const string& caPath,
 						 const string& enabledCipherSuites, bool enableServerCertAuth,
+                         const string& keyType, const string& engineId, const string& engineConfFile,
 						 const std::vector<string> alpnProtos /*=std::vector<string>()*/)
 			: opts_(DFLT_C_STRUCT),
                 trustStore_(trustStore),
@@ -57,7 +61,9 @@ ssl_options::ssl_options(const string& trustStore, const string& keyStore,
 				privateKey_(privateKey),
 				privateKeyPassword_(privateKeyPassword),
 				caPath_(caPath),
-				enabledCipherSuites_(enabledCipherSuites)
+				enabledCipherSuites_(enabledCipherSuites),
+				keyType_(keyType), engineId_(engineId),
+                engineConfFile_(engineConfFile)
 {
 	set_alpn_protos(alpnProtos);
 	update_c_struct();
@@ -72,6 +78,8 @@ ssl_options::ssl_options(const ssl_options& other)
 			privateKeyPassword_(other.privateKeyPassword_),
 			caPath_(other.caPath_),
 			enabledCipherSuites_(other.enabledCipherSuites_),
+			keyType_(other.keyType_), engineId_(other.engineId_),
+            engineConfFile_(other.engineConfFile_),
 			errHandler_(other.errHandler_),
 			pskHandler_(other.pskHandler_),
 			protos_(other.protos_)
@@ -87,6 +95,8 @@ ssl_options::ssl_options(ssl_options&& other)
 			privateKeyPassword_(std::move(other.privateKeyPassword_)),
 			caPath_(std::move(other.caPath_)),
 			enabledCipherSuites_(std::move(other.enabledCipherSuites_)),
+			keyType_(std::move(other.keyType_)), engineId_(std::move(other.engineId_)),
+            engineConfFile_(std::move(other.engineConfFile_)),
 			errHandler_(std::move(other.errHandler_)),
 			pskHandler_(std::move(other.pskHandler_)),
 			protos_(std::move(other.protos_))
@@ -102,7 +112,9 @@ void ssl_options::update_c_struct()
 	opts_.privateKeyPassword = c_str(privateKeyPassword_);
 	opts_.CApath = c_str(caPath_);
 	opts_.enabledCipherSuites = c_str(enabledCipherSuites_);
-
+    opts_.keyType = c_str(keyType_);
+    opts_.engineId = c_str(engineId_);
+    opts_.engineConfFile = c_str(engineConfFile_);
 	if (errHandler_) {
 		opts_.ssl_error_cb = &ssl_options::on_error;
 		opts_.ssl_error_context = this;
@@ -196,6 +208,9 @@ ssl_options& ssl_options::operator=(const ssl_options& rhs)
 	pskHandler_ = rhs.pskHandler_;
 
 	protos_ = rhs.protos_;
+    keyType_ = rhs.keyType_;
+    engineId_ = rhs.engineId_;
+    engineConfFile_ = rhs.engineConfFile_;
 
 	update_c_struct();
 	return *this;
@@ -219,6 +234,9 @@ ssl_options& ssl_options::operator=(ssl_options&& rhs)
 	pskHandler_ = std::move(rhs.pskHandler_);
 
 	protos_ = std::move(rhs.protos_);
+    keyType_ = std::move(rhs.keyType_);
+    engineId_ = std::move(rhs.engineId_);
+    engineConfFile_ = std::move(rhs.engineConfFile_);
 
 	update_c_struct();
 	return *this;
@@ -236,6 +254,24 @@ void ssl_options::set_key_store(const string& keyStore)
 {
 	keyStore_ = keyStore;
 	opts_.keyStore = c_str(keyStore_);
+}
+
+void ssl_options::set_key_mode(const string& keyType)
+{
+	keyType_ = keyType;
+	opts_.keyType = c_str(keyType_);
+}
+
+void ssl_options::set_engine_id(const string& engineId)
+{
+	engineId_ = engineId;
+	opts_.engineId = c_str(engineId_);
+}
+
+void ssl_options::set_engine_conf(const string& engineConfFile)
+{
+	engineConfFile_ = engineConfFile;
+	opts_.engineConfFile = c_str(engineConfFile_);
 }
 
 void ssl_options::set_private_key(const string& privateKey)
