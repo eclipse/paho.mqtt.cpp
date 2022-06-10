@@ -282,9 +282,9 @@ public:
 	/**
 	 * Sets whether the server should remember state for the client across
 	 * reconnects. (MQTT v3.x only)
-	 * @param cleanSession @em true if the server should remember state for
+	 * @param cleanSession @em true if the server should NOT remember state for
 	 *  				   the client across reconnects, @em false
-	 *  				   othherwise.
+	 *  				   otherwise.
 	 */
 	void set_clean_session(bool cleanSession) {
 		opts_.cleansession = to_int(cleanSession);
@@ -623,8 +623,8 @@ public:
 	/**
 	 * Sets whether the server should remember state for the client across
 	 * reconnects. (MQTT v3.x only)
-	 * @param on @em true if the server should remember state for the client
-	 *  		 across reconnects, @em false othherwise.
+	 * @param on @em true if the server should NOT remember state for the client
+	 *  		 across reconnects, @em false otherwise.
 	 */
 	auto clean_session(bool on=true) -> self& {
 		opts_.set_clean_session(on);
