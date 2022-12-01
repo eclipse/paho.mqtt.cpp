@@ -239,6 +239,22 @@ void token::reset()
 	errMsg_.clear();
 }
 
+void set_action_callback(iaction_listener& listener)
+{
+	guard g(lock_);
+	listener_ = &listener;
+
+	if (complete_)
+	{
+		g.unlock();
+
+		if (rc_ == MQTTASYNC_SUCCESS)
+			listener.on_success(*this);
+		else
+			listener.on_failure(*this);
+	}
+}
+
 void token::wait()
 {
 	unique_lock g(lock_);
