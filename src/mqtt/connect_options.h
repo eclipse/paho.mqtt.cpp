@@ -229,10 +229,16 @@ public:
 	void set_ssl(ssl_options&& ssl);
 	/**
 	 * Returns whether the server should remember state for the client
-	 * across reconnects.
+	 * across reconnects. This only applies to MQTT v3.x connections.
 	 * @return @em true if requesting a clean session, @em false if not.
 	 */
 	bool is_clean_session() const { return to_bool(opts_.cleansession); }
+	/**
+	 * Returns whether the server should remember state for the client
+	 * across reconnects. This only applies to MQTT v5 connections.
+	 * @return @em true if requesting a clean start, @em false if not.
+	 */
+	bool is_clean_start() const { return to_bool(opts_.cleanstart); }
 	/**
 	 * Gets the token used as the callback context.
 	 * @return The delivery token used as the callback context.
@@ -278,17 +284,31 @@ public:
 	std::chrono::seconds get_max_retry_interval() const {
 		return std::chrono::seconds(opts_.maxRetryInterval);
 	}
-
 	/**
 	 * Sets whether the server should remember state for the client across
 	 * reconnects. (MQTT v3.x only)
-	 * @param cleanSession @em true if the server should remember state for
-	 *  				   the client across reconnects, @em false
-	 *  				   othherwise.
+	 *
+	 * This will force the MQTT version to 3.x default, if not already set
+	 * for a v3 version.
+	 *
+	 * @param clean @em true if the server should remember state for the
+	 *  			client across reconnects, @em false otherwise.
 	 */
-	void set_clean_session(bool cleanSession) {
-		opts_.cleansession = to_int(cleanSession);
-	}
+	void set_clean_session(bool cleanSession);
+	/**
+	 * Sets whether the server should remember state for the client across
+	 * reconnects. (MQTT v5 only)
+	 *
+	 * If a persistent session is desired (turning this off), then the app
+	 * should also set the `Session Expiry Interval` property, and add that
+	 * to the connect options.
+	 *
+	 * This will force the MQTT version to v5 default, if not already set.
+	 *
+	 * @param clean @em true if the server should remember state for the
+	 *  			client across reconnects, @em false otherwise.
+	 */
+	void set_clean_start(bool cleanStart);
 	/**
 	 * Sets the "keep alive" interval.
 	 * This is the maximum time that should pass without communications
@@ -429,21 +449,6 @@ public:
 								(int) to_seconds_count(maxRetryInterval));
 	}
 	/**
-	 * Determines if the 'clean start' flag is set for the connect.
-	 * @return @em true if the 'clean start' flag is set for the connect, @em
-	 *  	   false if not.
-	 */
-	bool is_clean_start() const {
-		return to_bool(opts_.cleanstart);
-	}
-	/**
-	 * Sets the 'clean start' flag for the connection.
-	 * @param cleanStart Whether to set the 'clean start' flag for the connect.
-	 */
-	void set_clean_start(bool cleanStart) {
-		opts_.cleanstart = to_int(cleanStart);
-	}
-	/**
 	 * Gets the connect properties.
 	 * @return A const reference to the properties for the connect.
 	 */
@@ -454,18 +459,12 @@ public:
 	 * Sets the properties for the connect.
 	 * @param props The properties to place into the message.
 	 */
-	void set_properties(const properties& props) {
-		props_ = props;
-		opts_.connectProperties = const_cast<MQTTProperties*>(&props_.c_struct());
-	}
+	void set_properties(const properties& props);
 	/**
 	 * Moves the properties for the connect.
 	 * @param props The properties to move into the connect object.
 	 */
-	void set_properties(properties&& props) {
-		props_ = std::move(props);
-		opts_.connectProperties = const_cast<MQTTProperties*>(&props_.c_struct());
-	}
+	void set_properties(properties&& props);
 	/**
 	 * Gets the HTTP headers
 	 * @return A const reference to the HTTP headers name/value collection.

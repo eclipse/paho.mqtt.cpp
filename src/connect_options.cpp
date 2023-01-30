@@ -1,7 +1,7 @@
 // connect_options.cpp
 
 /*******************************************************************************
- * Copyright (c) 2017-2020 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2017-2022 Frank Pagliughi <fpagliughi@mindspring.com>
  * Copyright (c) 2016 Guilherme M. Ferreira <guilherme.maciel.ferreira@gmail.com>
  *
  * All rights reserved. This program and the accompanying materials
@@ -30,11 +30,13 @@ const MQTTAsync_connectOptions connect_options::DFLT_C_STRUCT =
 
 connect_options::connect_options() : opts_(DFLT_C_STRUCT)
 {
+	opts_.cleanstart = 1;
 }
 
 connect_options::connect_options(string_ref userName, binary_ref password)
 		: connect_options()
 {
+	opts_.cleanstart = 1;
 	set_user_name(userName);
 	set_password(password);
 }
@@ -49,6 +51,8 @@ connect_options::connect_options(const connect_options& opt) : opts_(opt.opts_),
 						httpProxy_(opt.httpProxy_),
 						httpsProxy_(opt.httpsProxy_)
 {
+	opts_.cleanstart = 1;
+
 	if (opts_.will)
 		set_will(opt.will_);
 
@@ -70,6 +74,8 @@ connect_options::connect_options(connect_options&& opt) : opts_(opt.opts_),
 						httpProxy_(std::move(opt.httpProxy_)),
 						httpsProxy_(std::move(opt.httpsProxy_))
 {
+	opts_.cleanstart = 1;
+
 	if (opts_.will)
 		opts_.will = &will_.opts_;
 
@@ -237,6 +243,23 @@ void connect_options::set_ssl(ssl_options&& ssl)
 	opts_.ssl = &ssl_.opts_;
 }
 
+// Clean sessions only apply to MQTT v3, so force it there if set.
+void connect_options::set_clean_session(bool clean)
+{
+	opts_.cleansession = to_int(clean);
+	opts_.cleanstart = 0;
+	if (opts_.MQTTVersion >= MQTTVERSION_5)
+		opts_.MQTTVersion = MQTTVERSION_DEFAULT;
+}
+
+// Clean start only apply to MQTT v5, so force it there if set.
+void connect_options::set_clean_start(bool cleanStart)
+{
+	opts_.cleanstart = to_int(cleanStart);
+	opts_.cleansession = 0;
+	opts_.MQTTVersion = MQTTVERSION_5;
+}
+
 void connect_options::set_token(const token_ptr& tok)
 {
 	tok_ = tok;
@@ -289,6 +312,20 @@ void connect_options::set_automatic_reconnect(int minRetryInterval,
 	opts_.automaticReconnect = to_int(true);
 	opts_.minRetryInterval = minRetryInterval;
 	opts_.maxRetryInterval = maxRetryInterval;
+}
+
+void connect_options::set_properties(const properties& props)
+{
+	props_ = props;
+	opts_.connectProperties = const_cast<MQTTProperties*>(&props_.c_struct());
+	opts_.MQTTVersion = MQTTVERSION_5;
+}
+
+void connect_options::set_properties(properties&& props)
+{
+	props_ = std::move(props);
+	opts_.connectProperties = const_cast<MQTTProperties*>(&props_.c_struct());
+	opts_.MQTTVersion = MQTTVERSION_5;
 }
 
 void connect_options::set_http_proxy(const string& httpProxy)

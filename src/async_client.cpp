@@ -1,7 +1,7 @@
 // async_client.cpp
 
 /*******************************************************************************
- * Copyright (c) 2013-2019 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2022 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -442,9 +442,22 @@ token_ptr async_client::connect()
 
 token_ptr async_client::connect(connect_options opts)
 {
-	// TODO: We really should get (or update) this value from the response
+	// TODO: We should update the MQTT version from the response
 	//  	(when the server confirms the requested version)
-	mqttVersion_ = opts.opts_.MQTTVersion;
+
+	// If the options specified a new MQTT protocol version, we should
+	// use it, otherwise default to the version requested when the client
+	// was created.
+	if (opts.opts_.MQTTVersion == 0 && mqttVersion_ >= 5)
+		opts.opts_.MQTTVersion = mqttVersion_;
+	else
+		mqttVersion_ = opts.opts_.MQTTVersion;
+
+	// The C lib is very picky about version and clean start/session
+	if (opts.opts_.MQTTVersion >= 5)
+		opts.opts_.cleansession = 0;
+	else
+		opts.opts_.cleanstart = 0;
 
 	// TODO: If connTok_ is non-null, there could be a pending connect
 	// which might complete after creating/assigning a new one. If that
@@ -469,11 +482,21 @@ token_ptr async_client::connect(connect_options opts)
 }
 
 token_ptr async_client::connect(connect_options opts, void* userContext,
-										iaction_listener& cb)
+								iaction_listener& cb)
 {
-	// TODO: We really should get this value from the response (when
-	// 		the server confirms the requested version)
-	mqttVersion_ = opts.opts_.MQTTVersion;
+	// If the options specified a new MQTT protocol version, we should
+	// use it, otherwise default to the version requested when the client
+	// was created.
+	if (opts.opts_.MQTTVersion == 0 && mqttVersion_ >= 5)
+		opts.opts_.MQTTVersion = mqttVersion_;
+	else
+		mqttVersion_ = opts.opts_.MQTTVersion;
+
+	// The C lib is very picky about version and clean start/session
+	if (opts.opts_.MQTTVersion >= 5)
+		opts.opts_.cleansession = 0;
+	else
+		opts.opts_.cleanstart = 0;
 
 	auto tmpTok = connTok_;
 	connTok_ = token::create(token::Type::CONNECT, *this, userContext, cb);

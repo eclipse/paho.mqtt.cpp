@@ -21,7 +21,7 @@
 //     mqttpp_chat <user> <group>
 
 /*******************************************************************************
- * Copyright (c) 2019 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2019-2022 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -68,26 +68,23 @@ int main(int argc, char* argv[])
 				chatGroup { argv[2] },
 				chatTopic { "chat/"+chatGroup };
 
+	mqtt::async_client cli(SERVER_ADDRESS, "",
+						   mqtt::create_options(MQTTVERSION_5));
+
 	// LWT message is broadcast to other users if out connection is lost
 
 	auto lwt = mqtt::message(chatTopic, "<<<"+chatUser+" was disconnected>>>", QOS, false);
 
 	// Set up the connect options
 
-	mqtt::properties connectProperties{
-		{mqtt::property::SESSION_EXPIRY_INTERVAL, 604800}
-    };
-
 	auto connOpts = mqtt::connect_options_builder()
-		.mqtt_version(MQTTVERSION_5)
-		.properties(connectProperties)
-		.clean_start(true)
+		.properties({
+			{mqtt::property::SESSION_EXPIRY_INTERVAL, 604800}
+		})
+		.clean_start(false)
 		.will(std::move(lwt))
 		.keep_alive_interval(std::chrono::seconds(20))
 		.finalize();
-
-	mqtt::async_client cli(SERVER_ADDRESS, "",
-						   mqtt::create_options(MQTTVERSION_5));
 
 	// Set a callback for connection lost.
 	// This just exits the app.

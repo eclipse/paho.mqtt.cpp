@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013-2020 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2022 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -464,6 +464,16 @@ public:
 	 * @return The server's address, as a URI String.
 	 */
 	string get_server_uri() const override { return serverURI_; }
+   	/**
+   	 * Gets the MQTT version used by the client.
+	 * @return The MQTT version used by the client
+	 *   @li MQTTVERSION_DEFAULT (0) = default: start with 3.1.1, and if
+	 *       that fails, fall back to 3.1
+	 *   @li MQTTVERSION_3_1 (3) = only try version 3.1
+	 *   @li MQTTVERSION_3_1_1 (4) = only try version 3.1.1
+	 *   @li MQTTVERSION_5 (5) = only try version 5
+   	 */
+	int mqtt_version() const noexcept { return mqttVersion_; }
 	/**
 	 * Determines if this client is currently connected to the server.
 	 * @return true if connected, false otherwise.
