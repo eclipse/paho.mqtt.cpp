@@ -7,7 +7,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2017-2021 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2017-2022 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -39,6 +39,7 @@ namespace mqtt {
 
 /**
  * A thread-safe queue for inter-thread communication.
+ *
  * This is a lockinq queue with blocking operations. The get() operations
  * can always block on an empty queue, but have variations for non-blocking
  * (try_get) and bounded-time blocking (try_get_for, try_get_until).
@@ -149,14 +150,11 @@ public:
 	 */
 	void put(value_type val) {
 		unique_guard g(lock_);
-		if (que_.size() >= cap_)
-			notFullCond_.wait(g, [this]{return que_.size() < cap_;});
-        bool wasEmpty = que_.empty();
+		notFullCond_.wait(g, [this]{return que_.size() < cap_;});
+
 		que_.emplace(std::move(val));
-		if (wasEmpty) {
-			g.unlock();
-			notEmptyCond_.notify_one();
-		}
+		g.unlock();
+		notEmptyCond_.notify_one();
 	}
 	/**
 	 * Non-blocking attempt to place an item into the queue.
@@ -166,14 +164,12 @@ public:
 	 */
 	bool try_put(value_type val) {
 		unique_guard g(lock_);
-		size_type n = que_.size();
-		if (n >= cap_)
+		if (que_.size() >= cap_)
 			return false;
+
 		que_.emplace(std::move(val));
-		if (n == 0) {
-			g.unlock();
-			notEmptyCond_.notify_one();
-		}
+		g.unlock();
+		notEmptyCond_.notify_one();
 		return true;
 	}
 	/**
@@ -186,16 +182,14 @@ public:
 	 *  	   timeout occurred.
 	 */
 	template <typename Rep, class Period>
-	bool try_put_for(value_type* val, const std::chrono::duration<Rep, Period>& relTime) {
+	bool try_put_for(value_type val, const std::chrono::duration<Rep, Period>& relTime) {
 		unique_guard g(lock_);
-		if (que_.size() >= cap_ && !notFullCond_.wait_for(g, relTime, [this]{return que_.size() < cap_;}))
+		if (!notFullCond_.wait_for(g, relTime, [this]{return que_.size() < cap_;}))
 			return false;
-        bool wasEmpty = que_.empty();
+
 		que_.emplace(std::move(val));
-		if (wasEmpty) {
-			g.unlock();
-			notEmptyCond_.notify_one();
-		}
+		g.unlock();
+		notEmptyCond_.notify_one();
 		return true;
 	}
 	/**
@@ -209,16 +203,14 @@ public:
 	 *  	   timeout occurred.
 	 */
 	template <class Clock, class Duration>
-	bool try_put_until(value_type* val, const std::chrono::time_point<Clock,Duration>& absTime) {
+	bool try_put_until(value_type val, const std::chrono::time_point<Clock,Duration>& absTime) {
 		unique_guard g(lock_);
-		if (que_.size() >= cap_ && !notFullCond_.wait_until(g, absTime, [this]{return que_.size() < cap_;}))
+		if (!notFullCond_.wait_until(g, absTime, [this]{return que_.size() < cap_;}))
 			return false;
-        bool wasEmpty = que_.empty();
+
 		que_.emplace(std::move(val));
-		if (wasEmpty) {
-			g.unlock();
-			notEmptyCond_.notify_one();
-		}
+		g.unlock();
+		notEmptyCond_.notify_one();
 		return true;
 	}
 	/**
@@ -228,15 +220,16 @@ public:
 	 * @param val Pointer to a variable to receive the value.
 	 */
 	void get(value_type* val) {
+		if (!val)
+			return;
+
 		unique_guard g(lock_);
-		if (que_.empty())
-			notEmptyCond_.wait(g, [this]{return !que_.empty();});
+		notEmptyCond_.wait(g, [this]{return !que_.empty();});
+
 		*val = std::move(que_.front());
 		que_.pop();
-		if (que_.size() == cap_-1) {
-			g.unlock();
-			notFullCond_.notify_one();
-		}
+		g.unlock();
+		notFullCond_.notify_one();
 	}
 	/**
 	 * Retrieve a value from the queue.
@@ -246,14 +239,12 @@ public:
 	 */
 	value_type get() {
 		unique_guard g(lock_);
-		if (que_.empty())
-			notEmptyCond_.wait(g, [this]{return !que_.empty();});
+		notEmptyCond_.wait(g, [this]{return !que_.empty();});
+
 		value_type val = std::move(que_.front());
 		que_.pop();
-		if (que_.size() == cap_-1) {
-			g.unlock();
-			notFullCond_.notify_one();
-		}
+		g.unlock();
+		notFullCond_.notify_one();
 		return val;
 	}
 	/**
@@ -265,15 +256,17 @@ public:
 	 *  	   the queue is empty.
 	 */
 	bool try_get(value_type* val) {
+		if (!val)
+			return false;
+
 		unique_guard g(lock_);
 		if (que_.empty())
 			return false;
+
 		*val = std::move(que_.front());
 		que_.pop();
-		if (que_.size() == cap_-1) {
-			g.unlock();
-			notFullCond_.notify_one();
-		}
+		g.unlock();
+		notFullCond_.notify_one();
 		return true;
 	}
 	/**
@@ -288,15 +281,17 @@ public:
 	 */
 	template <typename Rep, class Period>
 	bool try_get_for(value_type* val, const std::chrono::duration<Rep, Period>& relTime) {
-		unique_guard g(lock_);
-		if (que_.empty() && !notEmptyCond_.wait_for(g, relTime, [this]{return !que_.empty();}))
+		if (!val)
 			return false;
+
+		unique_guard g(lock_);
+		if (!notEmptyCond_.wait_for(g, relTime, [this]{return !que_.empty();}))
+			return false;
+
 		*val = std::move(que_.front());
 		que_.pop();
-		if (que_.size() == cap_-1) {
-			g.unlock();
-			notFullCond_.notify_one();
-		}
+		g.unlock();
+		notFullCond_.notify_one();
 		return true;
 	}
 	/**
@@ -311,15 +306,17 @@ public:
 	 */
 	template <class Clock, class Duration>
 	bool try_get_until(value_type* val, const std::chrono::time_point<Clock,Duration>& absTime) {
-		unique_guard g(lock_);
-		if (que_.empty() && !notEmptyCond_.wait_until(g, absTime, [this]{return !que_.empty();}))
+		if (!val)
 			return false;
+
+		unique_guard g(lock_);
+		if (!notEmptyCond_.wait_until(g, absTime, [this]{return !que_.empty();}))
+			return false;
+
 		*val = std::move(que_.front());
 		que_.pop();
-		if (que_.size() == cap_-1) {
-			g.unlock();
-			notFullCond_.notify_one();
-		}
+		g.unlock();
+		notFullCond_.notify_one();
 		return true;
 	}
 };
