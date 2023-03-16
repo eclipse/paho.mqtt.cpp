@@ -49,6 +49,9 @@ class connect_options
 	/** The default C struct */
 	static const MQTTAsync_connectOptions DFLT_C_STRUCT;
 
+	/** The default C struct for MQTT v5 */
+	static const MQTTAsync_connectOptions DFLT_C_STRUCT5;
+
 	/** The underlying C connection options */
 	MQTTAsync_connectOptions opts_;
 
@@ -114,14 +117,20 @@ public:
 
 	/**
 	 * Constructs a new object using the default values.
+	 *
+	 * @param ver The MQTT protocol version.
 	 */
-	connect_options();
+	explicit connect_options(int ver=MQTTVERSION_DEFAULT);
 	/**
 	 * Constructs a new object using the specified user name and password.
 	 * @param userName The name of the user for connecting to the server
 	 * @param password The password for connecting to the server
+	 * @param ver The MQTT protocol version.
 	 */
-	connect_options(string_ref userName, binary_ref password);
+	connect_options(
+		string_ref userName, binary_ref password,
+		int ver=MQTTVERSION_DEFAULT
+    );
 	/**
 	 * Copy constructor.
 	 * @param opt Another object to copy.
@@ -145,7 +154,7 @@ public:
 	/**
 	 * Expose the underlying C struct for the unit tests.
 	 */
-	 #if defined(UNIT_TESTS)
+	#if defined(UNIT_TESTS)
 		const MQTTAsync_connectOptions& c_struct() const { return opts_; }
 	#endif
 	/**
@@ -288,8 +297,8 @@ public:
 	 * Sets whether the server should remember state for the client across
 	 * reconnects. (MQTT v3.x only)
 	 *
-	 * This will force the MQTT version to 3.x default, if not already set
-	 * for a v3 version.
+	 * This will only take effect if the version is _already_ set to v3.x
+	 * (not v5).
 	 *
 	 * @param clean @em true if the server should remember state for the
 	 *  			client across reconnects, @em false otherwise.
@@ -303,7 +312,7 @@ public:
 	 * should also set the `Session Expiry Interval` property, and add that
 	 * to the connect options.
 	 *
-	 * This will force the MQTT version to v5 default, if not already set.
+	 * This will only take effect if the MQTT version is set to v5
 	 *
 	 * @param clean @em true if the server should remember state for the
 	 *  			client across reconnects, @em false otherwise.
@@ -618,7 +627,7 @@ public:
 	/**
 	 * Default constructor.
 	 */
-	connect_options_builder() {}
+	explicit connect_options_builder(int ver=MQTTVERSION_DEFAULT) : opts_(ver) {}
 	/**
 	 * Sets whether the server should remember state for the client across
 	 * reconnects. (MQTT v3.x only)
@@ -746,7 +755,7 @@ public:
 	  * This will also set other connect options to legal values dependent on
 	  * the selected version.
 	  *
-	  * @param ver The MQTT version to use for the connection:
+	  * @param ver The MQTT protocol version to use for the connection:
 	  *   @li MQTTVERSION_DEFAULT (0) = default: start with 3.1.1, and if
 	  *       that fails, fall back to 3.1
 	  *   @li MQTTVERSION_3_1 (3) = only try version 3.1

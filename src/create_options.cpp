@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2020-2023 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -22,8 +22,7 @@ namespace mqtt {
 /////////////////////////////////////////////////////////////////////////////
 
 const MQTTAsync_createOptions create_options::DFLT_C_STRUCT =
-			MQTTAsync_createOptions_initializer;
-
+			MQTTAsync_createOptions_initializer5;
 
 create_options::create_options(int mqttVersion) : create_options()
 {
