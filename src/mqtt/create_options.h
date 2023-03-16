@@ -112,7 +112,7 @@ public:
 	 * Sets the MQTT version used to create the client.
 	 * @param ver The MQTT version used to create the client.
 	 */
-	void set_mqtt_verison(int ver) { opts_.MQTTVersion = ver; }
+	void set_mqtt_version(int ver) { opts_.MQTTVersion = ver; }
 	/**
 	 * Whether the oldest messages are deleted when the output buffer is
 	 * full.
