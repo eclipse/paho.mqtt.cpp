@@ -43,10 +43,10 @@ namespace mqtt {
  * The topic and payload buffers are kept as references to const data, so
  * they can be reassigned as needed, but the buffers can not be updated
  * in-place. Normally they would be created externally then copied or moved
- * into the message. The library to transport the messages never touchec the
+ * into the message. The library to transport the messages never touches the
  * payloads or topics.
  *
- * This also means that message objects are farily cheap to copy, since they
+ * This also means that message objects are fairly cheap to copy, since they
  * don't copy the payloads. They simply copy the reference to the buffers.
  * It is safe to pass these buffer references across threads since all
  * references promise not to update the contents of the buffer.

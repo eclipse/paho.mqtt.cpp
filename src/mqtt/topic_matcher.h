@@ -76,7 +76,7 @@ namespace mqtt {
  * This can be used to get an iterator to all items that have a filter that
  * matches a topic. To test against a single filter, see
  * [`TopicFilter`](crate::TopicFilter). This collection is more commonly
- * used when there are a nuber of filters and each needs to be associated
+ * used when there are a number of filters and each needs to be associated
  * with a particular action or piece of data. Note, though, that a single
  * incoming topic could match against several items in the collection. For
  * example, the topic:
@@ -87,7 +87,7 @@ namespace mqtt {
  *
  * Thus, the collection gives an iterator for the items matching a topic.
  *
- * A common use for this would be to store callbacks to proces incoming
+ * A common use for this would be to store callbacks to process incoming
  * messages based on topics.
  *
  * This code was adapted from the Eclipse Python `MQTTMatcher` class:
@@ -172,7 +172,7 @@ public:
 		 * Move the next iterator to the next value, or to end(), if none
 		 * left.
 		 *
-		 * This will keep recursing until it finds a mtching node that
+		 * This will keep recursing until it finds a matching node that
 		 * contains a value or it reaches the end.
 		 */
 		void next() {

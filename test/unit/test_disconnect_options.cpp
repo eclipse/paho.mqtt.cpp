@@ -99,7 +99,7 @@ TEST_CASE("disconnect_options set timeout", "[options]")
 }
 
 // ----------------------------------------------------------------------
-// Test set contect token
+// Test set connect token
 // ----------------------------------------------------------------------
 
 TEST_CASE("disconnect_options set token", "[options]")

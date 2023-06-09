@@ -131,7 +131,7 @@ async_client::~async_client()
 
 
 // Callback for MQTTAsync_setConnected()
-// This is installed with the normall callbacks and with a call to 
+// This is installed with the normal callbacks and with a call to 
 // reconnect() to indicate that it succeeded. It signals the client's
 // connect token then calls any registered callbacks.
 void async_client::on_connected(void* context, char* cause)

@@ -339,7 +339,7 @@ public:
 	 *  		  received at the published QoS. Messages published at a
 	 *  		  higher quality of service will be received using the QoS
 	 *  		  specified on the subscribe.
-	 * @param opts A collection of subscription optsions (one for each
+	 * @param opts A collection of subscription options (one for each
 	 *  		   topic)
 	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the subscribe to complete.
@@ -362,7 +362,7 @@ public:
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param callback listener that will be notified when subscribe has
 	 *  			   completed
-	 * @param opts A collection of subscription optsions (one for each
+	 * @param opts A collection of subscription options (one for each
 	 *  		   topic)
 	 * @param props The MQTT v5 properties.
 	 * @return token used to track and wait for the subscribe to complete.
