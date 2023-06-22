@@ -51,7 +51,7 @@ class string_collection
 	 */
 	collection_type coll_;
 	/**
-	 * A colleciton of pointers to NUL-terminated C strings for the topics.
+	 * A collection of pointers to NUL-terminated C strings for the topics.
 	 * This is what is required by the Paho C library, and thus the lifetime
 	 * of the pointers will remain consistent with the lifetime of the
 	 * object. The value is kept consistent with the current topics and
@@ -268,7 +268,7 @@ public:
 	/** The type of the string/string pair of values */
 	using value_type = collection_type::value_type;
     /**
-     * Default construtor for an empty collection.
+     * Default constructor for an empty collection.
      */
     name_value_collection() =default;
     /**

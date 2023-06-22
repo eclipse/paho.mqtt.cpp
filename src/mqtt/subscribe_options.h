@@ -135,7 +135,7 @@ public:
 		opts_.retainAsPublished = on ? 1 : 0;
 	}
 	/**
-	 * Gets the "retasin handling" option.
+	 * Gets the "retain handling" option.
 	 * @return When to send retained messages:
 	 *  	@li (SEND_RETAINED_ON_SUBSCRIBE, 0) At the time of the subscribe
 	 *  	@li (SEND_RETAINED_ON_NEW, 1) Only at the time of a new

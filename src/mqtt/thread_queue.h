@@ -40,14 +40,14 @@ namespace mqtt {
 /**
  * A thread-safe queue for inter-thread communication.
  *
- * This is a lockinq queue with blocking operations. The get() operations
+ * This is a locking queue with blocking operations. The get() operations
  * can always block on an empty queue, but have variations for non-blocking
  * (try_get) and bounded-time blocking (try_get_for, try_get_until).
  * @par
  * The default queue has a capacity that is unbounded in the practical
  * sense, limited by available memory. In this mode the object will not
  * block when placing values into the queue. A capacity can bet set with the
- * construtor or, at any time later by calling the @ref capacity(size_type)
+ * constructor or, at any time later by calling the @ref capacity(size_type)
  * method. Using this latter method, the capacity can be set to an amount
  * smaller than the current size of the queue. In that case all put's to the
  * queue will block until the number of items are removed from the queue to
@@ -128,7 +128,7 @@ public:
 	 * Sets the capacity of the queue.
 	 * Note that the capacity can be set to a value smaller than the current
 	 * size of the queue. In that event, all calls to put() will block until
-	 * a suffucuent number
+	 * a sufficient number
 	 */
 	void capacity(size_type cap) {
 		guard g(lock_);
@@ -270,9 +270,9 @@ public:
 		return true;
 	}
 	/**
-	 * Attempt to remove an item from the queue for a bounded amout of time.
+	 * Attempt to remove an item from the queue for a bounded amount of time.
 	 * This will retrieve the next item from the queue. If the queue is
-	 * empty, it will wait the specified amout of time for an item to arive
+	 * empty, it will wait the specified amount of time for an item to arrive
 	 * before timing out.
 	 * @param val Pointer to a variable to receive the value.
 	 * @param relTime The amount of time to wait until timing out.
@@ -295,9 +295,9 @@ public:
 		return true;
 	}
 	/**
-	 * Attempt to remove an item from the queue for a bounded amout of time.
+	 * Attempt to remove an item from the queue for a bounded amount of time.
 	 * This will retrieve the next item from the queue. If the queue is
-	 * empty, it will wait until the specified time for an item to arive
+	 * empty, it will wait until the specified time for an item to arrive
 	 * before timing out.
 	 * @param val Pointer to a variable to receive the value.
 	 * @param absTime The absolute time to wait to before timing out.

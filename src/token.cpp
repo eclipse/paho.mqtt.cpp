@@ -190,7 +190,7 @@ void token::on_failure(MQTTAsync_failureData* rsp)
 	complete_ = true;
 	g.unlock();
 
-	// Note: callback always completes before the obect is signaled.
+	// Note: callback always completes before the object is signaled.
 	if (listener)
 		listener->on_failure(*this);
 	cond_.notify_all();
@@ -219,7 +219,7 @@ void token::on_failure5(MQTTAsync_failureData5* rsp)
 	complete_ = true;
 	g.unlock();
 
-	// Note: callback always completes before the obect is signaled.
+	// Note: callback always completes before the object is signaled.
 	if (listener)
 		listener->on_failure(*this);
 	cond_.notify_all();

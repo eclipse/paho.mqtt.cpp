@@ -321,7 +321,7 @@ public:
 	/**
 	 * Sets the "keep alive" interval.
 	 * This is the maximum time that should pass without communications
-	 * between client and server. If no massages pass in this time, the
+	 * between client and server. If no messages pass in this time, the
 	 * client will ping the broker.
 	 * @param keepAliveInterval The keep alive interval in seconds.
 	 */
@@ -331,7 +331,7 @@ public:
 	/**
 	 * Sets the "keep alive" interval with a chrono duration.
 	 * This is the maximum time that should pass without communications
-	 * between client and server. If no massages pass in this time, the
+	 * between client and server. If no messages pass in this time, the
 	 * client will ping the broker.
 	 * @param interval The keep alive interval.
 	 */
@@ -570,12 +570,12 @@ public:
 	connect_data();
 	/**
 	 * Creates connection data with a user name, but no password.
-	 * @param userName The user name fopr reconnecting to the MQTT broker.
+	 * @param userName The user name for reconnecting to the MQTT broker.
 	 */
 	explicit connect_data(string_ref userName);
 	/**
 	 * Creates connection data with a user name and password.
-	 * @param userName The user name fopr reconnecting to the MQTT broker.
+	 * @param userName The user name for reconnecting to the MQTT broker.
 	 * @param password The password for connecting to the MQTT broker.
 	 */
 	connect_data(string_ref userName, binary_ref password);
@@ -632,7 +632,7 @@ public:
 	 * Sets whether the server should remember state for the client across
 	 * reconnects. (MQTT v3.x only)
 	 * @param on @em true if the server should remember state for the client
-	 *  		 across reconnects, @em false othherwise.
+	 *  		 across reconnects, @em false otherwise.
 	 */
 	auto clean_session(bool on=true) -> self& {
 		opts_.set_clean_session(on);
@@ -641,7 +641,7 @@ public:
 	/**
 	 * Sets the "keep alive" interval with a chrono duration.
 	 * This is the maximum time that should pass without communications
-	 * between client and server. If no massages pass in this time, the
+	 * between client and server. If no messages pass in this time, the
 	 * client will ping the broker.
 	 * @param interval The keep alive interval.
 	 */

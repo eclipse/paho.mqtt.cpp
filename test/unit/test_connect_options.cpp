@@ -435,7 +435,7 @@ TEST_CASE("set_token", "[options]")
 		REQUIRE(2*TIMEOUT_SEC == c_struct.connectTimeout);
 	}
 
-	SECTION("set stervers") {
+	SECTION("set servers") {
 		opts.set_servers(URIs);
 
 		REQUIRE(URIs.get() == opts.get_servers().get());

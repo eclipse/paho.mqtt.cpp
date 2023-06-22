@@ -57,7 +57,7 @@ public:
 	 */
 	create_options() : opts_(DFLT_C_STRUCT) {}
 	/**
-	 * Default create optionsfor the specified version of MQTT.
+	 * Default create options for the specified version of MQTT.
 	 * @param mqttVersion The MQTT version used to create the client.
 	 */
 	explicit create_options(int mqttVersion);
@@ -160,7 +160,7 @@ public:
 		return to_bool(opts_.persistQoS0);
 	}
 	/**
-	 * Determeine whether to persist QoS 0 messages.
+	 * Determine whether to persist QoS 0 messages.
 	 *
 	 * @param on @em true if QoS 0 messages are persisted, @em false if not.
 	 */
@@ -235,10 +235,10 @@ public:
 		return *this;
 	}
 	/**
-	 * Determines whether to restore persisted messsages or clear the
+	 * Determines whether to restore persisted messages or clear the
 	 * persistence store. (Defaults true)
 	 *
-	 * @param on @em true to retore persisted messages, @em false to clear
+	 * @param on @em true to restore persisted messages, @em false to clear
 	 *  		 the persistence store.
 	 * @return A reference to this object.
 	 */

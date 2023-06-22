@@ -107,7 +107,7 @@ private:
 	/** Whether the action has yet to complete */
 	bool complete_;
 
-	/** MQTT v5 propeties */
+	/** MQTT v5 properties */
 	//properties props_;
 	/** Connection response (null if not available) */
 	std::unique_ptr<connect_response> connRsp_;
@@ -213,7 +213,7 @@ public:
 	 * Constructs a token object.
 	 * @param typ The type of request that the token is tracking.
 	 * @param cli The client that created the token.
-	 * @param topic The topic assiciated with the token
+	 * @param topic The topic associated with the token
 	 */
 	token(Type typ, iasync_client& cli, const string& topic)
 		: token(typ, cli, string_collection::create(topic)) {}
@@ -221,7 +221,7 @@ public:
 	 * Constructs a token object.
 	 * @param typ The type of request that the token is tracking.
 	 * @param cli The client that created the token.
-	 * @param topic The topic assiciated with the token
+	 * @param topic The topic associated with the token
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb callback listener that will be notified when subscribe has
@@ -287,7 +287,7 @@ public:
 	 * Constructs a token object.
 	 * @param typ The type of request that the token is tracking.
 	 * @param cli The client that created the token.
-	 * @param topic The topic assiciated with the token
+	 * @param topic The topic associated with the token
 	 */
 	static ptr_t create(Type typ, iasync_client& cli, const string& topic) {
 		return std::make_shared<token>(typ, cli, topic);
@@ -296,7 +296,7 @@ public:
 	 * Constructs a token object.
 	 * @param typ The type of request that the token is tracking.
 	 * @param cli The client that created the token.
-	 * @param topic The topic assiciated with the token
+	 * @param topic The topic associated with the token
 	 * @param userContext optional object used to pass context to the
 	 *  				  callback. Use @em nullptr if not required.
 	 * @param cb callback listener that will be notified when subscribe has
@@ -405,7 +405,7 @@ public:
 	}
 	/**
 	 * Sets the number of results expected.
-	 * This is only required for subecribe_many() with < MQTTv5
+	 * This is only required for subscribe many() with < MQTTv5
 	 * @param n The number of results expected.
 	 */
 	void set_num_expected(size_t n) { nExpected_ = n; }
@@ -479,7 +479,7 @@ public:
 	/**
 	 * Gets the response from a connect operation.
 	 * This returns the result of the completed operation. If the
-	 * operaton is not yet complete this will block until the result
+	 * operation is not yet complete this will block until the result
 	 * is available.
 	 * @return The result of the operation.
 	 */
@@ -487,7 +487,7 @@ public:
 	/**
 	 * Gets the response from a connect operation.
 	 * This returns the result of the completed operation. If the
-	 * operaton is not yet complete this will block until the result
+	 * operation is not yet complete this will block until the result
 	 * is available.
 	 * @return The result of the operation.
 	 */
@@ -495,7 +495,7 @@ public:
 	/**
 	 * Gets the response from a connect operation.
 	 * This returns the result of the completed operation. If the
-	 * operaton is not yet complete this will block until the result
+	 * operation is not yet complete this will block until the result
 	 * is available.
 	 * @return The result of the operation.
 	 */

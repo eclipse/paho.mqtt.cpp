@@ -48,7 +48,7 @@ class topic
 	string name_;
 	/** The default QoS */
 	int qos_;
-	/** The default retined flag */
+	/** The default retained flag */
 	bool retained_;
 
 public:
