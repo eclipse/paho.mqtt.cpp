@@ -231,7 +231,7 @@ public:
 	 */
 	virtual topic get_topic(const string& top, int qos=message::DFLT_QOS,
 							bool retained=message::DFLT_RETAINED) {
-		return topic(cli_, top);
+		return topic(cli_, top, qos, retained);
 	}
 	/**
 	 * Determines if this client is currently connected to the server.
