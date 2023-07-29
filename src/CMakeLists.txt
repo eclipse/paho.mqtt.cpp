@@ -79,6 +79,14 @@ target_include_directories(paho-cpp-objs
         src
 )
 
+# --- Warnings ---
+
+# Maybe set '-Werror' for Release builds?
+target_compile_options(paho-cpp-objs PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/W3>
+  $<$<CXX_COMPILER_ID:Clang>:-Wall -Wextra -Wdocumentation>
+  $<$<NOT:$<CXX_COMPILER_ID:MSVC,Clang>>:-Wall -Wextra>
+)
 
 ## --- Build the shared library, if requested ---
 

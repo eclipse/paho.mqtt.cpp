@@ -28,7 +28,7 @@ class token_test;
  * functionality currently required by the library.
  *
  * Note, too, in the C lib, this became a place to add MQTT v5 options for
- * the outgoing calls without breaking the API, so is also refered to as the
+ * the outgoing calls without breaking the API, so is also referred to as the
  * "call options".
  */
 class response_options
@@ -54,13 +54,13 @@ class response_options
 public:
 	/**
 	 * Create an empty response object.
-	 * @param mqttVersion The MQTT versoion for the response.
+	 * @param mqttVersion The MQTT version for the response.
 	 */
 	explicit response_options(int mqttVersion=MQTTVERSION_DEFAULT);
 	/**
 	 * Creates a response object with the specified callbacks.
 	 * @param tok A token to be used as the context.
-	 * @param mqttVersion The MQTT versoion for the response.
+	 * @param mqttVersion The MQTT version for the response.
 	 */
 	response_options(const token_ptr& tok, int mqttVersion=MQTTVERSION_DEFAULT);
 	/**

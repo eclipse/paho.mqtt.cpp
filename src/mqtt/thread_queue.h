@@ -7,7 +7,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2017-2021 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2017-2022 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -39,14 +39,15 @@ namespace mqtt {
 
 /**
  * A thread-safe queue for inter-thread communication.
- * This is a lockinq queue with blocking operations. The get() operations
+ *
+ * This is a locking queue with blocking operations. The get() operations
  * can always block on an empty queue, but have variations for non-blocking
  * (try_get) and bounded-time blocking (try_get_for, try_get_until).
  * @par
  * The default queue has a capacity that is unbounded in the practical
  * sense, limited by available memory. In this mode the object will not
  * block when placing values into the queue. A capacity can bet set with the
- * construtor or, at any time later by calling the @ref capacity(size_type)
+ * constructor or, at any time later by calling the @ref capacity(size_type)
  * method. Using this latter method, the capacity can be set to an amount
  * smaller than the current size of the queue. In that case all put's to the
  * queue will block until the number of items are removed from the queue to
@@ -127,7 +128,7 @@ public:
 	 * Sets the capacity of the queue.
 	 * Note that the capacity can be set to a value smaller than the current
 	 * size of the queue. In that event, all calls to put() will block until
-	 * a suffucuent number
+	 * a sufficient number
 	 */
 	void capacity(size_type cap) {
 		guard g(lock_);
@@ -149,14 +150,11 @@ public:
 	 */
 	void put(value_type val) {
 		unique_guard g(lock_);
-		if (que_.size() >= cap_)
-			notFullCond_.wait(g, [this]{return que_.size() < cap_;});
-        bool wasEmpty = que_.empty();
+		notFullCond_.wait(g, [this]{return que_.size() < cap_;});
+
 		que_.emplace(std::move(val));
-		if (wasEmpty) {
-			g.unlock();
-			notEmptyCond_.notify_one();
-		}
+		g.unlock();
+		notEmptyCond_.notify_one();
 	}
 	/**
 	 * Non-blocking attempt to place an item into the queue.
@@ -166,14 +164,12 @@ public:
 	 */
 	bool try_put(value_type val) {
 		unique_guard g(lock_);
-		size_type n = que_.size();
-		if (n >= cap_)
+		if (que_.size() >= cap_)
 			return false;
+
 		que_.emplace(std::move(val));
-		if (n == 0) {
-			g.unlock();
-			notEmptyCond_.notify_one();
-		}
+		g.unlock();
+		notEmptyCond_.notify_one();
 		return true;
 	}
 	/**
@@ -186,16 +182,14 @@ public:
 	 *  	   timeout occurred.
 	 */
 	template <typename Rep, class Period>
-	bool try_put_for(value_type* val, const std::chrono::duration<Rep, Period>& relTime) {
+	bool try_put_for(value_type val, const std::chrono::duration<Rep, Period>& relTime) {
 		unique_guard g(lock_);
-		if (que_.size() >= cap_ && !notFullCond_.wait_for(g, relTime, [this]{return que_.size() < cap_;}))
+		if (!notFullCond_.wait_for(g, relTime, [this]{return que_.size() < cap_;}))
 			return false;
-        bool wasEmpty = que_.empty();
+
 		que_.emplace(std::move(val));
-		if (wasEmpty) {
-			g.unlock();
-			notEmptyCond_.notify_one();
-		}
+		g.unlock();
+		notEmptyCond_.notify_one();
 		return true;
 	}
 	/**
@@ -209,16 +203,14 @@ public:
 	 *  	   timeout occurred.
 	 */
 	template <class Clock, class Duration>
-	bool try_put_until(value_type* val, const std::chrono::time_point<Clock,Duration>& absTime) {
+	bool try_put_until(value_type val, const std::chrono::time_point<Clock,Duration>& absTime) {
 		unique_guard g(lock_);
-		if (que_.size() >= cap_ && !notFullCond_.wait_until(g, absTime, [this]{return que_.size() < cap_;}))
+		if (!notFullCond_.wait_until(g, absTime, [this]{return que_.size() < cap_;}))
 			return false;
-        bool wasEmpty = que_.empty();
+
 		que_.emplace(std::move(val));
-		if (wasEmpty) {
-			g.unlock();
-			notEmptyCond_.notify_one();
-		}
+		g.unlock();
+		notEmptyCond_.notify_one();
 		return true;
 	}
 	/**
@@ -228,15 +220,16 @@ public:
 	 * @param val Pointer to a variable to receive the value.
 	 */
 	void get(value_type* val) {
+		if (!val)
+			return;
+
 		unique_guard g(lock_);
-		if (que_.empty())
-			notEmptyCond_.wait(g, [this]{return !que_.empty();});
+		notEmptyCond_.wait(g, [this]{return !que_.empty();});
+
 		*val = std::move(que_.front());
 		que_.pop();
-		if (que_.size() == cap_-1) {
-			g.unlock();
-			notFullCond_.notify_one();
-		}
+		g.unlock();
+		notFullCond_.notify_one();
 	}
 	/**
 	 * Retrieve a value from the queue.
@@ -246,14 +239,12 @@ public:
 	 */
 	value_type get() {
 		unique_guard g(lock_);
-		if (que_.empty())
-			notEmptyCond_.wait(g, [this]{return !que_.empty();});
+		notEmptyCond_.wait(g, [this]{return !que_.empty();});
+
 		value_type val = std::move(que_.front());
 		que_.pop();
-		if (que_.size() == cap_-1) {
-			g.unlock();
-			notFullCond_.notify_one();
-		}
+		g.unlock();
+		notFullCond_.notify_one();
 		return val;
 	}
 	/**
@@ -265,21 +256,23 @@ public:
 	 *  	   the queue is empty.
 	 */
 	bool try_get(value_type* val) {
+		if (!val)
+			return false;
+
 		unique_guard g(lock_);
 		if (que_.empty())
 			return false;
+
 		*val = std::move(que_.front());
 		que_.pop();
-		if (que_.size() == cap_-1) {
-			g.unlock();
-			notFullCond_.notify_one();
-		}
+		g.unlock();
+		notFullCond_.notify_one();
 		return true;
 	}
 	/**
-	 * Attempt to remove an item from the queue for a bounded amout of time.
+	 * Attempt to remove an item from the queue for a bounded amount of time.
 	 * This will retrieve the next item from the queue. If the queue is
-	 * empty, it will wait the specified amout of time for an item to arive
+	 * empty, it will wait the specified amount of time for an item to arrive
 	 * before timing out.
 	 * @param val Pointer to a variable to receive the value.
 	 * @param relTime The amount of time to wait until timing out.
@@ -288,21 +281,23 @@ public:
 	 */
 	template <typename Rep, class Period>
 	bool try_get_for(value_type* val, const std::chrono::duration<Rep, Period>& relTime) {
-		unique_guard g(lock_);
-		if (que_.empty() && !notEmptyCond_.wait_for(g, relTime, [this]{return !que_.empty();}))
+		if (!val)
 			return false;
+
+		unique_guard g(lock_);
+		if (!notEmptyCond_.wait_for(g, relTime, [this]{return !que_.empty();}))
+			return false;
+
 		*val = std::move(que_.front());
 		que_.pop();
-		if (que_.size() == cap_-1) {
-			g.unlock();
-			notFullCond_.notify_one();
-		}
+		g.unlock();
+		notFullCond_.notify_one();
 		return true;
 	}
 	/**
-	 * Attempt to remove an item from the queue for a bounded amout of time.
+	 * Attempt to remove an item from the queue for a bounded amount of time.
 	 * This will retrieve the next item from the queue. If the queue is
-	 * empty, it will wait until the specified time for an item to arive
+	 * empty, it will wait until the specified time for an item to arrive
 	 * before timing out.
 	 * @param val Pointer to a variable to receive the value.
 	 * @param absTime The absolute time to wait to before timing out.
@@ -311,15 +306,17 @@ public:
 	 */
 	template <class Clock, class Duration>
 	bool try_get_until(value_type* val, const std::chrono::time_point<Clock,Duration>& absTime) {
-		unique_guard g(lock_);
-		if (que_.empty() && !notEmptyCond_.wait_until(g, absTime, [this]{return !que_.empty();}))
+		if (!val)
 			return false;
+
+		unique_guard g(lock_);
+		if (!notEmptyCond_.wait_until(g, absTime, [this]{return !que_.empty();}))
+			return false;
+
 		*val = std::move(que_.front());
 		que_.pop();
-		if (que_.size() == cap_-1) {
-			g.unlock();
-			notFullCond_.notify_one();
-		}
+		g.unlock();
+		notFullCond_.notify_one();
 		return true;
 	}
 };

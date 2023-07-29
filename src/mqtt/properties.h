@@ -167,8 +167,8 @@ public:
 };
 
 /**
- * Extracts the value from the property as the specitied type.
- * @return The value from the property as the specitied type.
+ * Extracts the value from the property as the specified type.
+ * @return The value from the property as the specified type.
  */
 template <typename T>
 inline T get(const property&) { throw bad_cast(); }
@@ -402,7 +402,7 @@ public:
 
 /**
  * Retrieves a single value from a property list for when there may be
- * multiple identical propert ID's.
+ * multiple identical property ID's.
  * @tparam T The type of the value to retrieve
  * @param props The property list
  * @param propid The property ID code for the desired value.

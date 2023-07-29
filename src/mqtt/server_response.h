@@ -190,7 +190,7 @@ class unsubscribe_response : public server_response
 		}
 	}
 
-	unsubscribe_response(MQTTAsync_successData* rsp) {}
+	unsubscribe_response(MQTTAsync_successData* /*rsp*/) {}
 
 public:
 	/**

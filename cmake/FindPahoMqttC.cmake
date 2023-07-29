@@ -37,7 +37,7 @@ else()
 endif()
 
 if(PAHO_WITH_SSL)
-set_target_properties(PahoMqttC::PahoMqttC PROPERTIES
+    set_target_properties(PahoMqttC::PahoMqttC PROPERTIES
         INTERFACE_COMPILE_DEFINITIONS "OPENSSL=1"
         INTERFACE_LINK_LIBRARIES "OpenSSL::SSL;OpenSSL::Crypto")
 endif()
