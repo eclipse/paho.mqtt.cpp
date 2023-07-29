@@ -77,6 +77,69 @@ TEST_CASE("disconnect_options user constructor", "[options]")
 }
 
 // ----------------------------------------------------------------------
+// Test the copy constructor
+// ----------------------------------------------------------------------
+
+TEST_CASE("disconnect_options copy ctor", "[options]")
+{
+	constexpr std::chrono::milliseconds TIMEOUT { 50 };
+
+	mqtt::disconnect_options orgOpts { TIMEOUT };
+
+	SECTION("simple options") {
+    	mqtt::disconnect_options opts { orgOpts };
+
+    	REQUIRE(TIMEOUT == opts.get_timeout());
+
+    	REQUIRE(opts.get_properties().empty());
+
+    	// Make sure it's a true copy, not linked to the original
+    	orgOpts.set_timeout(0);
+    	REQUIRE(TIMEOUT == opts.get_timeout());
+	}
+
+	SECTION("properties") {
+		orgOpts.set_properties({{ mqtt::property::SESSION_EXPIRY_INTERVAL, 0 }});
+
+		mqtt::disconnect_options opts { orgOpts };
+
+		REQUIRE(opts.get_properties().contains(mqtt::property::SESSION_EXPIRY_INTERVAL));
+		REQUIRE(1 == opts.c_struct().properties.count);
+	}
+}
+
+// ----------------------------------------------------------------------
+// Test the move constructor
+// ----------------------------------------------------------------------
+
+TEST_CASE("disconnect_options move_constructor", "[options]")
+{
+	constexpr std::chrono::milliseconds TIMEOUT { 50 };
+
+	mqtt::disconnect_options orgOpts { TIMEOUT };
+
+	SECTION("simple options") {
+		mqtt::disconnect_options opts { std::move(orgOpts) };
+
+		REQUIRE(TIMEOUT == opts.get_timeout());
+
+    	REQUIRE(opts.get_properties().empty());
+	}
+
+	SECTION("properties") {
+		orgOpts.set_properties({{ mqtt::property::SESSION_EXPIRY_INTERVAL, 0 }});
+
+		mqtt::disconnect_options opts { std::move(orgOpts) };
+
+		REQUIRE(opts.get_properties().contains(mqtt::property::SESSION_EXPIRY_INTERVAL));
+		REQUIRE(1 == opts.c_struct().properties.count);
+
+		// Check that the original was moved
+		REQUIRE(orgOpts.get_properties().empty());
+	}
+}
+
+// ----------------------------------------------------------------------
 // Test set timeout
 // ----------------------------------------------------------------------
 

@@ -62,6 +62,9 @@ connect_options::connect_options(const connect_options& opt) : opts_(opt.opts_),
 	if (opts_.ssl)
 		set_ssl(opt.ssl_);
 
+	if (opts_.connectProperties)
+		set_properties(opt.props_);
+
 	update_c_struct();
 }
 
@@ -85,12 +88,15 @@ connect_options::connect_options(connect_options&& opt) : opts_(opt.opts_),
 
 	if (opts_.ssl)
 		opts_.ssl = &ssl_.opts_;
+	
+	if (opts_.connectProperties)
+		opts_.connectProperties = const_cast<MQTTProperties*>(&props_.c_struct());
 
 	update_c_struct();
 }
 
 // Unfortunately, with the existing implementation, there's no way to know
-// if the will and ssl options were set by looking at the C++ structs.
+// if the (connect) properties, will and ssl options were set by looking at the C++ structs.
 // In a major update, we can consider using a pointer or optional<> to
 // indicate that they were set.
 // But, for now, the copy and assignment operations must handle it manually
@@ -164,7 +170,8 @@ connect_options& connect_options::operator=(const connect_options& opt)
 
 	tok_ = opt.tok_;
 	serverURIs_ = opt.serverURIs_;
-	props_ = opt.props_;
+	if (opts_.connectProperties)
+		set_properties(opt.props_);
 
 	httpHeaders_ = opt.httpHeaders_;
 	httpProxy_ = opt.httpProxy_;
@@ -192,7 +199,8 @@ connect_options& connect_options::operator=(connect_options&& opt)
 
 	tok_ = std::move(opt.tok_);
 	serverURIs_ = std::move(opt.serverURIs_);
-	props_ = std::move(opt.props_);
+	if (opts_.connectProperties)
+		set_properties(std::move(opt.props_));
 
 	httpHeaders_ = std::move(opt.httpHeaders_);
 	httpProxy_ = std::move(opt.httpProxy_);

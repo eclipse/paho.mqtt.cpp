@@ -15,12 +15,12 @@ disconnect_options::disconnect_options() : opts_(DFLT_C_STRUCT)
 }
 
 disconnect_options::disconnect_options(const disconnect_options& opt)
-			: opts_(opt.opts_), tok_(opt.tok_)
+			: opts_(opt.opts_), tok_(opt.tok_), props_(opt.props_)
 {
 }
 
 disconnect_options::disconnect_options(disconnect_options&& opt)
-			: opts_(opt.opts_), tok_(std::move(opt.tok_))
+			: opts_(opt.opts_), tok_(std::move(opt.tok_)), props_(std::move(opt.props_))
 {
 }
 
@@ -28,6 +28,7 @@ disconnect_options& disconnect_options::operator=(const disconnect_options& opt)
 {
 	opts_ = opt.opts_;
 	tok_ = opt.tok_;
+	props_ = opt.props_;
 	return *this;
 }
 
@@ -35,6 +36,7 @@ disconnect_options& disconnect_options::operator=(disconnect_options&& opt)
 {
 	opts_ = opt.opts_;
 	tok_ = std::move(opt.tok_);
+	props_ = std::move(opt.props_);
 	return *this;
 }
 
