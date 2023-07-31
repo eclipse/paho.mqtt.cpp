@@ -22,8 +22,6 @@
 #include "catch2/catch.hpp"
 #include "mqtt/topic_matcher.h"
 
-#include <iostream>
-
 using namespace mqtt;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -52,8 +50,7 @@ TEST_CASE("matcher matches", "[topic_matcher]")
 
 	auto it = matcher.matches("some/random/topic");
 
-	for ( ; it != matcher.end(); ++it) {
-		std::cout << "Matcher got: '" << it->first << "' -> " << it->second << std::endl;
+	for (; it != matcher.end(); ++it) {
 		bool ok = (
 		    (it->first == "some/random/topic" && it->second == 42) ||
 			(it->first == "some/#" &&  it->second == 99) ||

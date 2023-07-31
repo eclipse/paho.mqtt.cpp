@@ -17,12 +17,16 @@ if(PAHO_WITH_MQTT_C)
     add_library(PahoMqttC::PahoMqttC ALIAS ${_PAHO_MQTT_C_LIB_NAME})
 
     ## install paho.mqtt.c library (appending to PahoMqttCpp export)
-    install(TARGETS ${_PAHO_MQTT_C_LIB_NAME} EXPORT PahoMqttCpp
+    install(TARGETS ${_PAHO_MQTT_C_LIB_NAME}
+        EXPORT PahoMqttCpp
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
 
-    find_path(PAHO_MQTT_C_INCLUDE_DIRS NAMES MQTTAsync.h 
-        HINTS ${CMAKE_CURRENT_SOURCE_DIR}/externals/paho-mqtt-c/src)
+    find_path(PAHO_MQTT_C_INCLUDE_DIRS
+        NAMES MQTTAsync.h
+        HINTS ${CMAKE_CURRENT_SOURCE_DIR}/externals/paho-mqtt-c/src
+    )
 else()
     find_library(PAHO_MQTT_C_LIBRARIES NAMES ${_PAHO_MQTT_C_LIB_NAME})
     unset(_PAHO_MQTT_C_LIB_NAME)
@@ -33,13 +37,14 @@ else()
     set_target_properties(PahoMqttC::PahoMqttC PROPERTIES
         IMPORTED_LOCATION "${PAHO_MQTT_C_LIBRARIES}"
         INTERFACE_INCLUDE_DIRECTORIES "${PAHO_MQTT_C_INCLUDE_DIRS}"
-        IMPORTED_LINK_INTERFACE_LANGUAGES "C")
-endif()
+        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+    )
 
-if(PAHO_WITH_SSL)
-    set_target_properties(PahoMqttC::PahoMqttC PROPERTIES
-        INTERFACE_COMPILE_DEFINITIONS "OPENSSL=1"
-        INTERFACE_LINK_LIBRARIES "OpenSSL::SSL;OpenSSL::Crypto")
+    if(PAHO_WITH_SSL)
+        set_target_properties(PahoMqttC::PahoMqttC PROPERTIES
+            INTERFACE_COMPILE_DEFINITIONS "OPENSSL=1"
+            INTERFACE_LINK_LIBRARIES "OpenSSL::SSL;OpenSSL::Crypto")
+    endif()
 endif()
 
 include(FindPackageHandleStandardArgs)
