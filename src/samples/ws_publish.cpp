@@ -57,29 +57,29 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-	string	address  = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS,
-			proxy = (argc > 2) ? string(argv[2]) : DFLT_PROXY_ADDRESS;
+	try {	
+		string	address  = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS,
+				proxy = (argc > 2) ? string(argv[2]) : DFLT_PROXY_ADDRESS;
 
-	cout << "Initializing for server '" << address << "'..." << endl;
-	if (!proxy.empty())
-		cout << "    with proxy '" << proxy << "'" << endl;
+		cout << "Initializing for server '" << address << "'..." << endl;
+		if (!proxy.empty())
+			cout << "    with proxy '" << proxy << "'" << endl;
 
-	mqtt::async_client client(address, "");
+		mqtt::async_client client(address, "");
 
-	// Build the connect options.
+		// Build the connect options.
 
-	auto connBuilder = mqtt::connect_options_builder();
+		auto connBuilder = mqtt::connect_options_builder();
 
-	if (!proxy.empty())
-		connBuilder.http_proxy(proxy);
+		if (!proxy.empty())
+			connBuilder.http_proxy(proxy);
 
-	auto connOpts = connBuilder
-		.keep_alive_interval(std::chrono::seconds(45))
-		.finalize();
+		auto connOpts = connBuilder
+			.keep_alive_interval(std::chrono::seconds(45))
+			.finalize();
 
-	cout << "  ...OK" << endl;
+		cout << "  ...OK" << endl;
 
-	try {
 		// Connect to the server
 
 		cout << "\nConnecting..." << endl;

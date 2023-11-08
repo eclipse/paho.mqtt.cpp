@@ -51,25 +51,25 @@ const auto TIMEOUT = std::chrono::seconds(10);
 
 int main(int argc, char* argv[])
 {
-	if (argc < 4) {
-		cout << "USAGE: rpc_math_cli <add|mult> <num1> <num2> [... numN]" << endl;
-		return 1;
-	}
+	try {	
+		if (argc < 4) {
+			cout << "USAGE: rpc_math_cli <add|mult> <num1> <num2> [... numN]" << endl;
+			return 1;
+		}
 
-	constexpr int QOS = 1;
-	const string REQ_TOPIC_HDR { "requests/math/" };
+		constexpr int QOS = 1;
+		const string REQ_TOPIC_HDR { "requests/math/" };
 
-	mqtt::create_options createOpts(MQTTVERSION_5);
-	mqtt::async_client cli(SERVER_ADDRESS, "", createOpts);
+		mqtt::create_options createOpts(MQTTVERSION_5);
+		mqtt::async_client cli(SERVER_ADDRESS, "", createOpts);
 
-	auto connOpts = mqtt::connect_options_builder()
-					    .mqtt_version(MQTTVERSION_5)
-					    .clean_start()
-						.finalize();
+		auto connOpts = mqtt::connect_options_builder()
+							.mqtt_version(MQTTVERSION_5)
+							.clean_start()
+							.finalize();
 
-	cli.start_consuming();
+		cli.start_consuming();
 
-	try {
 		cout << "Connecting..." << flush;
 		mqtt::token_ptr tok = cli.connect(connOpts);
 		auto connRsp = tok->get_connect_response();

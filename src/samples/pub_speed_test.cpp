@@ -73,29 +73,29 @@ void token_wait_func()
 
 int main(int argc, char* argv[])
 {
-	string	address  = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS;
-	int		nMsg = (argc > 2) ? atoi(argv[2]) : DFLT_N_MSG;
-	size_t	msgSz = (size_t) ((argc > 3) ? atol(argv[3]) : DFLT_PAYLOAD_SIZE);
-	int		qos = (argc > 4) ? atoi(argv[4]) : DFLT_QOS;
+	try {	
+		string	address  = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS;
+		int		nMsg = (argc > 2) ? atoi(argv[2]) : DFLT_N_MSG;
+		size_t	msgSz = (size_t) ((argc > 3) ? atol(argv[3]) : DFLT_PAYLOAD_SIZE);
+		int		qos = (argc > 4) ? atoi(argv[4]) : DFLT_QOS;
 
-	cout << "Initializing for server '" << address << "'..." << flush;
-	mqtt::async_client cli(address, "");
+		cout << "Initializing for server '" << address << "'..." << flush;
+		mqtt::async_client cli(address, "");
 
-	mqtt::message willmsg(TOPIC, LWT_PAYLOAD, 1, true);
-	mqtt::will_options will(willmsg);
+		mqtt::message willmsg(TOPIC, LWT_PAYLOAD, 1, true);
+		mqtt::will_options will(willmsg);
 
-	mqtt::connect_options connOpts;
-	connOpts.set_clean_session(true);
-	connOpts.set_will(will);
+		mqtt::connect_options connOpts;
+		connOpts.set_clean_session(true);
+		connOpts.set_will(will);
 
-	// Create a payload
-	mqtt::binary payload;
-	for (size_t i=0; i<msgSz; ++i)
-		payload.push_back('a' + i%26);
+		// Create a payload
+		mqtt::binary payload;
+		for (size_t i=0; i<msgSz; ++i)
+			payload.push_back('a' + i%26);
 
-	cout << "OK" << endl;
+		cout << "OK" << endl;
 
-	try {
 		// Create the message (move payload into it)
 		auto msg = mqtt::make_message(TOPIC, std::move(payload), qos, false);
 

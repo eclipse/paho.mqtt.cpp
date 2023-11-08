@@ -78,22 +78,22 @@ bool command_handler(const mqtt::message& msg)
 
 int main(int argc, char* argv[])
 {
-	mqtt::client cli(SERVER_ADDRESS, CLIENT_ID,
-					 mqtt::create_options(MQTTVERSION_5));
+	try {	
+		mqtt::client cli(SERVER_ADDRESS, CLIENT_ID,
+						 mqtt::create_options(MQTTVERSION_5));
 
-	auto connOpts = mqtt::connect_options_builder()
-		.mqtt_version(MQTTVERSION_5)
-		.automatic_reconnect(seconds(2), seconds(30))
-		.clean_session(false)
-		.finalize();
+		auto connOpts = mqtt::connect_options_builder()
+			.mqtt_version(MQTTVERSION_5)
+			.automatic_reconnect(seconds(2), seconds(30))
+			.clean_session(false)
+			.finalize();
 
-	// Dispatch table to handle incoming messages based on Subscription ID's.
-	std::vector<handler_t> handler {
-		data_handler,
-		command_handler
-	};
+		// Dispatch table to handle incoming messages based on Subscription ID's.
+		std::vector<handler_t> handler {
+			data_handler,
+			command_handler
+		};
 
-	try {
 		cout << "Connecting to the MQTT server..." << flush;
 		mqtt::connect_response rsp = cli.connect(connOpts);
 		cout << "OK\n" << endl;

@@ -160,19 +160,19 @@ public:
 
 int main(int argc, char* argv[])
 {
-	std::cout << "Initialzing..." << std::endl;
-	sample_mem_persistence persist;
-	mqtt::client client(SERVER_ADDRESS, CLIENT_ID, &persist);
-
-	user_callback cb;
-	client.set_callback(cb);
-
-	mqtt::connect_options connOpts;
-	connOpts.set_keep_alive_interval(20);
-	connOpts.set_clean_session(true);
-	std::cout << "...OK" << std::endl;
-
 	try {
+		std::cout << "Initialzing..." << std::endl;
+		sample_mem_persistence persist;
+		mqtt::client client(SERVER_ADDRESS, CLIENT_ID, &persist);
+
+		user_callback cb;
+		client.set_callback(cb);
+
+		mqtt::connect_options connOpts;
+		connOpts.set_keep_alive_interval(20);
+		connOpts.set_clean_session(true);
+		std::cout << "...OK" << std::endl;
+
 		std::cout << "\nConnecting..." << std::endl;
 		client.connect(connOpts);
 		std::cout << "...OK" << std::endl;

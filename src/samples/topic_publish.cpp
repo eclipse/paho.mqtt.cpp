@@ -58,14 +58,14 @@ const auto TIMEOUT = std::chrono::seconds(10);
 
 int main(int argc, char* argv[])
 {
-	string address = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS;
-
-	cout << "Initializing for server '" << address << "'..." << endl;
-	mqtt::async_client cli(address, "");
-
-	cout << "  ...OK" << endl;
-
 	try {
+		string address = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS;
+
+		cout << "Initializing for server '" << address << "'..." << endl;
+		mqtt::async_client cli(address, "");
+
+		cout << "  ...OK" << endl;
+
 		cout << "\nConnecting..." << endl;
 		cli.connect()->wait();
 		cout << "  ...OK" << endl;

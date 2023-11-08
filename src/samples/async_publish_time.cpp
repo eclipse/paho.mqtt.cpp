@@ -84,44 +84,44 @@ uint64_t timestamp()
 
 int main(int argc, char* argv[])
 {
-	// The server URI (address)
-	string address = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS;
+	try {	
+		// The server URI (address)
+		string address = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS;
 
-	// The amount of time to run (in ms). Zero means "run forever".
-	uint64_t trun = (argc > 2) ? stoll(argv[2]) : 0LL;
+		// The amount of time to run (in ms). Zero means "run forever".
+		uint64_t trun = (argc > 2) ? stoll(argv[2]) : 0LL;
 
-	cout << "Initializing for server '" << address << "'..." << endl;
+		cout << "Initializing for server '" << address << "'..." << endl;
 
-	// We configure to allow publishing to the client while off-line,
-	// and that it's OK to do so before the 1st successful connection.
-	auto createOpts = mqtt::create_options_builder()
-						  .send_while_disconnected(true, true)
-					      .max_buffered_messages(MAX_BUFFERED_MESSAGES)
-						  .delete_oldest_messages()
-						  .finalize();
+		// We configure to allow publishing to the client while off-line,
+		// and that it's OK to do so before the 1st successful connection.
+		auto createOpts = mqtt::create_options_builder()
+							  .send_while_disconnected(true, true)
+							  .max_buffered_messages(MAX_BUFFERED_MESSAGES)
+							  .delete_oldest_messages()
+							  .finalize();
 
-	mqtt::async_client cli(address, "", createOpts);
+		mqtt::async_client cli(address, "", createOpts);
 
-	// Set callbacks for when connected and connection lost.
+		// Set callbacks for when connected and connection lost.
 
-	cli.set_connected_handler([&cli](const std::string&) {
-		std::cout << "*** Connected ("
-			<< timestamp() << ") ***" << std::endl;
-	});
+		cli.set_connected_handler([&cli](const std::string&) {
+			std::cout << "*** Connected ("
+				<< timestamp() << ") ***" << std::endl;
+		});
 
-	cli.set_connection_lost_handler([&cli](const std::string&) {
-		std::cout << "*** Connection Lost ("
-			<< timestamp() << ") ***" << std::endl;
-	});
+		cli.set_connection_lost_handler([&cli](const std::string&) {
+			std::cout << "*** Connection Lost ("
+				<< timestamp() << ") ***" << std::endl;
+		});
 
-	auto willMsg = mqtt::message("test/events", "Time publisher disconnected", 1, true);
-	auto connOpts = mqtt::connect_options_builder()
-		.clean_session()
-		.will(willMsg)
-		.automatic_reconnect(seconds(1), seconds(10))
-		.finalize();
+		auto willMsg = mqtt::message("test/events", "Time publisher disconnected", 1, true);
+		auto connOpts = mqtt::connect_options_builder()
+			.clean_session()
+			.will(willMsg)
+			.automatic_reconnect(seconds(1), seconds(10))
+			.finalize();
 
-	try {
 		// Note that we start the connection, but don't wait for completion.
 		// We configured to allow publishing before a successful connection.
 		cout << "Starting connection..." << endl;

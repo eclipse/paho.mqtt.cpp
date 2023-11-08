@@ -49,14 +49,13 @@ const int  QOS = 1;
 
 int main(int argc, char* argv[])
 {
-	mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
-
 	auto connOpts = mqtt::connect_options_builder()
 		.clean_session(false)
 		.finalize();
 
 	try {
 		// Start consumer before connecting to make sure to not miss messages
+		mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
 
 		cli.start_consuming();
 

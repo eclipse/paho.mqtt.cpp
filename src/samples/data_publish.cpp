@@ -252,31 +252,31 @@ public:
 
 int main(int argc, char* argv[])
 {
-	string address = (argc > 1) ? string(argv[1]) : DFLT_ADDRESS;
+	try {	
+		string address = (argc > 1) ? string(argv[1]) : DFLT_ADDRESS;
 
-	#if defined(_WIN32)
-		mqtt::async_client cli(address, CLIENT_ID, MAX_BUFFERED_MSGS);
-	#else
-		encoded_file_persistence persist("elephant");
-		mqtt::async_client cli(address, CLIENT_ID, MAX_BUFFERED_MSGS, &persist);
-	#endif
+		#if defined(_WIN32)
+			mqtt::async_client cli(address, CLIENT_ID, MAX_BUFFERED_MSGS);
+		#else
+			encoded_file_persistence persist("elephant");
+			mqtt::async_client cli(address, CLIENT_ID, MAX_BUFFERED_MSGS, &persist);
+		#endif
 
-	auto connOpts = mqtt::connect_options_builder()
-		.keep_alive_interval(MAX_BUFFERED_MSGS * PERIOD)
-		.clean_session(true)
-		.automatic_reconnect(true)
-		.finalize();
+		auto connOpts = mqtt::connect_options_builder()
+			.keep_alive_interval(MAX_BUFFERED_MSGS * PERIOD)
+			.clean_session(true)
+			.automatic_reconnect(true)
+			.finalize();
 
-	// Create a topic object. This is a conventience since we will
-	// repeatedly publish messages with the same parameters.
-	mqtt::topic top(cli, TOPIC, QOS, true);
+		// Create a topic object. This is a conventience since we will
+		// repeatedly publish messages with the same parameters.
+		mqtt::topic top(cli, TOPIC, QOS, true);
 
-	// Random number generator [0 - 100]
-	random_device rnd;
-    mt19937 gen(rnd());
-    uniform_int_distribution<> dis(0, 100);
+		// Random number generator [0 - 100]
+		random_device rnd;
+		mt19937 gen(rnd());
+		uniform_int_distribution<> dis(0, 100);
 
-	try {
 		// Connect to the MQTT broker
 		cout << "Connecting to server '" << address << "'..." << flush;
 		cli.connect(connOpts)->wait();

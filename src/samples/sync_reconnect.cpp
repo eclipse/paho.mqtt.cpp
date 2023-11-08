@@ -72,28 +72,28 @@ uint64_t timestamp()
 
 int main(int argc, char* argv[])
 {
+	try {	
 	// The server URI (address)
-	string address = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS;
+		string address = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS;
 
-	// The amount of time to run (in sec). Zero means "run forever".
-	uint64_t trun = (argc > 2) ? stoll(argv[2]) : 0LL;
+		// The amount of time to run (in sec). Zero means "run forever".
+		uint64_t trun = (argc > 2) ? stoll(argv[2]) : 0LL;
 
-	cout << "Initializing for server '" << address << "'..." << endl;
+		cout << "Initializing for server '" << address << "'..." << endl;
 
-	mqtt::client cli(address, "");
+		mqtt::client cli(address, "");
 
-	auto connOpts = mqtt::connect_options_builder()
-		.clean_session()
-		.finalize();
+		auto connOpts = mqtt::connect_options_builder()
+			.clean_session()
+			.finalize();
 
-	cli.set_timeout(seconds(3));
+		cli.set_timeout(seconds(3));
 
-	auto top = cli.get_topic("data/time", QOS);
+		auto top = cli.get_topic("data/time", QOS);
 
-	uint64_t	t = timestamp(),
-				tstart = t;
+		uint64_t	t = timestamp(),
+					tstart = t;
 
-	try {
 		// We need to connect once before we can use reconnect()
 		cli.connect(connOpts);
 

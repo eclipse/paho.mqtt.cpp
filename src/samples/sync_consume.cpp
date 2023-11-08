@@ -50,38 +50,38 @@ const string CLIENT_ID		{ "paho_cpp_sync_consume" };
 
 int main(int argc, char* argv[])
 {
-	mqtt::client cli(SERVER_ADDRESS, CLIENT_ID);
+	try {	
+		mqtt::client cli(SERVER_ADDRESS, CLIENT_ID);
 
-	auto connOpts = mqtt::connect_options_builder()
-		.user_name("user")
-		.password("passwd")
-		.keep_alive_interval(seconds(30))
-		.automatic_reconnect(seconds(2), seconds(30))
-		.clean_session(false)
-		.finalize();
+		auto connOpts = mqtt::connect_options_builder()
+			.user_name("user")
+			.password("passwd")
+			.keep_alive_interval(seconds(30))
+			.automatic_reconnect(seconds(2), seconds(30))
+			.clean_session(false)
+			.finalize();
 
-	// You can install a callback to change some connection data
-	// on auto reconnect attempts. To make a change, update the
-	// `connect_data` and return 'true'.
-	cli.set_update_connection_handler(
-		[](mqtt::connect_data& connData) {
-			string newUserName { "newuser" };
-			if (connData.get_user_name() == newUserName)
-				return false;
+		// You can install a callback to change some connection data
+		// on auto reconnect attempts. To make a change, update the
+		// `connect_data` and return 'true'.
+		cli.set_update_connection_handler(
+			[](mqtt::connect_data& connData) {
+				string newUserName { "newuser" };
+				if (connData.get_user_name() == newUserName)
+					return false;
 
-			cout << "Previous user: '" << connData.get_user_name()
-				<< "'" << endl;
-			connData.set_user_name(newUserName);
-			cout << "New user name: '" << connData.get_user_name()
-				<< "'" << endl;
-			return true;
-		}
-	);
+				cout << "Previous user: '" << connData.get_user_name()
+					<< "'" << endl;
+				connData.set_user_name(newUserName);
+				cout << "New user name: '" << connData.get_user_name()
+					<< "'" << endl;
+				return true;
+			}
+		);
 
-	const vector<string> TOPICS { "data/#", "command" };
-	const vector<int> QOS { 0, 1 };
+		const vector<string> TOPICS { "data/#", "command" };
+		const vector<int> QOS { 0, 1 };
 
-	try {
 		cout << "Connecting to the MQTT server..." << flush;
 		mqtt::connect_response rsp = cli.connect(connOpts);
 		cout << "OK\n" << endl;

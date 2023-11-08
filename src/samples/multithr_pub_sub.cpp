@@ -139,24 +139,24 @@ void publisher_func(mqtt::async_client_ptr cli, multithr_counter::ptr_t counter)
 
 int main(int argc, char* argv[])
 {
-	 string address = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS;
+	try {	
+		string address = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS;
 
-	// Create an MQTT client using a smart pointer to be shared among threads.
-	auto cli = std::make_shared<mqtt::async_client>(address, CLIENT_ID);
+		// Create an MQTT client using a smart pointer to be shared among threads.
+		auto cli = std::make_shared<mqtt::async_client>(address, CLIENT_ID);
 
-	// Make a counter object also with a shared pointer.
-	auto counter = std::make_shared <multithr_counter>();
+		// Make a counter object also with a shared pointer.
+		auto counter = std::make_shared <multithr_counter>();
 
-	// Connect options for a persistent session and automatic reconnects.
-	auto connOpts = mqtt::connect_options_builder()
-		.clean_session(false)
-		.automatic_reconnect(seconds(2), seconds(30))
-		.finalize();
+		// Connect options for a persistent session and automatic reconnects.
+		auto connOpts = mqtt::connect_options_builder()
+			.clean_session(false)
+			.automatic_reconnect(seconds(2), seconds(30))
+			.finalize();
 
-	auto TOPICS = mqtt::string_collection::create({ "data/#", "command" });
-	const vector<int> QOS { 0, 1 };
+		auto TOPICS = mqtt::string_collection::create({ "data/#", "command" });
+		const vector<int> QOS { 0, 1 };
 
-	try {
 		// Start consuming _before_ connecting, because we could get a flood
 		// of stored messages as soon as the connection completes since
 		// we're using a persistent (non-clean) session with the broker.
