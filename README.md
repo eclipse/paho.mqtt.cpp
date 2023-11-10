@@ -12,11 +12,11 @@ The library has the following features:
 - Network Transports:
     - Standard TCP
     - Secure sockets with SSL/TLS
-    - WebSockets 
+    - WebSockets
         - Secure and insecure
         - Proxy support
 - Message persistence
-    - User configurable 
+    - User configurable
     - Built-in File persistence
     - User-defined key/value persistence easy to implement
 - Automatic Reconnect
@@ -35,8 +35,17 @@ To keep up with the latest announcements for this project, or to ask questions:
 
 **EMail:** [Eclipse Paho Mailing List](https://accounts.eclipse.org/mailing-list/paho-dev)
 
-**Mattermost:** [Eclipse Mattermost Paho Channel](https://mattermost.eclipse.org/eclipse/channels/paho)
 
+### Upcoming Version 1.3
+
+It's been a while since there's been an update. But work has started on v1.3! It will do the following:
+
+- Cover all the new features in and up to Paho C v1.3.13
+- Finally release all the new features and bug fixed already in the repo
+- Optionally build the Paho C++ and C libraries at the same time.
+- Resolve many of the reported Issues
+
+Hopefully it will be out by the end of 2023. Just a few weeks away!
 
 ### Unreleased features in this branch
 
