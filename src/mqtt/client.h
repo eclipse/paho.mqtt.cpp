@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013-2020 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2023 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -40,7 +40,7 @@ class client : private callback
 	/** An arbitrary, but relatively long timeout */
 	static const std::chrono::seconds DFLT_TIMEOUT;
 	/** The default quality of service */
-	static constexpr int DFLT_QOS = 1;
+	static const int DFLT_QOS;  // =1;
 
 	/** The actual client */
 	async_client cli_;
