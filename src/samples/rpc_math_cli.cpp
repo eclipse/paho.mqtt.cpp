@@ -15,7 +15,7 @@
 //
 
 /*******************************************************************************
- * Copyright (c) 2019 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2019-2022 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -59,19 +59,15 @@ int main(int argc, char* argv[])
 	constexpr int QOS = 1;
 	const string REQ_TOPIC_HDR { "requests/math/" };
 
+	// Create a client using MQTT v5
 	mqtt::create_options createOpts(MQTTVERSION_5);
 	mqtt::async_client cli(SERVER_ADDRESS, "", createOpts);
-
-	auto connOpts = mqtt::connect_options_builder()
-					    .mqtt_version(MQTTVERSION_5)
-					    .clean_start()
-						.finalize();
 
 	cli.start_consuming();
 
 	try {
 		cout << "Connecting..." << flush;
-		mqtt::token_ptr tok = cli.connect(connOpts);
+		mqtt::token_ptr tok = cli.connect();	//connOpts);
 		auto connRsp = tok->get_connect_response();
 		cout << "OK (" << connRsp.get_server_uri() << ")" << endl;
 

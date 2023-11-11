@@ -273,7 +273,7 @@ public:
 	 *  						  cipher list format, please see the OpenSSL
 	 *  						  on-line documentation:
 	 *  						  http://www.openssl.org/docs/apps/ciphers.html#CIPHER_LIST_FORMAT
-	 *  						  If this setting is ommitted, its default
+	 *  						  If this setting is omitted, its default
 	 *  						  value will be "ALL", that is, all the
 	 *  						  cipher suites -excluding those offering no
 	 *  						  encryption- will be considered. This
@@ -284,10 +284,10 @@ public:
 	void set_enabled_cipher_suites(const string& enabledCipherSuites);
 	/**
 	 * Enables or disables verification of the server certificate.
-	 * @param enablServerCertAuth enable/disable verification of the server
+	 * @param enableServerCertAuth enable/disable verification of the server
 	 *  						  certificate
 	 */
-	void set_enable_server_cert_auth(bool enablServerCertAuth);
+	void set_enable_server_cert_auth(bool enableServerCertAuth);
 	/**
 	 * Gets the requested SSL/TLS version.
 	 * @return The requested SSL/TLS version.
@@ -350,7 +350,7 @@ public:
 	 */
 	std::vector<string> get_alpn_protos() const;
 	/**
-	 * Sets the list of supported ALPN protolols.
+	 * Sets the list of supported ALPN protocols.
 	 * See:
 	 * https://www.openssl.org/docs/man1.1.0/man3/SSL_CTX_set_alpn_protos.html
 	 * @param protos The list of ALPN protocols to be negotiated.
@@ -430,7 +430,7 @@ public:
 	 *  			 explanation of the cipher list format, please see the
 	 *  			 OpenSSL on-line documentation:
 	 *  			 http://www.openssl.org/docs/apps/ciphers.html#CIPHER_LIST_FORMAT
-	 *  			 If this setting is ommitted, its default value will be
+	 *  			 If this setting is omitted, its default value will be
 	 *  			 "ALL", that is, all the cipher suites -excluding those
 	 *  			 offering no encryption- will be considered. This setting
 	 *  			 can be used to set an SSL anonymous connection (empty

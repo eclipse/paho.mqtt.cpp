@@ -1,7 +1,7 @@
 // connect_options.cpp
 
 /*******************************************************************************
- * Copyright (c) 2017-2020 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2017-2023 Frank Pagliughi <fpagliughi@mindspring.com>
  * Copyright (c) 2016 Guilherme M. Ferreira <guilherme.maciel.ferreira@gmail.com>
  *
  * All rights reserved. This program and the accompanying materials
@@ -28,12 +28,19 @@ namespace mqtt {
 const MQTTAsync_connectOptions connect_options::DFLT_C_STRUCT =
 		MQTTAsync_connectOptions_initializer;
 
-connect_options::connect_options() : opts_(DFLT_C_STRUCT)
+const MQTTAsync_connectOptions connect_options::DFLT_C_STRUCT5 =
+		MQTTAsync_connectOptions_initializer5;
+
+connect_options::connect_options(int ver /*=MQTTVERSION_DEFAULT*/)
 {
+	opts_ = (ver < MQTTVERSION_5) ? DFLT_C_STRUCT : DFLT_C_STRUCT5;
 }
 
-connect_options::connect_options(string_ref userName, binary_ref password)
-		: connect_options()
+connect_options::connect_options(
+	string_ref userName, binary_ref password,
+	int ver /*=MQTTVERSION_DEFAULT*/
+)
+		: connect_options(ver)
 {
 	set_user_name(userName);
 	set_password(password);
@@ -54,6 +61,9 @@ connect_options::connect_options(const connect_options& opt) : opts_(opt.opts_),
 
 	if (opts_.ssl)
 		set_ssl(opt.ssl_);
+
+	if (opts_.connectProperties)
+		set_properties(opt.props_);
 
 	update_c_struct();
 }
@@ -78,12 +88,15 @@ connect_options::connect_options(connect_options&& opt) : opts_(opt.opts_),
 
 	if (opts_.ssl)
 		opts_.ssl = &ssl_.opts_;
+	
+	if (opts_.connectProperties)
+		opts_.connectProperties = const_cast<MQTTProperties*>(&props_.c_struct());
 
 	update_c_struct();
 }
 
 // Unfortunately, with the existing implementation, there's no way to know
-// if the will and ssl options were set by looking at the C++ structs.
+// if the (connect) properties, will and ssl options were set by looking at the C++ structs.
 // In a major update, we can consider using a pointer or optional<> to
 // indicate that they were set.
 // But, for now, the copy and assignment operations must handle it manually
@@ -141,6 +154,9 @@ void connect_options::update_c_struct()
 
 connect_options& connect_options::operator=(const connect_options& opt)
 {
+	if (&opt == this)
+		return *this;
+
 	opts_ = opt.opts_;
 
 	if (opts_.will)
@@ -154,7 +170,8 @@ connect_options& connect_options::operator=(const connect_options& opt)
 
 	tok_ = opt.tok_;
 	serverURIs_ = opt.serverURIs_;
-	props_ = opt.props_;
+	if (opts_.connectProperties)
+		set_properties(opt.props_);
 
 	httpHeaders_ = opt.httpHeaders_;
 	httpProxy_ = opt.httpProxy_;
@@ -166,6 +183,9 @@ connect_options& connect_options::operator=(const connect_options& opt)
 
 connect_options& connect_options::operator=(connect_options&& opt)
 {
+	if (&opt == this)
+		return *this;
+
 	opts_ = opt.opts_;
 
 	if (opts_.will)
@@ -179,7 +199,8 @@ connect_options& connect_options::operator=(connect_options&& opt)
 
 	tok_ = std::move(opt.tok_);
 	serverURIs_ = std::move(opt.serverURIs_);
-	props_ = std::move(opt.props_);
+	if (opts_.connectProperties)
+		set_properties(std::move(opt.props_));
 
 	httpHeaders_ = std::move(opt.httpHeaders_);
 	httpProxy_ = std::move(opt.httpProxy_);
@@ -237,6 +258,20 @@ void connect_options::set_ssl(ssl_options&& ssl)
 	opts_.ssl = &ssl_.opts_;
 }
 
+// Clean sessions only apply to MQTT v3, so force it there if set.
+void connect_options::set_clean_session(bool clean)
+{
+	if (opts_.MQTTVersion < MQTTVERSION_5)
+		opts_.cleansession = to_int(clean);
+}
+
+// Clean start only apply to MQTT v5, so force it there if set.
+void connect_options::set_clean_start(bool cleanStart)
+{
+	if (opts_.MQTTVersion >= MQTTVERSION_5)
+		opts_.cleanstart = to_int(cleanStart);
+}
+
 void connect_options::set_token(const token_ptr& tok)
 {
 	tok_ = tok;
@@ -289,6 +324,20 @@ void connect_options::set_automatic_reconnect(int minRetryInterval,
 	opts_.automaticReconnect = to_int(true);
 	opts_.minRetryInterval = minRetryInterval;
 	opts_.maxRetryInterval = maxRetryInterval;
+}
+
+void connect_options::set_properties(const properties& props)
+{
+	props_ = props;
+	opts_.connectProperties = const_cast<MQTTProperties*>(&props_.c_struct());
+	opts_.MQTTVersion = MQTTVERSION_5;
+}
+
+void connect_options::set_properties(properties&& props)
+{
+	props_ = std::move(props);
+	opts_.connectProperties = const_cast<MQTTProperties*>(&props_.c_struct());
+	opts_.MQTTVersion = MQTTVERSION_5;
 }
 
 void connect_options::set_http_proxy(const string& httpProxy)

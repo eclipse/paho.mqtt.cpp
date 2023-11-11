@@ -29,7 +29,7 @@ cmake_minimum_required(VERSION 3.5)
 
 ## project name
 project("paho-mqtt-cpp" 
-    VERSION "1.2.0"
+    VERSION "1.3.0"
     LANGUAGES CXX
 )
 
@@ -49,6 +49,7 @@ endif()
 option(PAHO_BUILD_SAMPLES "Build sample programs" FALSE)
 option(PAHO_BUILD_TESTS "Build tests" FALSE)
 option(PAHO_BUILD_DOCUMENTATION "Create and install the API documentation (requires Doxygen)" FALSE)
+option(PAHO_WITH_MQTT_C "Build Paho C from the internal GIT submodule." FALSE)
 
 ## --- C++11 build flags ---
 
@@ -64,7 +65,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 include(GNUInstallDirs)
 
 if(WIN32)
-	  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
     set(LIBS_SYSTEM ws2_32)
 elseif(UNIX)
@@ -118,5 +119,4 @@ endif()
 
 include(CPack)
 add_subdirectory(cmake)
-
 

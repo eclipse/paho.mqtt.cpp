@@ -15,7 +15,7 @@
 //
 
 /*******************************************************************************
- * Copyright (c) 2019 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2019-2022 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -95,10 +95,9 @@ int main(int argc, char* argv[])
 	mqtt::client cli(SERVER_ADDRESS, CLIENT_ID, createOpts);
 
 	auto connOpts = mqtt::connect_options_builder()
-					    .mqtt_version(MQTTVERSION_5)
-					    .keep_alive_interval(seconds(20))
-					    .clean_start(true)
-						.finalize();
+		.keep_alive_interval(seconds(20))
+		.clean_start()
+		.finalize();
 
 	const vector<string> TOPICS { "requests/math", "requests/math/#" };
 	const vector<int> QOS { 1, 1 };

@@ -7,7 +7,7 @@
 
 /*******************************************************************************
  * Copyright (c) 2016 Guilherme M. Ferreira <guilherme.maciel.ferreira@gmail.com>
- * Copyright (c) 2016-2019 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2016-2023 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -49,9 +49,9 @@ class will_options
 {
 public:
 	/** The default QoS for the LWT, if unspecified */
-	static constexpr int DFLT_QOS = 0;
+	static const int DFLT_QOS;  // =0;
 	/** The defalut retained flag for LWT, if unspecified */
-	static constexpr bool DFLT_RETAINED = false;
+	static const bool DFLT_RETAINED;  // =false;
 
 private:
 	/** A default C struct to support re-initializing variables */

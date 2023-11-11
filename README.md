@@ -12,11 +12,11 @@ The library has the following features:
 - Network Transports:
     - Standard TCP
     - Secure sockets with SSL/TLS
-    - WebSockets 
+    - WebSockets
         - Secure and insecure
         - Proxy support
 - Message persistence
-    - User configurable 
+    - User configurable
     - Built-in File persistence
     - User-defined key/value persistence easy to implement
 - Automatic Reconnect
@@ -35,11 +35,22 @@ To keep up with the latest announcements for this project, or to ask questions:
 
 **EMail:** [Eclipse Paho Mailing List](https://accounts.eclipse.org/mailing-list/paho-dev)
 
-**Mattermost:** [Eclipse Mattermost Paho Channel](https://mattermost.eclipse.org/eclipse/channels/paho)
 
+### Upcoming Version 1.3
+
+It's been a while since there's been an update. But work has started on v1.3! It will do the following:
+
+- Cover all the new features in and up to Paho C v1.3.13
+- Finally release all the new features and bug fixed already in the repo
+- Optionally build the Paho C++ and C libraries at the same time.
+- Resolve many of the reported Issues
+
+Hopefully it will be out by the end of 2023. Just a few weeks away!
 
 ### Unreleased features in this branch
 
+- Added `topic_filter` class for simple topic comparisons (w/ unit tests)
+- Added `topic_matcher` class for matching topics to a collection of filters (w/ unit tests)
 - Added Session Expiry Interval to v5 chat sample
 - Minor tweaks to prepare for C++20
 - Minor cleanup of the tests
@@ -95,9 +106,9 @@ Contributions to this project are gladly welcomed and appreciated Before submitt
  - This is an official Eclipse project, so it is required that all contributors sign an [Eclipse Contributor Agreement (ECA)](https://www.eclipse.org/legal/ECA.php)
  - Please submit all Pull Requests against the _develop_ branch (not master).
  - Please sign all commits.
- 
+
  For full details, see [CONTRIBUTING.md](https://github.com/eclipse/paho.mqtt.cpp/blob/master/CONTRIBUTING.md).
- 
+
 ## Building from source
 
 _CMake_  is a cross-platform build system suitable for Unix and non-Unix platforms such as Microsoft Windows. It is now the only supported build system.
@@ -137,7 +148,7 @@ $ sudo apt-get install build-essential gcc make cmake cmake-gui cmake-curses-gui
 If you will be using secure sockets (and you probably should):
 
 ```
-$ sudo apt-get install libssl-dev 
+$ sudo apt-get install libssl-dev
 ```
 
 Building the documentation requires doxygen and optionally graphviz to be installed:
@@ -146,7 +157,7 @@ Building the documentation requires doxygen and optionally graphviz to be instal
 $ sudo apt-get install doxygen graphviz
 ```
 
-Unit tests are being built using _Catch2_. 
+Unit tests are being built using _Catch2_.
 
 _Catch2_ can be found here: [Catch2](https://github.com/catchorg/Catch2).  You must download and install _Catch2_ to build and run the unit tests locally.
 
@@ -320,7 +331,7 @@ int main(int argc, char* argv[])
         cli.publish(TOPIC, PAYLOAD2, strlen(PAYLOAD2)+1, 0, false);
 
         // Disconnect
-        
+
         cli.disconnect();
     }
     catch (const mqtt::persistence_exception& exc) {

@@ -4,7 +4,7 @@
 //
 
 /*******************************************************************************
- * Copyright (c) 2020 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2020-2022 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -102,6 +102,16 @@ TEST_CASE("get/set", "[topic]")
     }
 }
 
+TEST_CASE("split", "[topic]")
+{
+	auto v = topic::split(TOPIC);
+
+	REQUIRE(3 == v.size());
+	REQUIRE("my" == v[0]);
+	REQUIRE("topic" == v[1]);
+	REQUIRE("name" == v[2]);
+}
+
 // ----------------------------------------------------------------------
 // Publish
 // ----------------------------------------------------------------------
@@ -177,4 +187,48 @@ TEST_CASE("publish full binary", "[topic]")
     REQUIRE(QOS == msg->get_qos());
     REQUIRE(RETAINED == msg->is_retained());
 }
+
+/////////////////////////////////////////////////////////////////////////////
+//						topic_filter
+/////////////////////////////////////////////////////////////////////////////
+
+TEST_CASE("has_wildcards", "[topic_filter]")
+{
+	REQUIRE(!topic_filter::has_wildcards(TOPIC));
+
+	REQUIRE(topic_filter::has_wildcards("some/wild/+/topic"));
+	REQUIRE(topic_filter::has_wildcards("some/multi/wild/#"));
+}
+
+TEST_CASE("matches", "[topic_filter]")
+{
+	SECTION("no_wildcards") {
+		topic_filter filt { TOPIC };
+
+		REQUIRE(filt.matches(TOPIC));
+		REQUIRE(!filt.matches("some/other/topic"));
+	}
+
+	// Test single-level wildcard, '+'
+    SECTION("single_wildcard") {
+		topic_filter filt { "my/+/name" };
+
+		REQUIRE(filt.matches("my/topic/name"));
+		REQUIRE(filt.matches("my/other/name"));
+		REQUIRE(!filt.matches("my/other/id"));
+	}
+
+	// Test multi-level wildcard, '#'
+    SECTION("multi_wildcard") {
+		topic_filter filt { "my/topic/#" };
+
+		REQUIRE(filt.matches("my/topic/name"));
+		REQUIRE(filt.matches("my/topic/id"));
+		REQUIRE(filt.matches("my/topic/name/and/id"));
+
+		REQUIRE(!filt.matches("my/other/name"));
+		REQUIRE(!filt.matches("my/other/id"));
+	}
+}
+
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017-2020 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2017-2023 Frank Pagliughi <fpagliughi@mindspring.com>
  * Copyright (c) 2016 Guilherme M. Ferreira <guilherme.maciel.ferreira@gmail.com>
  *
  * All rights reserved. This program and the accompanying materials
@@ -22,10 +22,8 @@
 
 namespace mqtt {
 
-#if __cplusplus < 201703L
-	constexpr int  will_options::DFLT_QOS;
-	constexpr bool will_options::DFLT_RETAINED;
-#endif
+const int  will_options::DFLT_QOS = 0;
+const bool will_options::DFLT_RETAINED = false;
 
 const MQTTAsync_willOptions will_options::DFLT_C_STRUCT = MQTTAsync_willOptions_initializer;
 

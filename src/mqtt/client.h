@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013-2020 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2023 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -40,7 +40,7 @@ class client : private callback
 	/** An arbitrary, but relatively long timeout */
 	static const std::chrono::seconds DFLT_TIMEOUT;
 	/** The default quality of service */
-	static constexpr int DFLT_QOS = 1;
+	static const int DFLT_QOS;  // =1;
 
 	/** The actual client */
 	async_client cli_;
@@ -68,17 +68,17 @@ class client : private callback
 	// Most are launched in a separate thread, for convenience, except
 	// message_arrived, for performance.
 	void connected(const string& cause) override {
-		std::async(std::launch::async, &callback::connected, userCallback_, cause);
+		std::async(std::launch::async, &callback::connected, userCallback_, cause).wait();
 	}
 	void connection_lost(const string& cause) override {
 		std::async(std::launch::async,
-				   &callback::connection_lost, userCallback_, cause);
+				   &callback::connection_lost, userCallback_, cause).wait();
 	}
 	void message_arrived(const_message_ptr msg) override {
 		userCallback_->message_arrived(msg);
 	}
 	void delivery_complete(delivery_token_ptr tok) override {
-		std::async(std::launch::async, &callback::delivery_complete, userCallback_, tok);
+		std::async(std::launch::async, &callback::delivery_complete, userCallback_, tok).wait();
 	}
 
 	/** Non-copyable */
@@ -231,7 +231,7 @@ public:
 	 */
 	virtual topic get_topic(const string& top, int qos=message::DFLT_QOS,
 							bool retained=message::DFLT_RETAINED) {
-		return topic(cli_, top);
+		return topic(cli_, top, qos, retained);
 	}
 	/**
 	 * Determines if this client is currently connected to the server.

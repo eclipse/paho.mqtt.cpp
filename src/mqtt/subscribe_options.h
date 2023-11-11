@@ -53,17 +53,17 @@ public:
 	using const_ptr_t = std::shared_ptr<const subscribe_options>;
 
 	/** Don't receive our own publications */
-	static constexpr bool SUBSCRIBE_NO_LOCAL = true;
+	static const bool SUBSCRIBE_NO_LOCAL;  // =true;
 	/** Receive our own publications */
-	static constexpr bool SUBSCRIBE_LOCAL = false;
+	static const bool SUBSCRIBE_LOCAL;  // =false;
 
 	/**
 	 * Retain flag is only set on publications sent by a broker if in
 	 * response to a subscribe request
 	 */
-	static constexpr bool NO_RETAIN_AS_PUBLISHED = false;
+	static const bool NO_RETAIN_AS_PUBLISHED;  // =false;
 	/** Keep the retain flag as on the original publish message */
-	static constexpr bool RETAIN_AS_PUBLISHED = true;
+	static const bool RETAIN_AS_PUBLISHED;  // =true;
 
 	/** The options for subscription retain handling */
 	enum RetainHandling {
@@ -135,7 +135,7 @@ public:
 		opts_.retainAsPublished = on ? 1 : 0;
 	}
 	/**
-	 * Gets the "retasin handling" option.
+	 * Gets the "retain handling" option.
 	 * @return When to send retained messages:
 	 *  	@li (SEND_RETAINED_ON_SUBSCRIBE, 0) At the time of the subscribe
 	 *  	@li (SEND_RETAINED_ON_NEW, 1) Only at the time of a new
