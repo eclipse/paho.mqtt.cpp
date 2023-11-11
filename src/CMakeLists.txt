@@ -23,8 +23,17 @@
 #     Frank Pagliughi - made the shared library optional
 #*******************************************************************************/
 
+# --- Find the Paho C library ---
+
 if (NOT TARGET PahoMqttC::PahoMqttC)
     find_package(PahoMqttC REQUIRED)
+endif()
+
+if(PAHO_WITH_MQTT_C)
+    message(STATUS "Paho C: Bundled")
+else()
+    message(STATUS "Paho C Headers: ${PAHO_MQTT_C_INCLUDE_DIRS}")
+    message(STATUS "Paho C Library: ${PAHO_MQTT_C_LIBRARIES}")
 endif()
 
 # --- The headers ---
@@ -35,11 +44,6 @@ add_subdirectory(mqtt)
 
 set (THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-
-#set(LIBS_SYSTEM Threads::Threads)
-#if(WIN32)
-#    string(APPEND LIBS_SYSTEM " ws2_32")
-#endif()
 
 ## --- Use object library to optimize compilation ---
 
@@ -147,7 +151,7 @@ if(PAHO_BUILD_STATIC)
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-    ## Let the archive use the same name as the shared lib on *nix systems
+    ## Let the archive use the same base name as the shared lib on *nix systems
     if(UNIX)
         set_target_properties(paho-mqttpp3-static PROPERTIES OUTPUT_NAME paho-mqttpp3)
     endif()
