@@ -24,7 +24,7 @@
 #define UNIT_TESTS
 
 #include <cstring>
-#include "catch2/catch.hpp"
+#include "catch2_version.h"
 #include "mqtt/iclient_persistence.h"
 #include "mock_persistence.h"
 

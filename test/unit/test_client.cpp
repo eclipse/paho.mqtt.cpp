@@ -26,7 +26,7 @@
 
 #define UNIT_TESTS
 
-#include "catch2/catch.hpp"
+#include "catch2_version.h"
 #include "mqtt/client.h"
 #include "mock_persistence.h"
 #include "mock_callback.h"

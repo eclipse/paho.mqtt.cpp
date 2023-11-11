@@ -20,6 +20,26 @@
  *******************************************************************************/
 
 // This tells Catch to provide a main() - only do this in one cpp file
-#define CATCH_CONFIG_MAIN
-#include "catch2/catch.hpp"
+//#define CATCH_CONFIG_MAIN
+//#include "catch2_version.h"
+
+// This seems to be required, at least for MSVS 2015 on Win7,
+// using Catch2 v2.9.2
+#if defined(_WIN32)
+    #define CATCH_CONFIG_DISABLE_EXCEPTIONS
+#endif
+
+#define CATCH_CONFIG_RUNNER
+#include "catch2_version.h"
+
+int main(int argc, char* argv[])
+{
+    // global setup...
+
+    int result = Catch::Session().run(argc, argv);
+
+    // global clean-up...
+
+    return result;
+}
 

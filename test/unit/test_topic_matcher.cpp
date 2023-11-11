@@ -19,7 +19,7 @@
 
 #define UNIT_TESTS
 
-#include "catch2/catch.hpp"
+#include "catch2_version.h"
 #include "mqtt/topic_matcher.h"
 
 using namespace mqtt;

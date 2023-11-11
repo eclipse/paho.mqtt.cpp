@@ -22,7 +22,7 @@
 
 #define UNIT_TESTS
 
-#include "catch2/catch.hpp"
+#include "catch2_version.h"
 #include "mqtt/connect_options.h"
 #include "mock_async_client.h"
 
@@ -349,11 +349,14 @@ TEST_CASE("connect_options set_user", "[options]")
 
 TEST_CASE("connect_options set_long_user", "[options]")
 {
+
 	std::string user;
 	std::string passwd;
 	for (int i=0; i<1053; ++i) {
-		if (isprint(char(i))) user.push_back(char(i));
-		passwd.push_back(byte(i));
+        auto by = byte(i % 128);
+		if (isprint(char(by)))
+            user.push_back(char(by));
+		passwd.push_back(by);
 	}
 
 	mqtt::connect_options orgOpts;

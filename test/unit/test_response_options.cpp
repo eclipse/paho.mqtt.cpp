@@ -5,7 +5,7 @@
 
 /*******************************************************************************
  * Copyright (c) 2016 Guilherme M. Ferreira <guilherme.maciel.ferreira@gmail.com>
- * Copyright (c) 2020 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2020-2023 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -27,7 +27,7 @@
 #define UNIT_TESTS
 
 #include <cstring>
-#include "catch2/catch.hpp"
+#include "catch2_version.h"
 #include "mqtt/response_options.h"
 #include "mock_async_client.h"
 

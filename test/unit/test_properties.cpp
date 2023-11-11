@@ -6,7 +6,7 @@
 
 #include <iostream>
 #include <cstring>
-#include "catch2/catch.hpp"
+#include "catch2_version.h"
 #include "mqtt/properties.h"
 
 using namespace mqtt;

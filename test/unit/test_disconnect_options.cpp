@@ -21,7 +21,7 @@
 #define UNIT_TESTS
 
 #include <cstring>
-#include "catch2/catch.hpp"
+#include "catch2_version.h"
 #include "mqtt/disconnect_options.h"
 #include "mock_async_client.h"
 

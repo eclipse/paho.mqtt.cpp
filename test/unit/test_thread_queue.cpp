@@ -21,7 +21,7 @@
 
 #define UNIT_TESTS
 
-#include "catch2/catch.hpp"
+#include "catch2_version.h"
 #include "mqtt/types.h"
 #include "mqtt/thread_queue.h"
 
@@ -52,7 +52,7 @@ TEST_CASE("que mt put/get", "[thread_queue]")
 	const size_t N = 1000000;
 	const size_t N_THR = 2;
 
-	auto producer = [&que]() {
+	auto producer = [&que, &N]() {
 		string s;
 		for (size_t i=0; i<512; ++i)
 			s.push_back('a' + i%26);
@@ -61,7 +61,7 @@ TEST_CASE("que mt put/get", "[thread_queue]")
 			que.put(s);
 	};
 
-	auto consumer = [&que]() {
+	auto consumer = [&que, &N]() {
 		string s;
 		bool ok = true;
 		for (size_t i=0; i<N && ok; ++i) {
