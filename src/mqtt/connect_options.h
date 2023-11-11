@@ -300,7 +300,7 @@ public:
 	 * This will only take effect if the version is _already_ set to v3.x
 	 * (not v5).
 	 *
-	 * @param clean @em true if the server should remember state for the
+	 * @param clean @em true if the server should NOT remember state for the
 	 *  			client across reconnects, @em false otherwise.
 	 */
 	void set_clean_session(bool cleanSession);
@@ -314,7 +314,7 @@ public:
 	 *
 	 * This will only take effect if the MQTT version is set to v5
 	 *
-	 * @param clean @em true if the server should remember state for the
+	 * @param clean @em true if the server should NOT remember state for the
 	 *  			client across reconnects, @em false otherwise.
 	 */
 	void set_clean_start(bool cleanStart);
@@ -631,8 +631,8 @@ public:
 	/**
 	 * Sets whether the server should remember state for the client across
 	 * reconnects. (MQTT v3.x only)
-	 * @param on @em true if the server should remember state for the client
-	 *  		 across reconnects, @em false otherwise.
+	 * @param on @em true if the server should NOT remember state for the
+	 *  		 client across reconnects, @em false otherwise.
 	 */
 	auto clean_session(bool on=true) -> self& {
 		opts_.set_clean_session(on);
