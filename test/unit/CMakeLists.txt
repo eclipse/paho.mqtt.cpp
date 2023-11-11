@@ -58,7 +58,7 @@ if(PAHO_WITH_SSL)
 endif()
 
 if (Catch2_VERSION VERSION_LESS "3.0")
-    target_compile_definitions(CATCH2_V2)
+    target_compile_definitions(unit_tests PUBLIC CATCH2_V2)
 endif()
 
 # --- Link for executables ---
