@@ -54,8 +54,8 @@ TEST_CASE("persistence", "[persistence]")
 {
 	dcp per_;
 	void* handle_;
+	void* context = dynamic_cast<iclient_persistence*>(&per_);
 
-	void* context = static_cast<void*>(&per_);
 	dcp::persistence_open(&handle_, CLIENT_ID, SERVER_URI, context);
 
 	// Put no buffer
@@ -69,13 +69,14 @@ TEST_CASE("persistence", "[persistence]")
 	SECTION("test persistence open") {
 		dcp per;
 		void* handle = nullptr;
+		void* context = dynamic_cast<iclient_persistence*>(&per);
 
 		REQUIRE(MQTTCLIENT_PERSISTENCE_ERROR ==
 				dcp::persistence_open(&handle, CLIENT_ID, SERVER_URI, nullptr));
 
 		REQUIRE(MQTTASYNC_SUCCESS ==
-				dcp::persistence_open(&handle, CLIENT_ID, SERVER_URI, &per));
-		REQUIRE(handle == static_cast<void*>(&per));
+				dcp::persistence_open(&handle, CLIENT_ID, SERVER_URI, context));
+		REQUIRE(handle == context);
 	}
 
 
@@ -89,11 +90,11 @@ TEST_CASE("persistence", "[persistence]")
 		REQUIRE(MQTTCLIENT_PERSISTENCE_ERROR ==
 				dcp::persistence_close(nullptr));
 
-		void* context = static_cast<void*>(&per);
+		void* context = dynamic_cast<iclient_persistence*>(&per);
 		void* handle = nullptr;
 		dcp::persistence_open(&handle, CLIENT_ID, SERVER_URI, context);
 
-		REQUIRE(MQTTASYNC_SUCCESS == dcp::persistence_close(handle));
+ 		REQUIRE(MQTTASYNC_SUCCESS == dcp::persistence_close(handle));
 	}
 
     // ----------------------------------------------------------------------
@@ -103,7 +104,7 @@ TEST_CASE("persistence", "[persistence]")
     SECTION("test persistence put 0 buffer") {
     	dcp per;
     	void* handle;
-    	dcp::persistence_open(&handle, CLIENT_ID, SERVER_URI, &per);
+    	dcp::persistence_open(&handle, CLIENT_ID, SERVER_URI, dynamic_cast<iclient_persistence*>(&per));
 
     	// Put no buffer
     	int bufcount = 0;
@@ -118,7 +119,7 @@ TEST_CASE("persistence", "[persistence]")
     SECTION("persistence put 1 buffer") {
     	dcp per;
     	void* handle;
-    	dcp::persistence_open(&handle, CLIENT_ID, SERVER_URI, &per);
+    	dcp::persistence_open(&handle, CLIENT_ID, SERVER_URI, dynamic_cast<iclient_persistence*>(&per));
 
     	// Put no buffer
     	int bufcount = 1;
@@ -137,7 +138,7 @@ TEST_CASE("persistence", "[persistence]")
     SECTION("test persistence put 2 buffers") {
     	dcp per;
     	void* handle;
-    	dcp::persistence_open(&handle, CLIENT_ID, SERVER_URI, &per);
+    	dcp::persistence_open(&handle, CLIENT_ID, SERVER_URI, dynamic_cast<iclient_persistence*>(&per));
 
     	// Put no buffer
     	int bufcount = 2;
@@ -163,8 +164,8 @@ TEST_CASE("persistence", "[persistence]")
     SECTION("test persistence put empty buffers") {
     	dcp per;
     	void* handle;
-    	dcp::persistence_open(&handle, CLIENT_ID, SERVER_URI, &per);
-
+    	dcp::persistence_open(&handle, CLIENT_ID, SERVER_URI, dynamic_cast<iclient_persistence*>(&per));
+		
     	// Put three empty buffers
     	int bufcount = 3;
     	const char* buffers[] = { "", "", "" };
@@ -250,5 +251,3 @@ TEST_CASE("persistence", "[persistence]")
 	dcp::persistence_clear(handle_);
 	dcp::persistence_close(handle_);
 }
-
-

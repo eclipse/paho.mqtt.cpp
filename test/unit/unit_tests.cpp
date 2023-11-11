@@ -4,7 +4,7 @@
 //
 
 /*******************************************************************************
- * Copyright (c) 2019 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2019-2023 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,10 +18,6 @@
  * Contributors:
  *    Frank Pagliughi - initial implementation
  *******************************************************************************/
-
-// This tells Catch to provide a main() - only do this in one cpp file
-//#define CATCH_CONFIG_MAIN
-//#include "catch2_version.h"
 
 // This seems to be required, at least for MSVS 2015 on Win7,
 // using Catch2 v2.9.2
