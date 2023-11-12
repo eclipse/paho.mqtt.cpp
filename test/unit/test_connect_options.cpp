@@ -35,6 +35,7 @@ static const size_t CSIG_LEN = std::strlen(CSIG);
 
 // These must match the C init struct
 static const int DFLT_KEEP_ALIVE = 60;
+static const int DFLT_WS_KEEP_ALIVE = 45;
 static const int DFLT_CONNECT_TIMEOUT = 30;
 static const bool DFLT_AUTO_RECONNECT = false;
 
@@ -44,9 +45,9 @@ static const std::string PASSWD { "xyzpdq" };
 static const std::string EMPTY_STR;
 
 static const std::vector<string> URIsVec = {
-    "tcp://server1:1883",
-    "tcp://server2:1883",
-    "ssl://server3:8883"
+    "mqtt://server1:1883",
+    "mqtt://server2:1883",
+    "mqtts://server3:8883"
 };
 const const_string_collection_ptr URIs = std::make_shared<const string_collection>(URIsVec);
 
@@ -54,7 +55,6 @@ static constexpr token::Type TOKEN_TYPE = token::Type::CONNECT;
 
 static const std::string HTTP_PROXY  { "http://localhost:80" };
 static const std::string HTTPS_PROXY { "https://localhost:443" };
-
 
 // ----------------------------------------------------------------------
 // Test the default constructor
@@ -501,5 +501,49 @@ TEST_CASE("set_token", "[options]")
 		opts.set_automatic_reconnect(false);
 		REQUIRE_FALSE(opts.get_automatic_reconnect());
 	}
+}
+
+// ----------------------------------------------------------------------
+// Test the builder constructors
+// ----------------------------------------------------------------------
+
+TEST_CASE("connect_options_builder default generator", "[options]")
+{
+	mqtt::connect_options opts;
+
+	// Default is v3.x
+
+	opts = mqtt::connect_options_builder().finalize();
+
+	REQUIRE(MQTTVERSION_DEFAULT == opts.get_mqtt_version());
+	REQUIRE(DFLT_KEEP_ALIVE == (int) opts.get_keep_alive_interval().count());
+
+	// Explicit v3
+
+	opts = mqtt::connect_options_builder::v3().finalize();
+
+	REQUIRE(MQTTVERSION_DEFAULT == opts.get_mqtt_version());
+	REQUIRE(DFLT_KEEP_ALIVE == (int) opts.get_keep_alive_interval().count());
+
+	// v5
+
+	opts = mqtt::connect_options_builder::v5().finalize();
+
+	REQUIRE(MQTTVERSION_5 == opts.get_mqtt_version());
+	REQUIRE(DFLT_KEEP_ALIVE == (int) opts.get_keep_alive_interval().count());
+
+	// WebSocket
+
+	opts = mqtt::connect_options_builder::ws().finalize();
+
+	REQUIRE(MQTTVERSION_DEFAULT == opts.get_mqtt_version());
+	REQUIRE(DFLT_WS_KEEP_ALIVE == (int) opts.get_keep_alive_interval().count());
+
+	// Explicit WebSocket v5
+
+	opts = mqtt::connect_options_builder::v5_ws().finalize();
+
+	REQUIRE(MQTTVERSION_5 == opts.get_mqtt_version());
+	REQUIRE(DFLT_WS_KEEP_ALIVE == (int) opts.get_keep_alive_interval().count());
 }
 

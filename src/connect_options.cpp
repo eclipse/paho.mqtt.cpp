@@ -31,6 +31,12 @@ const MQTTAsync_connectOptions connect_options::DFLT_C_STRUCT =
 const MQTTAsync_connectOptions connect_options::DFLT_C_STRUCT5 =
 		MQTTAsync_connectOptions_initializer5;
 
+const MQTTAsync_connectOptions connect_options::DFLT_C_STRUCT_WS =
+		MQTTAsync_connectOptions_initializer_ws;
+
+const MQTTAsync_connectOptions connect_options::DFLT_C_STRUCT5_WS =
+		MQTTAsync_connectOptions_initializer5_ws;
+
 connect_options::connect_options(int ver /*=MQTTVERSION_DEFAULT*/)
 {
 	opts_ = (ver < MQTTVERSION_5) ? DFLT_C_STRUCT : DFLT_C_STRUCT5;

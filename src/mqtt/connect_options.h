@@ -46,11 +46,17 @@ namespace mqtt {
  */
 class connect_options
 {
-	/** The default C struct */
+	/** The default C struct for non-WebSocket connections */
 	static const MQTTAsync_connectOptions DFLT_C_STRUCT;
 
-	/** The default C struct for MQTT v5 */
+	/** The default C struct for non-Websocket MQTT v5 connections */
 	static const MQTTAsync_connectOptions DFLT_C_STRUCT5;
+
+	/** The default C struct for WebSocket connections */
+	static const MQTTAsync_connectOptions DFLT_C_STRUCT_WS;
+
+	/** The default C struct for Websocket MQTT v5 connections */
+	static const MQTTAsync_connectOptions DFLT_C_STRUCT5_WS;
 
 	/** The underlying C connection options */
 	MQTTAsync_connectOptions opts_;
@@ -109,6 +115,12 @@ class connect_options
 	 */
 	void update_c_struct();
 
+	/**
+	 * Creates the options from a C option struct.
+	 * @param copts The C options struct.
+	 */
+	connect_options(const MQTTAsync_connectOptions& copts) : opts_(copts) {}
+
 public:
 	/** Smart/shared pointer to an object of this class. */
 	using ptr_t = std::shared_ptr<connect_options>;
@@ -141,6 +153,42 @@ public:
 	 * @param opt Another object to move into this new one.
 	 */
 	connect_options(connect_options&& opt);
+	/**
+	 * Creates default options for an MQTT v3.x connection.
+	 * @return Default options for an MQTT v3.x connection.
+	 */
+	static connect_options v3() {
+		return connect_options(DFLT_C_STRUCT);
+	}
+	/**
+	 * Creates default options for an MQTT v5 connection.
+	 * @return Default options for an MQTT v5 connection.
+	 */
+	static connect_options v5() {
+		return connect_options(DFLT_C_STRUCT5);
+	}
+	/**
+	 * Creates default options for an MQTT v3.x connection using WebSockets.
+	 *
+	 * The keepalive interval is set to 45 seconds to avoid webserver 60
+	 * second inactivity timeouts.
+	 *
+	 * @return Default options for an MQTT v3.x connection using websockets.
+	 */
+	static connect_options ws() {
+		return connect_options(DFLT_C_STRUCT_WS);
+	}
+	/**
+	 * Creates default options for an MQTT v5 connection using WebSockets.
+	 *
+	 * The keepalive interval is set to 45 seconds to avoid webserver 60
+	 * second inactivity timeouts.
+	 *
+	 * @return Default options for an MQTT v5 connection using websockets.
+	 */
+	static connect_options v5_ws() {
+		return connect_options(DFLT_C_STRUCT5_WS);
+	}
 	/**
 	 * Copy assignment.
 	 * @param opt Another object to copy.
@@ -628,6 +676,54 @@ public:
 	 * Default constructor.
 	 */
 	explicit connect_options_builder(int ver=MQTTVERSION_DEFAULT) : opts_(ver) {}
+	/**
+	 * Copy constructor from an existing set of options.
+	 */
+	explicit connect_options_builder(const connect_options& opts) : opts_(opts) {}
+	/**
+	 * Move constructor from an existing set of options.
+	 */
+	explicit connect_options_builder(const connect_options&& opts) : opts_(std::move(opts)) {}
+	/**
+	 * Creates the default options builder for an MQTT v3.x connection.
+	 * @return An options builder for an MQTT v3.x connection.
+	 */
+	static connect_options_builder v3() {
+		return connect_options_builder{ connect_options::v3() };
+	}
+	/**
+	 * Creates the default options builder for an MQTT v5 connection.
+	 * @return An options builder for an MQTT v5 connection.
+	 */
+	static connect_options_builder v5() {
+		return connect_options_builder{ connect_options::v5() };
+	}
+	/**
+	 * Creates the default options builder for an MQTT v3.x connection using
+	 * WebSockets.
+	 *
+	 * The keepalive interval is set to 45 seconds to avoid webserver 60
+	 * second inactivity timeouts.
+	 *
+	 * @return An options builder for an MQTT v3.x connection using
+	 *  	   websockets.
+	 */
+	static connect_options_builder ws() {
+		return connect_options_builder{ connect_options::ws() };
+	}
+	/**
+	 * Creates the default options for an MQTT v5 connection using
+	 * WebSockets
+	 * .
+	 * The keepalive interval is set to 45 seconds to avoid webserver 60
+	 * second inactivity timeouts.
+	 *
+	 * @return An options builder for an MQTT v5 connection using
+	 *  	   websockets.
+	 */
+	static connect_options_builder v5_ws() {
+		return connect_options_builder{ connect_options::v5_ws() };
+	}
 	/**
 	 * Sets whether the server should remember state for the client across
 	 * reconnects. (MQTT v3.x only)
