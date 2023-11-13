@@ -15,7 +15,7 @@
 //
 
 /*******************************************************************************
- * Copyright (c) 2019-2022 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2019-2023 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -44,7 +44,7 @@
 using namespace std;
 using namespace std::chrono;
 
-const string SERVER_ADDRESS { "tcp://localhost:1883" };
+const string SERVER_ADDRESS { "mqtt://localhost:1883" };
 const auto TIMEOUT = std::chrono::seconds(10);
 
 /////////////////////////////////////////////////////////////////////////////

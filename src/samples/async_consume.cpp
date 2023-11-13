@@ -13,7 +13,7 @@
 //
 
 /*******************************************************************************
- * Copyright (c) 2013-2020 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2023 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -39,7 +39,7 @@
 
 using namespace std;
 
-const string SERVER_ADDRESS	{ "tcp://localhost:1883" };
+const string SERVER_ADDRESS	{ "mqtt://localhost:1883" };
 const string CLIENT_ID		{ "paho_cpp_async_consume" };
 const string TOPIC 			{ "hello" };
 

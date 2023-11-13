@@ -32,7 +32,7 @@
 //
 
 /*******************************************************************************
- * Copyright (c) 2020 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2020-2023 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -60,7 +60,7 @@
 using namespace std;
 using namespace std::chrono;
 
-const std::string DFLT_SERVER_ADDRESS("tcp://localhost:1883");
+const std::string DFLT_SERVER_ADDRESS("mqtt://localhost:1883");
 const std::string CLIENT_ID("multithr_pub_sub_cpp");
 
 /////////////////////////////////////////////////////////////////////////////
