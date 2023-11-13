@@ -697,26 +697,26 @@ public:
 	 * This initializes the client to receive messages through a queue that
 	 * can be read synchronously.
 	 */
-	void start_consuming();
+	void start_consuming() override;
 	/**
 	 * Stop consuming messages.
 	 * This shuts down the internal callback and discards any unread
 	 * messages.
 	 */
-	void stop_consuming();
+	void stop_consuming() override;
 	/**
 	 * Read the next message from the queue.
 	 * This blocks until a new message arrives.
 	 * @return The message and topic.
 	 */
-	const_message_ptr consume_message() { return que_->get(); }
+	const_message_ptr consume_message() override { return que_->get(); }
 	/**
 	 * Try to read the next message from the queue without blocking.
 	 * @param msg Pointer to the value to receive the message
 	 * @return @em true is a message was read, @em false if no message was
 	 *  	   available.
 	 */
-	bool try_consume_message(const_message_ptr* msg) {
+	bool try_consume_message(const_message_ptr* msg) override {
 		return que_->try_get(msg);
 	}
 	/**

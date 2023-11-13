@@ -33,7 +33,7 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-class mock_async_client : public mqtt::iasync_client
+class mock_async_client : public virtual mqtt::iasync_client
 {
 public:
 	void remove_token(mqtt::token* tok) override {}
@@ -209,6 +209,16 @@ public:
 								const properties& props=properties()) override {
 		return mqtt::token_ptr{};
 	}
+
+	void start_consuming() override {}
+	void stop_consuming() override {}
+
+	const_message_ptr consume_message() override {
+		return const_message_ptr{};
+	}
+
+	bool try_consume_message(const_message_ptr*) override { return false; }
+
 };
 
 /////////////////////////////////////////////////////////////////////////////

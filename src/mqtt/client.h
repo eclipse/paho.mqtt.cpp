@@ -377,26 +377,26 @@ public:
 	 * This initializes the client to receive messages through a queue that
 	 * can be read synchronously.
 	 */
-	void start_consuming() { cli_.start_consuming(); }
+	virtual void start_consuming() { cli_.start_consuming(); }
 	/**
 	 * Stop consuming messages.
 	 * This shuts down the internal callback and discards any unread
 	 * messages.
 	 */
-	void stop_consuming() { cli_.stop_consuming(); }
+	virtual void stop_consuming() { cli_.stop_consuming(); }
 	/**
 	 * Read the next message from the queue.
 	 * This blocks until a new message arrives.
 	 * @return The message and topic.
 	 */
-	const_message_ptr consume_message() { return cli_.consume_message(); }
+	virtual const_message_ptr consume_message() { return cli_.consume_message(); }
 	/**
 	 * Try to read the next message from the queue without blocking.
 	 * @param msg Pointer to the value to receive the message
 	 * @return @em true is a message was read, @em false if no message was
 	 *  	   available.
 	 */
-	bool try_consume_message(const_message_ptr* msg) {
+	virtual bool try_consume_message(const_message_ptr* msg) {
 		return cli_.try_consume_message(msg);
 	}
 	/**
