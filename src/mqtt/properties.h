@@ -341,19 +341,6 @@ public:
 	 */
 	size_t size() const { return size_t(props_.count); }
 	/**
-	 * Gets the number of bytes required for the serialized
-	 * structure on the wire.
-	 * @return The number of bytes required for the serialized
-	 *  	   struct.
-	 */
-    #if 0
-    // Note: This isn't exported by the shared library. Perhaps we can change
-    // that in the upstream C lib.
-	size_t byte_length() const {
-		return (size_t) ::MQTTProperties_len(const_cast<MQTTProperties*>(&props_));
-	}
-    #endif
-	/**
 	 * Adds a property to the list.
 	 * @param prop The property to add to the list.
 	 */

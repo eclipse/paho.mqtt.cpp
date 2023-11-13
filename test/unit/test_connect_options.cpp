@@ -547,3 +547,29 @@ TEST_CASE("connect_options_builder default generator", "[options]")
 	REQUIRE(DFLT_WS_KEEP_ALIVE == (int) opts.get_keep_alive_interval().count());
 }
 
+// ----------------------------------------------------------------------
+// Test the builder
+// ----------------------------------------------------------------------
+
+TEST_CASE("connect_options_builder set", "[options]")
+{
+	const uint32_t INTERVAL = 80000;
+
+	mqtt::properties conn_props{
+		mqtt::property{mqtt::property::SESSION_EXPIRY_INTERVAL, INTERVAL}};
+
+	auto opts = mqtt::connect_options_builder()
+		.properties(conn_props)
+		.finalize();
+
+	auto& props = opts.get_properties();
+
+	REQUIRE(!props.empty());
+	REQUIRE(1 == props.size());
+	REQUIRE(INTERVAL == get<uint32_t>(props, mqtt::property::SESSION_EXPIRY_INTERVAL));
+
+	const auto& copts = opts.c_struct();
+	REQUIRE(nullptr != copts.connectProperties);
+}
+
+
