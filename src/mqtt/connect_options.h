@@ -567,11 +567,6 @@ public:
 	 *  			 proxy.
 	 */
 	void set_https_proxy(const string& httpsProxy);
-	/**
-	 * Gets a string representation of the object.
-	 * @return A string representation of the object.
-	 */
-	string to_string() const;
 };
 
 /** Smart/shared pointer to a connection options object. */
