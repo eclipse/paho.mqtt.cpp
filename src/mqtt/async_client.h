@@ -121,6 +121,8 @@ private:
 	update_connection_handler updateConnectionHandler_;
 	/** Message handler */
 	message_handler msgHandler_;
+  /** Cached options from the last connect */
+  connect_options connOpts_;
 	/** Copy of connect token (for re-connects) */
 	token_ptr connTok_;
 	/** A list of tokens that are in play */

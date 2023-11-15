@@ -278,7 +278,6 @@ int async_client::on_update_connection(void* context,
 	return 0;	// false
 }
 
-
 // --------------------------------------------------------------------------
 // Private methods
 
@@ -415,7 +414,7 @@ void async_client::set_update_connection_handler(update_connection_handler cb)
 
 token_ptr async_client::connect()
 { 
-	return connect(connect_options());
+	return connect(connect_options{});
 }
 
 token_ptr async_client::connect(connect_options opts)
@@ -448,7 +447,8 @@ token_ptr async_client::connect(connect_options opts)
 
 	opts.set_token(connTok_);
 
-	int rc = MQTTAsync_connect(cli_, &opts.opts_);
+	connOpts_ = std::move(opts);
+	int rc = MQTTAsync_connect(cli_, &connOpts_.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(connTok_);
@@ -482,7 +482,8 @@ token_ptr async_client::connect(connect_options opts, void* userContext,
 
 	opts.set_token(connTok_);
 
-	int rc = MQTTAsync_connect(cli_, &opts.opts_);
+	connOpts_ = std::move(opts);
+	int rc = MQTTAsync_connect(cli_, &connOpts_.opts_);
 
 	if (rc != MQTTASYNC_SUCCESS) {
 		remove_token(connTok_);
