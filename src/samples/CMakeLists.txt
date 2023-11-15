@@ -5,7 +5,7 @@
 #*******************************************************************************
 # This is part of the Paho MQTT C++ client library.
 #
-# Copyright (c) 2016-2019
+# Copyright (c) 2016-2023
 # 
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
@@ -36,6 +36,7 @@ add_executable(async_publish async_publish.cpp)
 add_executable(async_publish_time async_publish_time.cpp)
 add_executable(async_subscribe async_subscribe.cpp)
 add_executable(async_consume async_consume.cpp)
+add_executable(async_consume_v5 async_consume_v5.cpp)
 add_executable(sync_publish sync_publish.cpp)
 add_executable(sync_consume sync_consume.cpp)
 add_executable(sync_consume_v5 sync_consume_v5.cpp)
@@ -54,6 +55,7 @@ target_link_libraries(async_publish ${PAHO_CPP_LIB})
 target_link_libraries(async_publish_time ${PAHO_CPP_LIB})
 target_link_libraries(async_subscribe ${PAHO_CPP_LIB})
 target_link_libraries(async_consume ${PAHO_CPP_LIB})
+target_link_libraries(async_consume_v5 ${PAHO_CPP_LIB})
 target_link_libraries(sync_publish ${PAHO_CPP_LIB})
 target_link_libraries(sync_consume ${PAHO_CPP_LIB})
 target_link_libraries(sync_consume_v5 ${PAHO_CPP_LIB})
@@ -71,18 +73,19 @@ set(INSTALL_TARGETS
 	async_publish
 	async_publish_time
 	async_subscribe
-	async_consume
+    async_consume
+    async_consume_v5
 	sync_publish
-  sync_consume
-  sync_consume_v5
-  sync_reconnect
+    sync_consume
+    sync_consume_v5
+    sync_reconnect
 	data_publish
 	rpc_math_cli
 	rpc_math_srvr
 	mqttpp_chat
-  topic_publish
-  multithr_pub_sub
-  ws_publish
+    topic_publish
+    multithr_pub_sub
+    ws_publish
 	pub_speed_test
 )
 
