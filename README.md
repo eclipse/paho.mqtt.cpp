@@ -53,7 +53,13 @@ Hopefully it will be out by the end of 2023. Just a few weeks away!
 - Added a `topic_matcher` class to create a collection of items in a trie structure that can contain items tied to topic filters. (Useful for queues or callbacks per-subscription topic).
 - Minor tweaks to prepare for C++20
 - Support for Catch2 v3.x for unit tests (v2.x also still supported).
+- Changed the sample apps to use the newer "mqtt://" schemas.
+- Connect option initializers for v5 and WebSockets.
 
+- [#304](https://github.com/eclipse/paho.mqtt.cpp/issues/304) Missing create_options::DFLT_C_STRUCT symbol when linking with MSVC.
+- [#429] (https://github.com/eclipse/paho.mqtt.cpp/issues/411) Remove declaration of connect_options::to_string() with missing implementation.
+- [#411](https://github.com/eclipse/paho.mqtt.cpp/issues/411) Missing virtual keyword for some client methods
+- [#444](https://github.com/eclipse/paho.mqtt.cpp/issues/444) Unit tests to check that connect options builder sets properties.
 - [#313](https://github.com/eclipse/paho.mqtt.cpp/issues/313) Get unit tests building on Windows. Needed to get rid of make_unique<> for Windows
 - [#397](https://github.com/eclipse/paho.mqtt.cpp/issues/397) Doc about clean session in connect_options.h is wrong
 - [#442](https://github.com/eclipse/paho.mqtt.cpp/issues/442) g++ complains with multiple definition of static constexpr for mixed C++11/17 builds
@@ -63,7 +69,7 @@ Hopefully it will be out by the end of 2023. Just a few weeks away!
 - [#428](https://github.com/eclipse/paho.mqtt.cpp/issues/428) Fixed type in create_options.h
 - [#407](https://github.com/eclipse/paho.mqtt.cpp/pull/407) Fix nodiscard warnings in sync client
 - [#385](https://github.com/eclipse/paho.mqtt.cpp/issues/385) Thread queue deadlock with multiple consumers
-- [#374](https://github.com/eclipse/paho.mqtt.cpp/pull/374) Add Paho C as a submodule
+- [#374](https://github.com/eclipse/paho.mqtt.cpp/pull/374) Add Paho C as a submodeule
 - [#350](https://github.com/eclipse/paho.mqtt.cpp/pull/350) avoid adding Paho MQTT C library twice
 - [#253](https://github.com/eclipse/paho.mqtt.cpp/issues/253) implicit capture of 'this' via '[=]' is deprecated in C++20
 - [#337](https://github.com/eclipse/paho.mqtt.cpp/issues/337) copy/move of caPath_ in ssl_options

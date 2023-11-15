@@ -14,7 +14,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Added a `topic_matcher` class to create a collection of items in a trie structure that can contain items tied to topic filters. (Useful for queues or callbacks per-subscription topic).
 - Minor tweaks to prepare for C++20
 - Support for Catch2 v3.x for unit tests (v2.x also still supported).
+- Changed the sample apps to use the newer "mqtt://" schemas.
+- Connect option initializers for v5 and WebSockets.
 
+- [#304](https://github.com/eclipse/paho.mqtt.cpp/issues/304) Missing create_options::DFLT_C_STRUCT symbol when linking with MSVC.
+- [#429] (https://github.com/eclipse/paho.mqtt.cpp/issues/411) Remove declaration of connect_options::to_string() with missing implementation.
+- [#411](https://github.com/eclipse/paho.mqtt.cpp/issues/411) Missing virtual keyword for some client methods
+- [#444](https://github.com/eclipse/paho.mqtt.cpp/issues/444) Unit tests to check that connect options builder sets properties.
 - [#313](https://github.com/eclipse/paho.mqtt.cpp/issues/313) Get unit tests building on Windows. Needed to get rid of make_unique<> for Windows
 - [#397](https://github.com/eclipse/paho.mqtt.cpp/issues/397) Doc about clean session in connect_options.h is wrong
 - [#442](https://github.com/eclipse/paho.mqtt.cpp/issues/442) g++ complains with multiple definition of static constexpr for mixed C++11/17 builds
@@ -31,6 +37,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - [#330](https://github.com/eclipse/paho.mqtt.cpp/pull/330) added /build/ folder to .gitignore
 - [#317](https://github.com/eclipse/paho.mqtt.cpp/issues/317) String constructor using just len instead of end iterator.
 - [#323](https://github.com/eclipse/paho.mqtt.cpp/issues/323) Added Session Expiry Interval to v5 chat sample to test.
+
 
 ## [Version 1.2.0](https://github.com/eclipse/paho.mqtt.cpp/compare/v1.1..v1.2.0) - (2020-12-27)
 
@@ -68,7 +75,6 @@ Requires Paho C v1.3.8
 - Several memory issues and bug fixes from updated Paho C library support.
 
 
-
 ## Version 1.1 (2019-10-12)
 
 This release was primarily to add MQTT v5 support and server responses.
@@ -91,6 +97,7 @@ This release was primarily to add MQTT v5 support and server responses.
 - The connect options can take a LWT as a plain message, via `connect_options::set_will_message()` 
 - New unit tests have started using _Catch2_.
 - Tested with Paho C v1.3.1
+
 
 ## Version 1.0.1 (2018-12-12)
 
