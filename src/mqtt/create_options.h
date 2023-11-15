@@ -55,7 +55,7 @@ public:
 	/**
 	 * Default set of client create options.
 	 */
-	create_options() : opts_(DFLT_C_STRUCT) {}
+	create_options();
 	/**
 	 * Default create options for the specified version of MQTT.
 	 * @param mqttVersion The MQTT version used to create the client.
