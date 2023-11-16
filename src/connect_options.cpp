@@ -152,6 +152,10 @@ void connect_options::update_c_struct()
 		opts_.serverURIs = serverURIs_->c_arr();
 	}
 
+	// Connect Properties
+
+	opts_.connectProperties = const_cast<MQTTProperties*>(&props_.c_struct());
+
 	// HTTP & Proxy
 
 	opts_.httpProxy = c_str(httpProxy_);
