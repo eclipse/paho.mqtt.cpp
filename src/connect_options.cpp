@@ -68,9 +68,6 @@ connect_options::connect_options(const connect_options& opt) : opts_(opt.opts_),
 	if (opts_.ssl)
 		set_ssl(opt.ssl_);
 
-	if (opts_.connectProperties)
-		set_properties(opt.props_);
-
 	update_c_struct();
 }
 
@@ -95,10 +92,17 @@ connect_options::connect_options(connect_options&& opt) : opts_(opt.opts_),
 	if (opts_.ssl)
 		opts_.ssl = &ssl_.opts_;
 	
-	if (opts_.connectProperties)
-		opts_.connectProperties = const_cast<MQTTProperties*>(&props_.c_struct());
-
 	update_c_struct();
+}
+
+connect_options connect_options::v3()
+{
+	return connect_options(DFLT_C_STRUCT);
+}
+
+connect_options connect_options::v5()
+{
+	return connect_options(DFLT_C_STRUCT5);
 }
 
 // Unfortunately, with the existing implementation, there's no way to know
@@ -154,7 +158,8 @@ void connect_options::update_c_struct()
 
 	// Connect Properties
 
-	opts_.connectProperties = const_cast<MQTTProperties*>(&props_.c_struct());
+	if (opts_.MQTTVersion >= MQTTVERSION_5)
+		opts_.connectProperties = const_cast<MQTTProperties*>(&props_.c_struct());
 
 	// HTTP & Proxy
 
@@ -180,8 +185,7 @@ connect_options& connect_options::operator=(const connect_options& opt)
 
 	tok_ = opt.tok_;
 	serverURIs_ = opt.serverURIs_;
-	if (opts_.connectProperties)
-		set_properties(opt.props_);
+	props_ = opt.props_;
 
 	httpHeaders_ = opt.httpHeaders_;
 	httpProxy_ = opt.httpProxy_;
@@ -209,8 +213,7 @@ connect_options& connect_options::operator=(connect_options&& opt)
 
 	tok_ = std::move(opt.tok_);
 	serverURIs_ = std::move(opt.serverURIs_);
-	if (opts_.connectProperties)
-		set_properties(std::move(opt.props_));
+	props_ = std::move(opt.props_);
 
 	httpHeaders_ = std::move(opt.httpHeaders_);
 	httpProxy_ = std::move(opt.httpProxy_);

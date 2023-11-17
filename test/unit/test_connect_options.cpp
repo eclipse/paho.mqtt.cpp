@@ -4,7 +4,7 @@
 //
 
 /*******************************************************************************
- * Copyright (c) 2016-2020 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2016-2023 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -62,7 +62,7 @@ static const std::string HTTPS_PROXY { "https://localhost:443" };
 
 TEST_CASE("connect_options default ctor", "[options]")
 {
-	mqtt::connect_options opts;
+	connect_options opts;
 
 	REQUIRE(EMPTY_STR == opts.get_user_name());
 	REQUIRE(EMPTY_STR == opts.get_password_str());
@@ -113,7 +113,7 @@ TEST_CASE("connect_options default ctor", "[options]")
 
 TEST_CASE("connect_options user_constructor", "[options]")
 {
-	mqtt::connect_options opts { USER, PASSWD };
+	connect_options opts { USER, PASSWD };
 
 	REQUIRE(opts.get_http_proxy().empty());
 	REQUIRE(opts.get_https_proxy().empty());
@@ -144,10 +144,10 @@ TEST_CASE("connect_options user_constructor", "[options]")
 
 TEST_CASE("connect_options copy ctor", "[options]")
 {
-	mqtt::connect_options orgOpts { USER, PASSWD };
+	connect_options orgOpts { USER, PASSWD };
 
 	SECTION("simple options") {
-    	mqtt::connect_options opts { orgOpts };
+    	connect_options opts { orgOpts };
 
     	REQUIRE(USER == opts.get_user_name());
     	REQUIRE(PASSWD == opts.get_password_str());
@@ -172,7 +172,7 @@ TEST_CASE("connect_options copy ctor", "[options]")
 	SECTION("proxy options") {
 		orgOpts.set_http_proxy(HTTP_PROXY);
 
-		mqtt::connect_options opts { orgOpts };
+		connect_options opts { orgOpts };
 		REQUIRE(HTTP_PROXY == opts.get_http_proxy());
 		REQUIRE(opts.get_https_proxy().empty());
 	}
@@ -180,17 +180,25 @@ TEST_CASE("connect_options copy ctor", "[options]")
 	SECTION("secure proxy options") {
 		orgOpts.set_https_proxy(HTTPS_PROXY);
 
-		mqtt::connect_options opts { orgOpts };
+		connect_options opts { orgOpts };
 		REQUIRE(HTTPS_PROXY == opts.get_https_proxy());
 		REQUIRE(opts.get_http_proxy().empty());
 	}
 
 	SECTION("properties") {
-		orgOpts.set_properties({{ mqtt::property::SESSION_EXPIRY_INTERVAL, 0 }});
+		orgOpts.set_properties({{ property::SESSION_EXPIRY_INTERVAL, 0 }});
 
-		mqtt::connect_options opts { orgOpts };
+		connect_options opts { orgOpts };
 
-		REQUIRE(opts.get_properties().contains(mqtt::property::SESSION_EXPIRY_INTERVAL));
+		const auto& copts = opts.c_struct();
+		const auto& orgCopts = orgOpts.c_struct();
+
+		// Make sure it's an actual copy
+		REQUIRE(copts.connectProperties->array != orgCopts.connectProperties->array);
+		orgOpts.get_properties().clear();
+
+		REQUIRE(1 == opts.get_properties().size());
+		REQUIRE(opts.get_properties().contains(property::SESSION_EXPIRY_INTERVAL));
 		REQUIRE(opts.c_struct().connectProperties == &opts.get_properties().c_struct());
 	}
 }
@@ -201,10 +209,124 @@ TEST_CASE("connect_options copy ctor", "[options]")
 
 TEST_CASE("connect_options move_constructor", "[options]")
 {
-	mqtt::connect_options orgOpts { USER, PASSWD };
+	connect_options orgOpts { USER, PASSWD };
 
 	SECTION("simple options") {
-		mqtt::connect_options opts { std::move(orgOpts) };
+		connect_options opts { std::move(orgOpts) };
+
+		REQUIRE(USER == opts.get_user_name());
+		REQUIRE(PASSWD == opts.get_password_str());
+
+		const auto& copts = opts.c_struct();
+
+		REQUIRE(0 == memcmp(&copts.struct_id, CSIG, CSIG_LEN));
+
+		REQUIRE(0 == strcmp(USER.c_str(), copts.username));
+		REQUIRE(copts.password == nullptr);
+		REQUIRE(PASSWD.size() == size_t(copts.binarypwd.len));
+		REQUIRE(0 == memcmp(PASSWD.data(), copts.binarypwd.data, PASSWD.size()));
+		REQUIRE(nullptr == copts.connectProperties);
+
+		// Make sure it's a true copy, not linked to the original
+		orgOpts.set_user_name(EMPTY_STR);
+		orgOpts.set_password(EMPTY_STR);
+
+		REQUIRE(USER == opts.get_user_name());
+		REQUIRE(PASSWD == opts.get_password_str());
+
+		// Check that the original was moved
+		REQUIRE(EMPTY_STR == orgOpts.get_user_name());
+		REQUIRE(EMPTY_STR == orgOpts.get_password_str());
+	}
+
+	SECTION("properties") {
+		orgOpts.set_properties({{ property::SESSION_EXPIRY_INTERVAL, 42 }});
+
+		connect_options opts { std::move(orgOpts) };
+
+		const auto& copts = opts.c_struct();
+
+		// Check that the original was moved
+		REQUIRE(orgOpts.get_properties().empty());
+
+		// Check that we got the correct properties
+		REQUIRE(1 == opts.get_properties().size());
+		REQUIRE(opts.get_properties().contains(property::SESSION_EXPIRY_INTERVAL));
+		REQUIRE(42 == get<int>(opts.get_properties(), property::SESSION_EXPIRY_INTERVAL));
+
+		REQUIRE(copts.connectProperties == &opts.get_properties().c_struct());
+	}
+}
+
+// ----------------------------------------------------------------------
+// Test the copy assignment operator=(const&)
+// ----------------------------------------------------------------------
+
+TEST_CASE("connect_options copy_assignment", "[options]")
+{
+	SECTION("v3") {
+		connect_options orgOpts { USER, PASSWD };
+		connect_options opts;
+
+		opts = orgOpts;
+
+		REQUIRE(USER == opts.get_user_name());
+		REQUIRE(PASSWD == opts.get_password_str());
+
+		const auto& copts = opts.c_struct();
+
+		REQUIRE(0 == memcmp(&copts.struct_id, CSIG, CSIG_LEN));
+
+		REQUIRE(0 == strcmp(USER.c_str(), copts.username));
+		REQUIRE(copts.password == nullptr);
+		REQUIRE(PASSWD.size() == size_t(copts.binarypwd.len));
+		REQUIRE(0 == memcmp(PASSWD.data(), copts.binarypwd.data, PASSWD.size()));
+		REQUIRE(nullptr == copts.connectProperties);
+
+		// Make sure it's a true copy, not linked to the original
+		orgOpts.set_user_name(EMPTY_STR);
+		orgOpts.set_password(EMPTY_STR);
+
+		REQUIRE(USER == opts.get_user_name());
+		REQUIRE(PASSWD == opts.get_password_str());
+
+		// Self assignment should cause no harm
+		opts = opts;
+
+		REQUIRE(USER == opts.get_user_name());
+		REQUIRE(PASSWD == opts.get_password_str());
+	}
+
+	SECTION("v5") {
+		auto orgOpts = connect_options::v5();
+		orgOpts.set_properties({{ property::SESSION_EXPIRY_INTERVAL, 42 }});
+
+		connect_options opts = orgOpts;
+		const auto& copts = opts.c_struct();
+		const auto& orgCopts = orgOpts.c_struct();
+
+		// Make sure it's an actual copy
+		REQUIRE(copts.connectProperties->array != orgCopts.connectProperties->array);
+		orgOpts.get_properties().clear();
+
+		// Check that we got the correct properties
+		REQUIRE(1 == opts.get_properties().size());
+		REQUIRE(opts.get_properties().contains(property::SESSION_EXPIRY_INTERVAL));
+		REQUIRE(42 == get<int>(opts.get_properties(), property::SESSION_EXPIRY_INTERVAL));
+
+		REQUIRE(copts.connectProperties == &opts.get_properties().c_struct());
+	}
+}
+
+// ----------------------------------------------------------------------
+// Test the move assignment, operator=(&&)
+// ----------------------------------------------------------------------
+
+TEST_CASE("connect_options move_assignment", "[options]")
+{
+	SECTION("v3") {
+		connect_options orgOpts { USER, PASSWD };
+		connect_options opts { std::move(orgOpts) };
 
 		REQUIRE(USER == opts.get_user_name());
 		REQUIRE(PASSWD == opts.get_password_str());
@@ -228,97 +350,34 @@ TEST_CASE("connect_options move_constructor", "[options]")
 		// Check that the original was moved
 		REQUIRE(EMPTY_STR == orgOpts.get_user_name());
 		REQUIRE(EMPTY_STR == orgOpts.get_password_str());
-		}
+
+		// Self assignment should cause no harm
+		// (clang++ is smart enough to warn about this)
+		#if !defined(__clang__)
+			opts = std::move(opts);
+			REQUIRE(USER == opts.get_user_name());
+			REQUIRE(PASSWD == opts.get_password_str());
+		#endif
+	}
 
 	SECTION("properties") {
-		orgOpts.set_properties({{ mqtt::property::SESSION_EXPIRY_INTERVAL, 0 }});
+		auto orgOpts = connect_options::v5();
+		orgOpts.set_properties({{ property::SESSION_EXPIRY_INTERVAL, 42 }});
 
-		mqtt::connect_options opts { std::move(orgOpts) };
+		connect_options opts = std::move(orgOpts);
 
-		REQUIRE(opts.get_properties().contains(mqtt::property::SESSION_EXPIRY_INTERVAL));
-		REQUIRE(opts.c_struct().connectProperties == &opts.get_properties().c_struct());
+		const auto& copts = opts.c_struct();
 
 		// Check that the original was moved
 		REQUIRE(orgOpts.get_properties().empty());
+
+		// Check that we got the correct properties
+		REQUIRE(1 == opts.get_properties().size());
+		REQUIRE(opts.get_properties().contains(property::SESSION_EXPIRY_INTERVAL));
+		REQUIRE(42 == get<int>(opts.get_properties(), property::SESSION_EXPIRY_INTERVAL));
+
+		REQUIRE(copts.connectProperties == &opts.get_properties().c_struct());
 	}
-}
-
-// ----------------------------------------------------------------------
-// Test the copy assignment operator=(const&)
-// ----------------------------------------------------------------------
-
-TEST_CASE("connect_options copy_assignment", "[options]")
-{
-	mqtt::connect_options orgOpts { USER, PASSWD };
-	mqtt::connect_options opts;
-
-	opts = orgOpts;
-
-	REQUIRE(USER == opts.get_user_name());
-	REQUIRE(PASSWD == opts.get_password_str());
-
-	const auto& c_struct = opts.c_struct();
-
-	REQUIRE(0 == memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
-
-	REQUIRE(0 == strcmp(USER.c_str(), c_struct.username));
-	REQUIRE(c_struct.password == nullptr);
-	REQUIRE(PASSWD.size() == size_t(c_struct.binarypwd.len));
-	REQUIRE(0 == memcmp(PASSWD.data(), c_struct.binarypwd.data, PASSWD.size()));
-
-	// Make sure it's a true copy, not linked to the original
-	orgOpts.set_user_name(EMPTY_STR);
-	orgOpts.set_password(EMPTY_STR);
-
-	REQUIRE(USER == opts.get_user_name());
-	REQUIRE(PASSWD == opts.get_password_str());
-
-	// Self assignment should cause no harm
-	opts = opts;
-
-	REQUIRE(USER == opts.get_user_name());
-	REQUIRE(PASSWD == opts.get_password_str());
-}
-
-// ----------------------------------------------------------------------
-// Test the move assignment, operator=(&&)
-// ----------------------------------------------------------------------
-
-TEST_CASE("connect_options move_assignment", "[options]")
-{
-	mqtt::connect_options orgOpts { USER, PASSWD };
-	mqtt::connect_options opts { std::move(orgOpts) };
-
-	REQUIRE(USER == opts.get_user_name());
-	REQUIRE(PASSWD == opts.get_password_str());
-
-	const auto& c_struct = opts.c_struct();
-
-	REQUIRE(0 == memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
-
-	REQUIRE(0 == strcmp(USER.c_str(), c_struct.username));
-	REQUIRE(c_struct.password == nullptr);
-	REQUIRE(PASSWD.size() == size_t(c_struct.binarypwd.len));
-	REQUIRE(0 == memcmp(PASSWD.data(), c_struct.binarypwd.data, PASSWD.size()));
-
-	// Make sure it's a true copy, not linked to the original
-	orgOpts.set_user_name(EMPTY_STR);
-	orgOpts.set_password(EMPTY_STR);
-
-	REQUIRE(USER == opts.get_user_name());
-	REQUIRE(PASSWD == opts.get_password_str());
-
-	// Check that the original was moved
-	REQUIRE(EMPTY_STR == orgOpts.get_user_name());
-	REQUIRE(EMPTY_STR == orgOpts.get_password_str());
-
-	// Self assignment should cause no harm
-	// (clang++ is smart enough to warn about this)
-	#if !defined(__clang__)
-		opts = std::move(opts);
-		REQUIRE(USER == opts.get_user_name());
-		REQUIRE(PASSWD == opts.get_password_str());
-	#endif
 }
 
 
@@ -328,7 +387,7 @@ TEST_CASE("connect_options move_assignment", "[options]")
 
 TEST_CASE("connect_options set_user", "[options]")
 {
-	mqtt::connect_options opts;
+	connect_options opts;
 	const auto& c_struct = opts.c_struct();
 
 	opts.set_user_name(USER);
@@ -359,7 +418,7 @@ TEST_CASE("connect_options set_long_user", "[options]")
 		passwd.push_back(by);
 	}
 
-	mqtt::connect_options orgOpts;
+	connect_options orgOpts;
 
 	orgOpts.set_user_name(user);
 	orgOpts.set_password(passwd);
@@ -367,7 +426,7 @@ TEST_CASE("connect_options set_long_user", "[options]")
 	REQUIRE(user == orgOpts.get_user_name());
 	REQUIRE(passwd == orgOpts.get_password_str());
 
-	mqtt::connect_options opts;
+	connect_options opts;
 	opts = orgOpts;
 
 	REQUIRE(user == opts.get_user_name());
@@ -387,11 +446,11 @@ TEST_CASE("connect_options set_long_user", "[options]")
 
 TEST_CASE("connect_options set_will", "[options]")
 {
-	mqtt::connect_options opts;
+	connect_options opts;
 	const auto& c_struct = opts.c_struct();
 
 	REQUIRE(nullptr == c_struct.will);
-	mqtt::will_options willOpts;
+	will_options willOpts;
 	opts.set_will(willOpts);
 	REQUIRE(nullptr != c_struct.will);
 	//REQUIRE(&opts.will_.opts_ == c_struct.will);
@@ -403,11 +462,11 @@ TEST_CASE("connect_options set_will", "[options]")
 
 TEST_CASE("connect_options set_ssl", "[options]")
 {
-	mqtt::connect_options opts;
+	connect_options opts;
 	const auto& c_struct = opts.c_struct();
 
 	REQUIRE(nullptr == c_struct.ssl);
-	mqtt::ssl_options sslOpts;
+	ssl_options sslOpts;
 	opts.set_ssl(sslOpts);
 	REQUIRE(nullptr != c_struct.ssl);
 	//REQUIRE(&opts.ssl_.opts_ == c_struct.ssl);
@@ -419,7 +478,7 @@ TEST_CASE("connect_options set_ssl", "[options]")
 
 TEST_CASE("set_token", "[options]")
 {
-	mqtt::connect_options opts;
+	connect_options opts;
 	const auto& c_struct = opts.c_struct();
 
 	REQUIRE(nullptr == c_struct.context);
@@ -509,39 +568,39 @@ TEST_CASE("set_token", "[options]")
 
 TEST_CASE("connect_options_builder default generator", "[options]")
 {
-	mqtt::connect_options opts;
+	connect_options opts;
 
 	// Default is v3.x
 
-	opts = mqtt::connect_options_builder().finalize();
+	opts = connect_options_builder().finalize();
 
 	REQUIRE(MQTTVERSION_DEFAULT == opts.get_mqtt_version());
 	REQUIRE(DFLT_KEEP_ALIVE == (int) opts.get_keep_alive_interval().count());
 
 	// Explicit v3
 
-	opts = mqtt::connect_options_builder::v3().finalize();
+	opts = connect_options_builder::v3().finalize();
 
 	REQUIRE(MQTTVERSION_DEFAULT == opts.get_mqtt_version());
 	REQUIRE(DFLT_KEEP_ALIVE == (int) opts.get_keep_alive_interval().count());
 
 	// v5
 
-	opts = mqtt::connect_options_builder::v5().finalize();
+	opts = connect_options_builder::v5().finalize();
 
 	REQUIRE(MQTTVERSION_5 == opts.get_mqtt_version());
 	REQUIRE(DFLT_KEEP_ALIVE == (int) opts.get_keep_alive_interval().count());
 
 	// WebSocket
 
-	opts = mqtt::connect_options_builder::ws().finalize();
+	opts = connect_options_builder::ws().finalize();
 
 	REQUIRE(MQTTVERSION_DEFAULT == opts.get_mqtt_version());
 	REQUIRE(DFLT_WS_KEEP_ALIVE == (int) opts.get_keep_alive_interval().count());
 
 	// Explicit WebSocket v5
 
-	opts = mqtt::connect_options_builder::v5_ws().finalize();
+	opts = connect_options_builder::v5_ws().finalize();
 
 	REQUIRE(MQTTVERSION_5 == opts.get_mqtt_version());
 	REQUIRE(DFLT_WS_KEEP_ALIVE == (int) opts.get_keep_alive_interval().count());
@@ -555,10 +614,10 @@ TEST_CASE("connect_options_builder set", "[options]")
 {
 	const uint32_t INTERVAL = 80000;
 
-	mqtt::properties conn_props{
-		mqtt::property{mqtt::property::SESSION_EXPIRY_INTERVAL, INTERVAL}};
+	properties conn_props{
+		property{property::SESSION_EXPIRY_INTERVAL, INTERVAL}};
 
-	auto opts = mqtt::connect_options_builder()
+	auto opts = connect_options_builder()
 		.properties(conn_props)
 		.finalize();
 
@@ -566,7 +625,7 @@ TEST_CASE("connect_options_builder set", "[options]")
 
 	REQUIRE(!props.empty());
 	REQUIRE(1 == props.size());
-	REQUIRE(INTERVAL == get<uint32_t>(props, mqtt::property::SESSION_EXPIRY_INTERVAL));
+	REQUIRE(INTERVAL == get<uint32_t>(props, property::SESSION_EXPIRY_INTERVAL));
 
 	const auto& copts = opts.c_struct();
 	REQUIRE(nullptr != copts.connectProperties);

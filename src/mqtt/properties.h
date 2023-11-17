@@ -253,6 +253,9 @@ inline string_pair get<string_pair>(const property& prop) {
  */
 class properties
 {
+	/** The default C struct */
+	static const MQTTProperties DFLT_C_STRUCT;
+
 	/** The underlying C properties struct  */
 	MQTTProperties props_;
 
@@ -267,9 +270,7 @@ public:
 	 * Default constructor.
 	 * Creates an empty properties list.
 	 */
-	properties() {
-		std::memset(&props_, 0, sizeof(MQTTProperties));
-	}
+	properties();
 	/**
 	 * Copy constructor.
 	 * @param other The property list to copy.
@@ -309,26 +310,13 @@ public:
 	 * @param rhs The other property list to copy into this one
 	 * @return A reference to this object.
 	 */
-	properties& operator=(const properties& rhs) {
-		if (&rhs != this) {
-			::MQTTProperties_free(&props_);
-			props_ = ::MQTTProperties_copy(&rhs.props_);
-		}
-		return *this;
-	}
+	properties& operator=(const properties& rhs);
 	/**
 	 * Move assignment.
 	 * @param rhs The property list to move to this one.
 	 * @return A reference to this object.
 	 */
-	properties& operator=(properties&& rhs) {
-		if (&rhs != this) {
-			::MQTTProperties_free(&props_);
-			props_ = rhs.props_;
-			std::memset(&rhs.props_, 0, sizeof(MQTTProperties));
-		}
-		return *this;
-	}
+	properties& operator=(properties&& rhs);
 	/**
 	 * Determines if the property list is empty.
 	 * @return @em true if there are no properties in the list, @em false if
@@ -350,7 +338,9 @@ public:
 	/**
 	 * Removes all the items from the property list.
 	 */
-	void clear();
+	void clear() {
+		::MQTTProperties_free(&props_);
+	}
 	/**
 	 * Determines if the list contains a specific property.
 	 * @param propid The property ID (code).

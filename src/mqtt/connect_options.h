@@ -157,16 +157,12 @@ public:
 	 * Creates default options for an MQTT v3.x connection.
 	 * @return Default options for an MQTT v3.x connection.
 	 */
-	static connect_options v3() {
-		return connect_options(DFLT_C_STRUCT);
-	}
+	static connect_options v3();
 	/**
 	 * Creates default options for an MQTT v5 connection.
 	 * @return Default options for an MQTT v5 connection.
 	 */
-	static connect_options v5() {
-		return connect_options(DFLT_C_STRUCT5);
-	}
+	static connect_options v5();
 	/**
 	 * Creates default options for an MQTT v3.x connection using WebSockets.
 	 *
@@ -316,7 +312,6 @@ public:
 	  *     fails, fall back to 3.1
 	  * @li MQTTVERSION_3_1 (3) = only try version 3.1
 	  * @li MQTTVERSION_3_1_1 (4) = only try version 3.1.1
-	  * @li MQTTVERSION_5 (5) = only try version 5
 	  */
 	int get_mqtt_version() const { return opts_.MQTTVersion; }
 	/**
@@ -510,9 +505,12 @@ public:
 	 * Gets the connect properties.
 	 * @return A const reference to the properties for the connect.
 	 */
-	const properties& get_properties() const {
-		return props_;
-	}
+	const properties& get_properties() const { return props_; }
+	/**
+	 * Gets a mutable reference to the connect properties.
+	 * @return A reference to the properties for the connect.
+	 */
+	properties& get_properties() { return props_; }
 	/**
 	 * Sets the properties for the connect.
 	 * @param props The properties to place into the message.

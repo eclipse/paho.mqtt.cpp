@@ -538,6 +538,10 @@ TEST_CASE("properties copy and move", "[properties]") {
 		properties props { orgProps };
 
 		// Make sure it's a real copy, not a reference to org
+		const auto& cprops = props.c_struct();
+		const auto& orgCprops = orgProps.c_struct();
+		REQUIRE(orgCprops.array != cprops.array);
+
 		orgProps.clear();
 
 		REQUIRE(get<uint8_t>(props, property::PAYLOAD_FORMAT_INDICATOR) == FMT_IND);
@@ -579,14 +583,20 @@ TEST_CASE("properties copy and move", "[properties]") {
 
 		REQUIRE(orgProps.empty());
 		REQUIRE(0 == orgProps.size());
-	}
 
+		const auto& orgCprops = orgProps.c_struct();
+		REQUIRE(nullptr == orgCprops.array);
+	}
 
 	SECTION("copy assignment") {
 		properties props;
 		props = orgProps;
 
 		// Make sure it's a real copy, not a reference to org
+		const auto& cprops = props.c_struct();
+		const auto& orgCprops = orgProps.c_struct();
+		REQUIRE(orgCprops.array != cprops.array);
+
 		orgProps.clear();
 
 		REQUIRE(get<uint8_t>(props, property::PAYLOAD_FORMAT_INDICATOR) == FMT_IND);

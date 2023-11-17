@@ -55,7 +55,6 @@ Hopefully it will be out by the end of 2023. Just a few weeks away!
 - Support for Catch2 v3.x for unit tests (v2.x also still supported).
 - Changed the sample apps to use the newer "mqtt://" schemas.
 - Connect option initializers for v5 and WebSockets.
-
 - [#304](https://github.com/eclipse/paho.mqtt.cpp/issues/304) Missing create_options::DFLT_C_STRUCT symbol when linking with MSVC.
 - [#429] (https://github.com/eclipse/paho.mqtt.cpp/issues/411) Remove declaration of connect_options::to_string() with missing implementation.
 - [#411](https://github.com/eclipse/paho.mqtt.cpp/issues/411) Missing virtual keyword for some client methods

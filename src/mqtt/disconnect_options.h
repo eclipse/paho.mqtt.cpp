@@ -41,6 +41,9 @@ class disconnect_options
 	/** The default C struct */
 	static const MQTTAsync_disconnectOptions DFLT_C_STRUCT;
 
+	/** The default C struct */
+	static const MQTTAsync_disconnectOptions DFLT_C_STRUCT5;
+
 	/** The underlying C disconnect options */
 	MQTTAsync_disconnectOptions opts_;
 
@@ -52,6 +55,17 @@ class disconnect_options
 
 	/** The client has special access */
 	friend class async_client;
+
+	/** The options builder has special access */
+	friend class disconnect_options_builder;
+
+	/**
+	 * Updates the underlying C structure to match our cached data.
+	 */
+	void update_c_struct();
+
+	/** Construct options from a C struct */
+	disconnect_options(const MQTTAsync_disconnectOptions& copts) : opts_{copts} {}
 
 public:
 	/**
@@ -85,6 +99,16 @@ public:
 	 */
 	disconnect_options(disconnect_options&& opt);
 	/**
+	 * Creates default options for an MQTT v3.x connection.
+	 * @return Default options for an MQTT v3.x connection.
+	 */
+	static disconnect_options v3();
+	/**
+	 * Creates default options for an MQTT v5 connection.
+	 * @return Default options for an MQTT v5 connection.
+	 */
+	static disconnect_options v5();
+	/**
 	 * Copy assignment.
 	 * @param opt Another object to copy.
 	 */
@@ -108,16 +132,15 @@ public:
 		return std::chrono::milliseconds(opts_.timeout);
 	}
 	/**
-	 * Sets the timeout for disconnecting.
+	 * Sets the disconnect timeout, in milliseconds.
 	 * This allows for any remaining in-flight messages to be delivered.
-	 * @param timeout The timeout (in milliseconds).
+	 * @param timeout The disconnect timeout (in milliseconds).
 	 */
 	void set_timeout(int timeout) { opts_.timeout = timeout; }
 	/**
-	 * Sets the connect timeout with a chrono duration.
-	 * This is the maximum time that the underlying library will wait for a
-	 * connection before failing.
-	 * @param to The connect timeout in seconds.
+	 * Sets the disconnect timeout with a duration.
+	 * This allows for any remaining in-flight messages to be delivered.
+	 * @param to The disconnect connect timeout.
 	 */
 	template <class Rep, class Period>
 	void set_timeout(const std::chrono::duration<Rep, Period>& to) {
@@ -137,10 +160,15 @@ public:
 	 */
 	token_ptr get_token() const { return tok_; }
 	/**
-	 * Gets the connect properties.
-	 * @return A const reference to the properties for the connect.
+	 * Gets the disconnect properties.
+	 * @return A const reference to the properties for the disconnect.
 	 */
 	const properties& get_properties() const { return props_; }
+	/**
+	 * Gets a mutable reference to the disconnect properties.
+	 * @return A mutable reference to the properties for the disconnect.
+	 */
+	properties& get_properties() { return props_; }
 	/**
 	 * Sets the properties for the connect.
 	 * @param props The properties to place into the message.
@@ -173,7 +201,6 @@ public:
 	}
 };
 
-
 /////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -184,6 +211,9 @@ class disconnect_options_builder
 	/** The underlying options */
 	disconnect_options opts_;
 
+	/** Construct options builder from a C struct */
+	disconnect_options_builder(const MQTTAsync_disconnectOptions& copts) : opts_{copts} {}
+
 public:
 	/** This class */
 	using self = disconnect_options_builder;
@@ -191,6 +221,16 @@ public:
 	 * Default constructor.
 	 */
 	disconnect_options_builder() {}
+	/**
+	 * Creates default options builder for an MQTT v3.x connection.
+	 * @return Default options builder for an MQTT v3.x connection.
+	 */
+	static disconnect_options_builder v3();
+	/**
+	 * Creates default options builder for an MQTT v5 connection.
+	 * @return Default options builder for an MQTT v5 connection.
+	 */
+	static disconnect_options_builder v5();
 	/**
 	 * Sets the properties for the disconnect message.
 	 * @param props The properties for the disconnect message.
@@ -208,10 +248,9 @@ public:
 		return *this;
 	}
 	/**
-	 * Sets the connect timeout with a chrono duration.
-	 * This is the maximum time that the underlying library will wait for a
-	 * connection before failing.
-	 * @param to The connect timeout in seconds.
+	 * Sets the disconnect connect timeout.
+	 * This allows for any remaining in-flight messages to be delivered.
+	 * @param to The disconnect timeout.
 	 */
 	template <class Rep, class Period>
 	auto timeout(const std::chrono::duration<Rep, Period>& to) -> self&{

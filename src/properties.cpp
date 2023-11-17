@@ -154,17 +154,35 @@ property& property::operator=(property&& rhs)
 
 /////////////////////////////////////////////////////////////////////////////
 
-properties::properties(std::initializer_list<property> props)
+const MQTTProperties properties::DFLT_C_STRUCT = MQTTProperties_initializer;
+
+properties::properties() : props_{DFLT_C_STRUCT}
 {
-	std::memset(&props_, 0, sizeof(properties));
+}
+
+properties::properties(std::initializer_list<property> props) : props_{DFLT_C_STRUCT}
+{
 	for (const auto& prop : props)
 		::MQTTProperties_add(&props_, &prop.c_struct());
 }
 
-void properties::clear()
+properties& properties::operator=(const properties& rhs)
 {
-	::MQTTProperties_free(&props_);
-	memset(&props_, 0, sizeof(MQTTProperties));
+	if (&rhs != this) {
+		::MQTTProperties_free(&props_);
+		props_ = ::MQTTProperties_copy(&rhs.props_);
+	}
+	return *this;
+}
+
+properties& properties::operator=(properties&& rhs)
+{
+	if (&rhs != this) {
+		::MQTTProperties_free(&props_);
+		props_ = rhs.props_;
+		rhs.props_ = DFLT_C_STRUCT;
+	}
+	return *this;
 }
 
 property properties::get(property::code propid, size_t idx /*=0*/)
