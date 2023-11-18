@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Version 1.3.0](https://github.com/eclipse/paho.mqtt.cpp/compare/v1.2.0..v1.3.0) - (2023-12-29)
 
+- Updated License to Eclipse Public License v2.0
 - Updated create and connect options to better deal with MQTT protocol version
 - Defaulting connect version to v5 if specified in create options.
 - Added a `topic_filter` class to match a single filter to specific topics.
@@ -17,6 +18,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Changed the sample apps to use the newer "mqtt://" schemas.
 - Connect option initializers for v5 and WebSockets.
 
+Fixed Issues and Pull Requests:
+
+- [#445](https://github.com/eclipse/paho.mqtt.cpp/pull/445) Update properties when moving/copying connect options.
+- [#325]() Cache connect options in client to keep memory valid for callbacks like SSL on_error()
+- [#361](https://github.com/eclipse/paho.mqtt.cpp/issues/361) Added missing LICENSE file to conform to GitHub conventions.
 - [#304](https://github.com/eclipse/paho.mqtt.cpp/issues/304) Missing create_options::DFLT_C_STRUCT symbol when linking with MSVC.
 - [#429] (https://github.com/eclipse/paho.mqtt.cpp/issues/411) Remove declaration of connect_options::to_string() with missing implementation.
 - [#411](https://github.com/eclipse/paho.mqtt.cpp/issues/411) Missing virtual keyword for some client methods
