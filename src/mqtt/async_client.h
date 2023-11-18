@@ -71,8 +71,38 @@ namespace mqtt {
 /////////////////////////////////////////////////////////////////////////////
 
 /**
- * Lightweight client for talking to an MQTT server using non-blocking
+ * Client for talking to an MQTT server using non-blocking
  * methods that allow an operation to run in the background.
+ *
+ * The location of the server is specified as a URI string with the
+ * following schemas supported to specify the type and security used for the
+ * connection:
+ * @li @em "mqtt://" - A standard (insecure) connection over TCP. (Also,
+ * "tcp://")
+ * @li @em "mqtts://" - A secure connection using SSL/TLS sockets. (Also
+ * "ssl://")
+ * @li @em "ws://" - A standard (insecure) WebSocket connection.
+ * @li @em "wss:// - A secure websocket connection using SSL/TLS.
+ *
+ * The secure connection types assume that the library was built with
+ * OpenSSL support, otherwise requesting a secure conection will result in
+ * an error.
+ *
+ * The communication methods of this class - `connect()`, `publish()`,
+ * `subscribe()`, etc. - are all asynchronous. They create the request for
+ * the server, but return imediately, before a response is received back
+ * from the server.
+ *
+ * These methods return a `Token` to the caller which is akin to a C++
+ * std::future. The caller can keep the Token, then use it later to block
+ * until the asynchronous operation is complete and retrieve the result of
+ * the operation, including any response from the server.
+ *
+ * Alternately, the application can choose to set callbacks to be fired when
+ * each operation completes. This can be used to create an event-driven
+ * architecture, but is more complex in that it forces the user to avoid any
+ * blocking operations and manually handle thread synchronization (since
+ * the callbacks run in a separate thread managed by the library).
  */
 class async_client : public virtual iasync_client
 {

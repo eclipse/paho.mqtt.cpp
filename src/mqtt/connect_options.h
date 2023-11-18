@@ -470,6 +470,12 @@ public:
 	  *   @li MQTTVERSION_3_1 (3) = only try version 3.1
 	  *   @li MQTTVERSION_3_1_1 (4) = only try version 3.1.1
 	  *   @li MQTTVERSION_5 (5) = only try version 5
+	  *
+	  * @deprecated It is preferable to create the options for the desired
+	  * version rather than using this function to change the version after
+	  * some parameters have already been set. If you do use this function,
+	  * call it before setting any other version-specific options. @sa
+	  * connect_options::v5()
 	  */
 	void set_mqtt_version(int mqttVersion);
 	/**
@@ -668,6 +674,9 @@ public:
 	using self = connect_options_builder;
 	/**
 	 * Default constructor.
+	 *
+	 * @param ver The MQTT version for the connection. Defaults to the most
+	 *  		  recent v3 supported by the server.
 	 */
 	explicit connect_options_builder(int ver=MQTTVERSION_DEFAULT) : opts_(ver) {}
 	/**
@@ -851,6 +860,12 @@ public:
 	  *   @li MQTTVERSION_3_1 (3) = only try version 3.1
 	  *   @li MQTTVERSION_3_1_1 (4) = only try version 3.1.1
 	  *   @li MQTTVERSION_5 (5) = only try version 5
+	  *
+	  * @deprecated It is preferable to create the options builder for the
+	  * desired version rather than using this function to change the
+	  * version after some parameters have already been set. If you do use
+	  * this function, call it before setting any other version-specific
+	  * options. @sa connect_options_builder::v5()
 	  */
 	auto mqtt_version(int ver) -> self& {
 		opts_.set_mqtt_version(ver);
