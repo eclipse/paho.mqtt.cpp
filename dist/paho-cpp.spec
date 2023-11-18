@@ -49,7 +49,7 @@ cd build.paho.cpp
 make install DESTDIR=%{buildroot}
 
 %files
-%doc edl-v10 epl-v10
+%doc edl-v10 epl-v20
 %{_libdir}/*
 
 %files devel
