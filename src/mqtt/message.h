@@ -29,6 +29,7 @@
 #include "mqtt/buffer_ref.h"
 #include "mqtt/properties.h"
 #include "mqtt/exception.h"
+#include "mqtt/platform.h"
 #include <memory>
 
 namespace mqtt {
@@ -55,13 +56,13 @@ class message
 {
 public:
 	/** The default QoS for a message */
-	static const int DFLT_QOS;  // =0
+	PAHO_MQTTPP_EXPORT static const int DFLT_QOS;  // =0
 	/** The default retained flag */
-	static const bool DFLT_RETAINED;  // =false
+	PAHO_MQTTPP_EXPORT static const bool DFLT_RETAINED;  // =false
 
 private:
 	/** Initializer for the C struct (from the C library) */
-	static const MQTTAsync_message DFLT_C_STRUCT;
+	PAHO_MQTTPP_EXPORT static const MQTTAsync_message DFLT_C_STRUCT;
 
 	/** The underlying C message struct */
 	MQTTAsync_message msg_;

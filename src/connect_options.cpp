@@ -25,17 +25,19 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-const MQTTAsync_connectOptions connect_options::DFLT_C_STRUCT =
+PAHO_MQTTPP_EXPORT const MQTTAsync_connectOptions connect_options::DFLT_C_STRUCT =
 		MQTTAsync_connectOptions_initializer;
 
-const MQTTAsync_connectOptions connect_options::DFLT_C_STRUCT5 =
+PAHO_MQTTPP_EXPORT const MQTTAsync_connectOptions connect_options::DFLT_C_STRUCT5 =
 		MQTTAsync_connectOptions_initializer5;
 
-const MQTTAsync_connectOptions connect_options::DFLT_C_STRUCT_WS =
+PAHO_MQTTPP_EXPORT const MQTTAsync_connectOptions connect_options::DFLT_C_STRUCT_WS =
 		MQTTAsync_connectOptions_initializer_ws;
 
-const MQTTAsync_connectOptions connect_options::DFLT_C_STRUCT5_WS =
+PAHO_MQTTPP_EXPORT const MQTTAsync_connectOptions connect_options::DFLT_C_STRUCT5_WS =
 		MQTTAsync_connectOptions_initializer5_ws;
+
+// --------------------------------------------------------------------------
 
 connect_options::connect_options(int ver /*=MQTTVERSION_DEFAULT*/)
 {
@@ -368,8 +370,8 @@ void connect_options::set_https_proxy(const string& httpsProxy)
 /////////////////////////////////////////////////////////////////////////////
 // connect_data
 
-const MQTTAsync_connectData connect_data::DFLT_C_STRUCT =
-		MQTTAsync_connectData_initializer;
+PAHO_MQTTPP_EXPORT const MQTTAsync_connectData connect_data::DFLT_C_STRUCT
+    = MQTTAsync_connectData_initializer;
 
 connect_data::connect_data() : data_(DFLT_C_STRUCT)
 {

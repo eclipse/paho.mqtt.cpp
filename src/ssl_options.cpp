@@ -24,7 +24,10 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-const MQTTAsync_SSLOptions ssl_options::DFLT_C_STRUCT = MQTTAsync_SSLOptions_initializer;
+PAHO_MQTTPP_EXPORT const MQTTAsync_SSLOptions ssl_options::DFLT_C_STRUCT
+    = MQTTAsync_SSLOptions_initializer;
+
+// --------------------------------------------------------------------------
 
 ssl_options::ssl_options() : opts_(DFLT_C_STRUCT)
 {

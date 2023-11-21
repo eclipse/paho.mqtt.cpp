@@ -31,6 +31,7 @@
 #include "mqtt/message.h"
 #include "mqtt/topic.h"
 #include "mqtt/types.h"
+#include "mqtt/platform.h"
 #include <vector>
 #include <functional>
 
@@ -64,7 +65,7 @@ public:
 
 private:
 	/** The default C struct */
-	static const MQTTAsync_SSLOptions DFLT_C_STRUCT ;
+	PAHO_MQTTPP_EXPORT static const MQTTAsync_SSLOptions DFLT_C_STRUCT ;
 
 	/** The underlying C SSL options */
 	MQTTAsync_SSLOptions opts_;

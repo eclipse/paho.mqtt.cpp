@@ -38,9 +38,9 @@ namespace mqtt {
 class client : private callback
 {
 	/** An arbitrary, but relatively long timeout */
-	static const std::chrono::seconds DFLT_TIMEOUT;
+	PAHO_MQTTPP_EXPORT static const std::chrono::seconds DFLT_TIMEOUT;
 	/** The default quality of service */
-	static const int DFLT_QOS;  // =1;
+	PAHO_MQTTPP_EXPORT static const int DFLT_QOS;  // =1;
 
 	/** The actual client */
 	async_client cli_;

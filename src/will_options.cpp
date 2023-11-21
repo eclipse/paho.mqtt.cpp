@@ -22,10 +22,10 @@
 
 namespace mqtt {
 
-const int  will_options::DFLT_QOS = 0;
-const bool will_options::DFLT_RETAINED = false;
+PAHO_MQTTPP_EXPORT const int  will_options::DFLT_QOS = 0;
+PAHO_MQTTPP_EXPORT const bool will_options::DFLT_RETAINED = false;
 
-const MQTTAsync_willOptions will_options::DFLT_C_STRUCT = MQTTAsync_willOptions_initializer;
+PAHO_MQTTPP_EXPORT const MQTTAsync_willOptions will_options::DFLT_C_STRUCT = MQTTAsync_willOptions_initializer;
 
 /////////////////////////////////////////////////////////////////////////////
 

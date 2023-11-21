@@ -7,7 +7,7 @@
 
 #*******************************************************************************
 # Copyright (c) 2016-2017, Guilherme Maciel Ferreira
-# Copyright (c) 2017-2018, Frank Pagliughi
+# Copyright (c) 2017-2023, Frank Pagliughi
 #
 #  All rights reserved. This program and the accompanying materials
 #  are made available under the terms of the Eclipse Public License v2.0
@@ -39,6 +39,9 @@ endif()
 # --- The headers ---
 
 add_subdirectory(mqtt)
+
+include(GenerateExportHeader)
+#generate_export_header(mylibrary)
 
 ## --- Library dependencies ---
 
@@ -75,13 +78,15 @@ add_library(paho-cpp-objs OBJECT
 #target_include_directories(OBJS PRIVATE ${PAHO_MQTT_C_INCLUDE_DIRS})
 
 target_include_directories(paho-cpp-objs 
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-        $<INSTALL_INTERFACE:include>
-    PRIVATE 
-        ${PAHO_MQTT_C_INCLUDE_DIRS}
-        src
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include>
+  PRIVATE 
+    ${PAHO_MQTT_C_INCLUDE_DIRS}
+    src
 )
+
+target_compile_definitions(paho-cpp-objs PRIVATE PAHO_MQTTPP_EXPORTS)
 
 # --- Warnings ---
 
@@ -103,7 +108,7 @@ if(PAHO_BUILD_SHARED)
         PRIVATE ${LIBS_SYSTEM}
         PUBLIC PahoMqttC::PahoMqttC Threads::Threads)
 
-    # It would be nice to exort the include paths from the obj lib, but we
+    # It would be nice to export the include paths from the obj lib, but we
     # get an export error. Perhaps in a future version?
     # 
     # CMake Error: install(EXPORT "PahoMqttCpp" ...) includes target "paho-mqttpp3"
@@ -143,6 +148,7 @@ if(PAHO_BUILD_STATIC)
 
     target_include_directories(paho-mqttpp3-static PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
         $<INSTALL_INTERFACE:include>
     )
 

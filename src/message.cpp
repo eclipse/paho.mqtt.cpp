@@ -25,10 +25,10 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int message::DFLT_QOS = 0;
-const bool message::DFLT_RETAINED = false;
+PAHO_MQTTPP_EXPORT const int message::DFLT_QOS = 0;
+PAHO_MQTTPP_EXPORT const bool message::DFLT_RETAINED = false;
 
-const MQTTAsync_message message::DFLT_C_STRUCT = MQTTAsync_message_initializer;
+PAHO_MQTTPP_EXPORT const MQTTAsync_message message::DFLT_C_STRUCT = MQTTAsync_message_initializer;
 
 // --------------------------------------------------------------------------
 

@@ -154,7 +154,8 @@ property& property::operator=(property&& rhs)
 
 /////////////////////////////////////////////////////////////////////////////
 
-const MQTTProperties properties::DFLT_C_STRUCT = MQTTProperties_initializer;
+PAHO_MQTTPP_EXPORT const MQTTProperties properties::DFLT_C_STRUCT
+    = MQTTProperties_initializer;
 
 properties::properties() : props_{DFLT_C_STRUCT}
 {

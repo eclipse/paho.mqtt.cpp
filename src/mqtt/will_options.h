@@ -30,6 +30,7 @@
 #include "mqtt/types.h"
 #include "mqtt/message.h"
 #include "mqtt/topic.h"
+#include "mqtt/platform.h"
 
 namespace mqtt {
 
@@ -49,13 +50,13 @@ class will_options
 {
 public:
 	/** The default QoS for the LWT, if unspecified */
-	static const int DFLT_QOS;  // =0;
+	PAHO_MQTTPP_EXPORT static const int DFLT_QOS;  // =0;
 	/** The defalut retained flag for LWT, if unspecified */
-	static const bool DFLT_RETAINED;  // =false;
+	PAHO_MQTTPP_EXPORT static const bool DFLT_RETAINED;  // =false;
 
 private:
 	/** A default C struct to support re-initializing variables */
-	static const MQTTAsync_willOptions DFLT_C_STRUCT;
+	PAHO_MQTTPP_EXPORT static const MQTTAsync_willOptions DFLT_C_STRUCT;
 
 	/** The underlying C LWT options */
 	MQTTAsync_willOptions opts_;

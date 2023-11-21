@@ -23,11 +23,14 @@
 
 namespace mqtt {
 
-const std::chrono::seconds client::DFLT_TIMEOUT = std::chrono::seconds(30);
-
-const int client::DFLT_QOS = 1;
-
 /////////////////////////////////////////////////////////////////////////////
+
+PAHO_MQTTPP_EXPORT const std::chrono::seconds client::DFLT_TIMEOUT
+    = std::chrono::seconds(30);
+
+PAHO_MQTTPP_EXPORT const int client::DFLT_QOS = 1;
+
+// --------------------------------------------------------------------------
 
 client::client(const string& serverURI, const string& clientId,
 			   iclient_persistence* persistence /*=nullptr*/)

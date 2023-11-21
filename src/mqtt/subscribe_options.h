@@ -27,6 +27,7 @@
 #include "MQTTAsync.h"
 #include "MQTTSubscribeOpts.h"
 #include "mqtt/types.h"
+#include "mqtt/platform.h"
 
 namespace mqtt {
 
@@ -53,17 +54,17 @@ public:
 	using const_ptr_t = std::shared_ptr<const subscribe_options>;
 
 	/** Don't receive our own publications */
-	static const bool SUBSCRIBE_NO_LOCAL;  // =true;
+	PAHO_MQTTPP_EXPORT static const bool SUBSCRIBE_NO_LOCAL;  // =true;
 	/** Receive our own publications */
-	static const bool SUBSCRIBE_LOCAL;  // =false;
+	PAHO_MQTTPP_EXPORT static const bool SUBSCRIBE_LOCAL;  // =false;
 
 	/**
 	 * Retain flag is only set on publications sent by a broker if in
 	 * response to a subscribe request
 	 */
-	static const bool NO_RETAIN_AS_PUBLISHED;  // =false;
+	PAHO_MQTTPP_EXPORT static const bool NO_RETAIN_AS_PUBLISHED;  // =false;
 	/** Keep the retain flag as on the original publish message */
-	static const bool RETAIN_AS_PUBLISHED;  // =true;
+	PAHO_MQTTPP_EXPORT static const bool RETAIN_AS_PUBLISHED;  // =true;
 
 	/** The options for subscription retain handling */
 	enum RetainHandling {

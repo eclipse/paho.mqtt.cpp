@@ -32,6 +32,7 @@
 #include "mqtt/string_collection.h"
 #include "mqtt/will_options.h"
 #include "mqtt/ssl_options.h"
+#include "mqtt/platform.h"
 #include <vector>
 #include <map>
 #include <chrono>
@@ -47,16 +48,16 @@ namespace mqtt {
 class connect_options
 {
 	/** The default C struct for non-WebSocket connections */
-	static const MQTTAsync_connectOptions DFLT_C_STRUCT;
+	PAHO_MQTTPP_EXPORT static const MQTTAsync_connectOptions DFLT_C_STRUCT;
 
 	/** The default C struct for non-Websocket MQTT v5 connections */
-	static const MQTTAsync_connectOptions DFLT_C_STRUCT5;
+	PAHO_MQTTPP_EXPORT static const MQTTAsync_connectOptions DFLT_C_STRUCT5;
 
 	/** The default C struct for WebSocket connections */
-	static const MQTTAsync_connectOptions DFLT_C_STRUCT_WS;
+	PAHO_MQTTPP_EXPORT static const MQTTAsync_connectOptions DFLT_C_STRUCT_WS;
 
 	/** The default C struct for Websocket MQTT v5 connections */
-	static const MQTTAsync_connectOptions DFLT_C_STRUCT5_WS;
+	PAHO_MQTTPP_EXPORT static const MQTTAsync_connectOptions DFLT_C_STRUCT5_WS;
 
 	/** The underlying C connection options */
 	MQTTAsync_connectOptions opts_;
@@ -585,7 +586,7 @@ using connect_options_ptr = connect_options::ptr_t;
 class connect_data
 {
 	/** The default C struct */
-	static const MQTTAsync_connectData DFLT_C_STRUCT;
+	PAHO_MQTTPP_EXPORT static const MQTTAsync_connectData DFLT_C_STRUCT;
 
 	/** The underlying C connect data  */
 	MQTTAsync_connectData data_;

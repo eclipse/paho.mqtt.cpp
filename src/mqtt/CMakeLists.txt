@@ -1,5 +1,5 @@
 #*******************************************************************************
-#  Copyright (c) 2016-2018
+#  Copyright (c) 2016-2023
 # 
 #  All rights reserved. This program and the accompanying materials
 #  are made available under the terms of the Eclipse Public License v2.0
@@ -27,10 +27,12 @@ install(
         delivery_token.h
         disconnect_options.h
         exception.h
+        export.h
         iaction_listener.h
         iasync_client.h
         iclient_persistence.h
         message.h
+        platform.h
         properties.h
         response_options.h
         server_response.h

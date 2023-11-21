@@ -67,6 +67,14 @@ message(STATUS "Using library for unit tests: ${PAHO_CPP_LIB}")
 
 target_link_libraries(unit_tests ${PAHO_CPP_LIB} Catch2::Catch2)
 
+if(PAHO_BUILD_SHARED)
+  target_compile_definitions(unit_tests PUBLIC PAHO_MQTTPP_IMPORTS)
+
+  if(MSVC AND PAHO_BUILD_STATIC)
+    target_link_libraries(unit_tests ${LIBS_SYSTEM})
+  endif()
+endif()
+
 include(CTest)
 include(Catch)
 
