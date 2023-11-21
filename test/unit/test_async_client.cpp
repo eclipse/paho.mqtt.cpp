@@ -979,3 +979,9 @@ TEST_CASE("async_client unsubscribe many topics 3 args failure", "[client]")
 	REQUIRE(MQTTASYNC_DISCONNECTED == return_code);
 }
 
+TEST_CASE("async_client consumer timeout", "[client]")
+{
+	// This just compiling shows #343 fixed.
+	async_client client{GOOD_SERVER_URI, CLIENT_ID};
+	client.try_consume_message_until(std::chrono::steady_clock::now());
+}

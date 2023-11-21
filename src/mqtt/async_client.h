@@ -795,7 +795,7 @@ public:
 	template <class Clock, class Duration>
 	const_message_ptr try_consume_message_until(const std::chrono::time_point<Clock,Duration>& absTime) {
 		const_message_ptr msg;
-		que_->try_get_until(msg, absTime);
+		que_->try_get_until(&msg, absTime);
 		return msg;
 	}
 

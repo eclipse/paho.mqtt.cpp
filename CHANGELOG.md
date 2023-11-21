@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Version 1.3.0](https://github.com/eclipse/paho.mqtt.cpp/compare/v1.2.0..v1.3.0) - (2023-12-29)
 
+- Fixed building and using library as DLL on Windows with MSVC
 - Updated License to Eclipse Public License v2.0
 - Updated create and connect options to better deal with MQTT protocol version
 - Defaulting connect version to v5 if specified in create options.
