@@ -189,12 +189,12 @@ TEST_CASE("persistence", "[persistence]")
     	REQUIRE(MQTTASYNC_SUCCESS ==
     			dcp::persistence_get(handle_, const_cast<char*>(KEY), &buf, &buflen));
 
-    	int n = PAYLOAD_LEN + PAYLOAD2_LEN + PAYLOAD3_LEN;
+    	size_t n = PAYLOAD_LEN + PAYLOAD2_LEN + PAYLOAD3_LEN;
     	string str{PAYLOAD};
     	str += PAYLOAD2;
     	str += PAYLOAD3;
 
-    	REQUIRE(n == buflen);
+    	REQUIRE(int(n) == buflen);
     	REQUIRE(buf != nullptr);
     	REQUIRE(memcmp(str.data(), buf, n) == 0);
     }

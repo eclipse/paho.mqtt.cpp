@@ -174,7 +174,7 @@ TEST_CASE("c struct constructor", "[message]")
 	MQTTAsync_message c_msg = MQTTAsync_message_initializer;
 
 	c_msg.payload = const_cast<char*>(BUF);
-	c_msg.payloadlen = N;
+	c_msg.payloadlen = int(N);
 	c_msg.qos = QOS;
 	c_msg.retained = 1;
 	c_msg.dup = 1;

@@ -757,7 +757,7 @@ TEST_CASE("async_client subscribe many topics 2 args failure", "[client]")
 		REQUIRE(token_sub);
 		token_sub->wait_for(TIMEOUT);
 	}
-	catch (const mqtt::exception& ex) {
+	catch (const mqtt::exception& /*ex*/) {
 		//REQUIRE(MQTTASYNC_BAD_QOS == ex.get_return_code());
 	}
 
@@ -805,7 +805,7 @@ TEST_CASE("async_client subscribe many topics 4 args failure", "[client]")
 	try {
 		cli.subscribe(TOPIC_COLL, BAD_QOS_COLL, &CONTEXT, listener)->wait_for(TIMEOUT);
 	}
-	catch (const mqtt::exception& ex) {
+	catch (const mqtt::exception& /*ex*/) {
 		//REQUIRE(MQTTASYNC_BAD_QOS == ex.get_return_code());
 	}
 

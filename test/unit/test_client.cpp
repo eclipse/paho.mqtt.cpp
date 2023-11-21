@@ -436,7 +436,7 @@ TEST_CASE("client subscribe many topics 2 args failure", "[client]")
 	try {
 		cli.subscribe(TOPIC_COLL, BAD_QOS_COLL);
 	}
-	catch (std::invalid_argument& ex) {}
+	catch (std::invalid_argument&) {}
 
 	int return_code = MQTTASYNC_SUCCESS;
 	try {
