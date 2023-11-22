@@ -53,7 +53,7 @@ The first new release in a while! It's primarily a bug-fix release, but has a fe
 - [#325]() Cache connect options in client to keep memory valid for callbacks like SSL on_error()
 - [#361](https://github.com/eclipse/paho.mqtt.cpp/issues/361) Added missing LICENSE file to conform to GitHub conventions.
 - [#304](https://github.com/eclipse/paho.mqtt.cpp/issues/304) Missing create_options::DFLT_C_STRUCT symbol when linking with MSVC.
-- [#429] (https://github.com/eclipse/paho.mqtt.cpp/issues/411) Remove declaration of connect_options::to_string() with missing implementation.
+- [#429](https://github.com/eclipse/paho.mqtt.cpp/issues/429) Remove declaration of connect_options::to_string() with missing implementation.
 - [#411](https://github.com/eclipse/paho.mqtt.cpp/issues/411) Missing virtual keyword for some client methods
 - [#444](https://github.com/eclipse/paho.mqtt.cpp/issues/444) Unit tests to check that connect options builder sets properties.
 - [#313](https://github.com/eclipse/paho.mqtt.cpp/issues/313) Get unit tests building on Windows. Needed to get rid of make_unique<> for Windows
