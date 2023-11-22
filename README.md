@@ -94,7 +94,7 @@ Contributions to this project are gladly welcomed and appreciated Before submitt
 
 _CMake_  is a cross-platform build system suitable for Unix and non-Unix platforms such as Microsoft Windows. It is now the only supported build system.
 
-The Paho C++ library requires the Paho C library, v1.3.8 or greater, to be built and installed first. More information below.
+The Paho C++ library requires the Paho C library, v1.3.13 or greater, to be built and installed first. More information below.
 
 CMake allows for options to direct the build. The following are specific to Paho C++:
 
