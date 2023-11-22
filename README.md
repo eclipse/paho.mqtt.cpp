@@ -73,12 +73,12 @@ The first new release in a while! It's primarily a bug-fix release, but has a fe
 - [#317](https://github.com/eclipse/paho.mqtt.cpp/issues/317) String constructor using just len instead of end iterator.
 - [#323](https://github.com/eclipse/paho.mqtt.cpp/issues/323) Added Session Expiry Interval to v5 chat sample to test.
 
+## Coming Next
 
-### _Catch2_ Unit Tests
+Two new releases are planned for the near future:
 
-Unit tests use _Catch2_ for the test framework. Versions 2.x and 3.x are supported.
-
-_Catch2_ can be found here: [Catch2](https://github.com/catchorg/Catch2)
+- v1.4 will add some minor new features like callback-per-subscription (see [#202](https://github.com/eclipse/paho.mqtt.cpp/issues/202)) and continue with bug fixes and improvements to the build system.
+- v1.5 will upgrade the library to C++17 and start adding features the the newer C++ versions support, like an API that uses `std::variant<>`, `std::option<>`, `constexpr`, and so on.
 
 ## Contributing
 
@@ -215,7 +215,19 @@ $ (cd build && cpack)
 
 ### Windows
 
-On Windows systems CMake creates Visual Studio project files.
+On Windows systems CMake creates Visual Studio project files for use with MSVC. Currently, other compilers like _clang_ or _MinGW_ are not directly supported.
+
+#### Using Paho C++ as a Windows DLL
+
+The project can be built as a static library or shared DLL on Windows. If using it as a DLL in your application, yuo should define the macro `PAHO_MQTTPP_IMPORTS` before including any Paho C++ include files. Preferably, make it a global definition in the application's build file, like in CMake:
+
+    target_compile_definitions(myapp PUBLIC PAHO_MQTTPP_IMPORTS)
+
+It's better not to mix DLLs and static libraries, but if you do link the Paho C++ DLL against the Paho C static library, you may need to manually resolve some system dependencies, like adding the WinSock library as a dependency to your application:
+
+    target_link_libraries(myapp ws2_32)
+
+#### Building the Library on Windows
 
 The build process currently supports a number Windows versions. The build process requires the following tools:
   * CMake GUI v3.5 or newer
@@ -282,6 +294,13 @@ The "mqtt://" and "tcp://" schemas are identical. They indicate an insecure conn
 Similarly, the "mqtts://" and "ssl://" schemas are identical. They specify a secure connection over SSL/TLS sockets.
 
 Note that to use any of the secure connect options, "mqtts://, "ssl://", or "wss://" you must compile the library with the `PAHO_WITH_SSL=ON` CMake option to include OpenSSL. In addition, you _must_ specify `ssl_options` when you connect to the broker - i.e. you must add an instance of `ssl_options` to the `connect_options` when calling `connect()`.
+
+## _Catch2_ Unit Tests
+
+Unit tests use _Catch2_ for the test framework. Versions 2.x and 3.x are supported.
+
+_Catch2_ can be found here: [Catch2](https://github.com/catchorg/Catch2)
+
 
 ## Example
 
