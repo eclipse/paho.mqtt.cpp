@@ -798,7 +798,6 @@ public:
 		que_->try_get_until(&msg, absTime);
 		return msg;
 	}
-
 };
 
 /** Smart/shared pointer to an asynchronous MQTT client object */

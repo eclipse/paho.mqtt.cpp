@@ -20,7 +20,7 @@ The library has the following features:
 - Automatic Reconnect
 - Offline Buffering
 - High Availability
-- Blocking and non-blocking API's
+- Blocking and non-blocking APIs
 - Modern C++ interface (C++11 and beyond)
 
 This code requires the [Paho C library](https://github.com/eclipse/paho.mqtt.c) by Ian Craggs, et al., specifically version 1.3.13 or possibly later.
@@ -34,19 +34,12 @@ To keep up with the latest announcements for this project, or to ask questions:
 **Email:** [Eclipse Paho Mailing List](https://accounts.eclipse.org/mailing-list/paho-dev)
 
 
-### Upcoming Version 1.3
+### What's New in v1.3.0
 
-It's been a while since there's been an update. But work has started on v1.3! It will do the following:
+The first new release in a while! It's primarily a bug-fix release, but has a few minor new features. The full list is here:
 
-- Cover all the new features in and up to Paho C v1.3.13
-- Finally release all the new features and bug fixed already in the repository
-- Optionally build the Paho C++ and C libraries at the same time.
-- Resolve many of the reported Issues
-
-Hopefully it will be out by the end of 2023. Just a few weeks away!
-
-### Unreleased features in this branch (upcoming v1.3.0)
-
+- Fixed building and using library as DLL on Windows with MSVC
+- Updated License to Eclipse Public License v2.0
 - Updated create and connect options to better deal with MQTT protocol version
 - Defaulting connect version to v5 if specified in create options.
 - Added a `topic_filter` class to match a single filter to specific topics.
@@ -55,6 +48,10 @@ Hopefully it will be out by the end of 2023. Just a few weeks away!
 - Support for Catch2 v3.x for unit tests (v2.x also still supported).
 - Changed the sample apps to use the newer "mqtt://" schemas.
 - Connect option initializers for v5 and WebSockets.
+- [#343](https://github.com/eclipse/paho.mqtt.cpp/issues/343) async_client::try_consume_message_until taking single parameter fails to compile
+- [#445](https://github.com/eclipse/paho.mqtt.cpp/pull/445) Update properties when moving/copying connect options.
+- [#325]() Cache connect options in client to keep memory valid for callbacks like SSL on_error()
+- [#361](https://github.com/eclipse/paho.mqtt.cpp/issues/361) Added missing LICENSE file to conform to GitHub conventions.
 - [#304](https://github.com/eclipse/paho.mqtt.cpp/issues/304) Missing create_options::DFLT_C_STRUCT symbol when linking with MSVC.
 - [#429] (https://github.com/eclipse/paho.mqtt.cpp/issues/411) Remove declaration of connect_options::to_string() with missing implementation.
 - [#411](https://github.com/eclipse/paho.mqtt.cpp/issues/411) Missing virtual keyword for some client methods
@@ -68,53 +65,18 @@ Hopefully it will be out by the end of 2023. Just a few weeks away!
 - [#428](https://github.com/eclipse/paho.mqtt.cpp/issues/428) Fixed type in create_options.h
 - [#407](https://github.com/eclipse/paho.mqtt.cpp/pull/407) Fix nodiscard warnings in sync client
 - [#385](https://github.com/eclipse/paho.mqtt.cpp/issues/385) Thread queue deadlock with multiple consumers
-- [#374](https://github.com/eclipse/paho.mqtt.cpp/pull/374) Add Paho C as a submodeule
-- [#350](https://github.com/eclipse/paho.mqtt.cpp/pull/350) avoid adding Paho MQTT C library twice
-- [#253](https://github.com/eclipse/paho.mqtt.cpp/issues/253) implicit capture of 'this' via '[=]' is deprecated in C++20
-- [#337](https://github.com/eclipse/paho.mqtt.cpp/issues/337) copy/move of caPath_ in ssl_options
-- [#330](https://github.com/eclipse/paho.mqtt.cpp/pull/330) added /build/ folder to .gitignore
+- [#374](https://github.com/eclipse/paho.mqtt.cpp/pull/374) Add Paho C as a submodule
+- [#350](https://github.com/eclipse/paho.mqtt.cpp/pull/350) Avoid adding Paho MQTT C library twice
+- [#253](https://github.com/eclipse/paho.mqtt.cpp/issues/253) Implicit capture of 'this' via '[=]' is deprecated in C++20
+- [#337](https://github.com/eclipse/paho.mqtt.cpp/issues/337) Copy/move of caPath_ in ssl_options
+- [#330](https://github.com/eclipse/paho.mqtt.cpp/pull/330) Added /build/ folder to .gitignore
 - [#317](https://github.com/eclipse/paho.mqtt.cpp/issues/317) String constructor using just len instead of end iterator.
 - [#323](https://github.com/eclipse/paho.mqtt.cpp/issues/323) Added Session Expiry Interval to v5 chat sample to test.
 
 
-### New in Version 1.2.0
-
-Version 1.2.0 brought in some missing MQTT v5 features, support for websocket headers and proxies, ALPN protocol lists, added the builder pattern for options, and fixed a number of bugs in both the C++ library and the underlying C lib.
-
-Requires Paho C v1.3.8
-
-- Missing MQTT v5 features:
-    - Ability to add properties to Subscribe and Unsubscribe packets (i.e. subscription identifiers)
-    - "Disconnected" callback gives reason code and properties for server disconnect
-- New `create_options` that can be used to construct a client with new features:
-    - Send while disconnected before the 1st successful connection
-    - Output buffer can delete oldest messages when full
-    - Can choose to clear the persistence store on startup
-    - Select whether to persist QoS 0 messages
-- Started classes to create options using the Builder Pattern, with the `create_options_builder`, `connect_options_builder`, `message_ptr_builder`, etc.
-- User-defined websocket HTTP headers.
-- HTTP/S proxy support
-- Added ALPN protocol support to SSL/TLS options
-- SSL/TLS error and PSK callback support
-- Update connection callback support (change credentials when using auto-reconnect)
-- Updates to the sample apps:
-    - Overall cleanup with better consistency
-    - Example of using websockets and a proxy
-    - User-based file persistence with simple encoding/encryption
-    - Sharing a client between multiple threads
-- Converted the unit tests to use Catch2
-- All library exceptions are now properly derived from the `mqtt::exception` base class.
-- [#231] Added `on_disconnected` callback to handle receipt of disconnect packet from server.
-- [#211, #223, #235] Removed use of Log() function from the Paho C library.
-- [#227] Fixed race condition in thread-safe queue
-- [#224] & [#255] Subscribing to MQTT v3 broker with array of one topic causes segfault.
-- [#282] Ability to build Debian/Ubuntu package
-- [#300] Calling `reconnect()` was hanging forever, even when successful. In addition several of the synchronous `client` calls were hanging forever on failure. They now properly throw a `timeout_error` exception.
-- Several memory issues and bug fixes from updated Paho C library support.
-
 ### _Catch2_ Unit Tests
 
-Unit tests were converted to use _Catch2_ for the test framework. 
+Unit tests use _Catch2_ for the test framework. Versions 2.x and 3.x are supported.
 
 _Catch2_ can be found here: [Catch2](https://github.com/catchorg/Catch2)
 
@@ -269,36 +231,36 @@ At the end of this process you have a Visual Studio solution.
 
 Alternately, the libraries can be completely built at an MSBuild Command Prompt. Download the Paho C and C++ library sources, then open a command window and first compile the Paho C library:
 
-```
-> cd paho.mqtt.c
-> cmake -Bbuild -H. -DCMAKE_INSTALL_PREFIX=C:\mqtt\paho-c
-> cmake --build build/ --target install
-```
+    > cd paho.mqtt.c
+    > cmake -Bbuild -H. -DCMAKE_INSTALL_PREFIX=C:\mqtt\paho-c
+    > cmake --build build/ --target install
 
 Then build the C++ library:
 
-```
-> cd ..\paho.mqtt.cpp
-> cmake -Bbuild -H. -DCMAKE_INSTALL_PREFIX=C:\mqtt\paho-cpp -DPAHO_BUILD_SAMPLES=ON -DPAHO_WITH_SSL=OFF -DCMAKE_PREFIX_PATH=C:\mqtt\paho-c
-> cmake --build build/ --target install
-```
+    > cd ..\paho.mqtt.cpp
+    > cmake -Bbuild -H. -DCMAKE_INSTALL_PREFIX=C:\mqtt\paho-cpp -DPAHO_BUILD_SAMPLES=ON -DPAHO_WITH_SSL=OFF -DCMAKE_PREFIX_PATH=C:\mqtt\paho-c
+    > cmake --build build/ --target install
+
 This builds and installs both libraries to a non-standard location under `C:\mqtt`. Modify this location as desired or use the default location, but either way, the C++ library will most likely need to be told where the C library was built using `CMAKE_PREFIX_PATH`.
 
-It seems quite odd, but even on a 64-bit system using a 64-bit compiler, MSVC seems to default to a 32-bit build target. 
+It seems quite odd, but even on a 64-bit system using a 64-bit compiler, MSVC seems to default to a 32-bit build target.
 
-The 64-bit target can be selected using the CMake generator switch, *-G*, at configuration time. The full version must be provided. For Visual Studio 2015 which is v14 do this to first build the Paho C library:
+The 64-bit target can be selected using the CMake generator switch, *-G*, at configuration time. The full version must be provided.
 
-```
-> cmake -G "Visual Studio 14 Win64" -Bbuild -H. -DCMAKE_INSTALL_PREFIX=C:\mqtt\paho-c
-...
-```
+For MSVS 2019 and beyond:
+
+    > cmake -G "Visual Studio 16 2019" -Ax64 -Bbuild -H. -DCMAKE_INSTALL_PREFIX=C:\mqtt\paho-c
+    > ...
+
+For Visual Studio 2015 which is v14 do this to first build the Paho C library:
+
+    > cmake -G "Visual Studio 14 Win64" -Bbuild -H. -DCMAKE_INSTALL_PREFIX=C:\mqtt\paho-c
+    ...
 
 Then use it to build the C++ library:
 
-```
-> cmake -G "Visual Studio 14 Win64" -Bbuild -H. -DCMAKE_INSTALL_PREFIX=C:\mqtt\paho-cpp -DPAHO_WITH_SSL=OFF -DCMAKE_PREFIX_PATH=C:\mqtt\paho-c
-...
-```
+    > cmake -G "Visual Studio 14 Win64" -Bbuild -H. -DCMAKE_INSTALL_PREFIX=C:\mqtt\paho-cpp -DPAHO_WITH_SSL=OFF -DCMAKE_PREFIX_PATH=C:\mqtt\paho-c
+    ...
 
 *Note that it is very important that you use the same generator (target) to build BOTH libraries, otherwise you will get lots of linker errors when you try to build the C++ library.*
 
@@ -306,16 +268,14 @@ Then use it to build the C++ library:
 
 The library supports connecting to an MQTT server/broker using TCP, SSL/TLS, and websockets (secure and insecure). This is chosen by the URI supplied to the connect() call. It can be specified as:
 
-```
-"mqtt://<host>:<port>"   - TCP, unsecure
- "tcp://<host>:<port>"    (same)
+    "mqtt://<host>:<port>"   - TCP, unsecure
+     "tcp://<host>:<port>"    (same)
 
-"mqtts://<host>:<port>"  - SSL/TLS
- "ssl://<host>:<port>"     (same)
+    "mqtts://<host>:<port>"  - SSL/TLS
+     "ssl://<host>:<port>"     (same)
 
-"ws://<host>:<port>"    - Unsecure websockets
-"wss://<host>:<port>"   - Secure websockets
-```
+    "ws://<host>:<port>"    - Unsecure websockets
+    "wss://<host>:<port>"   - Secure websockets
 
 The "mqtt://" and "tcp://" schemas are identical. They indicate an insecure connection over TCP. The "mqtt://" variation is new for the library, but becoming more common across different MQTT libraries.
 
