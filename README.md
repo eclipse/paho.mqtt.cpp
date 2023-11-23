@@ -34,6 +34,10 @@ To keep up with the latest announcements for this project, or to ask questions:
 **Email:** [Eclipse Paho Mailing List](https://accounts.eclipse.org/mailing-list/paho-dev)
 
 
+### What's New in v1.3.1
+
+- [#462](https://github.com/eclipse/paho.mqtt.cpp/pull/462) Fix version string for version v1.3.x
+
 ### What's New in v1.3.0
 
 The first new release in a while! It's primarily a bug-fix release, but has a few minor new features. The full list is here:
