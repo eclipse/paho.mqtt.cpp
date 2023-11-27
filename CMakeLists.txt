@@ -22,16 +22,9 @@
 #   Frank Pagliughi
 #*******************************************************************************/
 
-## Note: on OS X you should install XCode and the associated command-line tools
-
-## cmake flags
 cmake_minimum_required(VERSION 3.5)
 
-## project name
-project("paho-mqtt-cpp" 
-    VERSION "1.3.1"
-    LANGUAGES CXX
-)
+project(PahoMqttCpp VERSION "1.4.0.1")
 
 ## --- Build options ---
 
@@ -47,9 +40,59 @@ else()
 endif()
 
 option(PAHO_BUILD_SAMPLES "Build sample programs" FALSE)
-option(PAHO_BUILD_TESTS "Build tests" FALSE)
+option(PAHO_BUILD_TESTS "Build tests (requires Catch2)" FALSE)
 option(PAHO_BUILD_DOCUMENTATION "Create and install the API documentation (requires Doxygen)" FALSE)
 option(PAHO_WITH_MQTT_C "Build Paho C from the internal GIT submodule." FALSE)
+
+if(NOT PAHO_BUILD_SHARED AND NOT PAHO_BUILD_STATIC)
+  message(FATAL_ERROR "You must set either PAHO_BUILD_SHARED, PAHO_BUILD_STATIC, or both")
+endif()
+
+## --- Find Paho C or build it, if reqested ---
+
+if(PAHO_WITH_MQTT_C)
+  message(STATUS "Paho C: Bundled")
+
+  ## Build the Paho C library from the submodule
+  set(PAHO_ENABLE_TESTING FALSE CACHE BOOL "No Paho C tests")
+  set(PAHO_HIGH_PERFORMANCE TRUE CACHE BOOL "Paho C high performance")
+
+  add_subdirectory(${PROJECT_SOURCE_DIR}/externals/paho-mqtt-c)
+
+  ## Alias namespace so that the full names can be used with the subdir.
+  if(PAHO_BUILD_SHARED)
+    add_library(eclipse-paho-mqtt-c::paho-mqtt3a ALIAS paho-mqtt3a)
+    if(PAHO_WITH_SSL)
+      add_library(eclipse-paho-mqtt-c::paho-mqtt3as ALIAS paho-mqtt3as)
+    endif()
+  else()
+    # Seems that the C lib
+    add_library(eclipse-paho-mqtt-c::paho-mqtt3a-static ALIAS paho-mqtt3a-static)
+    if(PAHO_WITH_SSL)
+      add_library(eclipse-paho-mqtt-c::paho-mqtt3as-static ALIAS paho-mqtt3as-static)
+    endif()
+  endif()
+
+  ## install paho.mqtt.c library (appending to PahoMqttCpp export)
+  install(TARGETS ${PAHO_MQTT_C_LIB}
+    EXPORT PahoMqttCpp
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  )
+else()
+  find_package(eclipse-paho-mqtt-c REQUIRED)
+endif()
+
+if(PAHO_WITH_SSL)
+  find_package(OpenSSL REQUIRED)
+  set(PAHO_MQTT_C_LIB eclipse-paho-mqtt-c::paho-mqtt3as)
+else()
+  set(PAHO_MQTT_C_LIB eclipse-paho-mqtt-c::paho-mqtt3a)
+endif()
+
+if(PAHO_BUILD_STATIC AND NOT PAHO_BUILD_SHARED)
+  set(PAHO_MQTT_C_LIB ${PAHO_MQTT_C_LIB}-static)
+endif()
 
 ## --- C++11 build flags ---
 
@@ -60,7 +103,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Generate position-independent code (-fPIC on UNIX)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# --- System Libraries ---
+# --- System Details ---
 
 include(GNUInstallDirs)
 
@@ -68,8 +111,6 @@ if(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
     set(LIBS_SYSTEM ws2_32)
-elseif(UNIX)
-    set(LIBS_SYSTEM c stdc++)
 endif()
 
 ## --- Build directories ---
@@ -118,5 +159,6 @@ elseif(UNIX)
 endif()
 
 include(CPack)
+
 add_subdirectory(cmake)
 
