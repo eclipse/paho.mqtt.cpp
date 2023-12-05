@@ -101,7 +101,7 @@ foreach(TARGET ${PAHO_CPP_TARGETS})
   target_compile_options(${TARGET} PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/W3>
     $<$<CXX_COMPILER_ID:Clang>:-Wall -Wextra -Wdocumentation>
-    $<$<NOT:$<CXX_COMPILER_ID:MSVC,Clang>>:-Wall -Wextra>
+    $<$<NOT:$<OR:$<CXX_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:Clang>>>:-Wall -Wextra>
   )
 
   target_include_directories(${TARGET} PUBLIC
