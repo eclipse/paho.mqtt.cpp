@@ -93,7 +93,7 @@ target_compile_definitions(paho-cpp-objs PRIVATE PAHO_MQTTPP_EXPORTS)
 target_compile_options(paho-cpp-objs PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/W3>
   $<$<CXX_COMPILER_ID:Clang>:-Wall -Wextra -Wdocumentation>
-  $<$<NOT:$<OR:$<CXX_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:Clang>>>:-Wall -Wextra -Wpedantic>
+  $<$<NOT:$<OR:$<CXX_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:Clang>>>:-Wall -Wextra>
 )
 
 ## --- Build the shared library, if requested ---
