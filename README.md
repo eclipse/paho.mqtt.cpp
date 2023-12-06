@@ -34,8 +34,10 @@ To keep up with the latest announcements for this project, or to ask questions:
 **Email:** [Eclipse Paho Mailing List](https://accounts.eclipse.org/mailing-list/paho-dev)
 
 
-### What's New in v1.3.1
+### What's New in v1.3.1 & v.1.3.2
 
+- [#463](https://github.com/eclipse/paho.mqtt.cpp/issues/463) Fixed generator expression for older CMake
+- [#378](https://github.com/eclipse/paho.mqtt.cpp/issues/378) Bad LWT message in async_publish.cpp sample.
 - [#462](https://github.com/eclipse/paho.mqtt.cpp/pull/462) Fix version string for version v1.3.x
 
 ### What's New in v1.3.0
