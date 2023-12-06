@@ -6,6 +6,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Version 1.3.2](https://github.com/eclipse/paho.mqtt.cpp/compare/v1.3.1..v1.3.2) - (2023-12-05)
+
+- [#463](https://github.com/eclipse/paho.mqtt.cpp/issues/463) Fixed generator expression for older CMake
+- [#378](https://github.com/eclipse/paho.mqtt.cpp/issues/378) Bad LWT message in async_publish.cpp sample.
+
 
 ## [Version 1.3.1](https://github.com/eclipse/paho.mqtt.cpp/compare/v1.3.0..v1.3.1) - (2023-11-23)
 
