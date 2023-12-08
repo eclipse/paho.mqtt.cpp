@@ -326,6 +326,85 @@ TEST_CASE("string_collection clear", "[collections]")
 	REQUIRE(size_t(0) == sc.size());
 }
 
+
+// ----------------------------------------------------------------------
+// Test the const_iterator class
+// ----------------------------------------------------------------------
+
+TEST_CASE("string_collection for each", "[collections]")
+{
+	string_collection sc(VEC);
+
+	size_t i = 0u;
+	for (const auto & string : sc) {
+		REQUIRE(sc[i] == sc[i]);
+		++i;
+	}
+	REQUIRE(i == sc.size());
+}
+
+TEST_CASE("string_collection iterator for with advance", "[collections]")
+{
+	string_collection sc(VEC);
+
+	size_t i = 0u;
+	for (auto it = sc.begin(); it != sc.end(); std::advance(it, 1)) {
+		REQUIRE(*it == sc[i]);
+		++i;
+	}
+	REQUIRE(i == sc.size());
+}
+
+TEST_CASE("string_collection iterator for with pre-increment", "[collections]")
+{
+	string_collection sc(VEC);
+
+	size_t i = 0u;
+	for (auto it = sc.begin(); it != sc.end(); ++it) {
+		REQUIRE(*it == sc[i]);
+		++i;
+	}
+	REQUIRE(i == sc.size());
+}
+
+TEST_CASE("string_collection iterator for with post increment", "[collections]")
+{
+	string_collection sc(VEC);
+
+	size_t i = 0u;
+	for (auto it = sc.begin(); it != sc.end(); it++) {
+		REQUIRE(*it == sc[i]);
+		++i;
+	}
+	REQUIRE(i == sc.size());
+}
+
+TEST_CASE("string_collection begin", "[collections]")
+{
+	string_collection sc(VEC);
+
+	REQUIRE(*(sc.begin()) == sc[0u]);
+}
+
+TEST_CASE("string_collection std copy", "[collections]")
+{
+	string_collection sc(VEC);
+
+	std::vector<std::string> output;
+	std::copy(
+		sc.begin(),
+		sc.end(),
+		std::back_inserter(output)
+	);
+
+	REQUIRE(sc.size() == output.size());
+
+	for (size_t i = 0u; i < sc.size(); ++i) {
+		REQUIRE(sc[i] == output[i]);
+	}
+}
+
+
 /////////////////////////////////////////////////////////////////////////////
 // 							name_value_collection
 /////////////////////////////////////////////////////////////////////////////
