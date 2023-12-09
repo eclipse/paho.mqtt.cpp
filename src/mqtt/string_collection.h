@@ -223,6 +223,12 @@ public:
 	 *
 	 */
 	char* const* c_arr() const { return (char* const *) cArr_.data(); }
+
+	using const_iterator = collection_type::const_iterator;
+
+	const_iterator begin() const { return coll_.begin(); }
+
+	const_iterator end() const { return coll_.end(); }
 };
 
 /////////////////////////////////////////////////////////////////////////////
