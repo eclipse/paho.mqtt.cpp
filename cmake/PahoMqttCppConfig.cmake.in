@@ -4,9 +4,11 @@ set(PAHO_BUILD_SHARED @PAHO_BUILD_SHARED@)
 set(PAHO_WITH_SSL @PAHO_WITH_SSL@)
 
 include(CMakeFindDependencyMacro)
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
-#find_dependency(PahoMqttC REQUIRED)
-list(REMOVE_AT CMAKE_MODULE_PATH -1)
 find_dependency(Threads REQUIRED)
+if(PAHO_WITH_SSL)
+	find_dependency(OpenSSL REQUIRED)
+endif()
+find_dependency(eclipse-paho-mqtt-c REQUIRED)
+
 
 include("${CMAKE_CURRENT_LIST_DIR}/@package_name@Targets.cmake")
