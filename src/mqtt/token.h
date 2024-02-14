@@ -420,6 +420,13 @@ public:
 	 * @return The reason code for the operation.
 	 */
 	ReasonCode get_reason_code() const { return reasonCode_; }
+
+	/**
+	 * Get the error message from the C library
+	 * @return Error message for the operation
+	*/
+	string get_message() const { return errMsg_; }
+
 	/**
 	 * Blocks the current thread until the action this token is associated
 	 * with has completed.
