@@ -425,7 +425,7 @@ public:
 	 * Get the error message from the C library
 	 * @return Error message for the operation
 	*/
-	string get_message() const { return errMsg_; }
+	string get_error_message() const { return errMsg_; }
 
 	/**
 	 * Blocks the current thread until the action this token is associated
