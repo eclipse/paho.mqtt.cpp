@@ -11,13 +11,13 @@
 #
 #  All rights reserved. This program and the accompanying materials
 #  are made available under the terms of the Eclipse Public License v2.0
-#  and Eclipse Distribution License v1.0 which accompany this distribution. 
-# 
-#  The Eclipse Public License is available at 
+#  and Eclipse Distribution License v1.0 which accompany this distribution.
+#
+#  The Eclipse Public License is available at
 #     http://www.eclipse.org/legal/epl-v20.html
-#  and the Eclipse Distribution License is available at 
+#  and the Eclipse Distribution License is available at
 #    http://www.eclipse.org/org/documents/edl-v10.php.
-# 
+#
 #  Contributors:
 #     Guilherme Maciel Ferreira - initial version
 #     Frank Pagliughi - made the shared library optional
@@ -38,7 +38,7 @@ set(COMMON_SRC
   async_client.cpp
   client.cpp
   connect_options.cpp
-  create_options.cpp    
+  create_options.cpp
   disconnect_options.cpp
   iclient_persistence.cpp
   message.cpp
@@ -61,7 +61,6 @@ if(PAHO_BUILD_SHARED)
 
     ## Add dependencies to the shared library
     target_link_libraries(paho-mqttpp3 PUBLIC
-      eclipse-paho-mqtt-c::paho-mqtt3as
       ${PAHO_MQTT_C_LIB}
       Threads::Threads
     )
@@ -81,7 +80,7 @@ if(PAHO_BUILD_STATIC)
     list(APPEND PAHO_CPP_TARGETS paho-mqttpp3-static)
 
     ## add dependencies to the shared library
-    target_link_libraries(paho-mqttpp3-static PUBLIC 
+    target_link_libraries(paho-mqttpp3-static PUBLIC
       ${PAHO_MQTT_C_LIB}
       Threads::Threads
     )
