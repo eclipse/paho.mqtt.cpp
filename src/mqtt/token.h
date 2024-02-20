@@ -390,10 +390,7 @@ public:
 	 * Register a listener to be notified when an action completes.
 	 * @param listener The callback to be notified when actions complete.
 	 */
-	virtual void set_action_callback(iaction_listener& listener) {
-		guard g(lock_);
-		listener_ = &listener;
-	}
+	virtual void set_action_callback(iaction_listener& listener);
 	/**
 	 * Store some context associated with an action.
 	 * @param userContext optional object used to pass context to the
