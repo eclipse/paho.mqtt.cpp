@@ -88,6 +88,15 @@ private:
 	/** Path to a directory containing CA certificates in PEM format */
 	string caPath_;
 
+	/** Key mode "ENG" for engine or "PEM" for pem format */
+	string keyType_;
+
+	/** ssl engine id */
+	string engineId_;
+
+    /** engine config file inorder to load engine*/
+    string engineConfFile_;
+
 	/**
 	 * The list of cipher suites that the client will present to the
 	 * server during the SSL handshake.
@@ -147,11 +156,15 @@ public:
 	 * will present to the server during the SSL handshake.
 	 * @param enableServerCertAuth True/False option to enable verification of
 	 * the server certificate
+	 * @param keyType privateKey mode ,choose "ENG" for engine, "PEM" for pem.
+     * @param engineId The SSL engine ID.
+     * @param engineConfFile  engine config file for load engine.
 	 * @param alpnProtos The ALPN protocols to try.
 	 */
 	ssl_options(const string& trustStore, const string& keyStore,
 				const string& privateKey, const string& privateKeyPassword,
 				const string& enabledCipherSuites, bool enableServerCertAuth,
+				const string& keyType, const string& engineId, const string& engineConfFile,
 				const std::vector<string> alpnProtos=std::vector<string>());
 	/**
 	 * Argument constructor.
@@ -169,12 +182,16 @@ public:
 	 *  						  handshake.
 	 * @param enableServerCertAuth True/False option to enable verification
 	 *  						   of the server certificate
+	 * @param keyType privateKey mode ,choose "ENG" for engine, "PEM" for pem.
+     * @param engineId The SSL engine ID.
+     * @param engineConfFile  engine config file for load engine.
 	 * @param alpnProtos The ALPN protocols to try.
 	 */
 	ssl_options(const string& trustStore, const string& keyStore,
 				const string& privateKey, const string& privateKeyPassword,
 				const string& caPath,
 				const string& enabledCipherSuites, bool enableServerCertAuth,
+				const string& keyType, const string& engineId, const string& engineConfFile,
 				const std::vector<string> alpnProtos=std::vector<string>());
 	/**
 	 * Copy constructor.
@@ -257,6 +274,21 @@ public:
 	 * @param privateKey If not included in the sslKeyStore, this is the
 	 *  				 file in PEM format containing the client's private
 	 *  				 key.
+	 */
+    void set_key_mode(const string& keyType);
+	/**
+	 * Sets the key mode for client's private key.
+	 * @param keyType choose "ENG" for engine, "PEM" for pem.
+	 */
+    void set_engine_id(const string& engineId);
+	/**
+	 * Sets the engine ID for SSL.
+	 * @param engineId engineId for SSL.
+	 */
+    void set_engine_conf(const string& engineConfFile);
+	/**
+	 * Sets the engine config file for SSL.
+	 * @param engineConfFile engine config file for SSL.
 	 */
 	void set_private_key(const string& privateKey);
 	/**
