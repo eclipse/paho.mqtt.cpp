@@ -41,6 +41,7 @@ install(
         subscribe_options.h
         thread_queue.h
         token.h
+        topic_matcher.h
         topic.h
         types.h
         will_options.h
