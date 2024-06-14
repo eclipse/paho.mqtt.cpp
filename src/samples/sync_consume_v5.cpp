@@ -16,7 +16,7 @@
 //
 
 /*******************************************************************************
- * Copyright (c) 2020-2023 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2020-2024 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -51,6 +51,9 @@ const string CLIENT_ID		{ "paho_cpp_sync_consume5" };
 constexpr int QOS_0 = 0;
 constexpr int QOS_1 = 1;
 
+// Infinite time for session expiration
+const uint32_t INFINITE = std::numeric_limits<uint32_t>::max();
+
 /////////////////////////////////////////////////////////////////////////////
 
 // Message table function signature
@@ -84,7 +87,10 @@ int main(int argc, char* argv[])
 	auto connOpts = mqtt::connect_options_builder()
 		.mqtt_version(MQTTVERSION_5)
 		.automatic_reconnect(seconds(2), seconds(30))
-		.clean_session(false)
+		.clean_start(false)
+		.properties({
+			{mqtt::property::SESSION_EXPIRY_INTERVAL, INFINITE}
+	    })
 		.finalize();
 
 	// Dispatch table to handle incoming messages based on Subscription ID's.
@@ -128,8 +134,8 @@ int main(int argc, char* argv[])
 
 			if (msg) {
 				// Get the subscription ID from the incoming message
-				int subId = mqtt::get<int>(msg->get_properties(),
-										   mqtt::property::SUBSCRIPTION_IDENTIFIER);
+				auto subId = mqtt::get<uint32_t>(msg->get_properties(),
+                                                 mqtt::property::SUBSCRIPTION_IDENTIFIER);
 
 				// Dispatch to a handler function based on the Subscription ID
 				if (!(handler[subId-1])(*msg))
