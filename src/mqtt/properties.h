@@ -98,6 +98,13 @@ public:
 	 */
 	property(code c, int32_t val);
 	/**
+	 * Create a numeric property.
+	 * This can be a byte, or 2-byte, 4-byte, or variable byte integer.
+	 * @param c The property code
+	 * @param val The integer value for the property
+	 */
+	property(code c, uint32_t val) : property(c, int32_t(val)) {}
+	/**
 	 * Create a string or binary property.
 	 * @param c The property code
 	 * @param val The value for the property
@@ -195,6 +202,8 @@ inline uint16_t get<uint16_t>(const property& prop) {
 /**
  * Extracts the value from the property as a signed 16-bit integer.
  * @return The value from the property as a signed 16-bit integer.
+ * @deprecated All integer properties are unsigned. Use
+ *             `get<uint16_t>()`
  */
 template <>
 inline int16_t get<int16_t>(const property& prop) {
@@ -213,6 +222,8 @@ inline uint32_t get<uint32_t>(const property& prop) {
 /**
  * Extracts the value from the property as a signed 32-bit integer.
  * @return The value from the property as a signed 32-bit integer.
+ * @deprecated All integer properties are unsigned. Use
+ *             `get<uint32_t>()`
  */
 template <>
 inline int32_t get<int32_t>(const property& prop) {

@@ -1,7 +1,7 @@
 // properties.cpp
 
 /*******************************************************************************
- * Copyright (c) 2019 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2019-2024 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -31,11 +31,11 @@ property::property(code c, int32_t val)
 			prop_.value.byte = uint8_t(val);
 			break;
 		case MQTTPROPERTY_TYPE_TWO_BYTE_INTEGER:
-			prop_.value.integer2 = int16_t(val);
+			prop_.value.integer2 = uint16_t(val);
 			break;
 		case MQTTPROPERTY_TYPE_FOUR_BYTE_INTEGER:
 		case MQTTPROPERTY_TYPE_VARIABLE_BYTE_INTEGER:
-			prop_.value.integer4 = val;
+			prop_.value.integer4 = uint32_t(val);
 			break;
 		default:
 			// TODO: Throw an exception
