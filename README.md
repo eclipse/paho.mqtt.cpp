@@ -34,55 +34,12 @@ To keep up with the latest announcements for this project, or to ask questions:
 **Email:** [Eclipse Paho Mailing List](https://accounts.eclipse.org/mailing-list/paho-dev)
 
 
-### What's New in v1.3.1
+### What's New in v1.4.0
 
-- [#462](https://github.com/eclipse/paho.mqtt.cpp/pull/462) Fix version string for version v1.3.x
-
-### What's New in v1.3.0
-
-The first new release in a while! It's primarily a bug-fix release, but has a few minor new features. The full list is here:
-
-- Fixed building and using library as DLL on Windows with MSVC
-- Updated License to Eclipse Public License v2.0
-- Updated create and connect options to better deal with MQTT protocol version
-- Defaulting connect version to v5 if specified in create options.
-- Added a `topic_filter` class to match a single filter to specific topics.
-- Added a `topic_matcher` class to create a collection of items in a trie structure that can contain items tied to topic filters. (Useful for queues or callbacks per-subscription topic).
-- Minor tweaks to prepare for C++20
-- Support for Catch2 v3.x for unit tests (v2.x also still supported).
-- Changed the sample apps to use the newer "mqtt://" schemas.
-- Connect option initializers for v5 and WebSockets.
-- [#343](https://github.com/eclipse/paho.mqtt.cpp/issues/343) async_client::try_consume_message_until taking single parameter fails to compile
-- [#445](https://github.com/eclipse/paho.mqtt.cpp/pull/445) Update properties when moving/copying connect options.
-- [#325]() Cache connect options in client to keep memory valid for callbacks like SSL on_error()
-- [#361](https://github.com/eclipse/paho.mqtt.cpp/issues/361) Added missing LICENSE file to conform to GitHub conventions.
-- [#304](https://github.com/eclipse/paho.mqtt.cpp/issues/304) Missing create_options::DFLT_C_STRUCT symbol when linking with MSVC.
-- [#429](https://github.com/eclipse/paho.mqtt.cpp/issues/429) Remove declaration of connect_options::to_string() with missing implementation.
-- [#411](https://github.com/eclipse/paho.mqtt.cpp/issues/411) Missing virtual keyword for some client methods
-- [#444](https://github.com/eclipse/paho.mqtt.cpp/issues/444) Unit tests to check that connect options builder sets properties.
-- [#313](https://github.com/eclipse/paho.mqtt.cpp/issues/313) Get unit tests building on Windows. Needed to get rid of make_unique<> for Windows
-- [#397](https://github.com/eclipse/paho.mqtt.cpp/issues/397) Doc about clean session in connect_options.h is wrong
-- [#442](https://github.com/eclipse/paho.mqtt.cpp/issues/442) g++ complains with multiple definition of static constexpr for mixed C++11/17 builds
-- [#445](https://github.com/eclipse/paho.mqtt.cpp/pull/445)Fix copy/move constructor for connect/disconnect opts with properties
-- [#425](https://github.com/eclipse/paho.mqtt.cpp/pull/425) Silence warning for unused variable rsp in class `unsubscribe_response`
-- [#440](https://github.com/eclipse/paho.mqtt.cpp/pull/440) Fix typos across the project
-- [#428](https://github.com/eclipse/paho.mqtt.cpp/issues/428) Fixed type in create_options.h
-- [#407](https://github.com/eclipse/paho.mqtt.cpp/pull/407) Fix nodiscard warnings in sync client
-- [#385](https://github.com/eclipse/paho.mqtt.cpp/issues/385) Thread queue deadlock with multiple consumers
-- [#374](https://github.com/eclipse/paho.mqtt.cpp/pull/374) Add Paho C as a submodule
-- [#350](https://github.com/eclipse/paho.mqtt.cpp/pull/350) Avoid adding Paho MQTT C library twice
-- [#253](https://github.com/eclipse/paho.mqtt.cpp/issues/253) Implicit capture of 'this' via '[=]' is deprecated in C++20
-- [#337](https://github.com/eclipse/paho.mqtt.cpp/issues/337) Copy/move of caPath_ in ssl_options
-- [#330](https://github.com/eclipse/paho.mqtt.cpp/pull/330) Added /build/ folder to .gitignore
-- [#317](https://github.com/eclipse/paho.mqtt.cpp/issues/317) String constructor using just len instead of end iterator.
-- [#323](https://github.com/eclipse/paho.mqtt.cpp/issues/323) Added Session Expiry Interval to v5 chat sample to test.
 
 ## Coming Next
 
-Two new releases are planned for the near future:
-
-- v1.4 will add some minor new features like callback-per-subscription (see [#202](https://github.com/eclipse/paho.mqtt.cpp/issues/202)) and continue with bug fixes and improvements to the build system.
-- v1.5 will upgrade the library to C++17 and start adding features the the newer C++ versions support, like an API that uses `std::variant<>`, `std::option<>`, `constexpr`, and so on.
+The next minor release, v1.5, will upgrade the library to C++17 and start adding features the the newer C++ versions support, like an API that uses `std::variant<>`, `std::option<>`, `constexpr`, and so on.
 
 ## Contributing
 
@@ -108,7 +65,7 @@ PAHO_BUILD_SHARED | TRUE (Linux), FALSE (Win32) | Whether to build the shared li
 PAHO_BUILD_STATIC | FALSE (Linux), TRUE (Win32) | Whether to build the static library
 PAHO_WITH_SSL | TRUE (Linux), FALSE (Win32) | Whether to build SSL/TLS support into the library
 PAHO_BUILD_DOCUMENTATION | FALSE | Create the HTML API documentation (requires _Doxygen_)
-PAHO_BUILD_SAMPLES | FALSE | Whether to build the sample programs
+PAHO_BUILD_EXAMPLES | FALSE | Whether to build the example programs
 PAHO_BUILD_TESTS | FALSE | Build the unit tests. (Requires _Catch2_)
 PAHO_BUILD_DEB_PACKAGE | FALSE | Flag that configures cpack to build a Debian/Ubuntu package
 PAHO_WITH_MQTT_C | FALSE | Whether to build the bundled Paho C library
