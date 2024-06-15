@@ -4,6 +4,22 @@
 // Eclipse Paho MQTT C++ library.
 //
 
+/*******************************************************************************
+ * Copyright (c) 2020-2024 Frank Pagliughi <fpagliughi@mindspring.com>
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
+ *
+ * The Eclipse Public License is available at
+ *    http://www.eclipse.org/legal/epl-v20.html
+ * and the Eclipse Distribution License is available at
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * Contributors:
+ *    Frank Pagliughi - initial implementation and documentation
+ *******************************************************************************/
+
 #include <iostream>
 #include <cstring>
 #include "catch2_version.h"
@@ -31,8 +47,8 @@ static const binary	CORR_ID	{ "\x00\x01\x02\x03\x04", 5 };
 // property
 
 TEST_CASE("int property constructor", "[property]") {
-    // This is a known byte property
-    SECTION("creating a byte property") {
+	// This is a known byte property
+	SECTION("creating a byte property") {
 		property::code typ = property::PAYLOAD_FORMAT_INDICATOR;
 
 		property prop { typ, 42 };
@@ -42,14 +58,14 @@ TEST_CASE("int property constructor", "[property]") {
 
 		REQUIRE(prop.type() == typ);
 		REQUIRE(get<uint8_t>(prop) == uint8_t(42));
-    }
+	}
 
 	SECTION("creating a bad byte property") {
 		// TODO: Test constructor for out of range input
 	}
 
-    // This is a known 2-byte integer property
-    SECTION("creating an int2 property") {
+	// This is a known 2-byte integer property
+	SECTION("creating an int2 property") {
 		property::code typ = property::TOPIC_ALIAS;
 
 		property prop { typ, 512 };
@@ -59,14 +75,20 @@ TEST_CASE("int property constructor", "[property]") {
 
 		REQUIRE(prop.type() == typ);
 		REQUIRE(get<int16_t>(prop) == int16_t(512));
-    }
+
+		// Should be able to support full 16-bit unsigned range
+		const uint16_t MAX = std::numeric_limits<uint16_t>::max();
+
+		property propMax { typ, MAX };
+		REQUIRE(get<uint16_t>(propMax) == MAX);
+	}
 
 	SECTION("creating a bad int2 property") {
 		// TODO: Test constructor for out of range input
 	}
 
-    // This is a known 4-byte integer property
-    SECTION("creating an int4 property") {
+	// This is a known 4-byte integer property
+	SECTION("creating an int4 property") {
 		property::code typ = property::MESSAGE_EXPIRY_INTERVAL;
 
 		property prop { typ, 70000 };
@@ -76,7 +98,13 @@ TEST_CASE("int property constructor", "[property]") {
 
 		REQUIRE(prop.type() == typ);
 		REQUIRE(get<int32_t>(prop) == int32_t(70000));
-    }
+
+		// Should be able to support full 32-bit unsigned range
+		const uint32_t MAX = std::numeric_limits<uint32_t>::max();
+
+		property propMax { typ, MAX };
+		REQUIRE(get<uint32_t>(propMax) == MAX);
+	}
 
 	SECTION("creating a bad int2 property") {
 		// TODO: Test constructor for out of range input
@@ -183,7 +211,7 @@ TEST_CASE("string pair property constructor", "[property]") {
 }
 
 TEST_CASE("int property copy constructor", "[property]") {
-    SECTION("copy an int4 property") {
+	SECTION("copy an int4 property") {
 		property::code typ = property::MESSAGE_EXPIRY_INTERVAL;
 
 		property org_prop { typ, 70000 };
@@ -194,11 +222,11 @@ TEST_CASE("int property copy constructor", "[property]") {
 
 		REQUIRE(prop.type() == typ);
 		REQUIRE(get<int32_t>(prop) == int32_t(70000));
-    }
+	}
 }
 
 TEST_CASE("int property move constructor", "[property]") {
-    SECTION("move an int4 property") {
+	SECTION("move an int4 property") {
 		property::code typ = property::MESSAGE_EXPIRY_INTERVAL;
 
 		property org_prop { typ, 70000 };
@@ -213,7 +241,7 @@ TEST_CASE("int property move constructor", "[property]") {
 		// Make sure the old value was moved
 		REQUIRE(org_prop.c_struct().identifier == 0);
 		REQUIRE(org_prop.c_struct().value.integer4 == 0);
-    }
+	}
 }
 
 TEST_CASE("string property copy constructor", "[property]") {
@@ -364,13 +392,13 @@ TEST_CASE("string pair property move constructor", "[property]") {
 // properties
 
 TEST_CASE("properties constructors", "[properties]") {
-    SECTION("properties default constructor") {
+	SECTION("properties default constructor") {
 		properties props;
 		REQUIRE(props.empty());
 		REQUIRE(props.size() == 0);
 	}
 
-    SECTION("properties init list constructor") {
+	SECTION("properties init list constructor") {
 		properties props {
 			{ property::PAYLOAD_FORMAT_INDICATOR, 42 },
 			{ property::MESSAGE_EXPIRY_INTERVAL, 70000 }
@@ -383,7 +411,7 @@ TEST_CASE("properties constructors", "[properties]") {
 }
 
 TEST_CASE("properties add", "[properties]") {
-    SECTION("properties adding items") {
+	SECTION("properties adding items") {
 		properties props;
 		REQUIRE(props.empty());
 		REQUIRE(props.size() == 0);
@@ -399,7 +427,7 @@ TEST_CASE("properties add", "[properties]") {
 }
 
 TEST_CASE("properties clear", "[properties]") {
-    SECTION("properties clear") {
+	SECTION("properties clear") {
 		properties props {
 			{ property::PAYLOAD_FORMAT_INDICATOR, 42 },
 			{ property::MESSAGE_EXPIRY_INTERVAL, 70000 }
@@ -413,7 +441,7 @@ TEST_CASE("properties clear", "[properties]") {
 }
 
 TEST_CASE("properties count and contains", "[properties]") {
-    SECTION("single count properties") {
+	SECTION("single count properties") {
 		properties props;
 
 		REQUIRE(props.count(property::PAYLOAD_FORMAT_INDICATOR) == 0);
@@ -432,7 +460,7 @@ TEST_CASE("properties count and contains", "[properties]") {
 	}
 
 	/*
-    SECTION("single count properties with multi add") {
+	SECTION("single count properties with multi add") {
 		properties props;
 
 		props.add({property::PAYLOAD_FORMAT_INDICATOR, 42});
@@ -444,7 +472,7 @@ TEST_CASE("properties count and contains", "[properties]") {
 	}
 	*/
 
-    SECTION("multi count properties") {
+	SECTION("multi count properties") {
 		properties props;
 
 		REQUIRE(props.count(property::USER_PROPERTY) == 0);
@@ -461,7 +489,7 @@ TEST_CASE("properties count and contains", "[properties]") {
 }
 
 TEST_CASE("getting properties", "[properties]") {
-    SECTION("integer properties") {
+	SECTION("integer properties") {
 		properties props {
 			{ property::PAYLOAD_FORMAT_INDICATOR, FMT_IND },
 			{ property::MAXIMUM_PACKET_SIZE, MAX_PKT_SZ },
@@ -478,7 +506,7 @@ TEST_CASE("getting properties", "[properties]") {
 		REQUIRE(get<uint32_t>(maxPktSz) == MAX_PKT_SZ);
 	}
 
-    SECTION("integer properties with typed get") {
+	SECTION("integer properties with typed get") {
 		properties props {
 			{ property::PAYLOAD_FORMAT_INDICATOR, FMT_IND },
 			{ property::MAXIMUM_PACKET_SIZE, MAX_PKT_SZ },
@@ -490,7 +518,7 @@ TEST_CASE("getting properties", "[properties]") {
 		REQUIRE(get<uint32_t>(props, property::MAXIMUM_PACKET_SIZE) == MAX_PKT_SZ);
 	}
 
-    SECTION("string properties") {
+	SECTION("string properties") {
 		properties props {
 			{ property::RESPONSE_TOPIC, TOPIC },
 			{ property::CORRELATION_DATA, CORR_ID }
@@ -500,7 +528,7 @@ TEST_CASE("getting properties", "[properties]") {
 		REQUIRE(get<binary>(props, property::CORRELATION_DATA) == CORR_ID);
 	}
 
-    SECTION("string pair properties") {
+	SECTION("string pair properties") {
 		properties props {
 			{ property::USER_PROPERTY, NAME1, VALUE1 },
 			{ property::USER_PROPERTY, NAME2, VALUE2 }
