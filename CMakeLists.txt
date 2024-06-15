@@ -29,14 +29,14 @@ project(PahoMqttCpp VERSION "1.4.0")
 ## --- Build options ---
 
 if(WIN32)
-  option(PAHO_BUILD_STATIC "Build static library" TRUE)
-  option(PAHO_BUILD_SHARED "Build shared library (DLL)" FALSE)
-  option(PAHO_WITH_SSL "Build SSL-enabled library" FALSE)
+    option(PAHO_BUILD_STATIC "Build static library" TRUE)
+    option(PAHO_BUILD_SHARED "Build shared library (DLL)" FALSE)
+    option(PAHO_WITH_SSL "Build SSL-enabled library" FALSE)
 else()
-  option(PAHO_BUILD_STATIC "Build static library" FALSE)
-  option(PAHO_BUILD_SHARED "Build shared library" TRUE)
-  option(PAHO_WITH_SSL "Build SSL-enabled library" TRUE)
-  option(PAHO_BUILD_DEB_PACKAGE "Build debian package" FALSE)
+    option(PAHO_BUILD_STATIC "Build static library" FALSE)
+    option(PAHO_BUILD_SHARED "Build shared library" TRUE)
+    option(PAHO_WITH_SSL "Build SSL-enabled library" TRUE)
+    option(PAHO_BUILD_DEB_PACKAGE "Build debian package" FALSE)
 endif()
 
 option(PAHO_BUILD_SAMPLES "Build sample/example programs" FALSE)
@@ -46,15 +46,15 @@ option(PAHO_BUILD_DOCUMENTATION "Create and install the API documentation (requi
 option(PAHO_WITH_MQTT_C "Build Paho C from the internal GIT submodule." FALSE)
 
 if(NOT PAHO_BUILD_SHARED AND NOT PAHO_BUILD_STATIC)
-  message(FATAL_ERROR "You must set either PAHO_BUILD_SHARED, PAHO_BUILD_STATIC, or both")
+    message(FATAL_ERROR "You must set either PAHO_BUILD_SHARED, PAHO_BUILD_STATIC, or both")
 endif()
 
 ## --- Find Paho C or build it, if reqested ---
 
 if(PAHO_WITH_SSL)
-  find_package(OpenSSL REQUIRED)
-  set(PAHO_MQTT_C_LIB eclipse-paho-mqtt-c::paho-mqtt3as)
-  set(PAHO_MQTT_C_LIB_NA paho-mqtt3as)
+    find_package(OpenSSL REQUIRED)
+    set(PAHO_MQTT_C_LIB eclipse-paho-mqtt-c::paho-mqtt3as)
+    set(PAHO_MQTT_C_LIB_NA paho-mqtt3as)
 else()
     set(PAHO_MQTT_C_LIB eclipse-paho-mqtt-c::paho-mqtt3a)
     set(PAHO_MQTT_C_LIB_NA paho-mqtt3a)
@@ -76,16 +76,16 @@ if(PAHO_WITH_MQTT_C)
 
     ## Alias namespace so that the full names can be used with the subdir.
     if(PAHO_BUILD_SHARED)
-    add_library(eclipse-paho-mqtt-c::paho-mqtt3a ALIAS paho-mqtt3a)
-    if(PAHO_WITH_SSL)
-        add_library(eclipse-paho-mqtt-c::paho-mqtt3as ALIAS paho-mqtt3as)
-    endif()
+        add_library(eclipse-paho-mqtt-c::paho-mqtt3a ALIAS paho-mqtt3a)
+        if(PAHO_WITH_SSL)
+            add_library(eclipse-paho-mqtt-c::paho-mqtt3as ALIAS paho-mqtt3as)
+        endif()
     else()
-    # Seems that the C lib
-    add_library(eclipse-paho-mqtt-c::paho-mqtt3a-static ALIAS paho-mqtt3a-static)
-    if(PAHO_WITH_SSL)
-        add_library(eclipse-paho-mqtt-c::paho-mqtt3as-static ALIAS paho-mqtt3as-static)
-    endif()
+        # Seems that the C lib
+        add_library(eclipse-paho-mqtt-c::paho-mqtt3a-static ALIAS paho-mqtt3a-static)
+        if(PAHO_WITH_SSL)
+            add_library(eclipse-paho-mqtt-c::paho-mqtt3as-static ALIAS paho-mqtt3as-static)
+        endif()
     endif()
 
     ## install paho.mqtt.c library (appending to PahoMqttCpp export)
@@ -96,7 +96,7 @@ if(PAHO_WITH_MQTT_C)
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     )
 else()
-  find_package(eclipse-paho-mqtt-c REQUIRED)
+    find_package(eclipse-paho-mqtt-c REQUIRED)
 endif()
 
 ## --- C++11 build flags ---
