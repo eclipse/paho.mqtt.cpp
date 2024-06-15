@@ -65,6 +65,9 @@ if(PAHO_WITH_MQTT_C)
     set(PAHO_ENABLE_TESTING FALSE CACHE BOOL "No Paho C tests")
     set(PAHO_HIGH_PERFORMANCE TRUE CACHE BOOL "Paho C high performance")
 
+    # TODO: Remove this when the next Paho C update is released.
+    set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
+
     add_subdirectory(${PROJECT_SOURCE_DIR}/externals/paho-mqtt-c)
 
     ## Alias namespace so that the full names can be used with the subdir.
