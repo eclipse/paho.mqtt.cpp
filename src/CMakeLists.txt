@@ -57,9 +57,8 @@ if(PAHO_BUILD_SHARED)
 
     ## Add dependencies to the shared library
     target_link_libraries(paho-mqttpp3 PUBLIC
-      eclipse-paho-mqtt-c::paho-mqtt3as
-      ${PAHO_MQTT_C_LIB}
-      Threads::Threads
+        eclipse-paho-mqtt-c::${PAHO_MQTT_C_LIB}
+        Threads::Threads
     )
 
     ## set the shared library soname
@@ -78,8 +77,8 @@ if(PAHO_BUILD_STATIC)
 
     ## add dependencies to the shared library
     target_link_libraries(paho-mqttpp3-static PUBLIC 
-      ${PAHO_MQTT_C_LIB}
-      Threads::Threads
+        eclipse-paho-mqtt-c::${PAHO_MQTT_C_LIB}-static
+        Threads::Threads
     )
 
     ## Let the archive use the same base name as the shared lib on *nix systems
