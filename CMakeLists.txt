@@ -39,7 +39,8 @@ else()
   option(PAHO_BUILD_DEB_PACKAGE "Build debian package" FALSE)
 endif()
 
-option(PAHO_BUILD_SAMPLES "Build sample programs" FALSE)
+option(PAHO_BUILD_SAMPLES "Build sample/example programs" FALSE)
+option(PAHO_BUILD_EXAMPLES "Build sample/example programs" FALSE)
 option(PAHO_BUILD_TESTS "Build tests (requires Catch2)" FALSE)
 option(PAHO_BUILD_DOCUMENTATION "Create and install the API documentation (requires Doxygen)" FALSE)
 option(PAHO_WITH_MQTT_C "Build Paho C from the internal GIT submodule." FALSE)
@@ -133,10 +134,10 @@ else()
     set(PAHO_CPP_LIB paho-mqttpp3-static)
 endif()
 
-# --- Sample Apps ---
+# --- Example Apps ---
 
-if(PAHO_BUILD_SAMPLES)
-    add_subdirectory(src/samples)
+if(PAHO_BUILD_SAMPLES OR PAHO_BUILD_EXAMPLES)
+    add_subdirectory(examples)
 endif()
 
 # --- Unit Tests ---
