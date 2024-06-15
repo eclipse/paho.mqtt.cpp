@@ -5,7 +5,7 @@
 #*******************************************************************************
 # This is part of the Paho MQTT C++ client library.
 #
-# Copyright (c) 2016-2023
+# Copyright (c) 2016-2024
 # 
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v2.0
