@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2019-2023 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2019-2024 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -61,33 +61,33 @@ public:
 	 * The integer codes for the different v5 properties.
 	 */
 	enum code {
-        PAYLOAD_FORMAT_INDICATOR = 1,
-        MESSAGE_EXPIRY_INTERVAL = 2,
-        CONTENT_TYPE = 3,
-        RESPONSE_TOPIC = 8,
-        CORRELATION_DATA = 9,
-        SUBSCRIPTION_IDENTIFIER = 11,
-        SESSION_EXPIRY_INTERVAL = 17,
-        ASSIGNED_CLIENT_IDENTIFER = 18,
-        SERVER_KEEP_ALIVE = 19,
-        AUTHENTICATION_METHOD = 21,
-        AUTHENTICATION_DATA = 22,
-        REQUEST_PROBLEM_INFORMATION = 23,
-        WILL_DELAY_INTERVAL = 24,
-        REQUEST_RESPONSE_INFORMATION = 25,
-        RESPONSE_INFORMATION = 26,
-        SERVER_REFERENCE = 28,
-        REASON_STRING = 31,
-        RECEIVE_MAXIMUM = 33,
-        TOPIC_ALIAS_MAXIMUM = 34,
-        TOPIC_ALIAS = 35,
-        MAXIMUM_QOS = 36,
-        RETAIN_AVAILABLE = 37,
-        USER_PROPERTY = 38,
-        MAXIMUM_PACKET_SIZE = 39,
-        WILDCARD_SUBSCRIPTION_AVAILABLE = 40,
-        SUBSCRIPTION_IDENTIFIERS_AVAILABLE = 41,
-        SHARED_SUBSCRIPTION_AVAILABLE = 42
+		PAYLOAD_FORMAT_INDICATOR = 1,
+		MESSAGE_EXPIRY_INTERVAL = 2,
+		CONTENT_TYPE = 3,
+		RESPONSE_TOPIC = 8,
+		CORRELATION_DATA = 9,
+		SUBSCRIPTION_IDENTIFIER = 11,
+		SESSION_EXPIRY_INTERVAL = 17,
+		ASSIGNED_CLIENT_IDENTIFER = 18,
+		SERVER_KEEP_ALIVE = 19,
+		AUTHENTICATION_METHOD = 21,
+		AUTHENTICATION_DATA = 22,
+		REQUEST_PROBLEM_INFORMATION = 23,
+		WILL_DELAY_INTERVAL = 24,
+		REQUEST_RESPONSE_INFORMATION = 25,
+		RESPONSE_INFORMATION = 26,
+		SERVER_REFERENCE = 28,
+		REASON_STRING = 31,
+		RECEIVE_MAXIMUM = 33,
+		TOPIC_ALIAS_MAXIMUM = 34,
+		TOPIC_ALIAS = 35,
+		MAXIMUM_QOS = 36,
+		RETAIN_AVAILABLE = 37,
+		USER_PROPERTY = 38,
+		MAXIMUM_PACKET_SIZE = 39,
+		WILDCARD_SUBSCRIPTION_AVAILABLE = 40,
+		SUBSCRIPTION_IDENTIFIERS_AVAILABLE = 41,
+		SHARED_SUBSCRIPTION_AVAILABLE = 42
 	};
 
 	/**
@@ -203,7 +203,7 @@ inline uint16_t get<uint16_t>(const property& prop) {
  * Extracts the value from the property as a signed 16-bit integer.
  * @return The value from the property as a signed 16-bit integer.
  * @deprecated All integer properties are unsigned. Use
- *             `get<uint16_t>()`
+ *  		   `get<uint16_t>()`
  */
 template <>
 inline int16_t get<int16_t>(const property& prop) {
@@ -223,7 +223,7 @@ inline uint32_t get<uint32_t>(const property& prop) {
  * Extracts the value from the property as a signed 32-bit integer.
  * @return The value from the property as a signed 32-bit integer.
  * @deprecated All integer properties are unsigned. Use
- *             `get<uint32_t>()`
+ *  		   `get<uint32_t>()`
  */
 template <>
 inline int32_t get<int32_t>(const property& prop) {
@@ -268,7 +268,7 @@ class properties
 	/** The default C struct */
 	PAHO_MQTTPP_EXPORT static const MQTTProperties DFLT_C_STRUCT;
 
-	/** The underlying C properties struct  */
+	/** The underlying C properties struct */
 	MQTTProperties props_;
 
 	template<typename T>
