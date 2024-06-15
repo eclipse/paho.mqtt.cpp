@@ -24,7 +24,7 @@
 
 cmake_minimum_required(VERSION 3.5)
 
-project(PahoMqttCpp VERSION "1.4.0.1")
+project(PahoMqttCpp VERSION "1.4.0")
 
 ## --- Build options ---
 
@@ -51,48 +51,52 @@ endif()
 
 ## --- Find Paho C or build it, if reqested ---
 
-if(PAHO_WITH_MQTT_C)
-  message(STATUS "Paho C: Bundled")
-
-  ## Build the Paho C library from the submodule
-  set(PAHO_ENABLE_TESTING FALSE CACHE BOOL "No Paho C tests")
-  set(PAHO_HIGH_PERFORMANCE TRUE CACHE BOOL "Paho C high performance")
-
-  add_subdirectory(${PROJECT_SOURCE_DIR}/externals/paho-mqtt-c)
-
-  ## Alias namespace so that the full names can be used with the subdir.
-  if(PAHO_BUILD_SHARED)
-    add_library(eclipse-paho-mqtt-c::paho-mqtt3a ALIAS paho-mqtt3a)
-    if(PAHO_WITH_SSL)
-      add_library(eclipse-paho-mqtt-c::paho-mqtt3as ALIAS paho-mqtt3as)
-    endif()
-  else()
-    # Seems that the C lib
-    add_library(eclipse-paho-mqtt-c::paho-mqtt3a-static ALIAS paho-mqtt3a-static)
-    if(PAHO_WITH_SSL)
-      add_library(eclipse-paho-mqtt-c::paho-mqtt3as-static ALIAS paho-mqtt3as-static)
-    endif()
-  endif()
-
-  ## install paho.mqtt.c library (appending to PahoMqttCpp export)
-  install(TARGETS ${PAHO_MQTT_C_LIB}
-    EXPORT PahoMqttCpp
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  )
-else()
-  find_package(eclipse-paho-mqtt-c REQUIRED)
-endif()
-
 if(PAHO_WITH_SSL)
   find_package(OpenSSL REQUIRED)
   set(PAHO_MQTT_C_LIB eclipse-paho-mqtt-c::paho-mqtt3as)
+  set(PAHO_MQTT_C_LIB_NA paho-mqtt3as)
 else()
-  set(PAHO_MQTT_C_LIB eclipse-paho-mqtt-c::paho-mqtt3a)
+    set(PAHO_MQTT_C_LIB eclipse-paho-mqtt-c::paho-mqtt3a)
+    set(PAHO_MQTT_C_LIB_NA paho-mqtt3a)
 endif()
 
 if(PAHO_BUILD_STATIC AND NOT PAHO_BUILD_SHARED)
-  set(PAHO_MQTT_C_LIB ${PAHO_MQTT_C_LIB}-static)
+    set(PAHO_MQTT_C_LIB ${PAHO_MQTT_C_LIB}-static)
+    set(PAHO_MQTT_C_LIB_NA ${PAHO_MQTT_C_LIB_NA}-static)
+endif()
+
+if(PAHO_WITH_MQTT_C)
+    message(STATUS "Paho C: Bundled")
+
+    ## Build the Paho C library from the submodule
+    set(PAHO_ENABLE_TESTING FALSE CACHE BOOL "No Paho C tests")
+    set(PAHO_HIGH_PERFORMANCE TRUE CACHE BOOL "Paho C high performance")
+
+    add_subdirectory(${PROJECT_SOURCE_DIR}/externals/paho-mqtt-c)
+
+    ## Alias namespace so that the full names can be used with the subdir.
+    if(PAHO_BUILD_SHARED)
+    add_library(eclipse-paho-mqtt-c::paho-mqtt3a ALIAS paho-mqtt3a)
+    if(PAHO_WITH_SSL)
+        add_library(eclipse-paho-mqtt-c::paho-mqtt3as ALIAS paho-mqtt3as)
+    endif()
+    else()
+    # Seems that the C lib
+    add_library(eclipse-paho-mqtt-c::paho-mqtt3a-static ALIAS paho-mqtt3a-static)
+    if(PAHO_WITH_SSL)
+        add_library(eclipse-paho-mqtt-c::paho-mqtt3as-static ALIAS paho-mqtt3as-static)
+    endif()
+    endif()
+
+    ## install paho.mqtt.c library (appending to PahoMqttCpp export)
+    install(TARGETS ${PAHO_MQTT_C_LIB_NA}
+        EXPORT PahoMqttCpp
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
+else()
+  find_package(eclipse-paho-mqtt-c REQUIRED)
 endif()
 
 ## --- C++11 build flags ---
@@ -115,6 +119,10 @@ if(WIN32)
 endif()
 
 ## --- Build directories ---
+
+# --- The headers ---
+
+add_subdirectory(include/mqtt)
 
 # For the paho_mqtt_c module
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
