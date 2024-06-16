@@ -275,6 +275,19 @@ Unit tests use _Catch2_ for the test framework. Versions 2.x and 3.x are support
 
 _Catch2_ can be found here: [Catch2](https://github.com/catchorg/Catch2)
 
+## Basics of Thread Safety
+
+Some things to keep in mind when using the library in a multi-threaded application:
+
+- The clients are thread-safe. You can publish/subscribe/etc from multiple threads simultaneously. There are internal mutexes to protect multi-threaded access.
+- You should not make a blocking call from within a callback from the library, i.e. anything registered with `set_callback()`, `set_message_callback()`, etc. Callbacks are invoked from the one internal thread that is processing incoming packets from the network. If you make a blocking call that expects an ACK, you will deadlock.
+- You can only register one `on_message()` callback per client to receive incoming messages for all of your registered subscriptions. That callback runs in the context of the library thread. If you want to process incoming messages from a different (or multiple) threads:
+    - Use a consumer queue, or create one or more instances of a thread-safe queue to move the messages around.
+    - The [thread_queue](https://github.com/eclipse/paho.mqtt.cpp/blob/master/include/mqtt/thread_queue.h) class in the library is a thread-safe queue that you can use for this.
+    - To route incoming messages by topic:
+        - Use an instance of the (topic_matcher)[https://github.com/eclipse/paho.mqtt.cpp/blob/master/include/mqtt/topic_matcher.h] collection to create a collection of queues or callback functions to receive messages that match a set of topic filters.
+        - For MQTT v5 consider using Subscription Identifiers to map incoming messages to callbacks or queues.
+- The various data and options structs (like connect_options) are simple data structs. They are not thread protected.
 
 ## Example
 
