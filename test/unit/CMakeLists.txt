@@ -26,35 +26,35 @@ find_package(Catch2 REQUIRED)
 message(STATUS "Found Catch2 v${Catch2_VERSION}")
 
 if (Catch2_VERSION VERSION_LESS "2.0")
-  message(FATAL "Catch2 v2.0 or greater required for tests")
+    message(FATAL "Catch2 v2.0 or greater required for tests")
 endif()
 
 # --- Executables ---
 
 add_executable(unit_tests unit_tests.cpp
-  test_async_client.cpp
-  test_buffer_ref.cpp
-  test_client.cpp
-  test_connect_options.cpp
-  test_create_options.cpp
-  test_disconnect_options.cpp
-  test_exception.cpp
-  test_message.cpp
-  test_persistence.cpp
-  test_properties.cpp
-  test_response_options.cpp
-  test_string_collection.cpp
-  test_thread_queue.cpp
-  test_token.cpp
-  test_topic.cpp
-  test_topic_matcher.cpp
-  test_will_options.cpp
+    test_async_client.cpp
+    test_buffer_ref.cpp
+    test_client.cpp
+    test_connect_options.cpp
+    test_create_options.cpp
+    test_disconnect_options.cpp
+    test_exception.cpp
+    test_message.cpp
+    test_persistence.cpp
+    test_properties.cpp
+    test_response_options.cpp
+    test_string_collection.cpp
+    test_thread_queue.cpp
+    test_token.cpp
+    test_topic.cpp
+    test_topic_matcher.cpp
+    test_will_options.cpp
 )
 
 if(PAHO_WITH_SSL)
-  target_sources(unit_tests PUBLIC 
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_ssl_options.cpp
-  )
+    target_sources(unit_tests PUBLIC 
+        ${CMAKE_CURRENT_SOURCE_DIR}/test_ssl_options.cpp
+    )
 endif()
 
 if (Catch2_VERSION VERSION_LESS "3.0")
@@ -68,11 +68,11 @@ message(STATUS "Using library for unit tests: ${PAHO_CPP_LIB}")
 target_link_libraries(unit_tests ${PAHO_CPP_LIB} Catch2::Catch2)
 
 if(PAHO_BUILD_SHARED)
-  target_compile_definitions(unit_tests PUBLIC PAHO_MQTTPP_IMPORTS)
+    target_compile_definitions(unit_tests PUBLIC PAHO_MQTTPP_IMPORTS)
 
-  if(MSVC AND PAHO_BUILD_STATIC)
-    target_link_libraries(unit_tests ${LIBS_SYSTEM})
-  endif()
+    if(MSVC AND PAHO_BUILD_STATIC)
+        target_link_libraries(unit_tests ${LIBS_SYSTEM})
+    endif()
 endif()
 
 include(CTest)

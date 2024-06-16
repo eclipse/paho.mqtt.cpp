@@ -23,10 +23,6 @@
 #     Frank Pagliughi - made the shared library optional
 #*******************************************************************************/
 
-# --- The headers ---
-
-add_subdirectory(mqtt)
-
 ## --- Library dependencies ---
 
 set (THREADS_PREFER_PTHREAD_FLAG ON)
@@ -35,21 +31,21 @@ find_package(Threads REQUIRED)
 ## --- Use object library to optimize compilation ---
 
 set(COMMON_SRC
-  async_client.cpp
-  client.cpp
-  connect_options.cpp
-  create_options.cpp    
-  disconnect_options.cpp
-  iclient_persistence.cpp
-  message.cpp
-  properties.cpp
-  response_options.cpp
-  ssl_options.cpp
-  string_collection.cpp
-  subscribe_options.cpp
-  token.cpp
-  topic.cpp
-  will_options.cpp
+    async_client.cpp
+    client.cpp
+    connect_options.cpp
+    create_options.cpp    
+    disconnect_options.cpp
+    iclient_persistence.cpp
+    message.cpp
+    properties.cpp
+    response_options.cpp
+    ssl_options.cpp
+    string_collection.cpp
+    subscribe_options.cpp
+    token.cpp
+    topic.cpp
+    will_options.cpp
 )
 
 ## --- Build the shared library, if requested ---
@@ -59,11 +55,13 @@ if(PAHO_BUILD_SHARED)
     add_library(paho-mqttpp3 SHARED ${COMMON_SRC})
     list(APPEND PAHO_CPP_TARGETS paho-mqttpp3)
 
+    target_compile_definitions(paho-mqttpp3 PRIVATE PAHO_MQTTPP_EXPORTS)
+
     ## Add dependencies to the shared library
     target_link_libraries(paho-mqttpp3 PUBLIC
-      eclipse-paho-mqtt-c::paho-mqtt3as
-      ${PAHO_MQTT_C_LIB}
-      Threads::Threads
+        eclipse-paho-mqtt-c::${PAHO_MQTT_C_LIB}
+        Threads::Threads
+        ${LIBS_SYSTEM}
     )
 
     ## set the shared library soname
@@ -82,8 +80,9 @@ if(PAHO_BUILD_STATIC)
 
     ## add dependencies to the shared library
     target_link_libraries(paho-mqttpp3-static PUBLIC 
-      ${PAHO_MQTT_C_LIB}
-      Threads::Threads
+        eclipse-paho-mqtt-c::${PAHO_MQTT_C_LIB}-static
+        Threads::Threads
+        ${LIBS_SYSTEM}
     )
 
     ## Let the archive use the same base name as the shared lib on *nix systems
@@ -97,7 +96,7 @@ endif()
 include(GNUInstallDirs)
 
 foreach(TARGET ${PAHO_CPP_TARGETS})
-  ## Warnings
+  ## Build warnings
   target_compile_options(${TARGET} PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/W3>
     $<$<CXX_COMPILER_ID:Clang>:-Wall -Wextra -Wdocumentation>
@@ -105,7 +104,7 @@ foreach(TARGET ${PAHO_CPP_TARGETS})
   )
 
   target_include_directories(${TARGET} PUBLIC
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
       $<INSTALL_INTERFACE:include>
   )
 

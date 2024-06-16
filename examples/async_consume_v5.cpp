@@ -54,10 +54,10 @@ int main(int argc, char* argv[])
 	mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID, createOpts);
 
 	auto connOpts = mqtt::connect_options_builder()
+		.clean_start(false)
 		.properties({
 			{mqtt::property::SESSION_EXPIRY_INTERVAL, 604800}
 	    })
-		.clean_session(false)
 		.finalize();
 
 	try {
