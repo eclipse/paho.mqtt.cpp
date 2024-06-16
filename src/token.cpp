@@ -178,7 +178,7 @@ void token::on_failure(MQTTAsync_failureData* rsp)
 		msgId_ = rsp->token;
 		rc_ = rsp->code;
 
-		// HACK: For backward compatability with v3 connections
+		// HACK: For backward compatibility with v3 connections
 		reasonCode_ = ReasonCode(MQTTPP_V3_CODE);
 
 		if (rsp->message)

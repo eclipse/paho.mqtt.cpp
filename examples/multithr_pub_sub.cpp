@@ -13,7 +13,7 @@
 //
 // Note that this is a fairly contrived example, and it could be done much
 // more easily in a single thread. It is meant to demonstrate how you can
-// share a client amonst threads if and when that's a proper thing to do.
+// share a client amongst threads if and when that's a proper thing to do.
 //
 // At this time, there is a single callback or consumer queue for all
 // incoming messages, so you would typically only have one thead receiving

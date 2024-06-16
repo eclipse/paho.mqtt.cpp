@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2017 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2017-2024 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -220,8 +220,8 @@ public:
 	bool is_null() const { return !data_; }
 	/**
 	 * Determines if the buffer is empty.
-	 * @return @em true if the buffer is empty or thr reference is null, @em
-	 *  	   false if the buffer contains data.
+	 * @return @em true if the buffer is empty or the reference is null,
+	 *  	   @em false if the buffer contains data.
 	 */
 	bool empty() const { return !data_ || data_->empty(); }
 	/**
@@ -285,7 +285,7 @@ std::ostream& operator<<(std::ostream& os, const buffer_ref<T>& buf) {
 /////////////////////////////////////////////////////////////////////////////
 
 /**
- * A refernce to a text buffer.
+ * A reference to a text buffer.
  */
 using string_ref = buffer_ref<char>;
 

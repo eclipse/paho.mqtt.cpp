@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2017 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2017-2024 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -188,23 +188,23 @@ public:
 	 */
 	string_collection& operator=(string_collection&& coll) =default;
 	/**
-	 * Gets a const iterator to the begining of the collecion.
-	 * @return A const iterator to the begining of the collecion.
+	 * Gets a const iterator to the beginning of the collection.
+	 * @return A const iterator to the beginning of the collection.
 	 */
 	const_iterator begin() const { return coll_.begin(); }
 	/**
-	 * Gets a const iterator to the end of the collecion.
-	 * @return A const iterator to the end of the collecion.
+	 * Gets a const iterator to the end of the collection.
+	 * @return A const iterator to the end of the collection.
 	 */
 	const_iterator end() const { return coll_.end(); }
 	/**
-	 * Gets a const iterator to the begining of the collecion.
-	 * @return A const iterator to the begining of the collecion.
+	 * Gets a const iterator to the beginning of the collection.
+	 * @return A const iterator to the beginning of the collection.
 	 */
 	const_iterator cbegin() const { return coll_.cbegin(); }
 	/**
-	 * Gets a const iterator to the end of the collecion.
-	 * @return A const iterator to the end of the collecion.
+	 * Gets a const iterator to the end of the collection.
+	 * @return A const iterator to the end of the collection.
 	 */
 	const_iterator cend() const { return coll_.cend(); }
 	/**

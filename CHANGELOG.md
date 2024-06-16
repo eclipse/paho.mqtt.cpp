@@ -16,12 +16,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     - Moved header files to top-level 'include/' directory.
     - Moved 'src/sampless/' to top-level and renamed 'examples/'
 - Fixed and optimized 'topic_matcher' trie collection
-- Added some missing Eclipse/Paho legal documents to the repo. 
+- Added some missing Eclipse/Paho legal documents to the repo.
 
 - [#498](https://github.com/eclipse/paho.mqtt.cpp/issues/416) Overloaded property constructor to also take a uint32_t 
 - [#491](https://github.com/eclipse/paho.mqtt.cpp/pull/491) add topic_matcher.h to install
 - [#485](https://github.com/eclipse/paho.mqtt.cpp/pull/485) export dependencies
 - [#484](https://github.com/eclipse/paho.mqtt.cpp/pull/484) add token::get_message
+- [#480](https://github.com/eclipse/paho.mqtt.cpp/issues/480) Fixed Paho C version in 'install_paho_mqtt_c.sh' script.
 - [#466](https://github.com/eclipse/paho.mqtt.cpp/pull/466) Iterable string collection
 - [#416](https://github.com/eclipse/paho.mqtt.cpp/issues/416) Removed FindPahoMqttC.cmake. Using Paho C package directly.
 
@@ -54,10 +55,10 @@ Fixed Issues and Pull Requests:
 
 - [#343](https://github.com/eclipse/paho.mqtt.cpp/issues/343) async_client::try_consume_message_until taking single parameter fails to compile
 - [#445](https://github.com/eclipse/paho.mqtt.cpp/pull/445) Update properties when moving/copying connect options.
-- [#325]() Cache connect options in client to keep memory valid for callbacks like SSL on_error()
+- [#325](https://github.com/eclipse/paho.mqtt.cpp/issues/325) Cache connect options in client to keep memory valid for callbacks like SSL on_error()
 - [#361](https://github.com/eclipse/paho.mqtt.cpp/issues/361) Added missing LICENSE file to conform to GitHub conventions.
 - [#304](https://github.com/eclipse/paho.mqtt.cpp/issues/304) Missing create_options::DFLT_C_STRUCT symbol when linking with MSVC.
-- [#429] (https://github.com/eclipse/paho.mqtt.cpp/issues/411) Remove declaration of connect_options::to_string() with missing implementation.
+- [#429](https://github.com/eclipse/paho.mqtt.cpp/issues/429) Remove declaration of connect_options::to_string() with missing implementation.
 - [#411](https://github.com/eclipse/paho.mqtt.cpp/issues/411) Missing virtual keyword for some client methods
 - [#444](https://github.com/eclipse/paho.mqtt.cpp/issues/444) Unit tests to check that connect options builder sets properties.
 - [#313](https://github.com/eclipse/paho.mqtt.cpp/issues/313) Get unit tests building on Windows. Needed to get rid of make_unique<> for Windows
@@ -126,14 +127,14 @@ This release was primarily to add MQTT v5 support and server responses.
         - Properties can also be obtained from server responses to requests such as from a _connect_ call. These are available in the `token` objects when they complete.
     - The client object tracks the desired MQTT version that the app requested and/or is currently connected at. Internally this is now required by the `response_options` the need to distinguish between pre-v5 and post-v5 callback functions.
     - MQTT v5 reason codes for requests are available via `token` objects when they complete. They are also available in `exception` objects that are thrown by tokens.
-    - Support for subscibe options, like no local subscriptions, etc.
+    - Support for subscribe options, like no local subscriptions, etc.
     - Sample applications were added showing how to do basic Remote Procedure Calls (RPC's) with MQTT v5 using the *RESPONSE_TOPIC* and *CORRELATION_DATA* properties. These are *rpc_math_cli* and *rpc_math_srvr* in the _src/samples_ directory.
     - A sample "chat" application was added, showing how to use subscribe options, such as "no local".
 - More descriptive error messages (PR #154), integrated into the `mqtt::exception` class. MQTT v5 reason codes are also included in the exceptions when an error occurs.
 - Applications can (finally) get server responses from the various ACK packets. These are available through the tokens after they complete, as `connect_response`, `subscribe_response`, and `unsubscribe_response`.
 - The `topic` objects can be used to subscribe.
 - Applications can register individual callback functions instead of using a `callback` interface object. This allows easy use of lambda functions for callbacks.
-- The connect options can take a LWT as a plain message, via `connect_options::set_will_message()` 
+- The connect options can take a LWT as a plain message, via `connect_options::set_will_message()`
 - New unit tests have started using _Catch2_.
 - Tested with Paho C v1.3.1
 
@@ -153,7 +154,7 @@ This is a bug-fix released aimed mainly at issues with the build system and work
 The initial Paho C++ Client library for memory-managed platforms (Linux, Windows, etc).
 
 - Requires Paho C Client Library v1.2.
-- MQTT 3.1 & 3.1.1 
+- MQTT 3.1 & 3.1.1
 - SSL/TLS
 - Asynchronous & Synchronous interfaces
 - Persistence and off-line buffering

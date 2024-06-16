@@ -36,7 +36,7 @@ To keep up with the latest announcements for this project, or to ask questions:
 
 ### What's New in v1.4.0
 
-The v1.4 release is primarily concerned with reorganizing the sources and fixing a number of CMake build issues, particulary to get the Paho C submodule build working with the existing C library, fix transient deendencies, and get the Windows DLL (maybe, finally) working properly.
+The v1.4 release is primarily concerned with reorganizing the sources and fixing a number of CMake build issues, particularly to get the Paho C submodule build working with the existing C library, fix transient dependencies, and get the Windows DLL (maybe, finally) working properly.
 
 - Ability to build the Paho C library automatically (now working)
     - Reworked the CMake build so that 'PAHO_WITH_MQTT_C' option properly compiles the existing Paho C v1.3.13
@@ -44,20 +44,15 @@ The v1.4 release is primarily concerned with reorganizing the sources and fixing
 - Reorganized the source tree:
     - Moved header files to top-level 'include/' directory.
     - Moved 'src/sampless/' to top-level and renamed 'examples/'
+    - Removed the ob
 - Fixed and optimized 'topic_matcher' trie collection
-- Added some missing Eclipse/Paho legal documents to the repo. 
+- Added some missing Eclipse/Paho legal documents to the repo.
 
-- [#498](https://github.com/eclipse/paho.mqtt.cpp/issues/416) Overloaded property constructor to also take a uint32_t 
-- [#491](https://github.com/eclipse/paho.mqtt.cpp/pull/491) add topic_matcher.h to install
-- [#485](https://github.com/eclipse/paho.mqtt.cpp/pull/485) export dependencies
-- [#484](https://github.com/eclipse/paho.mqtt.cpp/pull/484) add token::get_message
-- [#466](https://github.com/eclipse/paho.mqtt.cpp/pull/466) Iterable string collection
-- [#416](https://github.com/eclipse/paho.mqtt.cpp/issues/416) Removed FindPahoMqttC.cmake. Using Paho C package directly.
-
+For a full list of updates see the [CHANGELOG](https://github.com/eclipse/paho.mqtt.cpp/blob/master/CHANGELOG.md)
 
 ## Coming Next
 
-The next minor release, v1.5, will upgrade the library to C++17 and start adding features the the newer C++ versions support, like an API that uses `std::variant<>`, `std::option<>`, `constexpr`, and so on.
+The next release, v1.5, will upgrade the library to C++17 and start adding features the the newer C++ version supports, like an API that uses `std::variant<>`, `std::option<>`, `constexpr`, and so on.
 
 ## Contributing
 
@@ -73,7 +68,7 @@ Contributions to this project are gladly welcomed and appreciated Before submitt
 
 _CMake_  is a cross-platform build system suitable for Unix and non-Unix platforms such as Microsoft Windows. It is now the only supported build system.
 
-The Paho C++ library requires the Paho C library, v1.3.13 or greater, to be built and installed first. More information below.
+The Paho C++ library requires the Paho C library, v1.3.13 or greater, to be built and installed. That can be done before building this library, or it can be done here using the CMake `PAHO_WITH_MQTT_C` build option.
 
 CMake allows for options to direct the build. The following are specific to Paho C++:
 
@@ -102,10 +97,10 @@ The build process currently supports a number of Unix and Linux flavors. The bui
 On Debian based systems this would mean that the following packages have to be installed:
 
 ```
-$ sudo apt-get install build-essential gcc make cmake cmake-gui cmake-curses-gui
+$ sudo apt-get install build-essential gcc make cmake
 ```
 
-If you will be using secure sockets (and you probably should):
+If you will be using secure sockets (and you probably should if you're sending messages across a public netwok):
 
 ```
 $ sudo apt-get install libssl-dev
@@ -117,17 +112,17 @@ Building the documentation requires doxygen and optionally graphviz to be instal
 $ sudo apt-get install doxygen graphviz
 ```
 
-Unit tests are being built using _Catch2_.
+Unit tests are built using _Catch2_.
 
 _Catch2_ can be found here: [Catch2](https://github.com/catchorg/Catch2).  You must download and install _Catch2_ to build and run the unit tests locally.
 
 #### Building the Paho C library
 
-Before building the C++ library, first, build and install the Paho C library, if not already present. Note, this version of the C++ library requires Paho C v1.3.13 or greater.
+The Paho C library can be built automatically when building this library by enabling the CMake build option, `PAHO_WITH_MQTT_C`. That will build and install the Paho C library from a Git submodule, using a known-good version, and the proper build configuration for the C++ library.
 
-As of C++ v1.3.0, the recommended version of the Paho C library is included in the repo as a submodule. This can be built together with the C++ library all at the same time, which simplifies the overall build of the packages.
+If you want to manually specify the build configuration of the Paho C library or use a different version, then it must be built and installed before building this library. Note, this version of the C++ library requires Paho C v1.3.13 or greater.
 
-But, if you want to build the Paho C library manually, it can be done as follows:
+To download and build the Paho C library:
 
 ```
 $ git clone https://github.com/eclipse/paho.mqtt.c.git
@@ -161,7 +156,7 @@ $ git clone https://github.com/eclipse/paho.mqtt.cpp
 $ cd paho.mqtt.cpp
 
 $ cmake -Bbuild -H. -DPAHO_WITH_MQTT_C=ON -DPAHO_BUILD_STATIC=ON \
-    -DPAHO_BUILD_DOCUMENTATION=ON -DPAHO_BUILD_SAMPLES=ON
+    -DPAHO_BUILD_DOCUMENTATION=ON -DPAHO_BUILD_EXAMPLES=ON
 $ sudo cmake --build build/ --target install
 $ sudo ldconfig
 ```
@@ -194,11 +189,11 @@ $ (cd build && cpack)
 
 ### Windows
 
-On Windows systems CMake creates Visual Studio project files for use with MSVC. Currently, other compilers like _clang_ or _MinGW_ are not directly supported.
+On Windows, CMake creates Visual Studio project files for use with MSVC. Currently, other compilers like _clang_ or _MinGW_ are not directly supported.
 
 #### Using Paho C++ as a Windows DLL
 
-The project can be built as a static library or shared DLL on Windows. If using it as a DLL in your application, yuo should define the macro `PAHO_MQTTPP_IMPORTS` before including any Paho C++ include files. Preferably, make it a global definition in the application's build file, like in CMake:
+The project can be built as a static library or shared DLL on Windows. If using it as a DLL in your application, you should define the macro `PAHO_MQTTPP_IMPORTS` before including any Paho C++ include files. Preferably, make it a global definition in the application's build file, like in CMake:
 
     target_compile_definitions(myapp PUBLIC PAHO_MQTTPP_IMPORTS)
 

@@ -160,7 +160,7 @@ public:
 
 int main(int argc, char* argv[])
 {
-	std::cout << "Initialzing..." << std::endl;
+	std::cout << "Initializing..." << std::endl;
 	sample_mem_persistence persist;
 	mqtt::client client(SERVER_ADDRESS, CLIENT_ID, &persist);
 

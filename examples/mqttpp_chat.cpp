@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	// Let eveyone know that a new user joined the conversation.
+	// Let everyone know that a new user joined the conversation.
 
 	topic.publish("<<" + chatUser + " joined the group>>");
 
@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
 		topic.publish(usrMsg);
 	}
 
-	// Let eveyone know that the user left the conversation.
+	// Let everyone know that the user left the conversation.
 
 	topic.publish("<<" + chatUser + " left the group>>")->wait();
 

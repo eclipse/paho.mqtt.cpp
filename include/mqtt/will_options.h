@@ -51,7 +51,7 @@ class will_options
 public:
 	/** The default QoS for the LWT, if unspecified */
 	PAHO_MQTTPP_EXPORT static const int DFLT_QOS;  // =0;
-	/** The defalut retained flag for LWT, if unspecified */
+	/** The default retained flag for LWT, if unspecified */
 	PAHO_MQTTPP_EXPORT static const bool DFLT_RETAINED;  // =false;
 
 private:

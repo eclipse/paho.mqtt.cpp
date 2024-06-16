@@ -85,12 +85,12 @@ namespace mqtt {
  * @li @em "wss:// - A secure websocket connection using SSL/TLS.
  *
  * The secure connection types assume that the library was built with
- * OpenSSL support, otherwise requesting a secure conection will result in
+ * OpenSSL support, otherwise requesting a secure connection will result in
  * an error.
  *
  * The communication methods of this class - `connect()`, `publish()`,
  * `subscribe()`, etc. - are all asynchronous. They create the request for
- * the server, but return imediately, before a response is received back
+ * the server, but return immediately, before a response is received back
  * from the server.
  *
  * These methods return a `Token` to the caller which is akin to a C++
@@ -114,11 +114,11 @@ public:
 
 	/** Handler type for registering an individual message callback */
 	using message_handler = std::function<void(const_message_ptr)>;
-	/** Handler type for when a connecion is made or lost */
+	/** Handler type for when a connection is made or lost */
 	using connection_handler = std::function<void(const string& cause)>;
 	/** Handler type for when a disconnect packet is received */
 	using disconnected_handler = std::function<void(const properties&, ReasonCode)>;
-	/** Handler for updaing connection data before an auto-reconnect. */
+	/** Handler for updating connection data before an auto-reconnect. */
 	using update_connection_handler = std::function<bool(connect_data&)>;
 
 private:

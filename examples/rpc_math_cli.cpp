@@ -72,11 +72,11 @@ int main(int argc, char* argv[])
 		cout << "OK (" << connRsp.get_server_uri() << ")" << endl;
 
 		// Since we gave an empty client ID, the server should create a
-		// unique one for us and send it back as ASSIGNED_CLIENT_IDENTIFER
+		// unique one for us and send it back as ASSIGNED_CLIENT_IDENTIFIER
 		// in the connect properties.
 
 		string clientId = get<string>(connRsp.get_properties(),
-									  mqtt::property::ASSIGNED_CLIENT_IDENTIFER);
+									  mqtt::property::ASSIGNED_CLIENT_IDENTIFIER);
 
 		// So now we can create a unique RPC response topic using
 		// the assigned (unique) client ID.

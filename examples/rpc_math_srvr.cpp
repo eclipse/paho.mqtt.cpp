@@ -50,7 +50,7 @@ constexpr auto RESPONSE_TOPIC	= mqtt::property::RESPONSE_TOPIC;
 constexpr auto CORRELATION_DATA	= mqtt::property::CORRELATION_DATA;
 
 // --------------------------------------------------------------------------
-// Simple function to manually reconect a client.
+// Simple function to manually reconnect a client.
 
 bool try_reconnect(mqtt::client& cli)
 {
