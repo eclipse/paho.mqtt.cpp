@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fixed and optimized 'topic_matcher' trie collection
 - [#498](https://github.com/eclipse/paho.mqtt.cpp/issues/416) Overloaded property constructor to also take a uint32_t 
 - [#491](https://github.com/eclipse/paho.mqtt.cpp/pull/491) add topic_matcher.h to install
+- [#485](https://github.com/eclipse/paho.mqtt.cpp/pull/485) export dependencies
 - [#484](https://github.com/eclipse/paho.mqtt.cpp/pull/484) add token::get_message
 - Added some missing Eclipse/Paho legal documents to the repo. 
 - [#466](https://github.com/eclipse/paho.mqtt.cpp/pull/466) Iterable string collection
