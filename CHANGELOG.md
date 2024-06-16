@@ -9,17 +9,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Version 1.4.0](https://github.com/eclipse/paho.mqtt.cpp/compare/v1.3.2..v1.4.0) - (2024-06-16)
 
-- Reworked the CMake build so that 'PAHO_WITH_MQTT_C' option properly compiles the existing Paho C v1.3.13
+- Ability to build the Paho C library automatically (now working)
+    - CMake 'PAHO_WITH_MQTT_C' option properly compiles the existing Paho C v1.3.13
+    - Moved 'src/externals/' to top-level
 - Reorganized the source tree:
     - Moved header files to top-level 'include/' directory.
     - Moved 'src/sampless/' to top-level and renamed 'examples/'
-    - Moved 'src/externals/' to top-level
 - Fixed and optimized 'topic_matcher' trie collection
+- Added some missing Eclipse/Paho legal documents to the repo. 
+
 - [#498](https://github.com/eclipse/paho.mqtt.cpp/issues/416) Overloaded property constructor to also take a uint32_t 
 - [#491](https://github.com/eclipse/paho.mqtt.cpp/pull/491) add topic_matcher.h to install
 - [#485](https://github.com/eclipse/paho.mqtt.cpp/pull/485) export dependencies
 - [#484](https://github.com/eclipse/paho.mqtt.cpp/pull/484) add token::get_message
-- Added some missing Eclipse/Paho legal documents to the repo. 
 - [#466](https://github.com/eclipse/paho.mqtt.cpp/pull/466) Iterable string collection
 - [#416](https://github.com/eclipse/paho.mqtt.cpp/issues/416) Removed FindPahoMqttC.cmake. Using Paho C package directly.
 
