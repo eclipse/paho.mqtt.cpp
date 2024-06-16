@@ -55,10 +55,13 @@ if(PAHO_BUILD_SHARED)
     add_library(paho-mqttpp3 SHARED ${COMMON_SRC})
     list(APPEND PAHO_CPP_TARGETS paho-mqttpp3)
 
+    target_compile_definitions(paho-mqttpp3 PRIVATE PAHO_MQTTPP_EXPORTS)
+
     ## Add dependencies to the shared library
     target_link_libraries(paho-mqttpp3 PUBLIC
         eclipse-paho-mqtt-c::${PAHO_MQTT_C_LIB}
         Threads::Threads
+        ${LIBS_SYSTEM}
     )
 
     ## set the shared library soname
@@ -79,6 +82,7 @@ if(PAHO_BUILD_STATIC)
     target_link_libraries(paho-mqttpp3-static PUBLIC 
         eclipse-paho-mqtt-c::${PAHO_MQTT_C_LIB}-static
         Threads::Threads
+        ${LIBS_SYSTEM}
     )
 
     ## Let the archive use the same base name as the shared lib on *nix systems
