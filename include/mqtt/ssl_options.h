@@ -273,7 +273,7 @@ public:
 	 *  						  handshake. For a  full explanation of the
 	 *  						  cipher list format, please see the OpenSSL
 	 *  						  on-line documentation:
-	 *  						  http://www.openssl.org/docs/apps/ciphers.html#CIPHER_LIST_FORMAT
+	 *  						  https://www.openssl.org/docs/manmaster/man1/openssl-ciphers.html
 	 *  						  If this setting is omitted, its default
 	 *  						  value will be "ALL", that is, all the
 	 *  						  cipher suites -excluding those offering no
