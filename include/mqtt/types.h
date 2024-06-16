@@ -167,7 +167,8 @@ inline bool to_bool(int n) { return n != 0; }
 inline int to_int(bool b) { return b ? (!0) : 0; }
 
 /**
- * Gets a valid string for the char pointer.
+ * Gets a valid string for the char pointer, returning an empty string if
+ * the pointer is NULL.
  * @param cstr A C-string pointer
  * @return A string copy of the C array. If `cstr` is NULL, this returns an
  *  	   empty string.
