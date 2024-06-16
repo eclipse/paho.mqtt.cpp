@@ -222,6 +222,14 @@ public:
 	 */
 	virtual std::chrono::milliseconds get_timeout() const { return timeout_; }
 	/**
+	 * Gets a copy of the connect options that were last used in a request
+	 * to connect to the broker.
+	 * @returns The last connect options that were used.
+	 */
+	connect_options get_connect_options() const {
+		return cli_.get_connect_options();
+	}
+	/**
 	 * Get a topic object which can be used to publish messages on this
 	 * client.
 	 * @param top The topic name

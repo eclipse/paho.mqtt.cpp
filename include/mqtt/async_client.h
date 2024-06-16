@@ -151,8 +151,8 @@ private:
 	update_connection_handler updateConnectionHandler_;
 	/** Message handler */
 	message_handler msgHandler_;
-  /** Cached options from the last connect */
-  connect_options connOpts_;
+	/** Cached options from the last connect */
+	connect_options connOpts_;
 	/** Copy of connect token (for re-connects) */
 	token_ptr connTok_;
 	/** A list of tokens that are in play */
@@ -506,6 +506,15 @@ public:
 	 *   @li MQTTVERSION_5 (5) = only try version 5
    	 */
 	int mqtt_version() const noexcept { return mqttVersion_; }
+	/**
+	 * Gets a copy of the connect options that were last used in a request
+	 * to connect to the broker.
+	 * @returns The last connect options that were used.
+	 */
+	connect_options get_connect_options() const {
+		guard g(lock_);
+		return connOpts_;
+	}
 	/**
 	 * Determines if this client is currently connected to the server.
 	 * @return true if connected, false otherwise.

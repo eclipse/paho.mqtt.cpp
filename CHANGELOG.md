@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - [#485](https://github.com/eclipse/paho.mqtt.cpp/pull/485) export dependencies
 - [#484](https://github.com/eclipse/paho.mqtt.cpp/pull/484) add token::get_message
 - [#480](https://github.com/eclipse/paho.mqtt.cpp/issues/480) Fixed Paho C version in 'install_paho_mqtt_c.sh' script.
+- [#473](https://github.com/eclipse/paho.mqtt.cpp/issues/473) Getter for the client's cached connect options.
 - [#466](https://github.com/eclipse/paho.mqtt.cpp/pull/466) Iterable string collection
 - [#416](https://github.com/eclipse/paho.mqtt.cpp/issues/416) Removed FindPahoMqttC.cmake. Using Paho C package directly.
 

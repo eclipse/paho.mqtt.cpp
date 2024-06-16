@@ -447,6 +447,7 @@ token_ptr async_client::connect(connect_options opts)
 
 	opts.set_token(connTok_);
 
+	// TODO: Lock!
 	connOpts_ = std::move(opts);
 	int rc = MQTTAsync_connect(cli_, &connOpts_.opts_);
 
