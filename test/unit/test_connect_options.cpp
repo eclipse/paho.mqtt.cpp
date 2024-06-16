@@ -631,4 +631,107 @@ TEST_CASE("connect_options_builder set", "[options]")
 	REQUIRE(nullptr != copts.connectProperties);
 }
 
+// ----------------------------------------------------------------------
+// Test the builder's copy assignment operator=(const&)
+// ----------------------------------------------------------------------
+
+TEST_CASE("connect_options_builder copy_assignment", "[options]")
+{
+	SECTION("v3") {
+		auto orgOptsBldr = connect_options_builder::v3();
+		orgOptsBldr
+			.user_name(USER)
+			.password(PASSWD);
+
+		connect_options_builder optsBldr;
+		optsBldr = orgOptsBldr;
+
+		connect_options opts = optsBldr.finalize();
+
+		REQUIRE(USER == opts.get_user_name());
+		REQUIRE(PASSWD == opts.get_password_str());
+
+		const auto& copts = opts.c_struct();
+
+		REQUIRE(0 == memcmp(&copts.struct_id, CSIG, CSIG_LEN));
+
+		REQUIRE(0 == strcmp(USER.c_str(), copts.username));
+		REQUIRE(copts.password == nullptr);
+		REQUIRE(PASSWD.size() == size_t(copts.binarypwd.len));
+		REQUIRE(0 == memcmp(PASSWD.data(), copts.binarypwd.data, PASSWD.size()));
+		REQUIRE(nullptr == copts.connectProperties);
+	}
+
+	SECTION("v5") {
+		auto orgOptsBldr = connect_options_builder::v5();
+		orgOptsBldr.properties({{ property::SESSION_EXPIRY_INTERVAL, 42 }});
+
+		connect_options_builder optsBldr;
+		optsBldr = orgOptsBldr;
+
+		connect_options opts = optsBldr.finalize();
+
+		// Check that we got the correct properties
+		REQUIRE(1 == opts.get_properties().size());
+		REQUIRE(opts.get_properties().contains(property::SESSION_EXPIRY_INTERVAL));
+		REQUIRE(42 == get<int>(opts.get_properties(), property::SESSION_EXPIRY_INTERVAL));
+	}
+}
+
+// ----------------------------------------------------------------------
+// Test the builder's move assignment, operator=(&&)
+// ----------------------------------------------------------------------
+
+TEST_CASE("connect_options_builder move_assignment", "[options]")
+{
+	SECTION("v3") {
+		auto orgOptsBldr = connect_options_builder::v3();
+		orgOptsBldr
+			.user_name(USER)
+			.password(PASSWD);
+
+		connect_options_builder optsBldr;
+
+		optsBldr = std::move(orgOptsBldr);
+		connect_options opts = optsBldr.finalize();
+
+		REQUIRE(USER == opts.get_user_name());
+		REQUIRE(PASSWD == opts.get_password_str());
+
+		const auto& c_struct = opts.c_struct();
+
+		REQUIRE(0 == memcmp(&c_struct.struct_id, CSIG, CSIG_LEN));
+
+		REQUIRE(0 == strcmp(USER.c_str(), c_struct.username));
+		REQUIRE(c_struct.password == nullptr);
+		REQUIRE(PASSWD.size() == size_t(c_struct.binarypwd.len));
+		REQUIRE(0 == memcmp(PASSWD.data(), c_struct.binarypwd.data, PASSWD.size()));
+
+		// Self assignment should cause no harm
+		// (clang++ is smart enough to warn about this)
+		#if !defined(__clang__)
+			optsBldr = std::move(optsBldr);
+			opts = optsBldr.finalize();
+			REQUIRE(USER == opts.get_user_name());
+			REQUIRE(PASSWD == opts.get_password_str());
+		#endif
+	}
+
+	SECTION("properties") {
+		auto orgOptsBldr = connect_options_builder::v5();
+		orgOptsBldr.properties({{ property::SESSION_EXPIRY_INTERVAL, 42 }});
+
+		connect_options_builder optsBldr;
+		optsBldr = std::move(orgOptsBldr);
+
+		connect_options opts = optsBldr.finalize();
+
+		const auto& copts = opts.c_struct();
+
+		// Check that we got the correct properties
+		REQUIRE(1 == opts.get_properties().size());
+		REQUIRE(opts.get_properties().contains(property::SESSION_EXPIRY_INTERVAL));
+		REQUIRE(42 == get<int>(opts.get_properties(), property::SESSION_EXPIRY_INTERVAL));
+	}
+}
 
