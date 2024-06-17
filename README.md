@@ -36,7 +36,7 @@ To keep up with the latest announcements for this project, or to ask questions:
 
 ### What's New in v1.4.0
 
-The v1.4 release is primarily concerned with reorganizing the sources and fixing a number of CMake build issues, particularly to get the Paho C submodule build working with the existing C library, fix transient dependencies, and get the Windows DLL (maybe, finally) working properly.
+The v1.4.0 release is primarily concerned with reorganizing the sources and fixing a number of CMake build issues, particularly to get the Paho C submodule build working with the existing C library, fix transient dependencies, and get the Windows DLL (maybe, finally) working properly.
 
 - Ability to build the Paho C library automatically (now working)
     - Reworked the CMake build so that 'PAHO_WITH_MQTT_C' option properly compiles the existing Paho C v1.3.13
@@ -74,9 +74,9 @@ CMake allows for options to direct the build. The following are specific to Paho
 
 Variable | Default Value | Description
 ------------ | ------------- | -------------
-PAHO_BUILD_SHARED | TRUE (Linux), FALSE (Win32) | Whether to build the shared library
-PAHO_BUILD_STATIC | FALSE (Linux), TRUE (Win32) | Whether to build the static library
-PAHO_WITH_SSL | TRUE (Linux), FALSE (Win32) | Whether to build SSL/TLS support into the library
+PAHO_BUILD_SHARED | TRUE (*nix), FALSE (Win32) | Whether to build the shared library
+PAHO_BUILD_STATIC | FALSE (*nix), TRUE (Win32) | Whether to build the static library
+PAHO_WITH_SSL | TRUE (*nix), FALSE (Win32) | Whether to build SSL/TLS support into the library
 PAHO_BUILD_DOCUMENTATION | FALSE | Create the HTML API documentation (requires _Doxygen_)
 PAHO_BUILD_EXAMPLES | FALSE | Whether to build the example programs
 PAHO_BUILD_TESTS | FALSE | Build the unit tests. (Requires _Catch2_)
@@ -84,6 +84,25 @@ PAHO_BUILD_DEB_PACKAGE | FALSE | Flag that configures cpack to build a Debian/Ub
 PAHO_WITH_MQTT_C | FALSE | Whether to build the bundled Paho C library
 
 In addition, the C++ build might commonly use `CMAKE_PREFIX_PATH` to help the build system find the location of the Paho C library.
+
+### Build the Paho C++ and Paho C libraries together
+
+The quickest and easiest way to build Paho C++ is to buid it together with Paho C in a single step using the included Git submodule.
+This requires the CMake option `PAHO_WITH_MQTT_C` set.
+
+```
+$ git clone https://github.com/eclipse/paho.mqtt.cpp
+$ cd paho.mqtt.cpp
+$ git co v1.4.0
+
+$ git submodule init
+$ git submodule update
+
+$ cmake -Bbuild -H. -DPAHO_WITH_MQTT_C=ON -DPAHO_BUILD_EXAMPLES=ON
+$ sudo cmake --build build/ --target install
+```
+
+This assumes the build tools and dependencies, such as OpenSSL, have already been installed. For more details and platform-specific requirements, see below.
 
 ### Unix and Linux
 
@@ -118,9 +137,7 @@ _Catch2_ can be found here: [Catch2](https://github.com/catchorg/Catch2).  You m
 
 #### Building the Paho C library
 
-The Paho C library can be built automatically when building this library by enabling the CMake build option, `PAHO_WITH_MQTT_C`. That will build and install the Paho C library from a Git submodule, using a known-good version, and the proper build configuration for the C++ library.
-
-If you want to manually specify the build configuration of the Paho C library or use a different version, then it must be built and installed before building this library. Note, this version of the C++ library requires Paho C v1.3.13 or greater.
+The Paho C library can be built automatically when building this library by enabling the CMake build option, `PAHO_WITH_MQTT_C`. That will build and install the Paho C library from a Git submodule, using a known-good version, and the proper build configuration for the C++ library. But iIf you want to manually specify the build configuration of the Paho C library or use a different version, then it must be built and installed before building the C++ library. Note, this version of the C++ library requires Paho C v1.3.13 or greater.
 
 To download and build the Paho C library:
 
@@ -129,10 +146,8 @@ $ git clone https://github.com/eclipse/paho.mqtt.c.git
 $ cd paho.mqtt.c
 $ git checkout v1.3.13
 
-$ cmake -Bbuild -H. -DPAHO_ENABLE_TESTING=OFF -DPAHO_BUILD_STATIC=ON \
-    -DPAHO_WITH_SSL=ON -DPAHO_HIGH_PERFORMANCE=ON
+$ cmake -Bbuild -H. -DPAHO_ENABLE_TESTING=OFF -DPAHO_WITH_SSL=ON -DPAHO_HIGH_PERFORMANCE=ON
 $ sudo cmake --build build/ --target install
-$ sudo ldconfig
 ```
 
 This builds the C library with SSL/TLS enabled. If that is not desired, omit the `-DPAHO_WITH_SSL=ON`.
@@ -142,7 +157,7 @@ It also uses the "high performance" option of the C library to disable more exte
 The above will install the library to the default location on the host, which for Linux is normally `/usr/local`. To install the library to a non-standard location, use the `CMAKE_INSTALL_PREFIX` to specify a location. For example, to install into a directory under the user's home directory, perhaps for local testing, do this:
 
 ```
-$ cmake -Bbuild -H. -DPAHO_ENABLE_TESTING=OFF -DPAHO_BUILD_STATIC=ON \
+$ cmake -Bbuild -H. -DPAHO_ENABLE_TESTING=OFF \
     -DPAHO_WITH_SSL=ON -DPAHO_HIGH_PERFORMANCE=ON \
     -DCMAKE_INSTALL_PREFIX=$HOME/install
 ```
@@ -154,25 +169,24 @@ If the Paho C library is not already installed, the recommended version can be b
 ```
 $ git clone https://github.com/eclipse/paho.mqtt.cpp
 $ cd paho.mqtt.cpp
+$ git co v1.4.0
+$ git submodule init
+$ git submodule update
 
-$ cmake -Bbuild -H. -DPAHO_WITH_MQTT_C=ON -DPAHO_BUILD_STATIC=ON \
-    -DPAHO_BUILD_DOCUMENTATION=ON -DPAHO_BUILD_EXAMPLES=ON
+$ cmake -Bbuild -H. -DPAHO_WITH_MQTT_C=ON -DPAHO_BUILD_EXAMPLES=ON
 $ sudo cmake --build build/ --target install
-$ sudo ldconfig
 ```
 
 If a recent version of the Paho C library is available on the build host, and it's installed to a default location, it does not need to be built again. Omit the `PAHO_WITH_MQTT_C` option:
 
 ```
-$ cmake -Bbuild -H. -DPAHO_BUILD_STATIC=ON \
-    -DPAHO_BUILD_DOCUMENTATION=ON -DPAHO_BUILD_SAMPLES=ON
+$ cmake -Bbuild -H. -DPAHO_BUILD_SAMPLES=ON
 ```
 
 If the Paho C library is installed to a _non-default_ location, or you want to build against a different version, use the `CMAKE_PREFIX_PATH` to specify its install location. Perhaps something like this:
 
 ```
-$ cmake -Bbuild -H. -DPAHO_BUILD_STATIC=ON \
-    -DPAHO_BUILD_DOCUMENTATION=ON -DPAHO_BUILD_SAMPLES=ON \
+$ cmake -Bbuild -H. -DPAHO_BUILD_SAMPLES=ON \
     -DCMAKE_PREFIX_PATH=$HOME/install
 ```
 
@@ -205,17 +219,9 @@ It's better not to mix DLLs and static libraries, but if you do link the Paho C+
 
 The build process currently supports a number Windows versions. The build process requires the following tools:
   * CMake GUI v3.5 or newer
-  * Visual Studio 2015 or newer
+  * Visual Studio 2017 or newer
 
-First install and open the cmake-gui application. This tutorial is based on cmake-gui 3.5.2.
-
-Second, select the path to the Paho MQTT C library (CMAKE_PREFIX_PATH) if not installed in a standard path. Remember that the Paho MQTT C must be installed on the system. Next, choose if it is supposed to build the documentation (PAHO_BUILD_DOCUMENTATION) and/or the sample applications (PAHO_BUILD_SAMPLES).
-
-Once the configuration is done, click on the Configure button, select the version of the Visual Studio, and then click on Generate button.
-
-At the end of this process you have a Visual Studio solution.
-
-Alternately, the libraries can be completely built at an MSBuild Command Prompt. Download the Paho C and C++ library sources, then open a command window and first compile the Paho C library:
+The libraries can be completely built at an MSBuild Command Prompt. Download the Paho C and C++ library sources, then open a command window and first compile the Paho C library:
 
     > cd paho.mqtt.c
     > cmake -Bbuild -H. -DCMAKE_INSTALL_PREFIX=C:\mqtt\paho-c
@@ -237,16 +243,6 @@ For MSVS 2019 and beyond:
 
     > cmake -G "Visual Studio 16 2019" -Ax64 -Bbuild -H. -DCMAKE_INSTALL_PREFIX=C:\mqtt\paho-c
     > ...
-
-For Visual Studio 2015 which is v14 do this to first build the Paho C library:
-
-    > cmake -G "Visual Studio 14 Win64" -Bbuild -H. -DCMAKE_INSTALL_PREFIX=C:\mqtt\paho-c
-    ...
-
-Then use it to build the C++ library:
-
-    > cmake -G "Visual Studio 14 Win64" -Bbuild -H. -DCMAKE_INSTALL_PREFIX=C:\mqtt\paho-cpp -DPAHO_WITH_SSL=OFF -DCMAKE_PREFIX_PATH=C:\mqtt\paho-c
-    ...
 
 *Note that it is very important that you use the same generator (target) to build BOTH libraries, otherwise you will get lots of linker errors when you try to build the C++ library.*
 
@@ -305,7 +301,7 @@ int main(int argc, char* argv[])
     callback cb;
     cli.set_callback(cb);
 
-    auto connOpts = mqtt::connect_options_builder() 
+    auto connOpts = mqtt::connect_options_builder()
         .keep_alive_interval(20);
         .clean_session()
         .finalize();
