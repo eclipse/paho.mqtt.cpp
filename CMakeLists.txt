@@ -5,8 +5,8 @@
 #*******************************************************************************
 # This is part of the Paho MQTT C++ client library.
 #
+# Copyright (c) 2017-2024, Frank Pagliughi
 # Copyright (c) 2016-2017, Guilherme Maciel Ferreira
-# Copyright (c) 2017-2023, Frank Pagliughi
 #
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v2.0
@@ -24,7 +24,7 @@
 
 cmake_minimum_required(VERSION 3.5)
 
-project(PahoMqttCpp VERSION "1.4.0")
+project(PahoMqttCpp VERSION "1.5.0.1")
 
 ## --- Build options ---
 
