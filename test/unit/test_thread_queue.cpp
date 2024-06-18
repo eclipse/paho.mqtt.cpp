@@ -21,69 +21,63 @@
 
 #define UNIT_TESTS
 
-#include "catch2_version.h"
-#include "mqtt/types.h"
-#include "mqtt/thread_queue.h"
-
-#include <thread>
-#include <future>
 #include <chrono>
+#include <future>
+#include <thread>
 #include <vector>
+
+#include "catch2_version.h"
+#include "mqtt/thread_queue.h"
+#include "mqtt/types.h"
 
 using namespace mqtt;
 using namespace std::chrono;
 
 TEST_CASE("que put/get", "[thread_queue]")
 {
-	thread_queue<int> que;
+    thread_queue<int> que;
 
-	que.put(1);
-	que.put(2);
-	REQUIRE(que.get() == 1);
+    que.put(1);
+    que.put(2);
+    REQUIRE(que.get() == 1);
 
-	que.put(3);
-	REQUIRE(que.get() == 2);
-	REQUIRE(que.get() == 3);
+    que.put(3);
+    REQUIRE(que.get() == 2);
+    REQUIRE(que.get() == 3);
 }
 
 TEST_CASE("que mt put/get", "[thread_queue]")
 {
-	thread_queue<string> que;
-	const size_t N = 1000000;
-	const size_t N_THR = 2;
+    thread_queue<string> que;
+    const size_t N = 1000000;
+    const size_t N_THR = 2;
 
-	auto producer = [&que, &N]() {
-		string s;
-		for (size_t i=0; i<512; ++i)
-			s.push_back('a' + i%26);
+    auto producer = [&que, &N]() {
+        string s;
+        for (size_t i = 0; i < 512; ++i) s.push_back('a' + i % 26);
 
-		for (size_t i=0; i<N; ++i)
-			que.put(s);
-	};
+        for (size_t i = 0; i < N; ++i) que.put(s);
+    };
 
-	auto consumer = [&que, &N]() {
-		string s;
-		bool ok = true;
-		for (size_t i=0; i<N && ok; ++i) {
-			ok = que.try_get_for(&s, seconds{1});
-		}
-		return ok;
-	};
+    auto consumer = [&que, &N]() {
+        string s;
+        bool ok = true;
+        for (size_t i = 0; i < N && ok; ++i) {
+            ok = que.try_get_for(&s, seconds{1});
+        }
+        return ok;
+    };
 
-	std::vector<std::thread> producers;
-	std::vector<std::future<bool>> consumers;
+    std::vector<std::thread> producers;
+    std::vector<std::future<bool>> consumers;
 
-	for (size_t i=0; i<N_THR; ++i)
-		producers.push_back(std::thread(producer));
+    for (size_t i = 0; i < N_THR; ++i) producers.push_back(std::thread(producer));
 
-	for (size_t i=0; i<N_THR; ++i)
-		consumers.push_back(std::async(consumer));
+    for (size_t i = 0; i < N_THR; ++i) consumers.push_back(std::async(consumer));
 
-	for (size_t i=0; i<N_THR; ++i)
-		producers[i].join();
+    for (size_t i = 0; i < N_THR; ++i) producers[i].join();
 
-	for (size_t i=0; i<N_THR; ++i) {
-		REQUIRE(consumers[i].get());
-	}
+    for (size_t i = 0; i < N_THR; ++i) {
+        REQUIRE(consumers[i].get());
+    }
 }
-

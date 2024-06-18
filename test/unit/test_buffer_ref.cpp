@@ -22,6 +22,7 @@
 #define UNIT_TESTS
 
 #include <cstring>
+
 #include "catch2_version.h"
 #include "mqtt/buffer_ref.h"
 
@@ -29,8 +30,8 @@ using namespace mqtt;
 
 static const string EMPTY_STR;
 
-static const string STR { "Some random string" };
-static const binary BIN { "\x0\x1\x2\x3\x4\x5\x6\x7" };
+static const string STR{"Some random string"};
+static const binary BIN{"\x0\x1\x2\x3\x4\x5\x6\x7"};
 
 static const char* CSTR = "Another random string";
 static const size_t CSTR_LEN = strlen(CSTR);
@@ -41,10 +42,10 @@ static const size_t CSTR_LEN = strlen(CSTR);
 
 TEST_CASE("dflt_ctor", "[collections]")
 {
-	string_ref sr;
+    string_ref sr;
 
-	REQUIRE_FALSE(sr);
-	REQUIRE(sr.empty());
+    REQUIRE_FALSE(sr);
+    REQUIRE(sr.empty());
 }
 
 // ----------------------------------------------------------------------
@@ -53,8 +54,8 @@ TEST_CASE("dflt_ctor", "[collections]")
 
 TEST_CASE("str_copy_ctor", "[collections]")
 {
-	string_ref sr(STR);
-	REQUIRE(STR == sr.str());
+    string_ref sr(STR);
+    REQUIRE(STR == sr.str());
 }
 
 // ----------------------------------------------------------------------
@@ -63,11 +64,11 @@ TEST_CASE("str_copy_ctor", "[collections]")
 
 TEST_CASE("str_move_ctor", "[collections]")
 {
-	string str(STR);
-	string_ref sr(std::move(str));
+    string str(STR);
+    string_ref sr(std::move(str));
 
-	REQUIRE(STR == sr.str());
-	REQUIRE(EMPTY_STR == str);
+    REQUIRE(STR == sr.str());
+    REQUIRE(EMPTY_STR == str);
 }
 
 // ----------------------------------------------------------------------
@@ -76,10 +77,10 @@ TEST_CASE("str_move_ctor", "[collections]")
 
 TEST_CASE("cstr_ctor", "[collections]")
 {
-	string_ref sr(CSTR);
+    string_ref sr(CSTR);
 
-	REQUIRE(CSTR_LEN == strlen(sr.c_str()));
-	REQUIRE(0 == strcmp(CSTR, sr.c_str()));
+    REQUIRE(CSTR_LEN == strlen(sr.c_str()));
+    REQUIRE(0 == strcmp(CSTR, sr.c_str()));
 }
 
 // ----------------------------------------------------------------------
@@ -88,10 +89,10 @@ TEST_CASE("cstr_ctor", "[collections]")
 
 TEST_CASE("ptr_copy_ctor", "[collections]")
 {
-	string_ptr sp(new string(STR));
-	string_ref sr(sp);
+    string_ptr sp(new string(STR));
+    string_ref sr(sp);
 
-	REQUIRE(STR == sr.str());
+    REQUIRE(STR == sr.str());
 }
 
 // ----------------------------------------------------------------------
@@ -100,11 +101,11 @@ TEST_CASE("ptr_copy_ctor", "[collections]")
 
 TEST_CASE("ptr_move_ctor", "[collections]")
 {
-	string_ptr sp(new string(STR));
-	string_ref sr(std::move(sp));
+    string_ptr sp(new string(STR));
+    string_ref sr(std::move(sp));
 
-	REQUIRE(STR == sr.str());
-	REQUIRE_FALSE(sp);
+    REQUIRE(STR == sr.str());
+    REQUIRE_FALSE(sp);
 }
 
 // ----------------------------------------------------------------------
@@ -113,12 +114,12 @@ TEST_CASE("ptr_move_ctor", "[collections]")
 
 TEST_CASE("copy_ctor", "[collections]")
 {
-	string_ref orgSR(STR);
-	string_ref sr(orgSR);
+    string_ref orgSR(STR);
+    string_ref sr(orgSR);
 
-	REQUIRE(STR == sr.str());
-	REQUIRE(orgSR.ptr().get() == sr.ptr().get());
-	REQUIRE(2 == sr.ptr().use_count());
+    REQUIRE(STR == sr.str());
+    REQUIRE(orgSR.ptr().get() == sr.ptr().get());
+    REQUIRE(2 == sr.ptr().use_count());
 }
 
 // ----------------------------------------------------------------------
@@ -127,13 +128,13 @@ TEST_CASE("copy_ctor", "[collections]")
 
 TEST_CASE("move_ctor", "[collections]")
 {
-	string_ref orgSR(STR);
-	string_ref sr(std::move(orgSR));
+    string_ref orgSR(STR);
+    string_ref sr(std::move(orgSR));
 
-	REQUIRE(STR == sr.str());
+    REQUIRE(STR == sr.str());
 
     REQUIRE_FALSE(orgSR);
-	REQUIRE(1 == sr.ptr().use_count());
+    REQUIRE(1 == sr.ptr().use_count());
 }
 
 // ----------------------------------------------------------------------
@@ -142,17 +143,17 @@ TEST_CASE("move_ctor", "[collections]")
 
 TEST_CASE("copy_assignment", "[collections]")
 {
-	string_ref sr, orgSR(STR);
+    string_ref sr, orgSR(STR);
 
-	sr = orgSR;
+    sr = orgSR;
 
-	REQUIRE(STR == sr.str());
-	REQUIRE(orgSR.ptr().get() == sr.ptr().get());
-	REQUIRE(2 == sr.ptr().use_count());
+    REQUIRE(STR == sr.str());
+    REQUIRE(orgSR.ptr().get() == sr.ptr().get());
+    REQUIRE(2 == sr.ptr().use_count());
 
-	// Test for true copy
-	orgSR = EMPTY_STR;
-	REQUIRE(STR == sr.str());
+    // Test for true copy
+    orgSR = EMPTY_STR;
+    REQUIRE(STR == sr.str());
 }
 
 // ----------------------------------------------------------------------
@@ -161,14 +162,14 @@ TEST_CASE("copy_assignment", "[collections]")
 
 TEST_CASE("move_assignment", "[collections]")
 {
-	string_ref sr, orgSR(STR);
+    string_ref sr, orgSR(STR);
 
-	sr = std::move(orgSR);
+    sr = std::move(orgSR);
 
-	REQUIRE(STR == sr.str());
+    REQUIRE(STR == sr.str());
 
-	REQUIRE_FALSE(orgSR);
-	REQUIRE(1 == sr.ptr().use_count());
+    REQUIRE_FALSE(orgSR);
+    REQUIRE(1 == sr.ptr().use_count());
 }
 
 // ----------------------------------------------------------------------
@@ -177,14 +178,14 @@ TEST_CASE("move_assignment", "[collections]")
 
 TEST_CASE("str_copy_assignment", "[collections]")
 {
-	string str(STR);
-	string_ref sr;
+    string str(STR);
+    string_ref sr;
 
-	sr = str;
-	REQUIRE(STR == sr.str());
+    sr = str;
+    REQUIRE(STR == sr.str());
 
-	str = EMPTY_STR;
-	REQUIRE(STR == sr.str());
+    str = EMPTY_STR;
+    REQUIRE(STR == sr.str());
 }
 
 // ----------------------------------------------------------------------
@@ -193,14 +194,14 @@ TEST_CASE("str_copy_assignment", "[collections]")
 
 TEST_CASE("str_move_assignment", "[collections]")
 {
-	string str(STR);
-	string_ref sr;
+    string str(STR);
+    string_ref sr;
 
-	sr = std::move(str);
-	REQUIRE(STR == sr.str());
+    sr = std::move(str);
+    REQUIRE(STR == sr.str());
 
-	REQUIRE(EMPTY_STR == str);
-	REQUIRE(1 == sr.ptr().use_count());
+    REQUIRE(EMPTY_STR == str);
+    REQUIRE(1 == sr.ptr().use_count());
 }
 
 // ----------------------------------------------------------------------
@@ -209,11 +210,11 @@ TEST_CASE("str_move_assignment", "[collections]")
 
 TEST_CASE("cstr_assignment", "[collections]")
 {
-	string_ref sr;
-	sr = CSTR;
+    string_ref sr;
+    sr = CSTR;
 
-	REQUIRE(CSTR_LEN == strlen(sr.c_str()));
-	REQUIRE(0 == strcmp(CSTR, sr.c_str()));
+    REQUIRE(CSTR_LEN == strlen(sr.c_str()));
+    REQUIRE(0 == strcmp(CSTR, sr.c_str()));
 }
 
 // ----------------------------------------------------------------------
@@ -222,12 +223,12 @@ TEST_CASE("cstr_assignment", "[collections]")
 
 TEST_CASE("ptr_copy_assignment", "[collections]")
 {
-	string_ptr sp(new string(STR));
-	string_ref sr;
+    string_ptr sp(new string(STR));
+    string_ref sr;
 
-	sr = sp;
+    sr = sp;
 
-	REQUIRE(STR == sr.str());
+    REQUIRE(STR == sr.str());
 }
 
 // ----------------------------------------------------------------------
@@ -236,13 +237,13 @@ TEST_CASE("ptr_copy_assignment", "[collections]")
 
 TEST_CASE("ptr_move_assignment", "[collections]")
 {
-	string_ptr sp(new string(STR));
-	string_ref sr;
+    string_ptr sp(new string(STR));
+    string_ref sr;
 
-	sr = std::move(sp);
+    sr = std::move(sp);
 
-	REQUIRE(STR == sr.str());
-	REQUIRE_FALSE(sp);
+    REQUIRE(STR == sr.str());
+    REQUIRE_FALSE(sp);
 }
 
 // ----------------------------------------------------------------------
@@ -251,10 +252,9 @@ TEST_CASE("ptr_move_assignment", "[collections]")
 
 TEST_CASE("reset", "[collections]")
 {
-	string_ref sr(STR);
+    string_ref sr(STR);
 
-	sr.reset();
-	REQUIRE_FALSE(sr);
-	REQUIRE(sr.empty());
+    sr.reset();
+    REQUIRE_FALSE(sr);
+    REQUIRE(sr.empty());
 }
-

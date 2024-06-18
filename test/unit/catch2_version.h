@@ -19,17 +19,15 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
-
 #ifndef __catch2_version_h
 #define __catch2_version_h
 
 #ifdef CATCH2_V2
-	// For Catch2 v2.x
-	#include "catch2/catch.hpp"
+    // For Catch2 v2.x
+    #include "catch2/catch.hpp"
 #else
-	// For Catch2 v3.x (and beyond?)
-	#include "catch2/catch_all.hpp"
+    // For Catch2 v3.x (and beyond?)
+    #include "catch2/catch_all.hpp"
 #endif
 
-#endif		// __catch2_version_h
-
+#endif  // __catch2_version_h

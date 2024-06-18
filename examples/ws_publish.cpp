@@ -30,20 +30,21 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
-#include <string>
 #include <chrono>
+#include <cstdlib>
 #include <cstring>
+#include <fstream>
+#include <iostream>
+#include <string>
+
 #include "mqtt/async_client.h"
 
 // Assume a local server with websocket support on port 8080
-const std::string DFLT_SERVER_ADDRESS { "ws://localhost:8080" };
+const std::string DFLT_SERVER_ADDRESS{"ws://localhost:8080"};
 
 // A local proxy, like squid on port 3128
 // Here assuming basic authentication with user "user" and password "pass".
-const std::string DFLT_PROXY_ADDRESS { "http://user:pass@localhost:3128" };
+const std::string DFLT_PROXY_ADDRESS{"http://user:pass@localhost:3128"};
 
 // Quality of service for this app.
 const int QOS = 1;
@@ -57,53 +58,50 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-	string	address  = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS,
-			proxy = (argc > 2) ? string(argv[2]) : DFLT_PROXY_ADDRESS;
+    string address = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS,
+           proxy = (argc > 2) ? string(argv[2]) : DFLT_PROXY_ADDRESS;
 
-	cout << "Initializing for server '" << address << "'..." << endl;
-	if (!proxy.empty())
-		cout << "    with proxy '" << proxy << "'" << endl;
+    cout << "Initializing for server '" << address << "'..." << endl;
+    if (!proxy.empty())
+        cout << "    with proxy '" << proxy << "'" << endl;
 
-	mqtt::async_client client(address, "");
+    mqtt::async_client client(address, "");
 
-	// Build the connect options.
+    // Build the connect options.
 
-	auto connBuilder = mqtt::connect_options_builder::ws();
+    auto connBuilder = mqtt::connect_options_builder::ws();
 
-	if (!proxy.empty())
-		connBuilder.http_proxy(proxy);
+    if (!proxy.empty())
+        connBuilder.http_proxy(proxy);
 
-	auto connOpts = connBuilder
-		.keep_alive_interval(std::chrono::seconds(45))
-		.finalize();
+    auto connOpts = connBuilder.keep_alive_interval(std::chrono::seconds(45)).finalize();
 
-	cout << "  ...OK" << endl;
+    cout << "  ...OK" << endl;
 
-	try {
-		// Connect to the server
+    try {
+        // Connect to the server
 
-		cout << "\nConnecting..." << endl;
-		client.connect(connOpts)->wait();
-		cout << "  ...OK" << endl;
+        cout << "\nConnecting..." << endl;
+        client.connect(connOpts)->wait();
+        cout << "  ...OK" << endl;
 
-		// Send a message
+        // Send a message
 
-		cout << "\nSending message..." << endl;
-		auto msg = mqtt::make_message("hello", "Hello C++ websocket world!", QOS, false);
-		bool ok = client.publish(msg)->wait_for(TIMEOUT);
-		cout << "  ..." << (ok ? "OK" : "Error") << endl;
+        cout << "\nSending message..." << endl;
+        auto msg = mqtt::make_message("hello", "Hello C++ websocket world!", QOS, false);
+        bool ok = client.publish(msg)->wait_for(TIMEOUT);
+        cout << "  ..." << (ok ? "OK" : "Error") << endl;
 
-		// Disconnect
+        // Disconnect
 
-		cout << "\nDisconnecting..." << endl;
-		client.disconnect()->wait();
-		cout << "  ...OK" << endl;
-	}
-	catch (const mqtt::exception& exc) {
-		cerr << exc.get_error_str() << endl;
-		return 1;
-	}
+        cout << "\nDisconnecting..." << endl;
+        client.disconnect()->wait();
+        cout << "  ...OK" << endl;
+    }
+    catch (const mqtt::exception& exc) {
+        cerr << exc.get_error_str() << endl;
+        return 1;
+    }
 
- 	return 0;
+    return 0;
 }
-

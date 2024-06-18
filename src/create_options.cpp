@@ -15,6 +15,7 @@
  *******************************************************************************/
 
 #include "mqtt/create_options.h"
+
 #include <cstring>
 
 namespace mqtt {
@@ -22,28 +23,25 @@ namespace mqtt {
 /////////////////////////////////////////////////////////////////////////////
 
 const MQTTAsync_createOptions create_options::DFLT_C_STRUCT =
-			MQTTAsync_createOptions_initializer5;
+    MQTTAsync_createOptions_initializer5;
 
-create_options::create_options() : opts_(DFLT_C_STRUCT)
-{
-}
+create_options::create_options() : opts_(DFLT_C_STRUCT) {}
 
 create_options::create_options(int mqttVersion) : create_options()
 {
-	opts_.MQTTVersion = mqttVersion;
+    opts_.MQTTVersion = mqttVersion;
 }
 
 create_options::create_options(int mqttVersion, int maxBufferedMessages) : create_options()
 {
-	opts_.MQTTVersion = mqttVersion;
+    opts_.MQTTVersion = mqttVersion;
 
-	if (maxBufferedMessages != 0) {
-		opts_.sendWhileDisconnected = to_int(true);
-		opts_.maxBufferedMessages = maxBufferedMessages;
-	}
+    if (maxBufferedMessages != 0) {
+        opts_.sendWhileDisconnected = to_int(true);
+        opts_.maxBufferedMessages = maxBufferedMessages;
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-} // end namespace mqtt
-
+}  // end namespace mqtt

@@ -36,13 +36,14 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
-#include <iostream>
-#include <cstdlib>
-#include <string>
-#include <cstring>
 #include <cctype>
-#include <thread>
 #include <chrono>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+#include <string>
+#include <thread>
+
 #include "mqtt/async_client.h"
 #include "mqtt/topic.h"
 
@@ -50,113 +51,107 @@
 
 int main(int argc, char* argv[])
 {
-	// The broker/server address
-	const std::string SERVER_ADDRESS("mqtt://localhost:1883");
+    // The broker/server address
+    const std::string SERVER_ADDRESS("mqtt://localhost:1883");
 
-	// The QoS to use for publishing and subscribing
-	const int QOS = 1;
+    // The QoS to use for publishing and subscribing
+    const int QOS = 1;
 
-	// Tell the broker we don't want our own messages sent back to us.
-	const bool NO_LOCAL = true;
+    // Tell the broker we don't want our own messages sent back to us.
+    const bool NO_LOCAL = true;
 
-	if (argc != 3) {
-		std::cout << "USAGE: mqttpp_chat <user> <group>" << std::endl;
-		return 1;
-	}
+    if (argc != 3) {
+        std::cout << "USAGE: mqttpp_chat <user> <group>" << std::endl;
+        return 1;
+    }
 
-	std::string chatUser  { argv[1] },
-				chatGroup { argv[2] },
-				chatTopic { "chat/"+chatGroup };
+    std::string chatUser{argv[1]}, chatGroup{argv[2]}, chatTopic{"chat/" + chatGroup};
 
-	mqtt::async_client cli(SERVER_ADDRESS, "",
-						   mqtt::create_options(MQTTVERSION_5));
+    mqtt::async_client cli(SERVER_ADDRESS, "", mqtt::create_options(MQTTVERSION_5));
 
-	// LWT message is broadcast to other users if out connection is lost
+    // LWT message is broadcast to other users if out connection is lost
 
-	auto lwt = mqtt::message(chatTopic, "<<<"+chatUser+" was disconnected>>>", QOS, false);
+    auto lwt =
+        mqtt::message(chatTopic, "<<<" + chatUser + " was disconnected>>>", QOS, false);
 
-	// Set up the connect options
+    // Set up the connect options
 
-	auto connOpts = mqtt::connect_options_builder()
-		.properties({
-			{mqtt::property::SESSION_EXPIRY_INTERVAL, 604800}
-		})
-		.clean_start(false)
-		.will(std::move(lwt))
-		.keep_alive_interval(std::chrono::seconds(20))
-		.finalize();
+    auto connOpts = mqtt::connect_options_builder()
+                        .properties({{mqtt::property::SESSION_EXPIRY_INTERVAL, 604800}})
+                        .clean_start(false)
+                        .will(std::move(lwt))
+                        .keep_alive_interval(std::chrono::seconds(20))
+                        .finalize();
 
-	// Set a callback for connection lost.
-	// This just exits the app.
+    // Set a callback for connection lost.
+    // This just exits the app.
 
-	cli.set_connection_lost_handler([](const std::string&) {
-		std::cout << "*** Connection Lost  ***" << std::endl;
-		exit(2);
-	});
+    cli.set_connection_lost_handler([](const std::string&) {
+        std::cout << "*** Connection Lost  ***" << std::endl;
+        exit(2);
+    });
 
-	// Set the callback for incoming messages
+    // Set the callback for incoming messages
 
-	cli.set_message_callback([](mqtt::const_message_ptr msg) {
-		std::cout << msg->get_payload_str() << std::endl;
-	});
+    cli.set_message_callback([](mqtt::const_message_ptr msg) {
+        std::cout << msg->get_payload_str() << std::endl;
+    });
 
-	// We publish and subscribe to one topic,
-	// so a 'topic' object is helpful.
+    // We publish and subscribe to one topic,
+    // so a 'topic' object is helpful.
 
-	mqtt::topic topic { cli, "chat/"+chatGroup, QOS };
+    mqtt::topic topic{cli, "chat/" + chatGroup, QOS};
 
-	// Start the connection.
+    // Start the connection.
 
-	try {
-		std::cout << "Connecting to the chat server at '" << SERVER_ADDRESS
-			<< "'..." << std::flush;
-		auto tok = cli.connect(connOpts);
-		tok->wait();
+    try {
+        std::cout << "Connecting to the chat server at '" << SERVER_ADDRESS << "'..."
+                  << std::flush;
+        auto tok = cli.connect(connOpts);
+        tok->wait();
 
-		// Subscribe to the topic using "no local" so that
-		// we don't get own messages sent back to us
+        // Subscribe to the topic using "no local" so that
+        // we don't get own messages sent back to us
 
-		std::cout << "Ok\nJoining the group..." << std::flush;
-		auto subOpts = mqtt::subscribe_options(NO_LOCAL);
-		topic.subscribe(subOpts)->wait();
-		std::cout << "Ok" << std::endl;
-	}
-	catch (const mqtt::exception& exc) {
-		std::cerr << "\nERROR: Unable to connect. "
-			<< exc.what() << std::endl;
-		return 1;
-	}
+        std::cout << "Ok\nJoining the group..." << std::flush;
+        auto subOpts = mqtt::subscribe_options(NO_LOCAL);
+        topic.subscribe(subOpts)->wait();
+        std::cout << "Ok" << std::endl;
+    }
+    catch (const mqtt::exception& exc) {
+        std::cerr << "\nERROR: Unable to connect. " << exc.what() << std::endl;
+        return 1;
+    }
 
-	// Let everyone know that a new user joined the conversation.
+    // Let everyone know that a new user joined the conversation.
 
-	topic.publish("<<" + chatUser + " joined the group>>");
+    topic.publish("<<" + chatUser + " joined the group>>");
 
-	// Read messages from the console and publish them.
-	// Quit when the use enters an empty line.
+    // Read messages from the console and publish them.
+    // Quit when the use enters an empty line.
 
-	std::string usrMsg;
+    std::string usrMsg;
 
-	while (std::getline(std::cin, usrMsg) && !usrMsg.empty()) {
-		usrMsg = chatUser + ": " + usrMsg;
-		topic.publish(usrMsg);
-	}
+    while (std::getline(std::cin, usrMsg) && !usrMsg.empty()) {
+        usrMsg = chatUser + ": " + usrMsg;
+        topic.publish(usrMsg);
+    }
 
-	// Let everyone know that the user left the conversation.
+    // Let everyone know that the user left the conversation.
 
-	topic.publish("<<" + chatUser + " left the group>>")->wait();
+    topic.publish("<<" + chatUser + " left the group>>")->wait();
 
-	// Disconnect
+    // Disconnect
 
-	try {
-		std::cout << "Disconnecting from the chat server..." << std::flush;
-		cli.disconnect()->wait();
-		std::cout << "OK" << std::endl;
-	}
-	catch (const mqtt::exception& exc) {
-		std::cerr << exc.what() << std::endl;
-		return 1;
-	}
+    try {
+        std::cout << "Disconnecting from the chat server..." << std::flush;
+        cli.disconnect()->wait();
+        std::cout << "OK" << std::endl;
+    }
+    catch (const mqtt::exception& exc) {
+        std::cerr << exc.what() << std::endl;
+        return 1;
+    }
 
- 	return 0;
+    return 0;
 }
-

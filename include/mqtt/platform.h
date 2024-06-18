@@ -27,4 +27,3 @@
 #include "mqtt/export.h"
 
 #endif  // __mqtt_platform_h
-

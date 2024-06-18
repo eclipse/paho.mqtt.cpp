@@ -42,19 +42,20 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
-#include <iostream>
-#include <cstdlib>
-#include <string>
-#include <thread>	// For sleep
 #include <atomic>
 #include <chrono>
+#include <cstdlib>
 #include <cstring>
+#include <iostream>
+#include <string>
+#include <thread>  // For sleep
+
 #include "mqtt/async_client.h"
 
 using namespace std;
 using namespace std::chrono;
 
-const std::string DFLT_SERVER_ADDRESS { "mqtt://localhost:1883" };
+const std::string DFLT_SERVER_ADDRESS{"mqtt://localhost:1883"};
 
 // The QoS for sending data
 const int QOS = 1;
@@ -74,93 +75,87 @@ const int MAX_BUFFERED_MESSAGES = 1200;
 
 uint64_t timestamp()
 {
-	auto now = system_clock::now();
-	auto tse = now.time_since_epoch();
-	auto msTm = duration_cast<milliseconds>(tse);
-	return uint64_t(msTm.count());
+    auto now = system_clock::now();
+    auto tse = now.time_since_epoch();
+    auto msTm = duration_cast<milliseconds>(tse);
+    return uint64_t(msTm.count());
 }
 
 // --------------------------------------------------------------------------
 
 int main(int argc, char* argv[])
 {
-	// The server URI (address)
-	string address = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS;
+    // The server URI (address)
+    string address = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS;
 
-	// The amount of time to run (in ms). Zero means "run forever".
-	uint64_t trun = (argc > 2) ? stoll(argv[2]) : 0LL;
+    // The amount of time to run (in ms). Zero means "run forever".
+    uint64_t trun = (argc > 2) ? stoll(argv[2]) : 0LL;
 
-	cout << "Initializing for server '" << address << "'..." << endl;
+    cout << "Initializing for server '" << address << "'..." << endl;
 
-	// We configure to allow publishing to the client while off-line,
-	// and that it's OK to do so before the 1st successful connection.
-	auto createOpts = mqtt::create_options_builder()
-						  .send_while_disconnected(true, true)
-					      .max_buffered_messages(MAX_BUFFERED_MESSAGES)
-						  .delete_oldest_messages()
-						  .finalize();
+    // We configure to allow publishing to the client while off-line,
+    // and that it's OK to do so before the 1st successful connection.
+    auto createOpts = mqtt::create_options_builder()
+                          .send_while_disconnected(true, true)
+                          .max_buffered_messages(MAX_BUFFERED_MESSAGES)
+                          .delete_oldest_messages()
+                          .finalize();
 
-	mqtt::async_client cli(address, "", createOpts);
+    mqtt::async_client cli(address, "", createOpts);
 
-	// Set callbacks for when connected and connection lost.
+    // Set callbacks for when connected and connection lost.
 
-	cli.set_connected_handler([&cli](const std::string&) {
-		std::cout << "*** Connected ("
-			<< timestamp() << ") ***" << std::endl;
-	});
+    cli.set_connected_handler([&cli](const std::string&) {
+        std::cout << "*** Connected (" << timestamp() << ") ***" << std::endl;
+    });
 
-	cli.set_connection_lost_handler([&cli](const std::string&) {
-		std::cout << "*** Connection Lost ("
-			<< timestamp() << ") ***" << std::endl;
-	});
+    cli.set_connection_lost_handler([&cli](const std::string&) {
+        std::cout << "*** Connection Lost (" << timestamp() << ") ***" << std::endl;
+    });
 
-	auto willMsg = mqtt::message("test/events", "Time publisher disconnected", 1, true);
-	auto connOpts = mqtt::connect_options_builder()
-		.clean_session()
-		.will(willMsg)
-		.automatic_reconnect(seconds(1), seconds(10))
-		.finalize();
+    auto willMsg = mqtt::message("test/events", "Time publisher disconnected", 1, true);
+    auto connOpts = mqtt::connect_options_builder()
+                        .clean_session()
+                        .will(willMsg)
+                        .automatic_reconnect(seconds(1), seconds(10))
+                        .finalize();
 
-	try {
-		// Note that we start the connection, but don't wait for completion.
-		// We configured to allow publishing before a successful connection.
-		cout << "Starting connection..." << endl;
-		cli.connect(connOpts);
+    try {
+        // Note that we start the connection, but don't wait for completion.
+        // We configured to allow publishing before a successful connection.
+        cout << "Starting connection..." << endl;
+        cli.connect(connOpts);
 
-		auto top = mqtt::topic(cli, "data/time", QOS);
-		cout << "Publishing data..." << endl;
+        auto top = mqtt::topic(cli, "data/time", QOS);
+        cout << "Publishing data..." << endl;
 
-		while (timestamp() % DELTA_MS != 0)
-			;
+        while (timestamp() % DELTA_MS != 0);
 
-		uint64_t	t = timestamp(),
-					tlast = t,
-					tstart = t;
+        uint64_t t = timestamp(), tlast = t, tstart = t;
 
-		top.publish(to_string(t));
+        top.publish(to_string(t));
 
-		while (true) {
-			this_thread::sleep_for(SAMPLE_PERIOD);
+        while (true) {
+            this_thread::sleep_for(SAMPLE_PERIOD);
 
-			t = timestamp();
-			//cout << t << endl;
-			if (abs(int(t - tlast)) >= DELTA_MS)
-				top.publish(to_string(tlast = t));
+            t = timestamp();
+            // cout << t << endl;
+            if (abs(int(t - tlast)) >= DELTA_MS)
+                top.publish(to_string(tlast = t));
 
-			if (trun > 0 && t >= (trun + tstart))
-				break;
-		}
+            if (trun > 0 && t >= (trun + tstart))
+                break;
+        }
 
-		// Disconnect
-		cout << "\nDisconnecting..." << endl;
-		cli.disconnect()->wait();
-		cout << "  ...OK" << endl;
-	}
-	catch (const mqtt::exception& exc) {
-		cerr << exc.what() << endl;
-		return 1;
-	}
+        // Disconnect
+        cout << "\nDisconnecting..." << endl;
+        cli.disconnect()->wait();
+        cout << "  ...OK" << endl;
+    }
+    catch (const mqtt::exception& exc) {
+        cerr << exc.what() << endl;
+        return 1;
+    }
 
- 	return 0;
+    return 0;
 }
-

@@ -23,10 +23,10 @@
 #ifndef __mqtt_types_h
 #define __mqtt_types_h
 
+#include <chrono>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
-#include <chrono>
 
 namespace mqtt {
 
@@ -100,7 +100,7 @@ enum ReasonCode {
     MAXIMUM_CONNECT_TIME = 160,
     SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED = 161,
     WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED = 162,
-    MQTTPP_V3_CODE = 255	// This is not a protocol code; used internally by the library
+    MQTTPP_V3_CODE = 255  // This is not a protocol code; used internally by the library
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -114,7 +114,7 @@ enum ReasonCode {
  */
 template <class Rep, class Period>
 std::chrono::seconds to_seconds(const std::chrono::duration<Rep, Period>& dur) {
-	return std::chrono::duration_cast<std::chrono::seconds>(dur);
+    return std::chrono::duration_cast<std::chrono::seconds>(dur);
 }
 
 /**
@@ -125,7 +125,7 @@ std::chrono::seconds to_seconds(const std::chrono::duration<Rep, Period>& dur) {
  */
 template <class Rep, class Period>
 long to_seconds_count(const std::chrono::duration<Rep, Period>& dur) {
-	return (long) to_seconds(dur).count();
+    return (long)to_seconds(dur).count();
 }
 
 /**
@@ -136,7 +136,7 @@ long to_seconds_count(const std::chrono::duration<Rep, Period>& dur) {
  */
 template <class Rep, class Period>
 std::chrono::milliseconds to_milliseconds(const std::chrono::duration<Rep, Period>& dur) {
-	return std::chrono::duration_cast<std::chrono::milliseconds>(dur);
+    return std::chrono::duration_cast<std::chrono::milliseconds>(dur);
 }
 
 /**
@@ -147,7 +147,7 @@ std::chrono::milliseconds to_milliseconds(const std::chrono::duration<Rep, Perio
  */
 template <class Rep, class Period>
 long to_milliseconds_count(const std::chrono::duration<Rep, Period>& dur) {
-	return (long) to_milliseconds(dur).count();
+    return (long)to_milliseconds(dur).count();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -173,13 +173,10 @@ inline int to_int(bool b) { return b ? (!0) : 0; }
  * @return A string copy of the C array. If `cstr` is NULL, this returns an
  *  	   empty string.
  */
-inline string to_string(const char* cstr) {
-	return cstr ? string(cstr) : string();
-}
+inline string to_string(const char* cstr) { return cstr ? string(cstr) : string(); }
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
-}
+}  // namespace mqtt
 
-#endif		// __mqtt_types_h
-
+#endif  // __mqtt_types_h

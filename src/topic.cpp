@@ -17,6 +17,7 @@
  *******************************************************************************/
 
 #include "mqtt/topic.h"
+
 #include "mqtt/async_client.h"
 
 namespace mqtt {
@@ -28,80 +29,76 @@ namespace mqtt {
 // This is just a string split around '/'
 std::vector<string> topic::split(const string& s)
 {
-	std::vector<std::string> v;
+    std::vector<std::string> v;
 
-	if (s.empty())
-		return v;
+    if (s.empty())
+        return v;
 
-	const auto delim = '/';
-	string::size_type startPos = 0, pos;
+    const auto delim = '/';
+    string::size_type startPos = 0, pos;
 
-	do {
-		pos = s.find(delim, startPos);
-		auto n = (pos == string::npos) ? pos : (pos - startPos);
-		v.push_back(s.substr(startPos, n));
-		startPos = pos + 1;
-	}
-	while (pos != string::npos);
+    do {
+        pos = s.find(delim, startPos);
+        auto n = (pos == string::npos) ? pos : (pos - startPos);
+        v.push_back(s.substr(startPos, n));
+        startPos = pos + 1;
+    } while (pos != string::npos);
 
-	return v;
+    return v;
 }
 
 delivery_token_ptr topic::publish(const void* payload, size_t n)
 {
-	return cli_.publish(name_, payload, n, qos_, retained_);
+    return cli_.publish(name_, payload, n, qos_, retained_);
 }
 
-delivery_token_ptr topic::publish(const void* payload, size_t n,
-								  int qos, bool retained)
+delivery_token_ptr topic::publish(const void* payload, size_t n, int qos, bool retained)
 {
-	return cli_.publish(name_, payload, n, qos, retained);
+    return cli_.publish(name_, payload, n, qos, retained);
 }
 
 delivery_token_ptr topic::publish(binary_ref payload)
 {
-	return cli_.publish(name_, std::move(payload), qos_, retained_);
+    return cli_.publish(name_, std::move(payload), qos_, retained_);
 }
 
 delivery_token_ptr topic::publish(binary_ref payload, int qos, bool retained)
 {
-	return cli_.publish(name_, std::move(payload), qos, retained);
+    return cli_.publish(name_, std::move(payload), qos, retained);
 }
 
 token_ptr topic::subscribe(const subscribe_options& opts)
 {
-	return cli_.subscribe(name_, qos_, opts);
+    return cli_.subscribe(name_, qos_, opts);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 //  						topic_filter
 /////////////////////////////////////////////////////////////////////////////
 
-topic_filter::topic_filter(const string& filter)
-	: fields_(topic::split(filter))
-{
-}
+topic_filter::topic_filter(const string& filter) : fields_(topic::split(filter)) {}
 
 bool topic_filter::has_wildcards(const string& filter)
 {
-	auto n = filter.size();
+    auto n = filter.size();
 
-	if (n == 0)
-		return false;
+    if (n == 0)
+        return false;
 
-	// A '#' should only be the last char, if present
-	if (filter[n-1] == '#')
-		return true;
+    // A '#' should only be the last char, if present
+    if (filter[n - 1] == '#')
+        return true;
 
-	return filter.find('+') != string::npos;
+    return filter.find('+') != string::npos;
 }
 
-bool topic_filter::has_wildcards() const {
-	for (auto& f : fields_) {
-		if (f == "+" || f == "#")
-			return true;
-	}
-	return false;
+bool topic_filter::has_wildcards() const
+{
+    for (auto& f : fields_) {
+        if (f == "+" || f == "#")
+            return true;
+    }
+    return false;
 }
 
 // See if the topic matches this filter.
@@ -110,28 +107,25 @@ bool topic_filter::has_wildcards() const {
 // or topic into fields.
 bool topic_filter::matches(const string& topic) const
 {
-	auto n = fields_.size();
-	auto topic_fields = topic::split(topic);
+    auto n = fields_.size();
+    auto topic_fields = topic::split(topic);
 
-	if (n > topic_fields.size()) {
-		return false;
-	}
+    if (n > topic_fields.size()) {
+        return false;
+    }
 
-	for (size_t i=0; i<n; ++i) {
-		if (fields_[i] == "#") {
-			break;
-		}
-		if (fields_[i] != "+" && fields_[i] != topic_fields[i]) {
-			return false;
-		}
-	}
+    for (size_t i = 0; i < n; ++i) {
+        if (fields_[i] == "#") {
+            break;
+        }
+        if (fields_[i] != "+" && fields_[i] != topic_fields[i]) {
+            return false;
+        }
+    }
 
-	return true;
+    return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
-}
-
-
-
+}  // namespace mqtt

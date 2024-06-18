@@ -24,11 +24,12 @@
 #ifndef __mqtt_iclient_persistence_h
 #define __mqtt_iclient_persistence_h
 
+#include <vector>
+
 #include "MQTTAsync.h"
-#include "mqtt/types.h"
 #include "mqtt/buffer_view.h"
 #include "mqtt/string_collection.h"
-#include <vector>
+#include "mqtt/types.h"
 
 namespace mqtt {
 
@@ -38,17 +39,13 @@ namespace mqtt {
  * @param n The number of bytes for the buffer.
  * @return A pointer to the allocated memory
  */
-inline void* persistence_malloc(size_t n) {
-	return MQTTAsync_malloc(n);
-}
+inline void* persistence_malloc(size_t n) { return MQTTAsync_malloc(n); }
 
 /**
  * Frees memory allocated with @ref persistence_malloc().
  * @param p Pointer to a buffer obtained by persistence_malloc.
  */
-inline void persistence_free(void* p) {
-	MQTTAsync_free(p);
-}
+inline void persistence_free(void* p) { MQTTAsync_free(p); }
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -71,73 +68,77 @@ inline void persistence_free(void* p) {
  */
 class iclient_persistence
 {
-	friend class async_client;
-	friend class mock_persistence;
+    friend class async_client;
+    friend class mock_persistence;
 
-	/** Callbacks from the C library */
-	static int persistence_open(void** handle, const char* clientID, const char* serverURI, void* context);
-	static int persistence_close(void* handle);
-	static int persistence_put(void* handle, char* key, int bufcount, char* buffers[], int buflens[]);
-	static int persistence_get(void* handle, char* key, char** buffer, int* buflen);
-	static int persistence_remove(void* handle, char* key);
-	static int persistence_keys(void* handle, char*** keys, int* nkeys);
-	static int persistence_clear(void* handle);
-	static int persistence_containskey(void* handle, char* key);
+    /** Callbacks from the C library */
+    static int persistence_open(
+        void** handle, const char* clientID, const char* serverURI, void* context
+    );
+    static int persistence_close(void* handle);
+    static int persistence_put(
+        void* handle, char* key, int bufcount, char* buffers[], int buflens[]
+    );
+    static int persistence_get(void* handle, char* key, char** buffer, int* buflen);
+    static int persistence_remove(void* handle, char* key);
+    static int persistence_keys(void* handle, char*** keys, int* nkeys);
+    static int persistence_clear(void* handle);
+    static int persistence_containskey(void* handle, char* key);
 
 public:
-	/** Smart/shared pointer to an object of this class. */
-	using ptr_t = std::shared_ptr<iclient_persistence>;
-	/** Smart/shared pointer to a const object of this class. */
-	using const_ptr_t = std::shared_ptr<const iclient_persistence>;
+    /** Smart/shared pointer to an object of this class. */
+    using ptr_t = std::shared_ptr<iclient_persistence>;
+    /** Smart/shared pointer to a const object of this class. */
+    using const_ptr_t = std::shared_ptr<const iclient_persistence>;
 
-	/**
-	 * Virtual destructor.
-	 */
-	virtual ~iclient_persistence() {}
-	/**
-	 * Initialize the persistent store.
-	 * This uses the client ID and server name to create a unique location
-	 * for the data store.
-	 * @param clientId The identifier string for the client.
-	 * @param serverURI The server to which the client is connected.
-	 */
-	virtual void open(const string& clientId, const string& serverURI) =0;
-	/**
-	 * Close the persistent store that was previously opened.
-	 */
-	virtual void close() =0;
-	/**
-	 * Clears persistence, so that it no longer contains any persisted data.
-	 */
-	virtual void clear() =0;
-	/**
-	 * Returns whether or not data is persisted using the specified key.
-	 * @param key The key to find
-	 * @return @em true if the key exists, @em false if not.
-	 */
-	virtual bool contains_key(const string& key) =0;
-	/**
-	 * Returns a collection of keys in this persistent data store.
-	 * @return A collection of strings representing the keys in the store.
-	 */
-	virtual string_collection keys() const =0;
-	/**
-	 * Puts the specified data into the persistent store.
-	 * @param key The key.
-	 * @param bufs The data to store
-	 */
-	virtual void put(const string& key, const std::vector<string_view>& bufs) =0;
-	/**
-	 * Gets the specified data out of the persistent store.
-	 * @param key The key
-	 * @return A const view of the data associated with the key.
-	 */
-	virtual string get(const string& key) const =0;
-	/**
-	 * Remove the data for the specified key.
-	 * @param key The key
-	 */
-	virtual void remove(const string& key) =0;
+    /**
+     * Virtual destructor.
+     */
+    virtual ~iclient_persistence() {}
+    /**
+     * Initialize the persistent store.
+     * This uses the client ID and server name to create a unique location
+     * for the data store.
+     * @param clientId The identifier string for the client.
+     * @param serverURI The server to which the client is connected.
+     */
+    virtual void open(const string& clientId, const string& serverURI) = 0;
+    /**
+     * Close the persistent store that was previously opened.
+     */
+    virtual void close() = 0;
+    /**
+     * Clears persistence, so that it no longer contains any persisted data.
+     */
+    virtual void clear() = 0;
+    /**
+     * Returns whether or not data is persisted using the specified key.
+     * @param key The key to find
+     * @return @em true if the key exists, @em false if not.
+     */
+    virtual bool contains_key(const string& key) = 0;
+    /**
+     * Returns a collection of keys in this persistent data store.
+     * @return A collection of strings representing the keys in the store.
+     */
+    virtual string_collection keys() const = 0;
+    /**
+     * Puts the specified data into the persistent store.
+     * @param key The key.
+     * @param bufs The data to store
+     */
+    virtual void put(const string& key, const std::vector<string_view>& bufs) = 0;
+    /**
+     * Gets the specified data out of the persistent store.
+     * @param key The key
+     * @return A const view of the data associated with the key.
+     */
+    virtual string get(const string& key) const = 0;
+    /**
+     * Remove the data for the specified key.
+     * @param key The key
+     */
+    virtual void remove(const string& key) = 0;
 };
 
 /** Smart/shared pointer to a persistence client */
@@ -148,7 +149,6 @@ using const_iclient_persistence_ptr = iclient_persistence::const_ptr_t;
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
-}
+}  // namespace mqtt
 
-#endif		// __mqtt_iclient_persistence_h
-
+#endif  // __mqtt_iclient_persistence_h

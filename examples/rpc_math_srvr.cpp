@@ -30,42 +30,43 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
+#include <cctype>
+#include <chrono>
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <sstream>
-#include <cstdlib>
 #include <string>
-#include <cstring>
-#include <cctype>
 #include <thread>
-#include <chrono>
+
 #include "mqtt/client.h"
 
 using namespace std;
 using namespace std::chrono;
 
-const string SERVER_ADDRESS	{ "mqtt://localhost:1883" };
-const string CLIENT_ID		{ "rpc_math_srvr" };
+const string SERVER_ADDRESS{"mqtt://localhost:1883"};
+const string CLIENT_ID{"rpc_math_srvr"};
 
-constexpr auto RESPONSE_TOPIC	= mqtt::property::RESPONSE_TOPIC;
-constexpr auto CORRELATION_DATA	= mqtt::property::CORRELATION_DATA;
+constexpr auto RESPONSE_TOPIC = mqtt::property::RESPONSE_TOPIC;
+constexpr auto CORRELATION_DATA = mqtt::property::CORRELATION_DATA;
 
 // --------------------------------------------------------------------------
 // Simple function to manually reconnect a client.
 
 bool try_reconnect(mqtt::client& cli)
 {
-	constexpr int N_ATTEMPT = 30;
+    constexpr int N_ATTEMPT = 30;
 
-	for (int i=0; i<N_ATTEMPT && !cli.is_connected(); ++i) {
-		try {
-			cli.reconnect();
-			return true;
-		}
-		catch (const mqtt::exception&) {
-			this_thread::sleep_for(seconds(1));
-		}
-	}
-	return false;
+    for (int i = 0; i < N_ATTEMPT && !cli.is_connected(); ++i) {
+        try {
+            cli.reconnect();
+            return true;
+        }
+        catch (const mqtt::exception&) {
+            this_thread::sleep_for(seconds(1));
+        }
+    }
+    return false;
 }
 
 // --------------------------------------------------------------------------
@@ -73,125 +74,121 @@ bool try_reconnect(mqtt::client& cli)
 
 double add(const std::vector<double>& nums)
 {
-	double sum = 0.0;
-	for (auto n : nums)
-		sum += n;
-	return sum;
+    double sum = 0.0;
+    for (auto n : nums) sum += n;
+    return sum;
 }
 
 double mult(const std::vector<double>& nums)
 {
-	double prod = 1.0;
-	for (auto n : nums)
-		prod *= n;
-	return prod;
+    double prod = 1.0;
+    for (auto n : nums) prod *= n;
+    return prod;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[])
 {
-	mqtt::create_options createOpts(MQTTVERSION_5);
-	mqtt::client cli(SERVER_ADDRESS, CLIENT_ID, createOpts);
+    mqtt::create_options createOpts(MQTTVERSION_5);
+    mqtt::client cli(SERVER_ADDRESS, CLIENT_ID, createOpts);
 
-	auto connOpts = mqtt::connect_options_builder()
-		.keep_alive_interval(seconds(20))
-		.clean_start()
-		.finalize();
+    auto connOpts = mqtt::connect_options_builder()
+                        .keep_alive_interval(seconds(20))
+                        .clean_start()
+                        .finalize();
 
-	const vector<string> TOPICS { "requests/math", "requests/math/#" };
-	const vector<int> QOS { 1, 1 };
+    const vector<string> TOPICS{"requests/math", "requests/math/#"};
+    const vector<int> QOS{1, 1};
 
-	try {
-		cout << "Connecting to the MQTT server..." << flush;
-		cli.connect(connOpts);
-		cli.subscribe(TOPICS, QOS);
-		cout << "OK\n" << endl;
+    try {
+        cout << "Connecting to the MQTT server..." << flush;
+        cli.connect(connOpts);
+        cli.subscribe(TOPICS, QOS);
+        cout << "OK\n" << endl;
 
-		// Consume messages
+        // Consume messages
 
-		cout << "Waiting for RPC requests..." << endl;
-		while (true) {
-			auto msg = cli.consume_message();
+        cout << "Waiting for RPC requests..." << endl;
+        while (true) {
+            auto msg = cli.consume_message();
 
-			if (!msg) {
-				if (!cli.is_connected()) {
-					cout << "Lost connection. Attempting reconnect" << endl;
-					if (try_reconnect(cli)) {
-						cli.subscribe(TOPICS, QOS);
-						cout << "Reconnected" << endl;
-						continue;
-					}
-					else {
-						cout << "Reconnect failed." << endl;
-						break;
-					}
-				}
-				else
-					break;
-			}
+            if (!msg) {
+                if (!cli.is_connected()) {
+                    cout << "Lost connection. Attempting reconnect" << endl;
+                    if (try_reconnect(cli)) {
+                        cli.subscribe(TOPICS, QOS);
+                        cout << "Reconnected" << endl;
+                        continue;
+                    }
+                    else {
+                        cout << "Reconnect failed." << endl;
+                        break;
+                    }
+                }
+                else
+                    break;
+            }
 
-			cout << "Received a request" << endl;
+            cout << "Received a request" << endl;
 
-			const mqtt::properties& props = msg->get_properties();
+            const mqtt::properties& props = msg->get_properties();
 
-			if (props.contains(RESPONSE_TOPIC) && props.contains(CORRELATION_DATA)) {
-				mqtt::binary corr_id  = mqtt::get<string>(props, CORRELATION_DATA);
-				string reply_to = mqtt::get<string>(props, RESPONSE_TOPIC);
+            if (props.contains(RESPONSE_TOPIC) && props.contains(CORRELATION_DATA)) {
+                mqtt::binary corr_id = mqtt::get<string>(props, CORRELATION_DATA);
+                string reply_to = mqtt::get<string>(props, RESPONSE_TOPIC);
 
-				cout << "Client wants a reply to [" << corr_id << "] on '"
-					<< reply_to << "'" << endl;
+                cout << "Client wants a reply to [" << corr_id << "] on '" << reply_to << "'"
+                     << endl;
 
-				cout << msg->get_topic() << ": " << msg->to_string() << endl;
+                cout << msg->get_topic() << ": " << msg->to_string() << endl;
 
-				char c;
-				double x;
-				vector<double> nums;
+                char c;
+                double x;
+                vector<double> nums;
 
-				istringstream is(msg->to_string());
-				if (!(is >> c) || c != '[') {
-					cout << "Malformed arguments" << endl;
-					// Maybe send an error message to client.
-					continue;
-				}
+                istringstream is(msg->to_string());
+                if (!(is >> c) || c != '[') {
+                    cout << "Malformed arguments" << endl;
+                    // Maybe send an error message to client.
+                    continue;
+                }
 
-				c = ',';
-				while (c == ',' && (is >> x >> c))
-					nums.push_back(x);
+                c = ',';
+                while (c == ',' && (is >> x >> c)) nums.push_back(x);
 
-				if (c != ']') {
-					cout << "Bad closing delimiter" << endl;
-					continue;
-				}
+                if (c != ']') {
+                    cout << "Bad closing delimiter" << endl;
+                    continue;
+                }
 
-				x = 0.0;
-				if (msg->get_topic() == "requests/math/add")
-					x = add(nums);
-				else if (msg->get_topic() == "requests/math/mult")
-					x = mult(nums);
-				else {
-					cout << "Unknown request: " << msg->get_topic() << endl;
-					continue;
-				}
+                x = 0.0;
+                if (msg->get_topic() == "requests/math/add")
+                    x = add(nums);
+                else if (msg->get_topic() == "requests/math/mult")
+                    x = mult(nums);
+                else {
+                    cout << "Unknown request: " << msg->get_topic() << endl;
+                    continue;
+                }
 
-				cout << "  Result: " << x << endl;
+                cout << "  Result: " << x << endl;
 
-				auto reply_msg = mqtt::message::create(reply_to, to_string(x), 1, false);
-				cli.publish(reply_msg);
-			}
-		}
+                auto reply_msg = mqtt::message::create(reply_to, to_string(x), 1, false);
+                cli.publish(reply_msg);
+            }
+        }
 
-		// Disconnect
+        // Disconnect
 
-		cout << "\nDisconnecting from the MQTT server..." << flush;
-		cli.disconnect();
-		cout << "OK" << endl;
-	}
-	catch (const mqtt::exception& exc) {
-		cerr << exc.what() << endl;
-		return 1;
-	}
+        cout << "\nDisconnecting from the MQTT server..." << flush;
+        cli.disconnect();
+        cout << "OK" << endl;
+    }
+    catch (const mqtt::exception& exc) {
+        cerr << exc.what() << endl;
+        return 1;
+    }
 
- 	return 0;
+    return 0;
 }
-

@@ -36,19 +36,20 @@
  *    Frank Pagliughi - initial implementation and documentation
  *******************************************************************************/
 
-#include <iostream>
-#include <cstdlib>
-#include <string>
-#include <thread>
 #include <atomic>
 #include <chrono>
+#include <cstdlib>
 #include <cstring>
+#include <iostream>
+#include <string>
+#include <thread>
+
 #include "mqtt/client.h"
 
 using namespace std;
 using namespace std::chrono;
 
-const std::string DFLT_SERVER_ADDRESS { "mqtt://localhost:1883" };
+const std::string DFLT_SERVER_ADDRESS{"mqtt://localhost:1883"};
 
 // The QoS for sending data
 const int QOS = 1;
@@ -62,71 +63,67 @@ const auto SAMPLE_PERIOD = seconds(5);
 
 uint64_t timestamp()
 {
-	auto now = system_clock::now();
-	auto tse = now.time_since_epoch();
-	auto msTm = duration_cast<milliseconds>(tse);
-	return uint64_t(msTm.count());
+    auto now = system_clock::now();
+    auto tse = now.time_since_epoch();
+    auto msTm = duration_cast<milliseconds>(tse);
+    return uint64_t(msTm.count());
 }
 
 // --------------------------------------------------------------------------
 
 int main(int argc, char* argv[])
 {
-	// The server URI (address)
-	string address = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS;
+    // The server URI (address)
+    string address = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS;
 
-	// The amount of time to run (in sec). Zero means "run forever".
-	uint64_t trun = (argc > 2) ? stoll(argv[2]) : 0LL;
+    // The amount of time to run (in sec). Zero means "run forever".
+    uint64_t trun = (argc > 2) ? stoll(argv[2]) : 0LL;
 
-	cout << "Initializing for server '" << address << "'..." << endl;
+    cout << "Initializing for server '" << address << "'..." << endl;
 
-	mqtt::client cli(address, "");
+    mqtt::client cli(address, "");
 
-	auto connOpts = mqtt::connect_options_builder()
-		.clean_session()
-		.finalize();
+    auto connOpts = mqtt::connect_options_builder().clean_session().finalize();
 
-	cli.set_timeout(seconds(3));
+    cli.set_timeout(seconds(3));
 
-	auto top = cli.get_topic("data/time", QOS);
+    auto top = cli.get_topic("data/time", QOS);
 
-	uint64_t	t = timestamp(),
-				tstart = t;
+    uint64_t t = timestamp(), tstart = t;
 
-	try {
-		// We need to connect once before we can use reconnect()
-		cli.connect(connOpts);
+    try {
+        // We need to connect once before we can use reconnect()
+        cli.connect(connOpts);
 
-		while (true) {
-			cout << "\nCollecting data..." << endl;
+        while (true) {
+            cout << "\nCollecting data..." << endl;
 
-			// Collect some data
-			t = timestamp();
+            // Collect some data
+            t = timestamp();
 
-			if (!cli.is_connected()) {
-				cout << "Reconnecting..." << endl;
-				cli.reconnect();
-			}
+            if (!cli.is_connected()) {
+                cout << "Reconnecting..." << endl;
+                cli.reconnect();
+            }
 
-			cout << "Publishing data: " << t << "..." << endl;
-			top.publish(to_string(t));
+            cout << "Publishing data: " << t << "..." << endl;
+            top.publish(to_string(t));
 
-			cout << "Disconnecting..." << endl;
-			cli.disconnect();
+            cout << "Disconnecting..." << endl;
+            cli.disconnect();
 
-			// Quit if it's past time
-			if (trun > 0 && t >= (trun + tstart))
-				break;
+            // Quit if it's past time
+            if (trun > 0 && t >= (trun + tstart))
+                break;
 
-			cout << "Going to sleep." << endl;
-			this_thread::sleep_for(SAMPLE_PERIOD);
-		}
-	}
-	catch (const mqtt::exception& exc) {
-		cerr << exc << endl;
-		return 1;
-	}
+            cout << "Going to sleep." << endl;
+            this_thread::sleep_for(SAMPLE_PERIOD);
+        }
+    }
+    catch (const mqtt::exception& exc) {
+        cerr << exc << endl;
+        return 1;
+    }
 
- 	return 0;
+    return 0;
 }
-

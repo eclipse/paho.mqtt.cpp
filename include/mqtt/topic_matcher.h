@@ -24,15 +24,15 @@
 #ifndef __mqtt_topic_matcher_h
 #define __mqtt_topic_matcher_h
 
-#include <string>
-#include "mqtt/types.h"
-#include "mqtt/topic.h"
-
 #include <forward_list>
 #include <initializer_list>
 #include <map>
 #include <memory>
+#include <string>
 #include <vector>
+
+#include "mqtt/topic.h"
+#include "mqtt/types.h"
 
 // The make_unique<>() template functions from the original std proposal:
 //  https://isocpp.org/files/papers/N3656.txt
@@ -40,17 +40,20 @@
 #if __cplusplus < 201402L
 namespace std {
 template <class T>
-struct _Unique_if {
+struct _Unique_if
+{
     typedef unique_ptr<T> _Single_object;
 };
 
 template <class T>
-struct _Unique_if<T[]> {
+struct _Unique_if<T[]>
+{
     typedef unique_ptr<T[]> _Unknown_bound;
 };
 
 template <class T, size_t N>
-struct _Unique_if<T[N]> {
+struct _Unique_if<T[N]>
+{
     typedef void _Known_bound;
 };
 
@@ -157,7 +160,8 @@ private:
     /**
      * The nodes of the collection.
      */
-    struct node {
+    struct node
+    {
         using ptr_t = std::unique_ptr<node>;
         using map_t = std::map<string, ptr_t>;
 
@@ -221,7 +225,8 @@ public:
             // If there's a value in this node, use it;
             // otherwise keep looking.
             pval_ = snode->content.get();
-            if (!pval_) this->next();
+            if (!pval_)
+                this->next();
         }
 
         friend class topic_matcher;
@@ -277,9 +282,7 @@ public:
          * @param other The other iterator to compare against this one.
          * @return @em true if they don't match, @em false if they do
          */
-        bool operator!=(const iterator& other) const noexcept {
-            return pval_ != other.pval_;
-        }
+        bool operator!=(const iterator& other) const noexcept { return pval_ != other.pval_; }
     };
 
     /** A const iterator over all itemsin the collection. */
@@ -310,7 +313,8 @@ public:
     class match_iterator
     {
         /** Information about a node that needs to be searched. */
-        struct search_node {
+        struct search_node
+        {
             /** The current node being searched. */
             node* node_;
             /** The fields of the topic still to be searched. */
@@ -340,7 +344,8 @@ public:
             pval_ = nullptr;
 
             // If there are no nodes left to search, we're done.
-            if (nodes_.empty()) return;
+            if (nodes_.empty())
+                return;
 
             // Get the next node to search.
             auto snode = std::move(nodes_.back());
@@ -350,7 +355,8 @@ public:
             // or need to move on to the next node to search.
             if (snode.fields_.empty()) {
                 pval_ = snode.node_->content.get();
-                if (!pval_) this->next();
+                if (!pval_)
+                    this->next();
                 return;
             }
 
@@ -540,7 +546,8 @@ public:
 
         for (auto& field : fields) {
             auto it = nd->children.find(field);
-            if (it == nd->children.end()) return mapped_ptr{};
+            if (it == nd->children.end())
+                return mapped_ptr{};
 
             nd = it->second.get();
         }
@@ -591,7 +598,8 @@ public:
 
         for (auto& field : fields) {
             auto it = nd->children.find(field);
-            if (it == nd->children.end()) return end();
+            if (it == nd->children.end())
+                return end();
             nd = it->second.get();
         }
         return iterator{nd->content.get()};
@@ -610,9 +618,7 @@ public:
      * @param topic The topic to search for matches.
      * @return An iterator that can find the matches to the topic.
      */
-    match_iterator matches(const string& topic) {
-        return match_iterator(root_.get(), topic);
-    }
+    match_iterator matches(const string& topic) { return match_iterator(root_.get(), topic); }
     /**
      * Gets a const iterator that can find the matches to the topic.
      * @param topic The topic to search for matches.

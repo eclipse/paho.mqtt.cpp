@@ -28,36 +28,35 @@ using namespace mqtt;
 
 TEST_CASE("insert/get", "[topic_matcher]")
 {
-	topic_matcher<int> tm;
+    topic_matcher<int> tm;
 
-	tm.insert({"some/random/topic", 42});
+    tm.insert({"some/random/topic", 42});
 
-	auto it = tm.find("some/random/topic");
+    auto it = tm.find("some/random/topic");
 
-	REQUIRE(it != tm.end());
-	REQUIRE(it->first == "some/random/topic");
-	REQUIRE(it->second == 42);
+    REQUIRE(it != tm.end());
+    REQUIRE(it->first == "some/random/topic");
+    REQUIRE(it->second == 42);
 }
 
 TEST_CASE("matcher initialize", "[topic_matcher]")
 {
-	topic_matcher<int> tm {
-		{ "some/random/topic", 42 },
-		{ "some/#", 99 },
-		{ "some/other/topic", 55 },
-		{ "some/+/topic", 33 }
-	};
+    topic_matcher<int> tm{
+        {"some/random/topic", 42},
+        {"some/#", 99},
+        {"some/other/topic", 55},
+        {"some/+/topic", 33}
+    };
 
-	auto it = tm.matches("some/random/topic");
+    auto it = tm.matches("some/random/topic");
 
-	for (; it != tm.matches_end(); ++it) {
-		bool ok = (
-		    (it->first == "some/random/topic" && it->second == 42) ||
-			(it->first == "some/#" &&  it->second == 99) ||
-			(it-> first == "some/+/topic" && it->second == 33)
-		);
-		REQUIRE(ok);
-	}
+    for (; it != tm.matches_end(); ++it) {
+        bool ok =
+            ((it->first == "some/random/topic" && it->second == 42) ||
+             (it->first == "some/#" && it->second == 99) ||
+             (it->first == "some/+/topic" && it->second == 33));
+        REQUIRE(ok);
+    }
 }
 
 // This one is mostly borrowed from the Paho Python tests.

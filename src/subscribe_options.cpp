@@ -30,5 +30,4 @@ PAHO_MQTTPP_EXPORT const bool subscribe_options::RETAIN_AS_PUBLISHED = true;
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace 'mqtt'
-}
-
+}  // namespace mqtt

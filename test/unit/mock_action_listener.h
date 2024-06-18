@@ -36,16 +36,12 @@ namespace mqtt {
  */
 class mock_action_listener : public iaction_listener
 {
-	bool onSuccessCalled_ { false };
-	bool onFailureCalled_ { false };
+    bool onSuccessCalled_{false};
+    bool onFailureCalled_{false};
 
-	void on_success(const mqtt::token&) override {
-        onSuccessCalled_ = true;
-    }
+    void on_success(const mqtt::token&) override { onSuccessCalled_ = true; }
 
-    void on_failure(const mqtt::token&) override {
-        onFailureCalled_ = true;
-    }
+    void on_failure(const mqtt::token&) override { onFailureCalled_ = true; }
 
 public:
     bool succeeded() const { return onSuccessCalled_; }
@@ -54,6 +50,6 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
-}
+}  // namespace mqtt
 
-#endif //  __mqtt_dummy_action_listener_h
+#endif  //  __mqtt_dummy_action_listener_h

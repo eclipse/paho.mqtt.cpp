@@ -27,9 +27,10 @@
 #define UNIT_TESTS
 
 #include <cstring>
+
 #include "catch2_version.h"
-#include "mqtt/response_options.h"
 #include "mock_async_client.h"
+#include "mqtt/response_options.h"
 
 using namespace mqtt;
 
@@ -45,14 +46,14 @@ static mock_async_client cli;
 
 TEST_CASE("response_options dflt constructor", "[options]")
 {
-	mqtt::response_options opts;
-	const auto& c_struct = opts.c_struct();
+    mqtt::response_options opts;
+    const auto& c_struct = opts.c_struct();
 
-	REQUIRE(c_struct.context == nullptr);
+    REQUIRE(c_struct.context == nullptr);
 
-	// Make sure the callback functions are set during object construction
-	REQUIRE(c_struct.onSuccess != nullptr);
-	REQUIRE(c_struct.onFailure != nullptr);
+    // Make sure the callback functions are set during object construction
+    REQUIRE(c_struct.onSuccess != nullptr);
+    REQUIRE(c_struct.onFailure != nullptr);
 }
 
 // ----------------------------------------------------------------------
@@ -61,15 +62,15 @@ TEST_CASE("response_options dflt constructor", "[options]")
 
 TEST_CASE("response_options user constructor", "[options]")
 {
-	mqtt::token_ptr token { mqtt::token::create(TOKEN_TYPE, cli) };
-	mqtt::response_options opts { token };
-	const auto& c_struct = opts.c_struct();
+    mqtt::token_ptr token{mqtt::token::create(TOKEN_TYPE, cli)};
+    mqtt::response_options opts{token};
+    const auto& c_struct = opts.c_struct();
 
-	REQUIRE(c_struct.context == token.get());
+    REQUIRE(c_struct.context == token.get());
 
-	// Make sure the callback functions are set during object construction
-	REQUIRE(c_struct.onSuccess != nullptr);
-	REQUIRE(c_struct.onFailure != nullptr);
+    // Make sure the callback functions are set during object construction
+    REQUIRE(c_struct.onSuccess != nullptr);
+    REQUIRE(c_struct.onFailure != nullptr);
 }
 
 // ----------------------------------------------------------------------
@@ -78,13 +79,13 @@ TEST_CASE("response_options user constructor", "[options]")
 
 TEST_CASE("response_options set token", "[options]")
 {
-	mqtt::response_options opts;
-	const auto& c_struct = opts.c_struct();
+    mqtt::response_options opts;
+    const auto& c_struct = opts.c_struct();
 
-	REQUIRE(c_struct.context == nullptr);
-	mqtt::token_ptr token { mqtt::token::create(TOKEN_TYPE, cli) };
-	opts.set_token( token );
-	REQUIRE(c_struct.context == token.get());
+    REQUIRE(c_struct.context == nullptr);
+    mqtt::token_ptr token{mqtt::token::create(TOKEN_TYPE, cli)};
+    opts.set_token(token);
+    REQUIRE(c_struct.context == token.get());
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -97,14 +98,14 @@ TEST_CASE("response_options set token", "[options]")
 
 TEST_CASE("delivery_response_options dflt constructor", "[options]")
 {
-	mqtt::delivery_response_options opts;
-	const auto& c_struct = opts.c_struct();
+    mqtt::delivery_response_options opts;
+    const auto& c_struct = opts.c_struct();
 
-	REQUIRE(c_struct.context == nullptr);
+    REQUIRE(c_struct.context == nullptr);
 
-	// Make sure the callback functions are set during object construction
-	REQUIRE(c_struct.onSuccess != nullptr);
-	REQUIRE(c_struct.onFailure != nullptr);
+    // Make sure the callback functions are set during object construction
+    REQUIRE(c_struct.onSuccess != nullptr);
+    REQUIRE(c_struct.onFailure != nullptr);
 }
 
 // ----------------------------------------------------------------------
@@ -113,17 +114,17 @@ TEST_CASE("delivery_response_options dflt constructor", "[options]")
 
 TEST_CASE("delivery_response_options user constructor", "[options]")
 {
-	mock_async_client cli;
+    mock_async_client cli;
 
-	mqtt::delivery_token_ptr token { new mqtt::delivery_token{ cli } };
-	mqtt::delivery_response_options opts { token };
-	const auto& c_struct = opts.c_struct();
+    mqtt::delivery_token_ptr token{new mqtt::delivery_token{cli}};
+    mqtt::delivery_response_options opts{token};
+    const auto& c_struct = opts.c_struct();
 
-	REQUIRE(c_struct.context == token.get());
+    REQUIRE(c_struct.context == token.get());
 
-	// Make sure the callback functions are set during object construction
-	REQUIRE(c_struct.onSuccess != nullptr);
-	REQUIRE(c_struct.onFailure != nullptr);
+    // Make sure the callback functions are set during object construction
+    REQUIRE(c_struct.onSuccess != nullptr);
+    REQUIRE(c_struct.onFailure != nullptr);
 }
 
 // ----------------------------------------------------------------------
@@ -132,14 +133,13 @@ TEST_CASE("delivery_response_options user constructor", "[options]")
 
 TEST_CASE("delivery_response_options set token", "[options]")
 {
-	mqtt::delivery_response_options opts;
-	const auto& c_struct = opts.c_struct();
+    mqtt::delivery_response_options opts;
+    const auto& c_struct = opts.c_struct();
 
-	REQUIRE(c_struct.context == nullptr);
+    REQUIRE(c_struct.context == nullptr);
 
-	mock_async_client cli;
-	mqtt::delivery_token_ptr token { new mqtt::delivery_token{ cli } };
-	opts.set_token( token );
-	REQUIRE(c_struct.context == token.get());
+    mock_async_client cli;
+    mqtt::delivery_token_ptr token{new mqtt::delivery_token{cli}};
+    opts.set_token(token);
+    REQUIRE(c_struct.context == token.get());
 }
-

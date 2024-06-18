@@ -32,21 +32,18 @@ namespace mqtt {
 
 class mock_callback : public mqtt::callback
 {
-	bool connectionLost_ { false };
-	bool messageArrived_ { false };
-	bool deliveryComplete_ { false };
+    bool connectionLost_{false};
+    bool messageArrived_{false};
+    bool deliveryComplete_{false};
 
-	void connection_lost(const std::string& cause) override {
-		connectionLost_ = true;
-	}
+    void connection_lost(const std::string& cause) override { connectionLost_ = true; }
 
-	void message_arrived(mqtt::const_message_ptr msg) override {
-		messageArrived_ = true;
-	}
+    void message_arrived(mqtt::const_message_ptr msg) override { messageArrived_ = true; }
 
-	void delivery_complete(mqtt::delivery_token_ptr tok) override {
-		deliveryComplete_ = true;
-	}
+    void delivery_complete(mqtt::delivery_token_ptr tok) override
+    {
+        deliveryComplete_ = true;
+    }
 
 public:
     bool connection_lost() const { return connectionLost_; }
@@ -56,6 +53,6 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////
 // end namespace mqtt
-}
+}  // namespace mqtt
 
 #endif  //  __mqtt_mock_callback_h
