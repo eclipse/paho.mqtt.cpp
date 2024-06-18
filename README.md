@@ -2,7 +2,7 @@
 
 This repository contains the source code for the [Eclipse Paho](http://eclipse.org/paho) MQTT C++ client library for memory-managed operating systems such as Linux, MacOS, and Windows.
 
-This code builds a library which enables Modern C++ applications (C++11 and beyond) to connect to an [MQTT](http://mqtt.org) broker, publish messages, subscribe to topics, and receive messages from the broker.
+This code builds a library which enables Modern C++ applications (C++17 and beyond) to connect to an [MQTT](http://mqtt.org) broker, publish messages, subscribe to topics, and receive messages from the broker.
 
 The library has the following features:
 
@@ -33,6 +33,15 @@ To keep up with the latest announcements for this project, or to ask questions:
 
 **Email:** [Eclipse Paho Mailing List](https://accounts.eclipse.org/mailing-list/paho-dev)
 
+### Unreleased Features in This Branch
+
+- Required C++ standard raised to C++17
+- CMake minimum required version raised to v3.12 
+- Reformat the sources and added a .clang-format file (a project master and a slightly-different one for headers).
+- Clients always created for v5 persistence format, making it universal for any connection.
+    - If the application specifies a version it is kept as a hint for default connections.
+    - The version for the connection should be specified in the connect options.
+
 
 ### What's New in v1.4.0
 
@@ -49,10 +58,6 @@ The v1.4.0 release is primarily concerned with reorganizing the sources and fixi
 - Added some missing Eclipse/Paho legal documents to the repo.
 
 For a full list of updates see the [CHANGELOG](https://github.com/eclipse/paho.mqtt.cpp/blob/master/CHANGELOG.md)
-
-## Coming Next
-
-The next release, v1.5, will upgrade the library to C++17 and start adding features the the newer C++ version supports, like an API that uses `std::variant<>`, `std::option<>`, `constexpr`, and so on.
 
 ## Contributing
 
@@ -110,8 +115,8 @@ On *nix systems CMake creates Makefiles.
 
 The build process currently supports a number of Unix and Linux flavors. The build process requires the following tools:
 
-  * CMake v3.5 or newer
-  * A fully-compatible C++11 compiler (GCC, Clang, etc)
+  * CMake v3.12 or newer
+  * A fully-compatible C++17 compiler (GCC, Clang, etc)
 
 On Debian based systems this would mean that the following packages have to be installed:
 
@@ -218,8 +223,8 @@ It's better not to mix DLLs and static libraries, but if you do link the Paho C+
 #### Building the Library on Windows
 
 The build process currently supports a number Windows versions. The build process requires the following tools:
-  * CMake GUI v3.5 or newer
-  * Visual Studio 2017 or newer
+  * CMake GUI v3.12 or newer
+  * Visual Studio 2019 or newer
 
 The libraries can be completely built at an MSBuild Command Prompt. Download the Paho C and C++ library sources, then open a command window and first compile the Paho C library:
 
@@ -238,8 +243,6 @@ This builds and installs both libraries to a non-standard location under `C:\mqt
 It seems quite odd, but even on a 64-bit system using a 64-bit compiler, MSVC seems to default to a 32-bit build target.
 
 The 64-bit target can be selected using the CMake generator switch, *-G*, at configuration time. The full version must be provided.
-
-For MSVS 2019 and beyond:
 
     > cmake -G "Visual Studio 16 2019" -Ax64 -Bbuild -H. -DCMAKE_INSTALL_PREFIX=C:\mqtt\paho-c
     > ...

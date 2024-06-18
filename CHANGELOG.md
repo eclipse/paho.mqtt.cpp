@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Version 1.5.0  (Unreleased)
 
+- Required C++ standard raised to C++17
+- CMake minimum required version raised to v3.12 
 - Clients always created for v5 persistence format, making it universal for any connection.
     - If the application specifies a version it is kept as a hint for default connections.
     - The version for the connection should be specified in the connect options.
