@@ -13,7 +13,7 @@
 //
 
 /*******************************************************************************
- * Copyright (c) 2013-2023 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2024 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -49,11 +49,9 @@ const int  QOS = 1;
 
 int main(int argc, char* argv[])
 {
-	// Create a client using MQTT v5
-	mqtt::create_options createOpts(MQTTVERSION_5);
-	mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID, createOpts);
+	mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
 
-	auto connOpts = mqtt::connect_options_builder()
+	auto connOpts = mqtt::connect_options_builder::v5()
 		.clean_start(false)
 		.properties({
 			{mqtt::property::SESSION_EXPIRY_INTERVAL, 604800}

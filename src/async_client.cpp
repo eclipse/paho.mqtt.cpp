@@ -51,7 +51,7 @@ async_client::async_client(const string& serverURI, const string& clientId,
 				: serverURI_(serverURI), clientId_(clientId),
 					mqttVersion_(MQTTVERSION_DEFAULT), userCallback_(nullptr)
 {
-	create_options opts(MQTTVERSION_DEFAULT, maxBufferedMessages);
+	create_options opts(MQTTVERSION_5, maxBufferedMessages);
 
 	int rc = MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
 										 MQTTCLIENT_PERSISTENCE_DEFAULT,
@@ -76,10 +76,13 @@ async_client::async_client(const string& serverURI, const string& clientId,
 				: serverURI_(serverURI), clientId_(clientId),
 					mqttVersion_(opts.opts_.MQTTVersion), userCallback_(nullptr)
 {
+    create_options v5opts { opts };
+    v5opts.set_mqtt_version(MQTTVERSION_5);
+
 	int rc = MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
 										 MQTTCLIENT_PERSISTENCE_DEFAULT,
 										 const_cast<char*>(persistDir.c_str()),
-										 const_cast<MQTTAsync_createOptions*>(&opts.opts_));
+										 &v5opts.opts_);
 	if (rc != 0)
 		throw exception(rc);
 }
@@ -92,10 +95,13 @@ async_client::async_client(const string& serverURI, const string& clientId,
 {
 	int rc = MQTTASYNC_SUCCESS;
 
+    create_options v5opts { opts };
+    v5opts.set_mqtt_version(MQTTVERSION_5);
+
 	if (!persistence) {
 		rc = MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
 										 MQTTCLIENT_PERSISTENCE_NONE, nullptr,
-										 const_cast<MQTTAsync_createOptions*>(&opts.opts_));
+										 &v5opts.opts_);
 	}
 	else {
 		persist_.reset(new MQTTClient_persistence {
@@ -112,7 +118,7 @@ async_client::async_client(const string& serverURI, const string& clientId,
 
 		rc = MQTTAsync_createWithOptions(&cli_, serverURI.c_str(), clientId.c_str(),
 										 MQTTCLIENT_PERSISTENCE_USER, persist_.get(),
-										 const_cast<MQTTAsync_createOptions*>(&opts.opts_));
+										 &v5opts.opts_);
 	}
 	if (rc != 0)
 		throw exception(rc);
