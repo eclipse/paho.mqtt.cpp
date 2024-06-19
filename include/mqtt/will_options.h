@@ -276,7 +276,6 @@ using const_will_options_ptr = will_options::const_ptr_t;
 using will_options_unique_ptr = will_options::unique_ptr_t;
 
 /////////////////////////////////////////////////////////////////////////////
-// end namespace mqtt
 }  // namespace mqtt
 
 #endif  // __mqtt_will_options_h

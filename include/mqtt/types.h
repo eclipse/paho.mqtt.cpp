@@ -176,7 +176,6 @@ inline int to_int(bool b) { return b ? (!0) : 0; }
 inline string to_string(const char* cstr) { return cstr ? string(cstr) : string(); }
 
 /////////////////////////////////////////////////////////////////////////////
-// end namespace mqtt
 }  // namespace mqtt
 
 #endif  // __mqtt_types_h

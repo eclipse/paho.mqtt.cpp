@@ -839,7 +839,6 @@ public:
 using async_client_ptr = async_client::ptr_t;
 
 /////////////////////////////////////////////////////////////////////////////
-// end namespace mqtt
 }  // namespace mqtt
 
 #endif  // __mqtt_async_client_h

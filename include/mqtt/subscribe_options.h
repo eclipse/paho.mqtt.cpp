@@ -156,7 +156,6 @@ public:
 using subscribe_options_ptr = subscribe_options::ptr_t;
 
 /////////////////////////////////////////////////////////////////////////////
-// end namespace mqtt
 }  // namespace mqtt
 
 #endif  // __mqtt_subscribe_options_h

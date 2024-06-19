@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2020-2023 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2020-2024 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -55,12 +55,14 @@ public:
     /**
      * Default set of client create options.
      */
-    create_options();
+    create_options() : opts_(DFLT_C_STRUCT) {}
     /**
      * Default create options for the specified version of MQTT.
      * @param mqttVersion The MQTT version used to create the client.
      */
-    explicit create_options(int mqttVersion);
+    explicit create_options(int mqttVersion) : create_options() {
+		opts_.MQTTVersion = mqttVersion;
+	}
     /**
      * Default create options, but with off-line buffering enabled.
      * @param mqttVersion The MQTT version used to create the client.
@@ -246,7 +248,6 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-// end namespace mqtt
 }  // namespace mqtt
 
 #endif  // __mqtt_create_options_h

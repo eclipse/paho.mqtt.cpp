@@ -130,7 +130,6 @@ using delivery_token_ptr = delivery_token::ptr_t;
 using const_delivery_token_ptr = delivery_token::const_ptr_t;
 
 /////////////////////////////////////////////////////////////////////////////
-// end namespace mqtt
 }  // namespace mqtt
 
 #endif  // __mqtt_delivery_token_h

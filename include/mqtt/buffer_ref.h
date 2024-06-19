@@ -305,7 +305,6 @@ using string_ref = buffer_ref<char>;
 using binary_ref = buffer_ref<char>;
 
 /////////////////////////////////////////////////////////////////////////////
-// end namespace mqtt
 }  // namespace mqtt
 
 #endif  // __mqtt_buffer_ref_h

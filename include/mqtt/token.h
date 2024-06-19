@@ -518,7 +518,6 @@ using token_ptr = token::ptr_t;
 using const_token_ptr = token::const_ptr_t;
 
 /////////////////////////////////////////////////////////////////////////////
-// end namespace mqtt
 }  // namespace mqtt
 
 #endif  // __mqtt_token_h

@@ -422,7 +422,6 @@ inline T get(const properties& props, property::code propid) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// end namespace mqtt
 }  // namespace mqtt
 
 #endif  // __mqtt_properties_h

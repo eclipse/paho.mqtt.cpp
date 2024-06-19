@@ -452,7 +452,6 @@ public:
 using client_ptr = client::ptr_t;
 
 /////////////////////////////////////////////////////////////////////////////
-// end namespace mqtt
 }  // namespace mqtt
 
 #endif  // __mqtt_client_h

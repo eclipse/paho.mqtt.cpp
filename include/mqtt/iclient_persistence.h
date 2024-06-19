@@ -148,7 +148,6 @@ using iclient_persistence_ptr = iclient_persistence::ptr_t;
 using const_iclient_persistence_ptr = iclient_persistence::const_ptr_t;
 
 /////////////////////////////////////////////////////////////////////////////
-// end namespace mqtt
 }  // namespace mqtt
 
 #endif  // __mqtt_iclient_persistence_h
