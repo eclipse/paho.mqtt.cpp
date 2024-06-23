@@ -54,17 +54,17 @@ public:
     using const_ptr_t = std::shared_ptr<const subscribe_options>;
 
     /** Don't receive our own publications */
-    PAHO_MQTTPP_EXPORT static const bool SUBSCRIBE_NO_LOCAL;  // =true;
+    static constexpr bool SUBSCRIBE_NO_LOCAL = true;
     /** Receive our own publications */
-    PAHO_MQTTPP_EXPORT static const bool SUBSCRIBE_LOCAL;  // =false;
+    static constexpr bool SUBSCRIBE_LOCAL = false;
 
     /**
      * Retain flag is only set on publications sent by a broker if in
      * response to a subscribe request
      */
-    PAHO_MQTTPP_EXPORT static const bool NO_RETAIN_AS_PUBLISHED;  // =false;
+    static constexpr bool NO_RETAIN_AS_PUBLISHED = false;
     /** Keep the retain flag as on the original publish message */
-    PAHO_MQTTPP_EXPORT static const bool RETAIN_AS_PUBLISHED;  // =true;
+    static constexpr bool RETAIN_AS_PUBLISHED = true;
 
     /** The options for subscription retain handling */
     enum RetainHandling {

@@ -42,7 +42,6 @@ set(COMMON_SRC
     response_options.cpp
     ssl_options.cpp
     string_collection.cpp
-    subscribe_options.cpp
     token.cpp
     topic.cpp
     will_options.cpp

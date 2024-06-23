@@ -25,20 +25,12 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-PAHO_MQTTPP_EXPORT const MQTTAsync_SSLOptions ssl_options::DFLT_C_STRUCT =
-    MQTTAsync_SSLOptions_initializer;
-
-// --------------------------------------------------------------------------
-
-ssl_options::ssl_options() : opts_(DFLT_C_STRUCT) {}
-
 ssl_options::ssl_options(
     const string& trustStore, const string& keyStore, const string& privateKey,
     const string& privateKeyPassword, const string& enabledCipherSuites,
     bool enableServerCertAuth, const std::vector<string> alpnProtos /*=std::vector<string>()*/
 )
-    : opts_(DFLT_C_STRUCT),
-      trustStore_(trustStore),
+    : trustStore_(trustStore),
       keyStore_(keyStore),
       privateKey_(privateKey),
       privateKeyPassword_(privateKeyPassword),
@@ -54,8 +46,7 @@ ssl_options::ssl_options(
     const string& privateKeyPassword, const string& caPath, const string& enabledCipherSuites,
     bool enableServerCertAuth, const std::vector<string> alpnProtos /*=std::vector<string>()*/
 )
-    : opts_(DFLT_C_STRUCT),
-      trustStore_(trustStore),
+    : trustStore_(trustStore),
       keyStore_(keyStore),
       privateKey_(privateKey),
       privateKeyPassword_(privateKeyPassword),
@@ -351,5 +342,4 @@ void ssl_options::set_alpn_protos(const std::vector<string>& protos)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// end namespace mqtt
 }  // namespace mqtt

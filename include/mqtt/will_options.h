@@ -50,16 +50,16 @@ class will_options
 {
 public:
     /** The default QoS for the LWT, if unspecified */
-    PAHO_MQTTPP_EXPORT static const int DFLT_QOS;  // =0;
+    static constexpr int DFLT_QOS = 0;
     /** The default retained flag for LWT, if unspecified */
-    PAHO_MQTTPP_EXPORT static const bool DFLT_RETAINED;  // =false;
+    static constexpr bool DFLT_RETAINED = false;
 
 private:
     /** A default C struct to support re-initializing variables */
-    PAHO_MQTTPP_EXPORT static const MQTTAsync_willOptions DFLT_C_STRUCT;
+    static constexpr MQTTAsync_willOptions DFLT_C_STRUCT MQTTAsync_willOptions_initializer;
 
     /** The underlying C LWT options */
-    MQTTAsync_willOptions opts_;
+    MQTTAsync_willOptions opts_{DFLT_C_STRUCT};
 
     /** LWT message topic **/
     string_ref topic_;

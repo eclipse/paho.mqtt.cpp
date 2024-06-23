@@ -40,13 +40,15 @@ namespace mqtt {
 class disconnect_options
 {
     /** The default C struct */
-    static const MQTTAsync_disconnectOptions DFLT_C_STRUCT;
+    static constexpr MQTTAsync_disconnectOptions DFLT_C_STRUCT
+        MQTTAsync_disconnectOptions_initializer;
 
     /** The default C struct */
-    static const MQTTAsync_disconnectOptions DFLT_C_STRUCT5;
+    static constexpr MQTTAsync_disconnectOptions DFLT_C_STRUCT5
+        MQTTAsync_disconnectOptions_initializer5;
 
     /** The underlying C disconnect options */
-    MQTTAsync_disconnectOptions opts_;
+    MQTTAsync_disconnectOptions opts_{DFLT_C_STRUCT};
 
     /** Shared token pointer for context, if any */
     token_ptr tok_;
@@ -72,7 +74,7 @@ public:
     /**
      * Create an empty delivery response object.
      */
-    disconnect_options();
+    disconnect_options() {}
     /**
      * Creates disconnect options tied to the specific token.
      * @param timeout The timeout (in milliseconds).
@@ -100,12 +102,12 @@ public:
      * Creates default options for an MQTT v3.x connection.
      * @return Default options for an MQTT v3.x connection.
      */
-    static disconnect_options v3();
+    static disconnect_options v3() { return disconnect_options{DFLT_C_STRUCT}; }
     /**
      * Creates default options for an MQTT v5 connection.
      * @return Default options for an MQTT v5 connection.
      */
-    static disconnect_options v5();
+    static disconnect_options v5() { return disconnect_options{DFLT_C_STRUCT5}; }
     /**
      * Copy assignment.
      * @param opt Another object to copy.
@@ -219,12 +221,16 @@ public:
      * Creates default options builder for an MQTT v3.x connection.
      * @return Default options builder for an MQTT v3.x connection.
      */
-    static disconnect_options_builder v3();
+    static disconnect_options_builder v3() {
+        return disconnect_options_builder{disconnect_options::DFLT_C_STRUCT};
+    }
     /**
      * Creates default options builder for an MQTT v5 connection.
      * @return Default options builder for an MQTT v5 connection.
      */
-    static disconnect_options_builder v5();
+    static disconnect_options_builder v5() {
+        return disconnect_options_builder{disconnect_options::DFLT_C_STRUCT5};
+    }
     /**
      * Sets the properties for the disconnect message.
      * @param props The properties for the disconnect message.

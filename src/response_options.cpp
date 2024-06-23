@@ -1,7 +1,7 @@
 // response_options.cpp
 
 /*******************************************************************************
- * Copyright (c) 2019 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2019-2024 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -21,12 +21,6 @@
 namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
-
-response_options::response_options(int mqttVersion /*=MQTTVERSION_DEFAULT*/)
-    : opts_(MQTTAsync_responseOptions_initializer)
-{
-    set_mqtt_version(mqttVersion);
-}
 
 response_options::
     response_options(const token_ptr& tok, int mqttVersion /*=MQTTVERSION_DEFAULT*/)
@@ -119,5 +113,4 @@ delivery_response_options::delivery_response_options(
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// end namespace 'mqtt'
 }  // namespace mqtt

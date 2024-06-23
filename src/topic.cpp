@@ -127,5 +127,4 @@ bool topic_filter::matches(const string& topic) const
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// end namespace mqtt
 }  // namespace mqtt

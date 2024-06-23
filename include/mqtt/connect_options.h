@@ -49,16 +49,20 @@ namespace mqtt {
 class connect_options
 {
     /** The default C struct for non-WebSocket connections */
-    PAHO_MQTTPP_EXPORT static const MQTTAsync_connectOptions DFLT_C_STRUCT;
+    static constexpr MQTTAsync_connectOptions DFLT_C_STRUCT
+        MQTTAsync_connectOptions_initializer;
 
     /** The default C struct for non-Websocket MQTT v5 connections */
-    PAHO_MQTTPP_EXPORT static const MQTTAsync_connectOptions DFLT_C_STRUCT5;
+    static constexpr MQTTAsync_connectOptions DFLT_C_STRUCT5
+        MQTTAsync_connectOptions_initializer5;
 
     /** The default C struct for WebSocket connections */
-    PAHO_MQTTPP_EXPORT static const MQTTAsync_connectOptions DFLT_C_STRUCT_WS;
+    static constexpr MQTTAsync_connectOptions DFLT_C_STRUCT_WS
+        MQTTAsync_connectOptions_initializer_ws;
 
     /** The default C struct for Websocket MQTT v5 connections */
-    PAHO_MQTTPP_EXPORT static const MQTTAsync_connectOptions DFLT_C_STRUCT5_WS;
+    static constexpr MQTTAsync_connectOptions DFLT_C_STRUCT5_WS
+        MQTTAsync_connectOptions_initializer5_ws;
 
     /** The underlying C connection options */
     MQTTAsync_connectOptions opts_;
@@ -152,12 +156,12 @@ public:
      * Creates default options for an MQTT v3.x connection.
      * @return Default options for an MQTT v3.x connection.
      */
-    static connect_options v3();
+    static connect_options v3() { return connect_options(DFLT_C_STRUCT); }
     /**
      * Creates default options for an MQTT v5 connection.
      * @return Default options for an MQTT v5 connection.
      */
-    static connect_options v5();
+    static connect_options v5() { return connect_options(DFLT_C_STRUCT5); }
     /**
      * Creates default options for an MQTT v3.x connection using WebSockets.
      *
@@ -566,10 +570,11 @@ using connect_options_ptr = connect_options::ptr_t;
 class connect_data
 {
     /** The default C struct */
-    PAHO_MQTTPP_EXPORT static const MQTTAsync_connectData DFLT_C_STRUCT;
+    PAHO_MQTTPP_EXPORT static constexpr MQTTAsync_connectData DFLT_C_STRUCT
+        MQTTAsync_connectData_initializer;
 
     /** The underlying C connect data  */
-    MQTTAsync_connectData data_;
+    MQTTAsync_connectData data_{DFLT_C_STRUCT};
 
     /** The user name to use for the connection. */
     string_ref userName_;

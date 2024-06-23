@@ -6,8 +6,8 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
+ * Copyright (c) 2016-2024 Frank Pagliughi <fpagliughi@mindspring.com>
  * Copyright (c) 2016 Guilherme Ferreira <guilherme.maciel.ferreira@gmail.com>
- * Copyright (c) 2016-2021 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -67,10 +67,10 @@ public:
 
 private:
     /** The default C struct */
-    PAHO_MQTTPP_EXPORT static const MQTTAsync_SSLOptions DFLT_C_STRUCT;
+    static constexpr MQTTAsync_SSLOptions DFLT_C_STRUCT MQTTAsync_SSLOptions_initializer;
 
     /** The underlying C SSL options */
-    MQTTAsync_SSLOptions opts_;
+    MQTTAsync_SSLOptions opts_{DFLT_C_STRUCT};
 
     /**
      * The file containing the public digital certificates trusted by
@@ -135,7 +135,7 @@ public:
     /**
      * Constructs a new MqttConnectOptions object using the default values.
      */
-    ssl_options();
+    ssl_options() {}
     /**
      * Argument constructor.
      * @param trustStore The file containing the public digital certificates

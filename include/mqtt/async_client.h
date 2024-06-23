@@ -248,7 +248,7 @@ public:
      */
     async_client(
         const string& serverURI, const string& clientId, int maxBufferedMessages,
-        const persistence_type& persistence
+        const persistence_type& persistence = persistence_type{}
     )
         : createOpts_{serverURI, clientId, maxBufferedMessages, persistence} {
         create();

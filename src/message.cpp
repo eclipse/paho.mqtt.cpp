@@ -1,7 +1,7 @@
 // message.cpp
 
 /*******************************************************************************
- * Copyright (c) 2013-2023 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2024 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -25,21 +25,11 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-PAHO_MQTTPP_EXPORT const int message::DFLT_QOS = 0;
-PAHO_MQTTPP_EXPORT const bool message::DFLT_RETAINED = false;
-
-PAHO_MQTTPP_EXPORT const MQTTAsync_message message::DFLT_C_STRUCT =
-    MQTTAsync_message_initializer;
-
-// --------------------------------------------------------------------------
-
-message::message() : msg_(DFLT_C_STRUCT) {}
-
 message::message(
     string_ref topic, const void* payload, size_t len, int qos, bool retained,
     const properties& props /*=properties()*/
 )
-    : msg_(DFLT_C_STRUCT), topic_(std::move(topic))
+    : topic_(std::move(topic))
 {
     set_payload(payload, len);
     set_qos(qos);
@@ -51,7 +41,7 @@ message::message(
     string_ref topic, binary_ref payload, int qos, bool retained,
     const properties& props /*=properties()*/
 )
-    : msg_(DFLT_C_STRUCT), topic_(std::move(topic))
+    : topic_(std::move(topic))
 {
     set_payload(std::move(payload));
     set_qos(qos);
@@ -128,5 +118,4 @@ void message::set_payload(binary_ref payload)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// end namespace mqtt
 }  // namespace mqtt

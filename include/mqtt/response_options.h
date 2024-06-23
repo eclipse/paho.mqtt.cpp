@@ -34,7 +34,7 @@ class token_test;
 class response_options
 {
     /** The underlying C structure */
-    MQTTAsync_responseOptions opts_;
+    MQTTAsync_responseOptions opts_ MQTTAsync_responseOptions_initializer;
 
     /** The token to which we are connected */
     token::weak_ptr_t tok_;
@@ -56,7 +56,9 @@ public:
      * Create an empty response object.
      * @param mqttVersion The MQTT version for the response.
      */
-    explicit response_options(int mqttVersion = MQTTVERSION_DEFAULT);
+    explicit response_options(int mqttVersion = MQTTVERSION_DEFAULT) {
+        set_mqtt_version(mqttVersion);
+    }
     /**
      * Creates a response object with the specified callbacks.
      * @param tok A token to be used as the context.

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017-2023 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2017-2024 Frank Pagliughi <fpagliughi@mindspring.com>
  * Copyright (c) 2016 Guilherme M. Ferreira <guilherme.maciel.ferreira@gmail.com>
  *
  * All rights reserved. This program and the accompanying materials
@@ -23,21 +23,15 @@
 
 namespace mqtt {
 
-PAHO_MQTTPP_EXPORT const int will_options::DFLT_QOS = 0;
-PAHO_MQTTPP_EXPORT const bool will_options::DFLT_RETAINED = false;
-
-PAHO_MQTTPP_EXPORT const MQTTAsync_willOptions will_options::DFLT_C_STRUCT =
-    MQTTAsync_willOptions_initializer;
-
 /////////////////////////////////////////////////////////////////////////////
 
-will_options::will_options() : opts_(DFLT_C_STRUCT) { set_topic(string()); }
+will_options::will_options() { set_topic(string()); }
 
 will_options::will_options(
     string_ref top, const void* payload, size_t payloadlen, int qos, bool retained,
     const properties& props /*=properties()*/
 )
-    : opts_(DFLT_C_STRUCT), props_(props)
+    : props_(props)
 {
     opts_.qos = qos;
     opts_.retained = retained;
@@ -57,7 +51,7 @@ will_options::will_options(
     string_ref top, binary_ref payload, int qos, bool retained,
     const properties& props /*=properties()*/
 )
-    : opts_(DFLT_C_STRUCT), props_(props)
+    : props_(props)
 {
     opts_.qos = qos;
     opts_.retained = retained;
@@ -69,7 +63,7 @@ will_options::will_options(
     string_ref top, const string& payload, int qos, bool retained,
     const properties& props /*=properties()*/
 )
-    : opts_(DFLT_C_STRUCT), props_(props)
+    : props_(props)
 {
     opts_.qos = qos;
     opts_.retained = retained;
@@ -137,5 +131,4 @@ void will_options::set_payload(binary_ref msg)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// end namespace mqtt
 }  // namespace mqtt

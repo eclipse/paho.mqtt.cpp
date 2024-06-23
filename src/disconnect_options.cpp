@@ -10,14 +10,6 @@ namespace mqtt {
 /////////////////////////////////////////////////////////////////////////////
 // disconnect_options
 
-const MQTTAsync_disconnectOptions disconnect_options::DFLT_C_STRUCT =
-    MQTTAsync_disconnectOptions_initializer;
-
-const MQTTAsync_disconnectOptions disconnect_options::DFLT_C_STRUCT5 =
-    MQTTAsync_disconnectOptions_initializer5;
-
-disconnect_options::disconnect_options() : opts_{DFLT_C_STRUCT} {}
-
 disconnect_options::disconnect_options(const disconnect_options& opt)
     : opts_(opt.opts_), tok_(opt.tok_), props_(opt.props_)
 {
@@ -29,10 +21,6 @@ disconnect_options::disconnect_options(disconnect_options&& opt)
 {
     update_c_struct();
 }
-
-disconnect_options disconnect_options::v3() { return disconnect_options{DFLT_C_STRUCT}; }
-
-disconnect_options disconnect_options::v5() { return disconnect_options{DFLT_C_STRUCT5}; }
 
 void disconnect_options::update_c_struct()
 {
@@ -82,18 +70,4 @@ void disconnect_options::set_token(const token_ptr& tok, int mqttVersion)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// disconnect_options_builder
-
-disconnect_options_builder disconnect_options_builder::v3()
-{
-    return disconnect_options_builder{disconnect_options::DFLT_C_STRUCT};
-}
-
-disconnect_options_builder disconnect_options_builder::v5()
-{
-    return disconnect_options_builder{disconnect_options::DFLT_C_STRUCT5};
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// end namespace 'mqtt'
 }  // namespace mqtt

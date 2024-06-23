@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013-2023 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2024 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -57,16 +57,16 @@ class message
 {
 public:
     /** The default QoS for a message */
-    PAHO_MQTTPP_EXPORT static const int DFLT_QOS;  // =0
+    static constexpr int DFLT_QOS = 0;
     /** The default retained flag */
-    PAHO_MQTTPP_EXPORT static const bool DFLT_RETAINED;  // =false
+    static constexpr bool DFLT_RETAINED = false;
 
 private:
     /** Initializer for the C struct (from the C library) */
-    PAHO_MQTTPP_EXPORT static const MQTTAsync_message DFLT_C_STRUCT;
+    static constexpr MQTTAsync_message DFLT_C_STRUCT MQTTAsync_message_initializer;
 
     /** The underlying C message struct */
-    MQTTAsync_message msg_;
+    MQTTAsync_message msg_{DFLT_C_STRUCT};
     /** The topic that the message was (or should be) sent on. */
     string_ref topic_;
     /** The message payload - an arbitrary binary blob. */
@@ -93,7 +93,7 @@ public:
      * Constructs a message with an empty payload, and all other values set
      * to defaults.
      */
-    message();
+    message() {}
     /**
      * Constructs a message with the specified array as a payload, and all
      * other values set to defaults.
