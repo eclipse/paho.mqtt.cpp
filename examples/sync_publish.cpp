@@ -75,7 +75,7 @@ public:
     // "Open" the store
     void open(const std::string& clientId, const std::string& serverURI) override
     {
-        std::cout << "[Opening persistence store for '" << clientId << "' at '" << serverURI
+        std::cout << "  [Opening persistence store for '" << clientId << "' at '" << serverURI
                   << "']" << std::endl;
         open_ = true;
     }
@@ -83,14 +83,14 @@ public:
     // Close the persistent store that was previously opened.
     void close() override
     {
-        std::cout << "[Closing persistence store.]" << std::endl;
+        std::cout << "  [Closing persistence store.]" << std::endl;
         open_ = false;
     }
 
     // Clears persistence, so that it no longer contains any persisted data.
     void clear() override
     {
-        std::cout << "[Clearing persistence store.]" << std::endl;
+        std::cout << "  [Clearing persistence store.]" << std::endl;
         store_.clear();
     }
 
@@ -111,7 +111,7 @@ public:
     // Puts the specified data into the persistent store.
     void put(const std::string& key, const std::vector<mqtt::string_view>& bufs) override
     {
-        std::cout << "[Persisting data with key '" << key << "']" << std::endl;
+        std::cout << "  [Persisting data with key '" << key << "']" << std::endl;
         std::string str;
         for (const auto& b : bufs) str.append(b.data(), b.size());  // += b.str();
         store_[key] = std::move(str);
@@ -120,11 +120,11 @@ public:
     // Gets the specified data out of the persistent store.
     std::string get(const std::string& key) const override
     {
-        std::cout << "[Searching persistence for key '" << key << "']" << std::endl;
+        std::cout << "  [Searching persistence for key '" << key << "']" << std::endl;
         auto p = store_.find(key);
         if (p == store_.end())
             throw mqtt::persistence_exception();
-        std::cout << "[Found persistence data for key '" << key << "']" << std::endl;
+        std::cout << "  [Found persistence data for key '" << key << "']" << std::endl;
 
         return p->second;
     }
@@ -132,12 +132,12 @@ public:
     // Remove the data for the specified key.
     void remove(const std::string& key) override
     {
-        std::cout << "[Persistence removing key '" << key << "']" << std::endl;
+        std::cout << "  [Persistence removing key '" << key << "']" << std::endl;
         auto p = store_.find(key);
         if (p == store_.end())
             throw mqtt::persistence_exception();
         store_.erase(p);
-        std::cout << "[Persistence key removed '" << key << "']" << std::endl;
+        std::cout << "  [Persistence key removed '" << key << "']" << std::endl;
     }
 };
 
@@ -155,7 +155,7 @@ class user_callback : public virtual mqtt::callback
 
     void delivery_complete(mqtt::delivery_token_ptr tok) override
     {
-        std::cout << "\n\t[Delivery complete for token: "
+        std::cout << "\n  [Delivery complete for token: "
                   << (tok ? tok->get_message_id() : -1) << "]" << std::endl;
     }
 

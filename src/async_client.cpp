@@ -34,96 +34,39 @@
 namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
-// Constructors
 
-async_client::async_client(
-    const string& serverURI, const string& clientId, const string& persistDir
-)
-    : async_client(serverURI, clientId, 0, persistDir)
-{
-}
-
-async_client::async_client(
-    const string& serverURI, const string& clientId,
-    iclient_persistence* persistence /*=nullptr*/
-)
-    : async_client(serverURI, clientId, 0, persistence)
-{
-}
-
-async_client::async_client(
-    const string& serverURI, const string& clientId, int maxBufferedMessages,
-    const string& persistDir
-)
-    : serverURI_(serverURI),
-      clientId_(clientId),
-      mqttVersion_(MQTTVERSION_DEFAULT),
-      userCallback_(nullptr)
-{
-    create_options opts(MQTTVERSION_5, maxBufferedMessages);
-
-    int rc = MQTTAsync_createWithOptions(
-        &cli_, serverURI.c_str(), clientId.c_str(), MQTTCLIENT_PERSISTENCE_DEFAULT,
-        const_cast<char*>(persistDir.c_str()), &opts.opts_
-    );
-    if (rc != 0)
-        throw exception(rc);
-}
-
-async_client::async_client(
-    const string& serverURI, const string& clientId, int maxBufferedMessages,
-    iclient_persistence* persistence /*=nullptr*/
-)
-    : async_client(
-          serverURI, clientId, create_options(MQTTVERSION_DEFAULT, maxBufferedMessages),
-          persistence
-      )
-{
-}
-
-async_client::async_client(
-    const string& serverURI, const string& clientId, const create_options& opts,
-    const string& persistDir
-)
-    : serverURI_(serverURI),
-      clientId_(clientId),
-      mqttVersion_(opts.opts_.MQTTVersion),
-      userCallback_(nullptr)
-{
-    create_options v5opts{opts};
-    v5opts.set_mqtt_version(MQTTVERSION_5);
-
-    int rc = MQTTAsync_createWithOptions(
-        &cli_, serverURI.c_str(), clientId.c_str(), MQTTCLIENT_PERSISTENCE_DEFAULT,
-        const_cast<char*>(persistDir.c_str()), &v5opts.opts_
-    );
-    if (rc != 0)
-        throw exception(rc);
-}
-
-async_client::async_client(
-    const string& serverURI, const string& clientId, const create_options& opts,
-    iclient_persistence* persistence /*=nullptr*/
-)
-    : serverURI_(serverURI),
-      clientId_(clientId),
-      mqttVersion_(opts.opts_.MQTTVersion),
-      userCallback_(nullptr)
+void async_client::create()
 {
     int rc = MQTTASYNC_SUCCESS;
 
-    create_options v5opts{opts};
-    v5opts.set_mqtt_version(MQTTVERSION_5);
+    const auto& opts = createOpts_;
+    mqttVersion_ = opts.mqtt_version();
 
-    if (!persistence) {
+    // The C client, when created for v5, can accommodate any version for
+    // connections. This leaves the version solely to the connection.
+    auto copts{opts.opts_};
+    copts.MQTTVersion = MQTTVERSION_5;
+
+    auto serverURI = opts.get_server_uri();
+    auto clientId = opts.get_client_id();
+
+    const auto userp{std::get_if<iclient_persistence*>(&opts.persistence_)};
+
+    if (std::get_if<no_persistence>(&opts.persistence_) || (userp && !*userp)) {
         rc = MQTTAsync_createWithOptions(
             &cli_, serverURI.c_str(), clientId.c_str(), MQTTCLIENT_PERSISTENCE_NONE, nullptr,
-            &v5opts.opts_
+            &copts
+        );
+    }
+    else if (const auto dir{std::get_if<string>(&opts.persistence_)}; dir) {
+        rc = MQTTAsync_createWithOptions(
+            &cli_, serverURI.c_str(), clientId.c_str(), MQTTCLIENT_PERSISTENCE_DEFAULT,
+            const_cast<char*>(dir->c_str()), &copts
         );
     }
     else {
         persist_.reset(new MQTTClient_persistence{
-            persistence, &iclient_persistence::persistence_open,
+            *userp, &iclient_persistence::persistence_open,
             &iclient_persistence::persistence_close, &iclient_persistence::persistence_put,
             &iclient_persistence::persistence_get, &iclient_persistence::persistence_remove,
             &iclient_persistence::persistence_keys, &iclient_persistence::persistence_clear,
@@ -132,10 +75,10 @@ async_client::async_client(
 
         rc = MQTTAsync_createWithOptions(
             &cli_, serverURI.c_str(), clientId.c_str(), MQTTCLIENT_PERSISTENCE_USER,
-            persist_.get(), &v5opts.opts_
+            persist_.get(), &copts
         );
     }
-    if (rc != 0)
+    if (rc != MQTTASYNC_SUCCESS)
         throw exception(rc);
 }
 

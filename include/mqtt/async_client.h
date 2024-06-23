@@ -132,16 +132,14 @@ private:
     mutable std::mutex lock_;
     /** The underlying C-lib client. */
     MQTTAsync cli_;
-    /** The server URI string. */
-    string serverURI_;
-    /** The client ID string that we provided to the server. */
-    string clientId_;
-    /** The MQTT protocol version we're connected at */
+    /** The options used to create the client */
+    const create_options createOpts_;
+    /** The MQTT protocol version of the connection */
     int mqttVersion_;
     /** A user persistence wrapper (if any) */
-    std::unique_ptr<MQTTClient_persistence> persist_;
+    std::unique_ptr<MQTTClient_persistence> persist_{};
     /** Callback supplied by the user (if any) */
-    callback* userCallback_;
+    callback* userCallback_{};
     /** Connection handler */
     connection_handler connHandler_;
     /** Connection lost handler */
@@ -193,6 +191,15 @@ private:
         if (rc != MQTTASYNC_SUCCESS)
             throw exception(rc);
     }
+    /**
+     * Create an async_client that can be used to communicate with an MQTT
+     * server, which allows for off-line message buffering.
+     * This allows the caller to specify a user-defined persistence object,
+     * or use no persistence.
+     * @param opts The create options
+     * @throw exception if an argument is invalid
+     */
+    void create();
 
 public:
     /**
@@ -203,10 +210,10 @@ public:
      *  				as a URI.
      * @param clientId a client identifier that is unique on the server
      *  			   being connected to
-     * @param persistDir The directory to use for persistence data
      * @throw exception if an argument is invalid
      */
-    async_client(const string& serverURI, const string& clientId, const string& persistDir);
+    explicit async_client(const string& serverURI, const string& clientId = string{})
+        : async_client(serverURI, clientId, NO_PERSISTENCE) {}
     /**
      * Create an async_client that can be used to communicate with an MQTT
      * server.
@@ -221,9 +228,11 @@ public:
      * @throw exception if an argument is invalid
      */
     async_client(
-        const string& serverURI, const string& clientId,
-        iclient_persistence* persistence = nullptr
-    );
+        const string& serverURI, const string& clientId, const persistence_type& persistence
+    )
+        : createOpts_{serverURI, clientId, persistence} {
+        create();
+    }
     /**
      * Create an async_client that can be used to communicate with an MQTT
      * server, which allows for off-line message buffering.
@@ -239,27 +248,11 @@ public:
      */
     async_client(
         const string& serverURI, const string& clientId, int maxBufferedMessages,
-        const string& persistDir
-    );
-    /**
-     * Create an async_client that can be used to communicate with an MQTT
-     * server, which allows for off-line message buffering.
-     * This allows the caller to specify a user-defined persistence object,
-     * or use no persistence.
-     * @param serverURI the address of the server to connect to, specified
-     *  				as a URI.
-     * @param clientId a client identifier that is unique on the server
-     *  			   being connected to
-     * @param maxBufferedMessages the maximum number of messages allowed to
-     *  						  be buffered while not connected
-     * @param persistence The user persistence structure. If this is null,
-     *  				  then no persistence is used.
-     * @throw exception if an argument is invalid
-     */
-    async_client(
-        const string& serverURI, const string& clientId, int maxBufferedMessages,
-        iclient_persistence* persistence = nullptr
-    );
+        const persistence_type& persistence
+    )
+        : createOpts_{serverURI, clientId, maxBufferedMessages, persistence} {
+        create();
+    }
     /**
      * Create an async_client that can be used to communicate with an MQTT
      * server, which allows for off-line message buffering.
@@ -274,26 +267,20 @@ public:
      */
     async_client(
         const string& serverURI, const string& clientId, const create_options& opts,
-        const string& persistDir
-    );
+        const persistence_type& persistence
+    )
+        : createOpts_{serverURI, clientId, opts, persistence} {
+        create();
+    }
     /**
      * Create an async_client that can be used to communicate with an MQTT
      * server, which allows for off-line message buffering.
      * This allows the caller to specify a user-defined persistence object,
      * or use no persistence.
-     * @param serverURI the address of the server to connect to, specified
-     *  				as a URI.
-     * @param clientId a client identifier that is unique on the server
-     *  			   being connected to
      * @param opts The create options
-     * @param persistence The user persistence structure. If this is null,
-     *  				  then no persistence is used.
      * @throw exception if an argument is invalid
      */
-    async_client(
-        const string& serverURI, const string& clientId, const create_options& opts,
-        iclient_persistence* persistence = nullptr
-    );
+    async_client(const create_options& opts) : createOpts_{opts} { create(); }
     /**
      * Destructor
      */
@@ -501,12 +488,12 @@ public:
      * Returns the client ID used by this client.
      * @return The client ID used by this client.
      */
-    string get_client_id() const override { return clientId_; }
+    string get_client_id() const override { return createOpts_.get_client_id(); }
     /**
      * Returns the address of the server used by this client.
      * @return The server's address, as a URI String.
      */
-    string get_server_uri() const override { return serverURI_; }
+    string get_server_uri() const override { return createOpts_.get_server_uri(); }
     /**
      * Gets the MQTT version used by the client.
      * @return The MQTT version used by the client

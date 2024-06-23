@@ -86,22 +86,23 @@ uint64_t timestamp()
 int main(int argc, char* argv[])
 {
     // The server URI (address)
-    string address = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS;
+    string serverURI = (argc > 1) ? string(argv[1]) : DFLT_SERVER_ADDRESS;
 
     // The amount of time to run (in ms). Zero means "run forever".
     uint64_t trun = (argc > 2) ? stoll(argv[2]) : 0LL;
 
-    cout << "Initializing for server '" << address << "'..." << endl;
+    cout << "Initializing for server '" << serverURI << "'..." << endl;
 
     // We configure to allow publishing to the client while off-line,
     // and that it's OK to do so before the 1st successful connection.
     auto createOpts = mqtt::create_options_builder()
+                          .server_uri(serverURI)
                           .send_while_disconnected(true, true)
                           .max_buffered_messages(MAX_BUFFERED_MESSAGES)
                           .delete_oldest_messages()
                           .finalize();
 
-    mqtt::async_client cli(address, "", createOpts);
+    mqtt::async_client cli(createOpts);
 
     // Set callbacks for when connected and connection lost.
 
@@ -129,7 +130,8 @@ int main(int argc, char* argv[])
         auto top = mqtt::topic(cli, "data/time", QOS);
         cout << "Publishing data..." << endl;
 
-        while (timestamp() % DELTA_MS != 0);
+        while (timestamp() % DELTA_MS != 0)
+            ;
 
         uint64_t t = timestamp(), tlast = t, tstart = t;
 

@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
 
     std::string chatUser{argv[1]}, chatGroup{argv[2]}, chatTopic{"chat/" + chatGroup};
 
-    mqtt::async_client cli(SERVER_ADDRESS, "", mqtt::create_options(MQTTVERSION_5));
+    mqtt::async_client cli(SERVER_ADDRESS);
 
     // LWT message is broadcast to other users if out connection is lost
 

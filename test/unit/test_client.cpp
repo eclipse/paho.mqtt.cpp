@@ -4,8 +4,8 @@
 //
 
 /*******************************************************************************
+ * Copyright (c) 2020-2024 Frank Pagliughi <fpagliughi@mindspring.com>
  * Copyright (c) 2017 Guilherme M. Ferreira <guilherme.maciel.ferreira@gmail.com>
- * Copyright (c) 2020 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -461,6 +461,7 @@ TEST_CASE("client unsubscribe single topic 1 arg", "[client]")
     cli.connect();
     REQUIRE(cli.is_connected());
 
+    cli.subscribe(TOPIC, 1);
     cli.unsubscribe(TOPIC);
 
     cli.disconnect();
@@ -490,6 +491,7 @@ TEST_CASE("client unsubscribe many topics 1 arg", "[client]")
     cli.connect();
     REQUIRE(cli.is_connected());
 
+    cli.subscribe(TOPIC_COLL, GOOD_QOS_COLL);
     cli.unsubscribe(TOPIC_COLL);
 
     cli.disconnect();

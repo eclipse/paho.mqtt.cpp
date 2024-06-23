@@ -22,10 +22,10 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-const MQTTAsync_createOptions create_options::DFLT_C_STRUCT =
-    MQTTAsync_createOptions_initializer5;
+// const MQTTAsync_createOptions create_options::DFLT_C_STRUCT =
+//     MQTTAsync_createOptions_initializer5;
 
-create_options::create_options(int mqttVersion, int maxBufferedMessages) : create_options()
+create_options::create_options(int mqttVersion, int maxBufferedMessages)
 {
     opts_.MQTTVersion = mqttVersion;
 

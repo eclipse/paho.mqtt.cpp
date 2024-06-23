@@ -242,7 +242,6 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-// end namespace mqtt
 }  // namespace mqtt
 
 #endif  //  __mqtt_test_mock_async_client_h
