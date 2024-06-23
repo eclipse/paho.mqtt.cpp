@@ -48,12 +48,12 @@ const string PERSIST_DIR{"./persist"};
 
 const string TOPIC{"hello"};
 
-const char* PAYLOAD1 = "Hello World!";
-const char* PAYLOAD2 = "Hi there!";
-const char* PAYLOAD3 = "Is anyone listening?";
-const char* PAYLOAD4 = "Someone is always listening.";
+const string PAYLOAD1{"Hello World!"};
+const string PAYLOAD2{"Hi there!"};
+const string PAYLOAD3{"Is anyone listening?"};
+const string PAYLOAD4{"Someone is always listening."};
 
-const char* LWT_PAYLOAD = "Last will and testament.";
+const string LWT_PAYLOAD{"Last will and testament."};
 
 const int QOS = 1;
 
@@ -143,11 +143,10 @@ int main(int argc, char* argv[])
     callback cb;
     client.set_callback(cb);
 
-    auto connOpts =
-        mqtt::connect_options_builder()
-            .clean_session()
-            .will(mqtt::message(TOPIC, LWT_PAYLOAD, strlen(LWT_PAYLOAD), QOS, false))
-            .finalize();
+    auto connOpts = mqtt::connect_options_builder()
+                        .clean_session()
+                        .will(mqtt::message(TOPIC, LWT_PAYLOAD, QOS, false))
+                        .finalize();
 
     cout << "  ...OK" << endl;
 
@@ -170,7 +169,7 @@ int main(int argc, char* argv[])
 
         cout << "\nSending next message..." << endl;
         mqtt::delivery_token_ptr pubtok;
-        pubtok = client.publish(TOPIC, PAYLOAD2, strlen(PAYLOAD2), QOS, false);
+        pubtok = client.publish(TOPIC, PAYLOAD2, QOS, false);
         cout << "  ...with token: " << pubtok->get_message_id() << endl;
         cout << "  ...for message with " << pubtok->get_message()->get_payload().size()
              << " bytes" << endl;

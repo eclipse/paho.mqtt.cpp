@@ -37,7 +37,6 @@
 #include "mqtt/client.h"
 
 const std::string SERVER_ADDRESS{"mqtt://localhost:1883"};
-const std::string CLIENT_ID{"sync_publish_cpp"};
 const std::string TOPIC{"hello"};
 
 const std::string PAYLOAD1{"Hello World!"};
@@ -168,7 +167,7 @@ int main(int argc, char* argv[])
 {
     std::cout << "Initializing..." << std::endl;
     sample_mem_persistence persist;
-    mqtt::client client(SERVER_ADDRESS, CLIENT_ID, &persist);
+    mqtt::client client(SERVER_ADDRESS, "", &persist);
 
     user_callback cb;
     client.set_callback(cb);

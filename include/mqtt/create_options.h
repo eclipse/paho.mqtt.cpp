@@ -184,6 +184,9 @@ public:
           serverURI_{std::move(opts.serverURI_)},
           clientId_{std::move(opts.clientId_)},
           persistence_{std::move(opts.persistence_)} {}
+
+    create_options& operator=(const create_options& rhs);
+    create_options& operator=(create_options&& rhs);
     /**
      * Set the address of the server to connect to, specified as a URI
      * @param serverURI The URI of the server.

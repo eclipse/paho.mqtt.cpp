@@ -22,9 +22,6 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
-// const MQTTAsync_createOptions create_options::DFLT_C_STRUCT =
-//     MQTTAsync_createOptions_initializer5;
-
 create_options::create_options(int mqttVersion, int maxBufferedMessages)
 {
     opts_.MQTTVersion = mqttVersion;
@@ -33,6 +30,30 @@ create_options::create_options(int mqttVersion, int maxBufferedMessages)
         opts_.sendWhileDisconnected = to_int(true);
         opts_.maxBufferedMessages = maxBufferedMessages;
     }
+}
+
+// --------------------------------------------------------------------------
+
+create_options& create_options::operator=(const create_options& rhs)
+{
+    if (&rhs != this) {
+        opts_ = rhs.opts_;
+        serverURI_ = rhs.serverURI_;
+        clientId_ = rhs.clientId_;
+        persistence_ = rhs.persistence_;
+    }
+    return *this;
+}
+
+create_options& create_options::operator=(create_options&& rhs)
+{
+    if (&rhs != this) {
+        opts_ = std::move(rhs.opts_);
+        serverURI_ = std::move(rhs.serverURI_);
+        clientId_ = std::move(rhs.clientId_);
+        persistence_ = std::move(rhs.persistence_);
+    }
+    return *this;
 }
 
 /////////////////////////////////////////////////////////////////////////////
