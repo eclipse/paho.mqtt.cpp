@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2019 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2019-2024 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -37,7 +37,7 @@ namespace mqtt {
  */
 class server_response
 {
-    /** The properties from the acknowledge  */
+    /** The properties from the acknowledge */
     properties props_;
 
 public:
@@ -113,7 +113,19 @@ public:
 };
 
 /**
- * Response for subscribe messages
+ * Response for a subscribe request.
+ *
+ * This contains the information returned from the broker in the SUBACK
+ * packet. It gives information about the granted Qos for each topc in the
+ * subscribe request.
+ *
+ * @li MQTT v3: These are return "codes" with the value 0-2 for each of the
+ *     topic filters sent in the subscribe message.
+ * @li MQTT v5 These are reason codes, with one for each of the topics sent
+ *     in the subscribe message. On success, the values are the same as for
+ *     MQTT v3: the granted QoS 0-2. For errors, each could be an error code
+ *     with a value >= 0x80, as described in the MQTT v5 spec: (not
+ *     authorized, quota exceeded, etc).
  */
 struct subscribe_response : public server_response
 {
@@ -126,37 +138,26 @@ struct subscribe_response : public server_response
      * Create v5 subscribe response.
      * @param rsp The v5 response struct from the C lib
      */
-    subscribe_response(MQTTAsync_successData5* rsp)
-        : server_response(properties(rsp->properties)) {
-        if (rsp->alt.sub.reasonCodeCount < 2)
-            reasonCodes_.push_back(ReasonCode(rsp->reasonCode));
-        else if (rsp->alt.sub.reasonCodes) {
-            for (int i = 0; i < rsp->alt.sub.reasonCodeCount; ++i)
-                reasonCodes_.push_back(ReasonCode(rsp->alt.sub.reasonCodes[i]));
-        }
-    }
-
+    subscribe_response(MQTTAsync_successData5* rsp);
     /**
      * Create v3 subscribe response.
      * @param n The number of subscription topics
      * @param rsp The v3 response struct from the C lib
      */
-    subscribe_response(size_t n, MQTTAsync_successData* rsp) {
-        if (n < 2)
-            reasonCodes_.push_back(ReasonCode(rsp->alt.qos));
-        else if (rsp->alt.qosList) {
-            for (size_t i = 0; i < n; ++i)
-                reasonCodes_.push_back(ReasonCode(rsp->alt.qosList[i]));
-        }
-    }
+    subscribe_response(size_t n, MQTTAsync_successData* rsp);
 
 public:
     /**
      * Gets the reason codes from the server response.
-     * On a subscribe ack there is a reason code for each topic that
+     *
+     * On a subscribe ack there is a return/reason code for each topic that
      * was sent in the subscribe packet. Each tells the granted QoS
      * for the corresponding topic.
-     * @return A collection of return codes corresponding to
+     *
+     * For MQTT v5 values over 0x80 are error codes as descibed in the MQTT
+     * v5 spec.
+     *
+     * @return A collection of return/reason codes corresponding to
      *  	   subscribing each topic. On success, this is the
      *  	   granted QoS for each topic. On failure it is the
      *  	   reason for the failure.
@@ -174,17 +175,17 @@ class unsubscribe_response : public server_response
 
     friend class token;
 
-    unsubscribe_response(MQTTAsync_successData5* rsp)
-        : server_response(properties(rsp->properties)) {
-        if (rsp->alt.unsub.reasonCodeCount < 2)
-            reasonCodes_.push_back(ReasonCode(rsp->reasonCode));
-        else if (rsp->alt.unsub.reasonCodes) {
-            for (int i = 0; i < rsp->alt.unsub.reasonCodeCount; ++i)
-                reasonCodes_.push_back(ReasonCode(rsp->alt.unsub.reasonCodes[i]));
-        }
-    }
-
-    unsubscribe_response(MQTTAsync_successData* /*rsp*/) {}
+    /**
+     * Create v5 unsubscribe response.
+     * @param rsp The v5 response struct from the C lib
+     */
+    unsubscribe_response(MQTTAsync_successData5* rsp);
+    /**
+     * Create v3 subscribe response.
+     * The broker doesn't return any useful information for an unsubscribe
+     * in MQTT v3.
+     */
+    unsubscribe_response(MQTTAsync_successData*) {}
 
 public:
     /**

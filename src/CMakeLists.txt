@@ -40,6 +40,7 @@ set(COMMON_SRC
     message.cpp
     properties.cpp
     response_options.cpp
+    server_response.cpp
     ssl_options.cpp
     string_collection.cpp
     token.cpp
