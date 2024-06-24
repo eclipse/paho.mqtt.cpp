@@ -205,8 +205,7 @@ int main(int argc, char* argv[])
 
     // Just block till user tells us to quit.
 
-    while (std::tolower(std::cin.get()) != 'q')
-        ;
+    while (std::tolower(std::cin.get()) != 'q');
 
     // Disconnect
 

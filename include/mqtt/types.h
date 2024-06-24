@@ -51,8 +51,6 @@ using binary_ptr = std::shared_ptr<const binary>;
 
 /**
  * The MQTT v5 Reason Codes.
- *
- * These map to the Paho C MQTTReasonCodes
  */
 enum ReasonCode {
     SUCCESS = 0,
@@ -100,7 +98,8 @@ enum ReasonCode {
     MAXIMUM_CONNECT_TIME = 160,
     SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED = 161,
     WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED = 162,
-    MQTTPP_V3_CODE = 255  // This is not a protocol code; used internally by the library
+    // This is not a protocol code; used internally by the library (obsolete)
+    MQTTPP_V3_CODE = 0
 };
 
 /////////////////////////////////////////////////////////////////////////////

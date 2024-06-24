@@ -49,12 +49,12 @@ public:
      * Creates a server response with the specified properties.
      * @param props The properties in the response.
      */
-    server_response(const properties& props) : props_(props) {}
+    server_response(const properties& props) : props_{props} {}
     /**
      * Creates a server response with the specified properties.
      * @param props The properties in the response.
      */
-    server_response(properties&& props) : props_(std::move(props)) {}
+    server_response(properties&& props) : props_{std::move(props)} {}
     /**
      * Virtual destructor.
      */
@@ -63,11 +63,11 @@ public:
      * Gets the properties from the response.
      * @return The properties from the response.
      */
-    const properties& get_properties() const { return props_; }
+    const properties& get_properties() const noexcept { return props_; }
 };
 
 /**
- * Response for a connect request
+ * Response for a connect request.
  */
 class connect_response : public server_response
 {
@@ -80,16 +80,16 @@ class connect_response : public server_response
 
     friend class token;
 
-    connect_response(const MQTTAsync_successData5* rsp)
-        : server_response(properties(rsp->properties)),
-          serverURI_(string(rsp->alt.connect.serverURI)),
-          mqttVersion_(rsp->alt.connect.MQTTVersion),
-          sessionPresent_(to_bool(rsp->alt.connect.sessionPresent)) {}
-
-    connect_response(const MQTTAsync_successData* rsp)
-        : serverURI_(string(rsp->alt.connect.serverURI)),
-          mqttVersion_(rsp->alt.connect.MQTTVersion),
-          sessionPresent_(to_bool(rsp->alt.connect.sessionPresent)) {}
+    /**
+     * Create v5 connect response.
+     * @param rsp The v5 response struct from the C lib
+     */
+    connect_response(const MQTTAsync_successData5* rsp);
+    /**
+     * Create v3 connect response.
+     * @param rsp The v3 response struct from the C lib
+     */
+    connect_response(const MQTTAsync_successData* rsp);
 
 public:
     /**

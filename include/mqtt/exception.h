@@ -103,12 +103,8 @@ public:
      * @return A string describing the reason code.
      */
     static string reason_code_str(int reasonCode) {
-        if (reasonCode != MQTTPP_V3_CODE) {
-            auto msg = ::MQTTReasonCode_toString(MQTTReasonCodes(reasonCode));
-            if (msg)
-                return string(msg);
-        }
-        return string();
+        auto msg = ::MQTTReasonCode_toString(MQTTReasonCodes(reasonCode));
+        return (msg) ? string{msg} : string{};
     }
     /**
      * Gets a detailed error message for an error code.
@@ -125,7 +121,7 @@ public:
         string s = "MQTT error [" + std::to_string(rc) + "]";
         if (!msg.empty())
             s += string(": ") + msg;
-        if (reasonCode != MQTTPP_V3_CODE && reasonCode != ReasonCode::SUCCESS)
+        if (reasonCode != ReasonCode::SUCCESS)
             s += string(". Reason: ") + reason_code_str(reasonCode);
         return s;
     }
@@ -142,7 +138,7 @@ public:
      * Returns the reason code for this exception.
      * For MQTT v3 connections, this is actually the return code.
      */
-    int get_reason_code() const { return reasonCode_ == MQTTPP_V3_CODE ? rc_ : reasonCode_; }
+    int get_reason_code() const { return reasonCode_; }
     /**
      * Gets a string for the reason code.
      * @return A string for the reason code.

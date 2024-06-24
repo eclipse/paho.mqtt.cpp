@@ -118,7 +118,7 @@ public:
      */
     property(code c, string_ref name, string_ref val);
     /**
-     * Creates a property list from an C struct.
+     * Creates a property from a C struct.
      * @param cprop A C struct for a property list.
      */
     explicit property(const MQTTProperty& cprop);

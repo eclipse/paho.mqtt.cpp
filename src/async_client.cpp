@@ -98,7 +98,7 @@ void async_client::on_connected(void* context, char* cause)
 {
     if (context) {
         async_client* cli = static_cast<async_client*>(context);
-        string cause_str = cause ? string(cause) : string();
+        string cause_str = cause ? string{cause} : string{};
 
         auto tok = cli->connTok_;
         if (tok)

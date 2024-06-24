@@ -79,9 +79,9 @@ private:
     /** The MQTT client that is processing this action */
     iasync_client* cli_;
     /** The action success/failure code */
-    int rc_;
+    int rc_{0};
     /** MQTT v5 reason code */
-    ReasonCode reasonCode_;
+    ReasonCode reasonCode_{ReasonCode::SUCCESS};
     /** Error message from the C lib (if any) */
     string errMsg_;
     /** The underlying C token. Note that this is just an integer */
@@ -102,8 +102,6 @@ private:
     /** Whether the action has yet to complete */
     bool complete_;
 
-    /** MQTT v5 properties */
-    // properties props_;
     /** Connection response (null if not available) */
     std::unique_ptr<connect_response> connRsp_;
     /** Subscribe response (null if not available) */
@@ -180,7 +178,7 @@ private:
      * success code.
      */
     void check_ret() const {
-        if (rc_ != MQTTASYNC_SUCCESS || reasonCode_ > ReasonCode::GRANTED_QOS_2)
+        if (rc_ != MQTTASYNC_SUCCESS || reasonCode_ >= 0x80)
             throw exception(rc_, reasonCode_, errMsg_);
     }
 
@@ -190,7 +188,7 @@ public:
      * @param typ The type of request that the token is tracking.
      * @param cli The client that created the token.
      */
-    token(Type typ, iasync_client& cli) : token(typ, cli, MQTTAsync_token(0)) {}
+    token(Type typ, iasync_client& cli) : token{typ, cli, MQTTAsync_token(0)} {}
     /**
      * Constructs a token object.
      * @param typ The type of request that the token is tracking.
@@ -201,7 +199,7 @@ public:
      *  		 completed
      */
     token(Type typ, iasync_client& cli, void* userContext, iaction_listener& cb)
-        : token(typ, cli, const_string_collection_ptr(), userContext, cb) {}
+        : token{typ, cli, const_string_collection_ptr(), userContext, cb} {}
 
     /**
      * Constructs a token object.
@@ -210,7 +208,7 @@ public:
      * @param topic The topic associated with the token
      */
     token(Type typ, iasync_client& cli, const string& topic)
-        : token(typ, cli, string_collection::create(topic)) {}
+        : token{typ, cli, string_collection::create(topic)} {}
     /**
      * Constructs a token object.
      * @param typ The type of request that the token is tracking.
@@ -225,7 +223,7 @@ public:
         Type typ, iasync_client& cli, const string& topic, void* userContext,
         iaction_listener& cb
     )
-        : token(typ, cli, string_collection::create(topic), userContext, cb) {}
+        : token{typ, cli, string_collection::create(topic), userContext, cb} {}
 
     /**
      * Constructs a token object.
@@ -381,6 +379,17 @@ public:
      */
     virtual bool is_complete() const { return complete_; }
     /**
+     * Determines if the reference is valid.
+     * If the reference is invalid then it is not safe to call @em any
+     * member functions other than @ref is_null() and @ref empty()
+     * @return @em true if referring to a valid buffer, @em false if the
+     *  	   reference (pointer) is null.
+     */
+    explicit operator bool() const {
+        guard g(lock_);
+        return rc_ == MQTTASYNC_SUCCESS && reasonCode_ < 0x80;
+    }
+    /**
      * Gets the return code from the action.
      * This is only valid after the action has completed (i.e. if @ref
      * is_complete() returns @em true).
@@ -410,24 +419,16 @@ public:
      * @param n The number of results expected.
      */
     void set_num_expected(size_t n) { nExpected_ = n; }
-
-    /**
-     * Gets the properties for the operation.
-     * @return A const reference to the properties for the operation
-     */
-    // const properties& get_properties() const { return props_; }
     /**
      * Gets the reason code for the operation.
      * @return The reason code for the operation.
      */
     ReasonCode get_reason_code() const { return reasonCode_; }
-
     /**
      * Get the error message from the C library
      * @return Error message for the operation
      */
     string get_error_message() const { return errMsg_; }
-
     /**
      * Blocks the current thread until the action this token is associated
      * with has completed.

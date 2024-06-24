@@ -198,9 +198,7 @@ void token::on_failure(MQTTAsync_failureData* rsp)
     if (rsp) {
         msgId_ = rsp->token;
         rc_ = rsp->code;
-
-        // HACK: For backward compatibility with v3 connections
-        reasonCode_ = ReasonCode(MQTTPP_V3_CODE);
+        reasonCode_ = ReasonCode::SUCCESS;
 
         if (rsp->message)
             errMsg_ = string(rsp->message);
@@ -229,7 +227,6 @@ void token::on_failure5(MQTTAsync_failureData5* rsp)
     if (rsp) {
         msgId_ = rsp->token;
         reasonCode_ = ReasonCode(rsp->reasonCode);
-        // props_ = properties(rsp->properties);
         rc_ = rsp->code;
         if (rsp->message)
             errMsg_ = string(rsp->message);
@@ -313,5 +310,4 @@ unsubscribe_response token::get_unsubscribe_response() const
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// end namespace mqtt
 }  // namespace mqtt

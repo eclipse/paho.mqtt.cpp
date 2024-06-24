@@ -20,6 +20,23 @@ namespace mqtt {
 
 /////////////////////////////////////////////////////////////////////////////
 
+connect_response::connect_response(const MQTTAsync_successData5* rsp)
+    : server_response(properties(rsp->properties)),
+      serverURI_(string(rsp->alt.connect.serverURI)),
+      mqttVersion_(rsp->alt.connect.MQTTVersion),
+      sessionPresent_(to_bool(rsp->alt.connect.sessionPresent))
+{
+}
+
+connect_response::connect_response(const MQTTAsync_successData* rsp)
+    : serverURI_(string(rsp->alt.connect.serverURI)),
+      mqttVersion_(rsp->alt.connect.MQTTVersion),
+      sessionPresent_(to_bool(rsp->alt.connect.sessionPresent))
+{
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 // Implementation note: When there is just a single topic, the C library
 // places the return/reason code in the main part of the struct, and not in
 // the alt `reasonCodes` or `qosList` array, _even_ if the request was sent
