@@ -35,18 +35,19 @@ set(EXECUTABLES
     async_subscribe
     async_consume
     async_consume_v5
+    data_publish
+    mqttpp_chat
+    multithr_pub_sub
+    pub_speed_test
+    rpc_math_cli
+    rpc_math_srvr
+    server_props_v5
     sync_publish
     sync_consume
     sync_consume_v5
     sync_reconnect
-    data_publish
-    rpc_math_cli
-    rpc_math_srvr
-    mqttpp_chat
     topic_publish
-    multithr_pub_sub
     ws_publish
-    pub_speed_test
 )
 
 # These will only be built if SSL selected

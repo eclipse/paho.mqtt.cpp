@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013-2019 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2024 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -54,6 +54,13 @@ protected:
     /** The error message from the C library */
     string msg_;
 
+    /** See if the return code is actually a reason code error value */
+    static ReasonCode reason_code(int rc, ReasonCode reasonCode) {
+        if (reasonCode == ReasonCode::SUCCESS && rc >= ReasonCode::UNSPECIFIED_ERROR)
+            reasonCode = ReasonCode(rc);
+        return reasonCode;
+    }
+
 public:
     /**
      * Creates an MQTT exception.
@@ -72,11 +79,7 @@ public:
      * @param rc The error return code from the C library.
      * @param msg The text message for the error.
      */
-    exception(int rc, const string& msg)
-        : std::runtime_error(printable_error(rc, ReasonCode::SUCCESS, msg)),
-          rc_(rc),
-          reasonCode_(ReasonCode::SUCCESS),
-          msg_(msg) {}
+    exception(int rc, const string& msg) : exception(rc, ReasonCode::SUCCESS, msg) {}
     /**
      * Creates an MQTT exception.
      * @param rc The error return code from the C library.
@@ -85,9 +88,9 @@ public:
      */
     exception(int rc, ReasonCode reasonCode, const string& msg)
         : std::runtime_error(printable_error(rc, reasonCode, msg)),
-          rc_(rc),
-          reasonCode_(reasonCode),
-          msg_(msg) {}
+          rc_{rc},
+          reasonCode_{reason_code(rc, reasonCode)},
+          msg_{msg} {}
     /**
      * Gets an error message from an error code.
      * @param rc The error code from the C lib
@@ -116,13 +119,15 @@ public:
      *  	   explanation message.
      */
     static string printable_error(
-        int rc, int reasonCode = ReasonCode::SUCCESS, const string& msg = string()
+        int rc, ReasonCode reasonCode = ReasonCode::SUCCESS, const string& msg = string()
     ) {
+        reasonCode = reason_code(rc, reasonCode);
+
         string s = "MQTT error [" + std::to_string(rc) + "]";
         if (!msg.empty())
             s += string(": ") + msg;
         if (reasonCode != ReasonCode::SUCCESS)
-            s += string(". Reason: ") + reason_code_str(reasonCode);
+            s += string(". ") + reason_code_str(reasonCode);
         return s;
     }
     /**

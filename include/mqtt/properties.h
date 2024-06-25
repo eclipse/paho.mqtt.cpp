@@ -30,7 +30,10 @@ extern "C" {
 
 #include <initializer_list>
 #include <iostream>
+#include <map>
+#include <string_view>
 #include <tuple>
+#include <typeinfo>
 
 #include "mqtt/buffer_ref.h"
 #include "mqtt/exception.h"
@@ -55,6 +58,9 @@ class property
     // Make a deep copy of the property struct into this one.
     // For string properties, this allocates memory and copied the string(s)
     void copy(const MQTTProperty& other);
+
+    friend class properties;
+    property() {}
 
 public:
     /**
@@ -90,6 +96,9 @@ public:
         SHARED_SUBSCRIPTION_AVAILABLE = 42
     };
 
+    /** The names of the different types of properties */
+    PAHO_MQTTPP_EXPORT static const std::map<code, std::string_view> TYPE_NAME;
+
     /**
      * Create a numeric property.
      * This can be a byte, or 2-byte, 4-byte, or variable byte integer.
@@ -121,18 +130,20 @@ public:
      * Creates a property from a C struct.
      * @param cprop A C struct for a property list.
      */
-    explicit property(const MQTTProperty& cprop);
+    explicit property(const MQTTProperty& cprop) { copy(cprop); }
     /**
      * Moves a C struct into this property list.
      * This takes ownership of any memory that the C struct is holding.
      * @param cprop A C struct for a property list.
      */
-    explicit property(MQTTProperty&& cprop);
+    explicit property(MQTTProperty&& cprop) : prop_(cprop) {
+        memset(&cprop, 0, sizeof(MQTTProperty));
+    }
     /**
      * Copy constructor
      * @param other The other property to copy into this one.
      */
-    property(const property& other);
+    property(const property& other) { copy(other.prop_); }
     /**
      * Move constructor.
      * @param other The other property that is moved into this one.
@@ -169,8 +180,15 @@ public:
      * Gets a printable name for the property type.
      * @return A printable name for the property type.
      */
-    const char* type_name() const { return ::MQTTPropertyName(prop_.identifier); }
+    std::string_view type_name() const;
+    /**
+     * Gets the typeid for the value contained in the property.
+     * @return The typeid for the value contained in the property.
+     */
+    const std::type_info& value_type_id();
 };
+
+std::ostream& operator<<(std::ostream& os, const property& prop);
 
 /**
  * Extracts the value from the property as the specified type.
@@ -271,10 +289,10 @@ inline string_pair get<string_pair>(const property& prop) {
 class properties
 {
     /** The default C struct */
-    PAHO_MQTTPP_EXPORT static const MQTTProperties DFLT_C_STRUCT;
+    static constexpr MQTTProperties DFLT_C_STRUCT MQTTProperties_initializer;
 
     /** The underlying C properties struct */
-    MQTTProperties props_;
+    MQTTProperties props_{DFLT_C_STRUCT};
 
     template <typename T>
     friend T get(const properties& props, property::code propid, size_t idx);
@@ -283,11 +301,58 @@ class properties
     friend T get(const properties& props, property::code propid);
 
 public:
+    /** A const iterator for the properties list */
+    class const_iterator
+    {
+        const MQTTProperty* curr_;
+        mutable property prop_;
+
+        friend properties;
+        const_iterator(const MQTTProperty* curr) : curr_{curr} {}
+
+    public:
+        /**
+         * Gets a reference to the current value.
+         * @return A reference to the current value.
+         */
+        const property& operator*() const {
+            prop_ = property{*curr_};
+            return prop_;
+        }
+        /**
+         * Postfix increment operator.
+         * @return An iterator pointing to the previous matching item.
+         */
+        const_iterator operator++(int) noexcept {
+            auto tmp = *this;
+            curr_++;
+            return tmp;
+        }
+        /**
+         * Prefix increment operator.
+         * @return An iterator pointing to the next matching item.
+         */
+        const_iterator& operator++() noexcept {
+            ++curr_;
+            return *this;
+        }
+        /**
+         * Compares two iterators to see if they don't refer to the same
+         * node.
+         *
+         * @param other The other iterator to compare against this one.
+         * @return @em true if they don't match, @em false if they do
+         */
+        bool operator!=(const const_iterator& other) const noexcept {
+            return curr_ != other.curr_;
+        }
+    };
+
     /**
      * Default constructor.
      * Creates an empty properties list.
      */
-    properties();
+    properties() {}
     /**
      * Copy constructor.
      * @param other The property list to copy.
@@ -342,6 +407,26 @@ public:
      * @return The number of property items in the list.
      */
     size_t size() const { return size_t(props_.count); }
+    /**
+     * Gets a const iterator to the full collection of properties.
+     * @return A const iterator to the full collection of properties.
+     */
+    const_iterator begin() const { return const_iterator{props_.array}; }
+    /**
+     * Gets a const iterator to the full collection of properties.
+     * @return A const iterator to the full collection of properties.
+     */
+    const_iterator cbegin() const { return begin(); }
+    /**
+     * Gets a const iterator to the end of the collection of properties.
+     * @return A const iterator to the end of collection of properties.
+     */
+    const_iterator end() const { return const_iterator{props_.array + size()}; }
+    /**
+     * Gets a const iterator to the end of the collection of properties.
+     * @return A const iterator to the end of collection of properties.
+     */
+    const_iterator cend() const { return end(); }
     /**
      * Adds a property to the list.
      * @param prop The property to add to the list.

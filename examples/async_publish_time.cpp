@@ -130,7 +130,8 @@ int main(int argc, char* argv[])
         auto top = mqtt::topic(cli, "data/time", QOS);
         cout << "Publishing data..." << endl;
 
-        while (timestamp() % DELTA_MS != 0);
+        while (timestamp() % DELTA_MS != 0)
+            ;
 
         uint64_t t = timestamp(), tlast = t, tstart = t;
 
