@@ -61,8 +61,8 @@ namespace mqtt {
  * shared pointers, as the "dead" part of the queue will not hold onto a
  * reference count after the item has been removed from the queue.
  *
- * @param T The type of the items to be held in the queue.
- * @param Container The type of the underlying container to use. It must
+ * @tparam T The type of the items to be held in the queue.
+ * @tparam Container The type of the underlying container to use. It must
  * support back(), front(), push_back(), pop_front().
  */
 template <typename T, class Container = std::deque<T>>

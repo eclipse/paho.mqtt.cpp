@@ -116,7 +116,9 @@ TEST_CASE("disconnect_options copy ctor", "[options]")
         // Check that the properties transferred over
         REQUIRE(1 == opts.get_properties().size());
         REQUIRE(opts.get_properties().contains(property::SESSION_EXPIRY_INTERVAL));
-        REQUIRE(42 == get<int>(opts.get_properties(), property::SESSION_EXPIRY_INTERVAL));
+        REQUIRE(
+            42 == get<uint32_t>(opts.get_properties(), property::SESSION_EXPIRY_INTERVAL)
+        );
 
         REQUIRE(1 == opts.c_struct().properties.count);
         REQUIRE(

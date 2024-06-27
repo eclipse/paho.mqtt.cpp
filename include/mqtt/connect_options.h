@@ -106,7 +106,7 @@ class connect_options
      * @note In the connect options, by default, the Paho C treats
      * nullptr char arrays as unset values, so we keep that semantic and
      * only set those char arrays if the string is non-empty.
-     * @param str The C++ string object.
+     * @param sr The C++ string object.
      * @return Pointer to a NUL terminated string. This is only valid until
      *  	   the next time the string is updated.
      */
@@ -295,8 +295,8 @@ public:
      */
     const_string_collection_ptr get_servers() const { return serverURIs_; }
     /**
-     * Gets the version of MQTT to be used on the connect.
-     * @return
+     * Gets the version of MQTT to be used for the connection.
+     * @return The version of MQTT to be used for the connection:
      * @li MQTTVERSION_DEFAULT (0) = default: start with 3.1.1, and if that
      *     fails, fall back to 3.1
      * @li MQTTVERSION_3_1 (3) = only try version 3.1
@@ -333,8 +333,8 @@ public:
      * This will only take effect if the version is _already_ set to v3.x
      * (not v5).
      *
-     * @param clean @em true if the server should NOT remember state for the
-     *  			client across reconnects, @em false otherwise.
+     * @param cleanSession @em true if the server should NOT remember state
+     *              for the client across reconnects, @em false otherwise.
      */
     void set_clean_session(bool cleanSession);
     /**
@@ -347,8 +347,8 @@ public:
      *
      * This will only take effect if the MQTT version is set to v5
      *
-     * @param clean @em true if the server should NOT remember state for the
-     *  			client across reconnects, @em false otherwise.
+     * @param cleanStart @em true if the server should NOT remember state
+     *              for the client across reconnects, @em false otherwise.
      */
     void set_clean_start(bool cleanStart);
     /**
@@ -463,7 +463,9 @@ public:
      * call it before setting any other version-specific options. @sa
      * connect_options::v5()
      */
-    void set_mqtt_version(int mqttVersion);
+    [[deprecated("Use a versioned creation function to construct for the desired version"
+    )]] void
+    set_mqtt_version(int mqttVersion);
     /**
      * Enable or disable automatic reconnects.
      * The retry intervals are not affected.
@@ -747,15 +749,16 @@ public:
         return *this;
     }
     /**
-     * Sets the user name to use for the connection.
-     * @param userName
+     * Sets the user name for the connection.
+     * @param userName The user name for the connection.
      */
     auto user_name(string_ref userName) -> self& {
         opts_.set_user_name(userName);
         return *this;
     }
     /**
-     * Sets the password to use for the connection.
+     * Sets the password for the connection.
+     * @param password The password for the connection.
      */
     auto password(binary_ref password) -> self& {
         opts_.set_password(password);
@@ -853,7 +856,9 @@ public:
      * this function, call it before setting any other version-specific
      * options. @sa connect_options_builder::v5()
      */
-    auto mqtt_version(int ver) -> self& {
+    [[deprecated("Use a versioned creation function to construct for the desired version"
+    )]] auto
+    mqtt_version(int ver) -> self& {
         opts_.set_mqtt_version(ver);
         return *this;
     }

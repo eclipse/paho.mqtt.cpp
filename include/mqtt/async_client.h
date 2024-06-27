@@ -196,7 +196,6 @@ private:
      * server, which allows for off-line message buffering.
      * This allows the caller to specify a user-defined persistence object,
      * or use no persistence.
-     * @param opts The create options
      * @throw exception if an argument is invalid
      */
     void create();
@@ -223,8 +222,7 @@ public:
      *  				as a URI.
      * @param clientId a client identifier that is unique on the server
      *  			   being connected to
-     * @param persistence The user persistence structure. If this is null,
-     *  				  then no persistence is used.
+     * @param persistence The persistence that the client should use.
      * @throw exception if an argument is invalid
      */
     async_client(
@@ -243,7 +241,7 @@ public:
      *  			   being connected to
      * @param maxBufferedMessages the maximum number of messages allowed to
      *  						  be buffered while not connected
-     * @param persistDir The directory to use for persistence data
+     * @param persistence The persistence that the client should use.
      * @throw exception if an argument is invalid
      */
     async_client(
@@ -262,7 +260,7 @@ public:
      * @param clientId a client identifier that is unique on the server
      *  			   being connected to
      * @param opts The create options
-     * @param persistDir The directory to use for persistence data
+     * @param persistence The persistence that the client should use.
      * @throw exception if an argument is invalid
      */
     async_client(
@@ -582,7 +580,7 @@ public:
      *  			   server.
      * @param userContext optional object used to pass context to the
      *  				  callback. Use @em nullptr if not required.
-     * @param cb
+     * @param cb Listener callback object
      * @return token used to track and wait for the publish to complete. The
      *  	   token will be passed to callback methods if set.
      */
@@ -631,7 +629,7 @@ public:
      * Subscribe to a topic, which may include wildcards.
      * @param topicFilter the topic to subscribe to, which can include
      *  				  wildcards.
-     * @param qos the maximum quality of service at which to subscribe.
+     * @param qos The maximum quality of service at which to subscribe.
      *  		  Messages published at a lower quality of service will be
      *  		  received at the published QoS. Messages published at a
      *  		  higher quality of service will be received using the QoS
@@ -651,8 +649,9 @@ public:
     ) override;
     /**
      * Subscribe to multiple topics, each of which may include wildcards.
-     * @param topicFilters
-     * @param qos the maximum quality of service at which to subscribe.
+     * @param topicFilters The collection of topic filters to subscribe to,
+     *                     any of which can include wildcards
+     * @param qos The maximum quality of service at which to subscribe.
      *  		  Messages published at a lower quality of service will be
      *  		  received at the published QoS. Messages published at a
      *  		  higher quality of service will be received using the QoS
@@ -669,13 +668,14 @@ public:
     ) override;
     /**
      * Subscribes to multiple topics, each of which may include wildcards.
-     * @param topicFilters
-     * @param qos the maximum quality of service at which to subscribe.
+     * @param topicFilters The collection of topic filters to subscribe to,
+     *                     any of which can include wildcards
+     * @param qos The maximum quality of service at which to subscribe.
      *  		  Messages published at a lower quality of service will be
      *  		  received at the published QoS. Messages published at a
      *  		  higher quality of service will be received using the QoS
      *  		  specified on the subscribe.
-     * @param userContext optional object used to pass context to the
+     * @param userContext Optional object used to pass context to the
      *  				  callback. Use @em nullptr if not required.
      * @param cb listener that will be notified when subscribe has completed
      * @param opts The MQTT v5 subscribe options (one for each topic)
@@ -691,17 +691,17 @@ public:
     ) override;
     /**
      * Requests the server unsubscribe the client from a topic.
-     * @param topicFilter the topic to unsubscribe from. It must match a
+     * @param topicFilter The topic to unsubscribe from. It must match a
      *  				  topicFilter specified on an earlier subscribe.
      * @param props The MQTT v5 properties.
-     * @return token used to track and wait for the unsubscribe to complete.
+     * @return token Used to track and wait for the unsubscribe to complete.
      *  	   The token will be passed to callback methods if set.
      */
     token_ptr unsubscribe(const string& topicFilter, const properties& props = properties())
         override;
     /**
      * Requests the server unsubscribe the client from one or more topics.
-     * @param topicFilters one or more topics to unsubscribe from. Each
+     * @param topicFilters One or more topics to unsubscribe from. Each
      *  				   topicFilter must match one specified on an
      *  				   earlier subscribe.
      * @param props The MQTT v5 properties.
@@ -713,7 +713,9 @@ public:
     ) override;
     /**
      * Requests the server unsubscribe the client from one or more topics.
-     * @param topicFilters
+     * @param topicFilters One or more topics to unsubscribe from. Each
+     *  				   topicFilter must match one specified on an
+     *  				   earlier subscribe.
      * @param userContext optional object used to pass context to the
      *  				  callback. Use @em nullptr if not required.
      * @param cb listener that will be notified when unsubscribe has

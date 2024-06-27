@@ -60,12 +60,12 @@ public:
     virtual ~iaction_listener() {}
     /**
      * This method is invoked when an action fails.
-     * @param asyncActionToken
+     * @param asyncActionToken The token
      */
     virtual void on_failure(const token& asyncActionToken) = 0;
     /**
      * This method is invoked when an action has completed successfully.
-     * @param asyncActionToken
+     * @param asyncActionToken The token
      */
     virtual void on_success(const token& asyncActionToken) = 0;
 };

@@ -49,7 +49,7 @@ class delivery_token : public token
 
     /**
      * Sets the message to which this token corresponds.
-     * @param msg
+     * @param msg The message to which this token corresponds.
      */
     void set_message(const_message_ptr msg) { msg_ = msg; }
 

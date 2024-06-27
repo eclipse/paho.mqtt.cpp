@@ -136,7 +136,7 @@ public:
      *  			   being connected to
      * @param maxBufferedMessages the maximum number of messages allowed to
      *  						  be buffered while not connected
-     * @param persistDir The directory to use for persistence data
+     * @param persistence The persistence that the client should use.
      * @throw exception if an argument is invalid
      */
     create_options(
@@ -155,7 +155,7 @@ public:
      * @param clientId a client identifier that is unique on the server
      *  			   being connected to
      * @param opts The create options
-     * @param persistDir The directory to use for persistence data
+     * @param persistence The persistence that the client should use.
      * @throw exception if an argument is invalid
      */
     create_options(
@@ -199,7 +199,7 @@ public:
     const string& get_server_uri() const noexcept { return serverURI_; };
     /**
      * Set the client identifier.
-     * @param The client identifier.
+     * @param clientId The client identifier.
      */
     void set_client_id(const string& clientId) { clientId_ = clientId; }
     /**

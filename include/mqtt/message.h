@@ -79,7 +79,7 @@ private:
 
     /**
      * Set the dup flag in the underlying message
-     * @param dup
+     * @param dup Whether to set the dup flag.
      */
     void set_duplicate(bool dup) { msg_.dup = to_int(dup); }
 

@@ -196,11 +196,11 @@ public:
     /**
      * Publishes a message to a topic on the server
      * @param topic The topic to deliver the message to
-     * @param payload the bytes to use as the message payload
-     * @param n the number of bytes in the payload
-     * @param qos the Quality of Service to deliver the message at. Valid
+     * @param payload The bytes to use as the message payload
+     * @param n The number of bytes in the payload
+     * @param qos The Quality of Service to deliver the message at. Valid
      *  		  values are 0, 1 or 2.
-     * @param retained whether or not this message should be retained by the
+     * @param retained Whether or not this message should be retained by the
      *  			   server.
      * @return token used to track and wait for the publish to complete. The
      *  	   token will be passed to callback methods if set.
@@ -220,15 +220,15 @@ public:
     /**
      * Publishes a message to a topic on the server
      * @param topic The topic to deliver the message to
-     * @param payload the bytes to use as the message payload
-     * @param n the number of bytes in the payload
-     * @param qos the Quality of Service to deliver the message at. Valid
+     * @param payload The bytes to use as the message payload
+     * @param n The number of bytes in the payload
+     * @param qos The Quality of Service to deliver the message at. Valid
      *  		  values are 0, 1 or 2.
      * @param retained whether or not this message should be retained by the
      *  			   server.
-     * @param userContext optional object used to pass context to the
+     * @param userContext Optional object used to pass context to the
      *  				  callback. Use @em nullptr if not required.
-     * @param cb
+     * @param cb The listener callback object
      * @return token used to track and wait for the publish to complete. The
      *  	   token will be passed to callback methods if set.
      */

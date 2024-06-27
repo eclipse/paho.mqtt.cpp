@@ -78,7 +78,7 @@ TEST_CASE("int property constructor", "[property]")
         REQUIRE(prop.c_struct().value.integer2 == 512);
 
         REQUIRE(prop.type() == typ);
-        REQUIRE(get<int16_t>(prop) == int16_t(512));
+        REQUIRE(get<uint16_t>(prop) == 512);
 
         // Should be able to support full 16-bit unsigned range
         const uint16_t MAX = std::numeric_limits<uint16_t>::max();
@@ -103,7 +103,7 @@ TEST_CASE("int property constructor", "[property]")
         REQUIRE(prop.c_struct().value.integer4 == 70000);
 
         REQUIRE(prop.type() == typ);
-        REQUIRE(get<int32_t>(prop) == int32_t(70000));
+        REQUIRE(get<uint32_t>(prop) == 70000);
 
         // Should be able to support full 32-bit unsigned range
         const uint32_t MAX = std::numeric_limits<uint32_t>::max();
@@ -235,7 +235,7 @@ TEST_CASE("int property copy constructor", "[property]")
         REQUIRE(prop.c_struct().value.integer4 == 70000);
 
         REQUIRE(prop.type() == typ);
-        REQUIRE(get<int32_t>(prop) == int32_t(70000));
+        REQUIRE(get<uint32_t>(prop) == 70000);
     }
 }
 
@@ -252,7 +252,7 @@ TEST_CASE("int property move constructor", "[property]")
         REQUIRE(prop.c_struct().value.integer4 == 70000);
 
         REQUIRE(prop.type() == typ);
-        REQUIRE(get<int32_t>(prop) == int32_t(70000));
+        REQUIRE(get<uint32_t>(prop) == 70000);
 
         // Make sure the old value was moved
         REQUIRE(org_prop.c_struct().identifier == 0);
@@ -434,7 +434,7 @@ TEST_CASE("properties constructors", "[properties]")
         REQUIRE(props.size() == 2);
 
         REQUIRE(42 == get<uint8_t>(props, property::PAYLOAD_FORMAT_INDICATOR));
-        REQUIRE(70000 == get<int>(props, property::MESSAGE_EXPIRY_INTERVAL));
+        REQUIRE(70000 == get<uint32_t>(props, property::MESSAGE_EXPIRY_INTERVAL));
     }
 }
 

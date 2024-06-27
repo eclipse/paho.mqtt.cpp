@@ -224,7 +224,8 @@ inline uint16_t get<uint16_t>(const property& prop) {
  *  		   `get<uint16_t>()`
  */
 template <>
-inline int16_t get<int16_t>(const property& prop) {
+[[deprecated("Integer properties are unsigned. Use get<uint16_t>()")]] inline int16_t
+get<int16_t>(const property& prop) {
     return (int16_t)prop.c_struct().value.integer2;
 }
 
@@ -244,7 +245,8 @@ inline uint32_t get<uint32_t>(const property& prop) {
  *  		   `get<uint32_t>()`
  */
 template <>
-inline int32_t get<int32_t>(const property& prop) {
+[[deprecated("Integer properties are unsigned. Use get<uint32_t>()")]] inline int32_t
+get<int32_t>(const property& prop) {
     return (int32_t)prop.c_struct().value.integer4;
 }
 

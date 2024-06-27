@@ -184,7 +184,7 @@ public:
     virtual connect_response connect();
     /**
      * Connects to an MQTT server using the specified options.
-     * @param opts
+     * @param opts The connect options
      */
     virtual connect_response connect(connect_options opts);
     /**
@@ -327,8 +327,8 @@ public:
     }
     /**
      * Subscribe to a topic, which may include wildcards using a QoS of 1.
-     * @param topicFilter
-     * @param props The MQTT v5 properties.
+     * @param topicFilter A single topic to subscribe
+maked      * @param props The MQTT v5 properties.
      * @param opts The MQTT v5 subscribe options for the topic
      * @return The "subscribe" response from the server.
      */

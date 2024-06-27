@@ -86,7 +86,7 @@ private:
      * while others expect NULL pointers for missing parameters.
      * So we always return a pointer to a valid C char array, even when
      * empty.
-     * @param str The C++ string object.
+     * @param sr The C++ string object.
      * @return Pointer to a NUL terminated string. This is only valid until
      *  	   the next time the string is updated. This is never nullptr.
      */

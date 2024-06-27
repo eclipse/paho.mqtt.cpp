@@ -84,8 +84,7 @@ int main(int argc, char* argv[])
 {
     mqtt::client cli(SERVER_ADDRESS, CLIENT_ID, mqtt::create_options(MQTTVERSION_5));
 
-    auto connOpts = mqtt::connect_options_builder()
-                        .mqtt_version(MQTTVERSION_5)
+    auto connOpts = mqtt::connect_options_builder::v5()
                         .automatic_reconnect(seconds(2), seconds(30))
                         .clean_start(false)
                         .properties({{mqtt::property::SESSION_EXPIRY_INTERVAL, INFINITE}})

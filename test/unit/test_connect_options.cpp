@@ -255,7 +255,9 @@ TEST_CASE("connect_options move_constructor", "[options]")
         // Check that we got the correct properties
         REQUIRE(1 == opts.get_properties().size());
         REQUIRE(opts.get_properties().contains(property::SESSION_EXPIRY_INTERVAL));
-        REQUIRE(42 == get<int>(opts.get_properties(), property::SESSION_EXPIRY_INTERVAL));
+        REQUIRE(
+            42 == get<uint32_t>(opts.get_properties(), property::SESSION_EXPIRY_INTERVAL)
+        );
 
         REQUIRE(copts.connectProperties == &opts.get_properties().c_struct());
     }
@@ -317,7 +319,9 @@ TEST_CASE("connect_options copy_assignment", "[options]")
         // Check that we got the correct properties
         REQUIRE(1 == opts.get_properties().size());
         REQUIRE(opts.get_properties().contains(property::SESSION_EXPIRY_INTERVAL));
-        REQUIRE(42 == get<int>(opts.get_properties(), property::SESSION_EXPIRY_INTERVAL));
+        REQUIRE(
+            42 == get<uint32_t>(opts.get_properties(), property::SESSION_EXPIRY_INTERVAL)
+        );
 
         REQUIRE(copts.connectProperties == &opts.get_properties().c_struct());
     }
@@ -381,7 +385,9 @@ TEST_CASE("connect_options move_assignment", "[options]")
         // Check that we got the correct properties
         REQUIRE(1 == opts.get_properties().size());
         REQUIRE(opts.get_properties().contains(property::SESSION_EXPIRY_INTERVAL));
-        REQUIRE(42 == get<int>(opts.get_properties(), property::SESSION_EXPIRY_INTERVAL));
+        REQUIRE(
+            42 == get<uint32_t>(opts.get_properties(), property::SESSION_EXPIRY_INTERVAL)
+        );
 
         REQUIRE(copts.connectProperties == &opts.get_properties().c_struct());
     }
@@ -682,7 +688,9 @@ TEST_CASE("connect_options_builder copy_assignment", "[options]")
         // Check that we got the correct properties
         REQUIRE(1 == opts.get_properties().size());
         REQUIRE(opts.get_properties().contains(property::SESSION_EXPIRY_INTERVAL));
-        REQUIRE(42 == get<int>(opts.get_properties(), property::SESSION_EXPIRY_INTERVAL));
+        REQUIRE(
+            42 == get<uint32_t>(opts.get_properties(), property::SESSION_EXPIRY_INTERVAL)
+        );
     }
 }
 
@@ -739,6 +747,8 @@ TEST_CASE("connect_options_builder move_assignment", "[options]")
         // Check that we got the correct properties
         REQUIRE(1 == opts.get_properties().size());
         REQUIRE(opts.get_properties().contains(property::SESSION_EXPIRY_INTERVAL));
-        REQUIRE(42 == get<int>(opts.get_properties(), property::SESSION_EXPIRY_INTERVAL));
+        REQUIRE(
+            42 == get<uint32_t>(opts.get_properties(), property::SESSION_EXPIRY_INTERVAL)
+        );
     }
 }

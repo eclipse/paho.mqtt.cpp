@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
- * Copyright (c) 2013-2016 Frank Pagliughi <fpagliughi@mindspring.com>
+ * Copyright (c) 2013-2024 Frank Pagliughi <fpagliughi@mindspring.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -212,13 +212,13 @@ public:
      */
     explicit topic_filter(const string& filter);
     /**
-     * Determines if the specified topic filter contains any wildcards.
+     * Determines if the specified topic/filter contains any wildcards.
      *
-     * @param filter The topic filter string to check for wildcards.
+     * @param filter The topic/filter string to check for wildcards.
      * @return @em true if any of the fields contain a wildcard, @em false
      *  	   if not.
      */
-    static bool has_wildcards(const string& topic);
+    static bool has_wildcards(const string& filter);
     /**
      * Determines if this topic filter contains any wildcards.
      *

@@ -202,7 +202,7 @@ std::ostream& operator<<(std::ostream& os, const property& prop)
         case MQTTPROPERTY_TYPE_TWO_BYTE_INTEGER:
         case MQTTPROPERTY_TYPE_FOUR_BYTE_INTEGER:
         case MQTTPROPERTY_TYPE_VARIABLE_BYTE_INTEGER:
-            os << get<int>(prop);
+            os << get<uint32_t>(prop);
             break;
 
         case MQTTPROPERTY_TYPE_BINARY_DATA: {
