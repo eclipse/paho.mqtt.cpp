@@ -457,15 +457,13 @@ public:
      *   @li MQTTVERSION_3_1_1 (4) = only try version 3.1.1
      *   @li MQTTVERSION_5 (5) = only try version 5
      *
-     * @deprecated It is preferable to create the options for the desired
+     * Note that it is preferable to create the options for the desired
      * version rather than using this function to change the version after
      * some parameters have already been set. If you do use this function,
      * call it before setting any other version-specific options. @sa
      * connect_options::v5()
      */
-    [[deprecated("Use a versioned creation function to construct for the desired version"
-    )]] void
-    set_mqtt_version(int mqttVersion);
+    void set_mqtt_version(int mqttVersion);
     /**
      * Enable or disable automatic reconnects.
      * The retry intervals are not affected.
@@ -850,15 +848,13 @@ public:
      *   @li MQTTVERSION_3_1_1 (4) = only try version 3.1.1
      *   @li MQTTVERSION_5 (5) = only try version 5
      *
-     * @deprecated It is preferable to create the options builder for the
-     * desired version rather than using this function to change the
-     * version after some parameters have already been set. If you do use
-     * this function, call it before setting any other version-specific
-     * options. @sa connect_options_builder::v5()
+     * Note that it is preferable to create the options builder for the
+     * desired version rather than using this function to change the version
+     * after some parameters have already been set. If you do use this
+     * function, call it before setting any other version-specific options.
+     * @sa connect_options_builder::v5()
      */
-    [[deprecated("Use a versioned creation function to construct for the desired version"
-    )]] auto
-    mqtt_version(int ver) -> self& {
+    auto mqtt_version(int ver) -> self& {
         opts_.set_mqtt_version(ver);
         return *this;
     }
